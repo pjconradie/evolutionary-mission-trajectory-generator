@@ -55,3 +55,19 @@ def test_combined_dependencies_compile_link_and_run(phase1_toolchain_probe):
 def test_unchanged_cmake_reaches_snopt_gate_first(phase1_toolchain_probe):
     """Current CMake must fail at missing SNOPT before dependency discovery."""
     assert phase1_toolchain_probe["cmake_snopt_gate"] == "passed"
+
+
+def test_none_backend_configures_and_compiles_without_snopt(phase1_toolchain_probe):
+    """The complete EMTG library must compile without proprietary solver sources."""
+    assert phase1_toolchain_probe["none_backend_configure"] == "passed"
+    assert phase1_toolchain_probe["none_backend_compile"] == "passed"
+
+
+def test_native_nlp_contract_passes_in_target_environment(phase1_toolchain_probe):
+    """Solver-neutral native contracts must pass on Debian 12 amd64."""
+    assert phase1_toolchain_probe["nlp_contract"] == "passed"
+
+
+def test_cmake_rejects_invalid_and_unimplemented_solvers(phase1_toolchain_probe):
+    """CMake must reject unknown backends and IPOPT before its adapter exists."""
+    assert phase1_toolchain_probe["cmake_solver_rejections"] == "passed"

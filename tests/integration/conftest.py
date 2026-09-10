@@ -86,6 +86,56 @@ object_count=$(ar t lib/libcspice.a | wc -l | tr -d ' ')
 test "$object_count" -gt 0
 check cspice_objects "$object_count"
 
+mkdir -p /tmp/gsl /tmp/emtg-none
+cp -a /usr/include/gsl /tmp/gsl/
+ln -s /usr/lib/x86_64-linux-gnu/libgsl.a /tmp/gsl/libgsl.a
+ln -s /usr/lib/x86_64-linux-gnu/libgslcblas.a /tmp/gsl/libgslcblas.a
+ln -s /repo/src /tmp/emtg-none/src
+ln -s /repo/tests /tmp/emtg-none/tests
+cp /repo/CMakeLists.txt /tmp/emtg-none/CMakeLists.txt
+cat >/tmp/emtg-none/EMTG-Config.cmake <<'CMAKE'
+set(CSPICE_DIR /tmp/spice/cspice)
+set(SNOPT_ROOT_DIR /tmp/emtg-intentionally-missing-snopt)
+set(GSL_PATH /tmp/gsl)
+set(BOOST_ROOT /usr)
+set(Boost_NO_BOOST_CMAKE ON)
+CMAKE
+
+cmake -S /tmp/emtg-none -B /tmp/emtg-none-build \
+    -DEMTG_NLP_SOLVER=NONE \
+    -DBUILD_NLP_CONTRACT_TESTS=ON \
+    >/tmp/emtg-none-configure.log 2>&1
+! grep -Fq "Now checking on SNOPT" /tmp/emtg-none-configure.log
+! grep -Fq "SNOPT directory specified" /tmp/emtg-none-configure.log
+check none_backend_configure passed
+
+if ! cmake --build /tmp/emtg-none-build --target emtg -j2 \
+    >/tmp/emtg-none-build.log 2>&1; then
+    tail -n 150 /tmp/emtg-none-build.log
+    exit 13
+fi
+check none_backend_compile passed
+
+cmake --build /tmp/emtg-none-build --target nlp_solver_contract -j2 \
+    >/tmp/nlp-contract-build.log 2>&1
+ctest --test-dir /tmp/emtg-none-build --output-on-failure \
+    >/tmp/nlp-contract-test.log 2>&1
+check nlp_contract passed
+
+set +e
+cmake -S /tmp/emtg-none -B /tmp/emtg-invalid-build \
+    -DEMTG_NLP_SOLVER=INVALID >/tmp/emtg-invalid.log 2>&1
+invalid_status=$?
+cmake -S /tmp/emtg-none -B /tmp/emtg-ipopt-build \
+    -DEMTG_NLP_SOLVER=IPOPT >/tmp/emtg-ipopt.log 2>&1
+ipopt_status=$?
+set -e
+test "$invalid_status" -ne 0
+grep -Fq "Unsupported EMTG_NLP_SOLVER 'INVALID'" /tmp/emtg-invalid.log
+test "$ipopt_status" -ne 0
+grep -Fq "IPOPT adapter is not implemented" /tmp/emtg-ipopt.log
+check cmake_solver_rejections passed
+
 cat >/tmp/dependency_probe.cpp <<'CPP'
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/filesystem.hpp>

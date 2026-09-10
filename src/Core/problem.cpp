@@ -26,7 +26,7 @@
 
 #include "problem.h"
 #include "monotonic_basin_hopping.h"
-#include "SNOPT_interface.h"
+#include "NLP_solver_factory.h"
 #include "NLPoptions.h"
 #include "FilamentWalker.h"
 #include "EMTG_math.h"
@@ -173,8 +173,9 @@ namespace EMTG
 				this->indexOfBestSolutionAttempt = 0; // start at 0, change to inside solver.run() if solution is found
                 Solvers::NLPoptions myNLPoptions(this->options);
 
-                Solvers::SNOPT_interface mySNOPT(this, myNLPoptions);
-                EMTG::Solvers::MBH solver(this, &mySNOPT);
+                std::unique_ptr<Solvers::NLP_interface> myNLP = Solvers::createNLPSolver(
+                    this, myNLPoptions, this->options.NLP_solver_type);
+                EMTG::Solvers::MBH solver(this, myNLP.get());
 
                 if (options.seed_MBH)
                 {
@@ -268,9 +269,10 @@ namespace EMTG
 
                 Solvers::NLPoptions myNLPoptions(this->options);
 
-                Solvers::SNOPT_interface mySNOPT(this, myNLPoptions);
+                std::unique_ptr<Solvers::NLP_interface> myNLP = Solvers::createNLPSolver(
+                    this, myNLPoptions, this->options.NLP_solver_type);
 
-                mySNOPT.setX0_unscaled(this->options.current_trialX);
+                myNLP->setX0_unscaled(this->options.current_trialX);
                 
 				try
 				{
@@ -297,10 +299,10 @@ namespace EMTG
 						0);
 				}
 
-				mySNOPT.setJGlobalIncumbent(EMTG::math::LARGE);
-                mySNOPT.run_NLP(false);
+				myNLP->setJGlobalIncumbent(EMTG::math::LARGE);
+                myNLP->run_NLP(false);
 
-                this->Xopt = mySNOPT.getX_unscaled();
+                this->Xopt = myNLP->getX_unscaled();
                 try
                 {
                     this->evaluate(this->Xopt, this->F, this->G, false);
@@ -393,8 +395,9 @@ namespace EMTG
                 //do filament walker things
                 Solvers::NLPoptions myNLPoptions(this->options);
 
-                Solvers::SNOPT_interface mySNOPT(this, myNLPoptions);
-                Solvers::FilamentWalker myFilamentWalker(this, &mySNOPT);
+                std::unique_ptr<Solvers::NLP_interface> myNLP = Solvers::createNLPSolver(
+                    this, myNLPoptions, this->options.NLP_solver_type);
+                Solvers::FilamentWalker myFilamentWalker(this, myNLP.get());
                 myFilamentWalker.walk();
 
                 //write the output - but right now filament walkers don't really have output

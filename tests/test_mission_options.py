@@ -47,3 +47,25 @@ def test_osiris_options_round_trip_preserves_execution_settings(
     assert journey_names == ["Earth_to_Bennu", "Bennu_to_Earth"], (
         "OSIRIS journey order changed during options round-trip"
     )
+
+
+def test_ipopt_solver_option_round_trips(repository_root, tmp_path):
+    """The portable option model must preserve the explicit IPOPT solver value."""
+    source = (
+        repository_root
+        / "docs"
+        / "0_Users"
+        / "tutorial"
+        / "Tutorial_EMTG_Files"
+        / "OSIRIS-REx"
+        / "OSIRIS-REx.emtgopt"
+    )
+    options = MissionOptions(str(source))
+    options.NLP_solver_type = 2
+    output = tmp_path / "OSIRIS-REx-ipopt.emtgopt"
+
+    options.write_options_file(str(output), writeAll=True)
+    roundtrip = MissionOptions(str(output))
+
+    assert roundtrip.NLP_solver_type == 2
+    assert "#2: IPOPT" in output.read_text()

@@ -19,6 +19,7 @@
 //SNOPT interface
 
 #include "SNOPT_interface.h"
+#include "SNOPT_status.h"
 #include <time.h>
 #include <cmath>
 
@@ -232,6 +233,7 @@ namespace EMTG
 #endif
 
             //run SNOPT
+            this->status = NLPStatus::NotRun;
             this->NLP_start_time = time(NULL);
 			// set most recent write time to the starting time so that we have something meaningful to compare against
 			// before any writes have been made
@@ -256,6 +258,9 @@ namespace EMTG
 #else
             this->inform = mySNOPT.solve(0);			
 #endif
+            if (this->status != NLPStatus::TimeLimit)
+                this->status = translateSNOPTInform(this->inform);
+
             //unscale the various things that might need to be uncaled
             this->unscaleX();
 
@@ -600,6 +605,7 @@ namespace EMTG
             {
                 if (!self->myOptions.get_quiet_NLP())
                     std::cout << "Exceeded NLP time limit of " << self->myOptions.get_max_run_time_seconds() << " seconds. Aborting NLP run." << std::endl;
+                self->status = NLPStatus::TimeLimit;
                 *Status = -2;
             }
 

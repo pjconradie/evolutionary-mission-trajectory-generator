@@ -26,14 +26,19 @@ namespace EMTG
     {
         //constructor
         EMTG::Solvers::NLP_interface::NLP_interface() :
+            myProblem(nullptr),
+            status(NLPStatus::NotRun),
             nX(1),
-            nF(1)
+            nF(1),
+            nG(0),
+            nA(0)
         {}
 
         EMTG::Solvers::NLP_interface::NLP_interface(problem* myProblem_in,
             const NLPoptions& myOptions) :
             myProblem(myProblem_in),
             myOptions(myOptions),
+            status(NLPStatus::NotRun),
             nX(myProblem->total_number_of_NLP_parameters),
             nF(myProblem->total_number_of_constraints),
             nG(myProblem->Gdescriptions.size()),

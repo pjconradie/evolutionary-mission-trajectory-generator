@@ -4,6 +4,18 @@ cmake_minimum_required(VERSION 3.8)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 include(EMTG-Config.cmake)
 
+set(EMTG_NLP_SOLVER "SNOPT" CACHE STRING "NLP backend: NONE, SNOPT, or IPOPT")
+set_property(CACHE EMTG_NLP_SOLVER PROPERTY STRINGS NONE SNOPT IPOPT)
+string(TOUPPER "${EMTG_NLP_SOLVER}" EMTG_NLP_SOLVER)
+set(EMTG_NLP_SOLVER_VALUES NONE SNOPT IPOPT)
+list(FIND EMTG_NLP_SOLVER_VALUES "${EMTG_NLP_SOLVER}" EMTG_NLP_SOLVER_INDEX)
+if(EMTG_NLP_SOLVER_INDEX EQUAL -1)
+	message(FATAL_ERROR "Unsupported EMTG_NLP_SOLVER '${EMTG_NLP_SOLVER}'. Expected NONE, SNOPT, or IPOPT.")
+endif()
+if(EMTG_NLP_SOLVER STREQUAL "IPOPT")
+	message(FATAL_ERROR "IPOPT adapter is not implemented")
+endif()
+
 #identify the project
 project(EMTG)
 
@@ -44,10 +56,15 @@ endif(NOT IS_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 #compiler-time Define-level options  for EMTG
 
 # Optional user override of the snopt directory specified in the EMTG-Config.cmake file
-set(SNOPTDIR_OVRD "${SNOPT_ROOT_DIR}" CACHE PATH "SNOPT Root Directory") # Do not use the FORCE command here so the value the user enters in GUI is preserved
-if (NOT (IS_DIRECTORY ${SNOPTDIR_OVRD}))
-	# Throw an error if the directory specified does not exist
-	message(FATAL_ERROR "SNOPT directory specified (${SNOPTDIR_OVRD}) does not exist")
+if(EMTG_NLP_SOLVER STREQUAL "SNOPT")
+	set(SNOPTDIR_OVRD "${SNOPT_ROOT_DIR}" CACHE PATH "SNOPT Root Directory") # Do not use the FORCE command here so the value the user enters in GUI is preserved
+	if (NOT (IS_DIRECTORY ${SNOPTDIR_OVRD}))
+	    # Throw an error if the directory specified does not exist
+	    message(FATAL_ERROR "SNOPT directory specified (${SNOPTDIR_OVRD}) does not exist")
+	endif()
+	add_definitions(-DEMTG_NLP_SOLVER_SNOPT)
+else()
+	message(STATUS "NLP backend disabled for solver-neutral build and contract tests")
 endif()
 
 option(QUIET_SNOPT "Minimizes the SNOPT output to the log." OFF)
@@ -176,6 +193,7 @@ include_directories("${CSPICE_DIR}/include")
 link_directories("${CSPICE_DIR}/lib")
 
 #----------------------------SNOPT Items-------------------------------------
+if(EMTG_NLP_SOLVER STREQUAL "SNOPT")
 message(STATUS \n "Now checking on SNOPT...")
 
 # Check for the latest versions of SNOPT first
@@ -310,6 +328,7 @@ endif()
 include_directories(${SNOPT_INCLUDE_DIR})
 
 set(EMTG_LIBRARIES ${EMTG_LIBRARIES} ${SNOPT_LIBRARIES})
+endif()
 
 #-------------------------Boost Items------------------------------
 message(STATUS \n "Now looking for BOOST..")
@@ -327,5 +346,11 @@ set(EMTG_LIBRARIES ${EMTG_LIBRARIES} ${Boost_LIBRARIES})
 
 #pull in EMTG itself
 add_subdirectory(src)
+
+option(BUILD_NLP_CONTRACT_TESTS "Build solver-neutral NLP contract tests" OFF)
+if(BUILD_NLP_CONTRACT_TESTS)
+	enable_testing()
+	add_subdirectory(tests/cpp)
+endif()
 
 
