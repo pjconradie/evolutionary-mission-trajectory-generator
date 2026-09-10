@@ -34,6 +34,42 @@ OSIRIS_BASELINES = {
 sys.path.insert(0, str(PYEMTG_ROOT))
 
 
+def pytest_addoption(parser):
+    """Add mutually exclusive test-category selectors."""
+    group = parser.getgroup("test categories")
+    group.addoption("--unit", action="store_true", help="run only unit tests")
+    group.addoption(
+        "--integration", action="store_true", help="run only integration tests"
+    )
+    group.addoption(
+        "--regression", action="store_true", help="run only regression tests"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Filter collected tests when exactly one category selector is provided."""
+    selected_categories = [
+        category
+        for category in ("unit", "integration", "regression")
+        if config.getoption(f"--{category}")
+    ]
+    if len(selected_categories) > 1:
+        raise pytest.UsageError(
+            "--unit, --integration, and --regression are mutually exclusive"
+        )
+    if not selected_categories:
+        return
+
+    category = selected_categories[0]
+    selected = []
+    deselected = []
+    for item in items:
+        (selected if category in item.keywords else deselected).append(item)
+
+    items[:] = selected
+    config.hook.pytest_deselected(items=deselected)
+
+
 @pytest.fixture(scope="session")
 def repository_root():
     """Return the checked-out EMTG repository root."""

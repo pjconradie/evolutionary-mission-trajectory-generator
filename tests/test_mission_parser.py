@@ -6,8 +6,31 @@ import pytest
 
 from Mission import Mission
 
-from conftest import OSIRIS_BASELINES, REPOSITORY_ROOT, TESTATRON_TESTS_ROOT
+pytestmark = pytest.mark.regression
 
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+TESTATRON_TESTS_ROOT = REPOSITORY_ROOT / "testatron" / "tests"
+OSIRIS_RESULTS_ROOT = (
+    REPOSITORY_ROOT
+    / "docs"
+    / "0_Users"
+    / "tutorial"
+    / "Tutorial_EMTG_Files"
+    / "OSIRIS-REx"
+    / "results"
+)
+OSIRIS_BASELINES = {
+    "2022": (
+        OSIRIS_RESULTS_ROOT
+        / "OSIRIS-REx_11272022_144557"
+        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    ),
+    "2024": (
+        OSIRIS_RESULTS_ROOT
+        / "OSIRIS-REx_412024_11530"
+        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    ),
+}
 
 TRUTH_FILES = sorted(TESTATRON_TESTS_ROOT.glob("**/*.emtg"))
 TRUTH_IDS = [str(path.relative_to(TESTATRON_TESTS_ROOT)) for path in TRUTH_FILES]

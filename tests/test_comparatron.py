@@ -5,6 +5,9 @@ import pytest
 from Mission import Mission
 
 
+pytestmark = pytest.mark.regression
+
+
 @pytest.mark.parametrize("vintage", ["2022", "2024"])
 def test_comparatron_matches_each_osiris_baseline_to_itself(
     vintage, osiris_baselines, tmp_path

@@ -1,6 +1,11 @@
 """Characterize portable parsing and writing of EMTG mission options."""
 
+import pytest
+
 from MissionOptions import MissionOptions
+
+
+pytestmark = pytest.mark.regression
 
 
 def test_osiris_options_round_trip_preserves_execution_settings(
