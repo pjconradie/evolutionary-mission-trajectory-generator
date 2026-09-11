@@ -1,3 +1,4 @@
+#include "IPOPT_status.h"
 #include "NLP_interface.h"
 #include "NLP_solution_acceptance.h"
 #include "NLP_solver_selection.h"
@@ -40,9 +41,11 @@ int main()
 {
     using EMTG::Solvers::NLPStatus;
     using EMTG::Solvers::NLPBackend;
+    using EMTG::Solvers::IPOPTTermination;
     using EMTG::Solvers::acceptNLPSolution;
     using EMTG::Solvers::resolveNLPBackend;
     using EMTG::Solvers::solverAcceptedSolution;
+    using EMTG::Solvers::translateIPOPTTermination;
     using EMTG::Solvers::translateSNOPTInform;
 
     assert(!solverAcceptedSolution(NLPStatus::NotRun));
@@ -77,6 +80,47 @@ int main()
     assert(translateSNOPTInform(50) == NLPStatus::EvaluationError);
     assert(translateSNOPTInform(70) == NLPStatus::UserTerminated);
     assert(translateSNOPTInform(80) == NLPStatus::Error);
+
+        assert(translateIPOPTTermination(IPOPTTermination::SolveSucceeded)
+            == NLPStatus::AcceptedSolution);
+        assert(translateIPOPTTermination(
+             IPOPTTermination::SolvedToAcceptableLevel)
+            == NLPStatus::AcceptedSolution);
+        assert(translateIPOPTTermination(IPOPTTermination::FeasiblePointFound)
+            == NLPStatus::AcceptedSolution);
+        assert(translateIPOPTTermination(
+             IPOPTTermination::InfeasibleProblemDetected)
+            == NLPStatus::Infeasible);
+        assert(translateIPOPTTermination(
+             IPOPTTermination::MaximumIterationsExceeded)
+            == NLPStatus::IterationLimit);
+        assert(translateIPOPTTermination(
+             IPOPTTermination::MaximumCpuTimeExceeded)
+            == NLPStatus::TimeLimit);
+        assert(translateIPOPTTermination(IPOPTTermination::DivergingIterates)
+            == NLPStatus::Unbounded);
+        assert(translateIPOPTTermination(IPOPTTermination::UserRequestedStop)
+            == NLPStatus::UserTerminated);
+        assert(translateIPOPTTermination(IPOPTTermination::InvalidNumberDetected)
+            == NLPStatus::EvaluationError);
+        assert(translateIPOPTTermination(
+             IPOPTTermination::SearchDirectionTooSmall)
+            == NLPStatus::NumericalError);
+        assert(translateIPOPTTermination(IPOPTTermination::RestorationFailed)
+            == NLPStatus::NumericalError);
+        assert(translateIPOPTTermination(IPOPTTermination::ErrorInStepComputation)
+            == NLPStatus::NumericalError);
+        for (const IPOPTTermination termination : {
+              IPOPTTermination::InvalidProblemDefinition,
+              IPOPTTermination::InvalidOption,
+              IPOPTTermination::NotEnoughDegreesOfFreedom,
+              IPOPTTermination::UnrecoverableException,
+              IPOPTTermination::NonIpoptExceptionThrown,
+              IPOPTTermination::InsufficientMemory,
+              IPOPTTermination::InternalError })
+        {
+         assert(translateIPOPTTermination(termination) == NLPStatus::Error);
+        }
 
     constexpr double tolerance = 1.0e-5;
     assert(acceptNLPSolution(true, 1.0e-6, 1.0e-6, tolerance,

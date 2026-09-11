@@ -129,15 +129,31 @@ set +e
 cmake -S /tmp/emtg-none -B /tmp/emtg-invalid-build \
     -DEMTG_NLP_SOLVER=INVALID >/tmp/emtg-invalid.log 2>&1
 invalid_status=$?
-cmake -S /tmp/emtg-none -B /tmp/emtg-ipopt-build \
-    -DEMTG_NLP_SOLVER=IPOPT >/tmp/emtg-ipopt.log 2>&1
-ipopt_status=$?
 set -e
 test "$invalid_status" -ne 0
 grep -Fq "Unsupported EMTG_NLP_SOLVER 'INVALID'" /tmp/emtg-invalid.log
-test "$ipopt_status" -ne 0
-grep -Fq "IPOPT adapter is not implemented" /tmp/emtg-ipopt.log
-check cmake_solver_rejections passed
+check cmake_invalid_solver_rejection passed
+
+cmake -S /tmp/emtg-none -B /tmp/emtg-ipopt-build \
+    >/tmp/emtg-ipopt.log 2>&1
+grep -Fq "NLP backend: IPOPT" /tmp/emtg-ipopt.log
+grep -Fq "IPOPT 3.11.9 found through pkg-config" /tmp/emtg-ipopt.log
+! grep -Fq "Now checking on SNOPT" /tmp/emtg-ipopt.log
+check cmake_default_ipopt passed
+
+if ! cmake --build /tmp/emtg-ipopt-build --target EMTGv9 -j2 \
+    >/tmp/emtg-ipopt-build.log 2>&1; then
+    tail -n 150 /tmp/emtg-ipopt-build.log
+    exit 15
+fi
+ipopt_executable=/tmp/emtg-ipopt-build/src/EMTGv9
+test -x "$ipopt_executable"
+ldd "$ipopt_executable" >/tmp/emtg-ipopt.ldd
+grep -Fq "libipopt.so" /tmp/emtg-ipopt.ldd
+! grep -iFq "snopt" /tmp/emtg-ipopt.ldd
+! grep -Fq "not found" /tmp/emtg-ipopt.ldd
+check ipopt_backend_compile passed
+check ipopt_dynamic_linking resolved
 
 cat >/tmp/dependency_probe.cpp <<'CPP'
 #include <boost/archive/text_oarchive.hpp>
@@ -213,7 +229,8 @@ printf '%s\n' \
     >/tmp/cmake-source/EMTG-Config.cmake
 
 set +e
-cmake -S /tmp/cmake-source -B /tmp/cmake-build >/tmp/cmake.log 2>&1
+cmake -S /tmp/cmake-source -B /tmp/cmake-build \
+    -DEMTG_NLP_SOLVER=SNOPT >/tmp/cmake.log 2>&1
 cmake_status=$?
 set -e
 tr '\n' ' ' </tmp/cmake.log | tr -s ' ' >/tmp/cmake-normalized.log

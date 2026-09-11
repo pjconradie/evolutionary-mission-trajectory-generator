@@ -68,6 +68,17 @@ def test_native_nlp_contract_passes_in_target_environment(phase1_toolchain_probe
     assert phase1_toolchain_probe["nlp_contract"] == "passed"
 
 
-def test_cmake_rejects_invalid_and_unimplemented_solvers(phase1_toolchain_probe):
-    """CMake must reject unknown backends and IPOPT before its adapter exists."""
-    assert phase1_toolchain_probe["cmake_solver_rejections"] == "passed"
+def test_cmake_rejects_invalid_solver(phase1_toolchain_probe):
+    """CMake must reject unknown solver backends before dependency discovery."""
+    assert phase1_toolchain_probe["cmake_invalid_solver_rejection"] == "passed"
+
+
+def test_cmake_defaults_to_discovered_ipopt(phase1_toolchain_probe):
+    """A clean Debian configuration must select IPOPT without probing SNOPT."""
+    assert phase1_toolchain_probe["cmake_default_ipopt"] == "passed"
+
+
+def test_ipopt_backend_builds_without_snopt(phase1_toolchain_probe):
+    """The default executable must link IPOPT with no SNOPT dependency."""
+    assert phase1_toolchain_probe["ipopt_backend_compile"] == "passed"
+    assert phase1_toolchain_probe["ipopt_dynamic_linking"] == "resolved"

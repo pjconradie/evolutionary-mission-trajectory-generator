@@ -5,6 +5,9 @@
 #ifdef EMTG_NLP_SOLVER_SNOPT
 #include "SNOPT_interface.h"
 #endif
+#ifdef EMTG_NLP_SOLVER_IPOPT
+#include "IPOPT_interface.h"
+#endif
 
 #include <iostream>
 #include <stdexcept>
@@ -52,7 +55,12 @@ namespace EMTG
                     break;
 #endif
                 case NLPBackend::IPOPT:
-                    throw std::runtime_error("IPOPT adapter is not implemented");
+#ifdef EMTG_NLP_SOLVER_IPOPT
+                    return std::unique_ptr<NLP_interface>(
+                        new IPOPT_interface(myProblem, options));
+#else
+                    break;
+#endif
                 case NLPBackend::None:
                     break;
             }
