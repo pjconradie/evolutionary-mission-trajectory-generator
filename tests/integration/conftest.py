@@ -624,8 +624,14 @@ def _prepare_mission_options(source, artifacts, *, mbh):
     options.override_mission_subfolder = 1
     options.forced_mission_subfolder = "."
     options.universe_folder = "/repo/testatron/universe/"
-    options.HardwarePath = "/repo/HardwareModels/"
-    options.LaunchVehicleLibraryFile = "default.emtg_launchvehicleopt"
+    options.HardwarePath = (
+        "/repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/"
+        "Config_Files/hardware_models/"
+    )
+    options.LaunchVehicleLibraryFile = (
+        "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt"
+    )
+    options.LaunchVehicleKey = "Atlas_V_401"
     options.snopt_max_run_time = 30
     if mbh:
         options.mission_name = "CoastPhase_EMintercept_MBH_smoke"
@@ -712,16 +718,19 @@ def direct_nlp_mission_probe(toolchain_image, repository_root, tmp_path_factory)
 def fixed_seed_mbh_mission_probe(
     toolchain_image, repository_root, tmp_path_factory
 ):
-    """Run and parse one bounded fixed-seed MBH IPOPT mission."""
+    """Run and parse the bounded fixed-seed MBH IPOPT mission twice."""
     source = (
         repository_root
         / "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt"
     )
-    return _mission_runtime_probe(
-        toolchain_image=toolchain_image,
-        repository_root=repository_root,
-        tmp_path_factory=tmp_path_factory,
-        source=source,
-        probe_name="fixed-seed-mbh-mission",
-        mbh=True,
+    return tuple(
+        _mission_runtime_probe(
+            toolchain_image=toolchain_image,
+            repository_root=repository_root,
+            tmp_path_factory=tmp_path_factory,
+            source=source,
+            probe_name=f"fixed-seed-mbh-mission-{run_number}",
+            mbh=True,
+        )
+        for run_number in (1, 2)
     )
