@@ -221,6 +221,7 @@ def run_probe(
     probe_name: str,
     tmp_path_factory,
     build_volume: str | None = None,
+    writable_artifacts: Path | None = None,
     timeout: int = COMMAND_TIMEOUT_SECONDS,
 ) -> dict[str, str]:
     """Run one probe in a disposable amd64 container and return its checks."""
@@ -232,6 +233,12 @@ def run_probe(
         "--platform", PLATFORM,
         "--mount", f"type=bind,src={repository_root},dst=/repo,readonly",
     ]
+    if writable_artifacts:
+        writable_artifacts.mkdir(parents=True, exist_ok=True)
+        command.extend([
+            "--mount",
+            f"type=bind,src={writable_artifacts.resolve()},dst=/artifacts",
+        ])
     if build_volume:
         create = _run(
             ["docker", "volume", "create", "--label", IMAGE_LABEL, build_volume],

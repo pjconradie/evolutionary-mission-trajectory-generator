@@ -35,7 +35,11 @@ if(EMTG_NLP_SOLVER STREQUAL "IPOPT")
 
     add_nlp_contract(ipopt_adapter_contract test_ipopt_adapter.cpp)
     target_link_libraries(ipopt_adapter_contract PRIVATE emtg PkgConfig::IPOPT)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/ipopt.opt"
+        "derivative_test_tol 1e-7\n"
+        "derivative_test_perturbation 1e-9\n")
     set_tests_properties(ipopt_adapter_contract PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         FAIL_REGULAR_EXPRESSION
             "Derivative checker detected [1-9][0-9]* error\\(s\\)")
 endif()

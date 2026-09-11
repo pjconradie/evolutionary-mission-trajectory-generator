@@ -3,8 +3,11 @@
 import shutil
 import subprocess
 import uuid
+from pathlib import Path
 
 import pytest
+import Mission
+import MissionOptions
 
 from _docker_support import (
     build_clean_toolchain_image,
@@ -591,9 +594,13 @@ cmake --build /build --target ipopt_adapter_contract -j2 \
     >/tmp/runtime-build.log 2>&1 \
     || { tail -n 150 /tmp/runtime-build.log; exit 17; }
 check ipopt_runtime_compile passed
-ctest --test-dir /build -R '^ipopt_adapter_contract$' \
-    --output-on-failure >/tmp/runtime-test.log 2>&1 \
-    || { cat /tmp/runtime-test.log; exit 18; }
+set +e
+ctest --test-dir /build -R '^ipopt_adapter_contract$' -V \
+    >/tmp/runtime-test.log 2>&1
+runtime_status=$?
+set -e
+cat /tmp/runtime-test.log
+test "$runtime_status" -eq 0 || exit 18
 check ipopt_runtime passed
 '''
     volume = build_volume_name(toolchain_image, "ipopt")
@@ -604,4 +611,117 @@ check ipopt_runtime passed
         probe_name="ipopt-runtime",
         tmp_path_factory=tmp_path_factory,
         build_volume=volume,
+    )
+
+
+def _prepare_mission_options(source, artifacts, *, mbh):
+    options = MissionOptions.MissionOptions(str(source))
+    options.NLP_solver_type = 2
+    options.background_mode = 1
+    options.short_output_file_names = 1
+    options.override_working_directory = 1
+    options.forced_working_directory = "/artifacts"
+    options.override_mission_subfolder = 1
+    options.forced_mission_subfolder = "."
+    options.universe_folder = "/repo/testatron/universe/"
+    options.HardwarePath = "/repo/HardwareModels/"
+    options.LaunchVehicleLibraryFile = "default.emtg_launchvehicleopt"
+    options.snopt_max_run_time = 30
+    if mbh:
+        options.mission_name = "CoastPhase_EMintercept_MBH_smoke"
+        options.run_inner_loop = 1
+        options.MBH_max_trials = 3
+        options.MBH_max_run_time = 60
+        options.MBH_RNG_seed = 17
+        options.seed_MBH = 1
+    for journey in options.Journeys:
+        gravity_file = Path(
+            journey.central_body_gravity_file.replace("\\", "/")
+        ).name
+        journey.central_body_gravity_file = (
+            f"/repo/testatron/universe/gravity_files/{gravity_file}"
+        )
+
+    destination = artifacts / f"{options.mission_name}.emtgopt"
+    options.write_options_file(str(destination), True)
+    return options.mission_name, destination
+
+
+def _mission_runtime_probe(
+    *,
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+    source,
+    probe_name,
+    mbh,
+):
+    artifacts = tmp_path_factory.mktemp(probe_name)
+    mission_name, options_path = _prepare_mission_options(
+        source, artifacts, mbh=mbh
+    )
+    timeout_seconds = 300 if mbh else 180
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/mission-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/mission-build.log; exit 20; }}
+check {probe_name}_compile passed
+set +e
+timeout {timeout_seconds} /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/tmp/mission-runtime.log 2>&1
+mission_status=$?
+set -e
+cat /tmp/mission-runtime.log
+test "$mission_status" -eq 0 || exit 21
+test -s /artifacts/{mission_name}.emtg || exit 22
+check {probe_name}_run passed
+'''
+    volume = build_volume_name(toolchain_image, "ipopt")
+    checks = run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name=probe_name,
+        tmp_path_factory=tmp_path_factory,
+        build_volume=volume,
+        writable_artifacts=artifacts,
+    )
+    result_path = artifacts / f"{mission_name}.emtg"
+    checks["mission"] = Mission.Mission(str(result_path))
+    checks["result_path"] = str(result_path)
+    return checks
+
+
+@pytest.fixture(scope="session")
+def direct_nlp_mission_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Run and parse one deterministic direct-NLP IPOPT mission."""
+    source = (
+        repository_root
+        / "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt"
+    )
+    return _mission_runtime_probe(
+        toolchain_image=toolchain_image,
+        repository_root=repository_root,
+        tmp_path_factory=tmp_path_factory,
+        source=source,
+        probe_name="direct-nlp-mission",
+        mbh=False,
+    )
+
+
+@pytest.fixture(scope="session")
+def fixed_seed_mbh_mission_probe(
+    toolchain_image, repository_root, tmp_path_factory
+):
+    """Run and parse one bounded fixed-seed MBH IPOPT mission."""
+    source = (
+        repository_root
+        / "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt"
+    )
+    return _mission_runtime_probe(
+        toolchain_image=toolchain_image,
+        repository_root=repository_root,
+        tmp_path_factory=tmp_path_factory,
+        source=source,
+        probe_name="fixed-seed-mbh-mission",
+        mbh=True,
     )
