@@ -6,6 +6,14 @@ import uuid
 
 import pytest
 
+from _docker_support import (
+    build_clean_toolchain_image,
+    build_volume_name,
+    ensure_toolchain_image,
+    remove_toolchain_image,
+    run_probe,
+)
+
 
 IMAGE = (
     "python:3.12-slim-bookworm@"
@@ -324,3 +332,276 @@ def phase1_toolchain_probe(repository_root):
             checks[key] = value
 
     return checks
+
+
+@pytest.fixture(scope="session")
+def toolchain_image(repository_root, tmp_path_factory):
+    """Return the reusable content-addressed Linux toolchain image."""
+    return ensure_toolchain_image(repository_root, tmp_path_factory)
+
+
+@pytest.fixture(scope="session")
+def clean_toolchain_image(repository_root, tmp_path_factory):
+    """Build and remove one uniquely tagged uncached Linux toolchain image."""
+    image = build_clean_toolchain_image(repository_root, tmp_path_factory)
+    try:
+        yield image
+    finally:
+        remove_toolchain_image(image)
+
+
+@pytest.fixture(scope="session")
+def clean_bootstrap_probe(clean_toolchain_image, repository_root, tmp_path_factory):
+    """Validate essential outputs from a clean toolchain bootstrap."""
+    script = r'''
+set -eu
+check() { printf "EMTG_CHECK %s=%s\n" "$1" "$2"; }
+test "$(uname -m)" = x86_64
+test "$(. /etc/os-release; printf '%s' "$VERSION_ID")" = 12
+case "$(python --version | awk '{print $2}')" in 3.12.*) ;; *) exit 19 ;; esac
+test "$(pkg-config --modversion ipopt)" = 3.11.9
+test -f /opt/emtg-deps/cspice/include/SpiceUsr.h
+test -f /opt/emtg-deps/cspice/lib/libcspice.a
+test "$(ar t /opt/emtg-deps/cspice/lib/libcspice.a | wc -l | tr -d ' ')" = 2229
+check clean_bootstrap passed
+'''
+    return run_probe(
+        image=clean_toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="clean-bootstrap",
+        tmp_path_factory=tmp_path_factory,
+    )
+
+
+@pytest.fixture(scope="session")
+def platform_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Report immutable platform, package, and CSPICE properties."""
+    script = r'''
+set -eu
+check() { printf "EMTG_CHECK %s=%s\n" "$1" "$2"; }
+test "$(uname -m)" = x86_64
+check architecture "$(uname -m)"
+. /etc/os-release
+test "$ID" = debian
+test "$VERSION_ID" = 12
+check debian_version "$VERSION_ID"
+python_version=$(python --version | awk '{print $2}')
+case "$python_version" in 3.12.*) ;; *) exit 10 ;; esac
+check python_version "$python_version"
+check packages installed
+check compiler_version "$(g++ -dumpfullversion)"
+check cmake_version "$(cmake --version | awk 'NR == 1 {print $3}')"
+check pkg_config_version "$(pkg-config --version)"
+check gsl_version "$(pkg-config --modversion gsl)"
+check ipopt_version "$(pkg-config --modversion ipopt)"
+archive=/repo/depend/cspice-c_pc_linux_gcc_64bit/cspice.tar.Z
+checksum=$(sha256sum "$archive" | awk '{print $1}')
+test "$checksum" = 60a95b51a6472f1afe7e40d77ebdee43c12bb5b8823676ccc74692ddfede06ce
+check cspice_checksum "$checksum"
+test -f /opt/emtg-deps/cspice/makeall.csh
+test -f /opt/emtg-deps/cspice/include/SpiceUsr.h
+test -f /opt/emtg-deps/cspice/lib/libcspice.a
+check cspice_payload valid
+objects=$(ar t /opt/emtg-deps/cspice/lib/libcspice.a | wc -l | tr -d ' ')
+test "$objects" = 2229
+check cspice_objects "$objects"
+'''
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="platform",
+        tmp_path_factory=tmp_path_factory,
+    )
+
+
+@pytest.fixture(scope="session")
+def dependency_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Compile, link, and run the extracted dependency probe."""
+    script = r'''
+set -eu
+check() { printf "EMTG_CHECK %s=%s\n" "$1" "$2"; }
+g++ -std=c++17 -Wall -Wextra -Werror \
+    /repo/tests/cpp/dependency_probe.cpp \
+    -I/opt/emtg-deps/cspice/include \
+    /opt/emtg-deps/cspice/lib/libcspice.a \
+    -lboost_filesystem -lboost_system -lboost_serialization \
+    -lgsl -lgslcblas $(pkg-config --cflags --libs ipopt) \
+    -lm -o /tmp/dependency_probe
+check dependency_compile passed
+ldd /tmp/dependency_probe >/tmp/dependency-probe.ldd
+! grep -Fq "not found" /tmp/dependency-probe.ldd
+check dynamic_linking resolved
+/tmp/dependency_probe
+check dependency_runtime passed
+'''
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="dependencies",
+        tmp_path_factory=tmp_path_factory,
+    )
+
+
+@pytest.fixture(scope="session")
+def cmake_policy_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Check invalid, default IPOPT, and explicit SNOPT configuration policy."""
+    script = r'''
+set -eu
+check() { printf "EMTG_CHECK %s=%s\n" "$1" "$2"; }
+make_source() {
+    destination=$1
+    mkdir -p "$destination"
+    ln -s /repo/src "$destination/src"
+    ln -s /repo/tests "$destination/tests"
+    cp /repo/CMakeLists.txt "$destination/CMakeLists.txt"
+    cat >"$destination/EMTG-Config.cmake" <<'CMAKE'
+set(CSPICE_DIR /opt/emtg-deps/cspice)
+set(SNOPT_ROOT_DIR /tmp/emtg-intentionally-missing-snopt)
+set(GSL_PATH /opt/emtg-deps/gsl)
+set(BOOST_ROOT /usr)
+set(Boost_NO_BOOST_CMAKE ON)
+CMAKE
+}
+make_source /tmp/emtg-policy
+set +e
+cmake -S /tmp/emtg-policy -B /tmp/invalid \
+    -DEMTG_NLP_SOLVER=INVALID >/tmp/invalid.log 2>&1
+invalid_status=$?
+set -e
+test "$invalid_status" -ne 0
+grep -Fq "Unsupported EMTG_NLP_SOLVER 'INVALID'" /tmp/invalid.log
+check cmake_invalid_solver_rejection passed
+cmake -S /tmp/emtg-policy -B /tmp/default >/tmp/default.log 2>&1
+grep -Fq "NLP backend: IPOPT" /tmp/default.log
+grep -Fq "IPOPT 3.11.9 found through pkg-config" /tmp/default.log
+! grep -Fq "Now checking on SNOPT" /tmp/default.log
+check cmake_default_ipopt passed
+mkdir /tmp/snopt-policy
+cp /repo/CMakeLists.txt /tmp/snopt-policy/CMakeLists.txt
+printf '%s\n' 'set(SNOPT_ROOT_DIR /tmp/emtg-intentionally-missing-snopt)' \
+    >/tmp/snopt-policy/EMTG-Config.cmake
+set +e
+cmake -S /tmp/snopt-policy -B /tmp/snopt-build \
+    -DEMTG_NLP_SOLVER=SNOPT >/tmp/snopt.log 2>&1
+snopt_status=$?
+set -e
+test "$snopt_status" -ne 0
+tr '\n' ' ' </tmp/snopt.log | tr -s ' ' >/tmp/snopt-normalized.log
+grep -Fq "SNOPT directory specified (/tmp/emtg-intentionally-missing-snopt) does not exist" \
+    /tmp/snopt-normalized.log
+! grep -Fq "Now checking for CSpice" /tmp/snopt.log
+check cmake_snopt_gate passed
+'''
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="cmake-policy",
+        tmp_path_factory=tmp_path_factory,
+    )
+
+
+def _backend_source_script(backend):
+    return rf'''
+set -eu
+check() {{ printf "EMTG_CHECK %s=%s\n" "$1" "$2"; }}
+rm -rf /tmp/emtg-source
+mkdir /tmp/emtg-source
+ln -s /repo/src /tmp/emtg-source/src
+ln -s /repo/tests /tmp/emtg-source/tests
+cp /repo/CMakeLists.txt /tmp/emtg-source/CMakeLists.txt
+cat >/tmp/emtg-source/EMTG-Config.cmake <<'CMAKE'
+set(CSPICE_DIR /opt/emtg-deps/cspice)
+set(SNOPT_ROOT_DIR /tmp/emtg-intentionally-missing-snopt)
+set(GSL_PATH /opt/emtg-deps/gsl)
+set(BOOST_ROOT /usr)
+set(Boost_NO_BOOST_CMAKE ON)
+CMAKE
+cmake -S /tmp/emtg-source -B /build \
+    -DEMTG_NLP_SOLVER={backend} -DBUILD_NLP_CONTRACT_TESTS=ON \
+    >/tmp/configure.log 2>&1
+'''
+
+
+@pytest.fixture(scope="session")
+def none_backend_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Build and test only the solver-neutral NONE backend."""
+    script = _backend_source_script("NONE") + r'''
+! grep -Fq "Now checking on SNOPT" /tmp/configure.log
+check none_backend_configure passed
+cmake --build /build --target emtg nlp_pure_contract nlp_interface_contract -j2 \
+    >/tmp/build.log 2>&1 || { tail -n 150 /tmp/build.log; exit 13; }
+check none_backend_compile passed
+ctest --test-dir /build --output-on-failure \
+    >/tmp/ctest.log 2>&1 || { cat /tmp/ctest.log; exit 14; }
+check nlp_contract passed
+'''
+    volume = build_volume_name(toolchain_image, "none")
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="none-backend",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=volume,
+    )
+
+
+@pytest.fixture(scope="session")
+def ipopt_backend_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Build and inspect only the default IPOPT executable."""
+    script = _backend_source_script("IPOPT") + r'''
+grep -Fq "NLP backend: IPOPT" /tmp/configure.log
+grep -Fq "IPOPT 3.11.9 found through pkg-config" /tmp/configure.log
+! grep -Fq "Now checking on SNOPT" /tmp/configure.log
+check cmake_default_ipopt passed
+cmake --build /build --target ipopt_adapter_compile_contract -j2 \
+    >/tmp/adapter-build.log 2>&1 || { tail -n 150 /tmp/adapter-build.log; exit 15; }
+check ipopt_adapter_compile passed
+cmake --build /build --target EMTGv9 -j2 \
+    >/tmp/build.log 2>&1 || { tail -n 150 /tmp/build.log; exit 16; }
+executable=/build/src/EMTGv9
+test -x "$executable"
+ldd "$executable" >/tmp/emtg.ldd
+grep -Fq "libipopt.so" /tmp/emtg.ldd
+! grep -iFq "snopt" /tmp/emtg.ldd
+! grep -Fq "not found" /tmp/emtg.ldd
+check ipopt_backend_compile passed
+check ipopt_dynamic_linking resolved
+'''
+    volume = build_volume_name(toolchain_image, "ipopt")
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="ipopt-backend",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=volume,
+    )
+
+
+@pytest.fixture(scope="session")
+def ipopt_runtime_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Build and run only the deterministic IPOPT adapter contract."""
+    script = _backend_source_script("IPOPT") + r'''
+cmake --build /build --target ipopt_adapter_contract -j2 \
+    >/tmp/runtime-build.log 2>&1 \
+    || { tail -n 150 /tmp/runtime-build.log; exit 17; }
+check ipopt_runtime_compile passed
+ctest --test-dir /build -R '^ipopt_adapter_contract$' \
+    --output-on-failure >/tmp/runtime-test.log 2>&1 \
+    || { cat /tmp/runtime-test.log; exit 18; }
+check ipopt_runtime passed
+'''
+    volume = build_volume_name(toolchain_image, "ipopt")
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="ipopt-runtime",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=volume,
+    )

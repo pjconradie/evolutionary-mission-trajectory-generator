@@ -1,0 +1,26 @@
+FROM python:3.12-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254
+
+ARG CSPICE_SHA256
+
+RUN apt-get update -qq \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -qq -y --no-install-recommends \
+        build-essential cmake pkg-config csh gzip tar \
+        libboost-filesystem-dev libboost-system-dev libboost-serialization-dev \
+        libgsl-dev libblas-dev liblapack-dev coinor-libipopt-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY cspice.tar.Z /tmp/cspice.tar.Z
+RUN echo "${CSPICE_SHA256}  /tmp/cspice.tar.Z" | sha256sum -c - \
+    && mkdir -p /opt/emtg-deps/cspice \
+    && gzip -dc /tmp/cspice.tar.Z | tar -xf - -C /opt/emtg-deps/cspice --strip-components=1 \
+    && cd /opt/emtg-deps/cspice \
+    && /bin/csh -f makeall.csh \
+    && cp lib/cspice.a lib/libcspice.a \
+    && rm /tmp/cspice.tar.Z
+
+RUN mkdir -p /opt/emtg-deps/gsl \
+    && cp -a /usr/include/gsl /opt/emtg-deps/gsl/ \
+    && ln -s /usr/lib/x86_64-linux-gnu/libgsl.a /opt/emtg-deps/gsl/libgsl.a \
+    && ln -s /usr/lib/x86_64-linux-gnu/libgslcblas.a /opt/emtg-deps/gsl/libgslcblas.a
+
+LABEL org.emtg.pytest.toolchain="true"

@@ -47,7 +47,7 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(config, items):
-    """Filter collected tests when exactly one category selector is provided."""
+    """Filter categories and keep clean bootstrap tests explicitly opt-in."""
     selected_categories = [
         category
         for category in ("unit", "integration", "regression")
@@ -57,14 +57,17 @@ def pytest_collection_modifyitems(config, items):
         raise pytest.UsageError(
             "--unit, --integration, and --regression are mutually exclusive"
         )
-    if not selected_categories:
-        return
 
-    category = selected_categories[0]
+    category = selected_categories[0] if selected_categories else None
+    clean_bootstrap_requested = "clean_bootstrap" in config.option.markexpr
     selected = []
     deselected = []
     for item in items:
-        (selected if category in item.keywords else deselected).append(item)
+        category_matches = category is None or category in item.keywords
+        bootstrap_matches = (
+            clean_bootstrap_requested or "clean_bootstrap" not in item.keywords
+        )
+        (selected if category_matches and bootstrap_matches else deselected).append(item)
 
     items[:] = selected
     config.hook.pytest_deselected(items=deselected)
