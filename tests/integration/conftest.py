@@ -116,8 +116,11 @@ if ! cmake --build /tmp/emtg-none-build --target emtg -j2 \
 fi
 check none_backend_compile passed
 
-cmake --build /tmp/emtg-none-build --target nlp_solver_contract -j2 \
-    >/tmp/nlp-contract-build.log 2>&1
+if ! cmake --build /tmp/emtg-none-build --target nlp_solver_contract -j2 \
+    >/tmp/nlp-contract-build.log 2>&1; then
+    tail -n 150 /tmp/nlp-contract-build.log
+    exit 14
+fi
 ctest --test-dir /tmp/emtg-none-build --output-on-failure \
     >/tmp/nlp-contract-test.log 2>&1
 check nlp_contract passed

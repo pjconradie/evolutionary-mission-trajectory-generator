@@ -1,8 +1,10 @@
 add_executable(nlp_solver_contract test_nlp_solver_contract.cpp)
 target_compile_features(nlp_solver_contract PRIVATE cxx_std_17)
-target_include_directories(nlp_solver_contract PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/Core
-    ${PROJECT_SOURCE_DIR}/src/InnerLoop)
+get_property(EMTG_SOURCE_INCLUDE_DIRECTORIES
+    DIRECTORY ${PROJECT_SOURCE_DIR}/src
+    PROPERTY INCLUDE_DIRECTORIES)
+target_include_directories(nlp_solver_contract SYSTEM PRIVATE
+    ${EMTG_SOURCE_INCLUDE_DIRECTORIES})
 target_link_libraries(nlp_solver_contract PRIVATE emtg)
 
 if(MSVC)
