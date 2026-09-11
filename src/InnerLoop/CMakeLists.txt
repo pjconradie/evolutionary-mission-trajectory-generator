@@ -6,6 +6,7 @@ set(INNER_LOOP_HEADERS ${INNER_LOOP_HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/EMTG_in
                                              ${CMAKE_CURRENT_SOURCE_DIR}/NLPoptions.h
                                              ${CMAKE_CURRENT_SOURCE_DIR}/NLP_interface.h
                                              ${CMAKE_CURRENT_SOURCE_DIR}/NLP_solution_acceptance.h
+                                             ${CMAKE_CURRENT_SOURCE_DIR}/NLP_sparse_derivative_layout.h
                                              ${CMAKE_CURRENT_SOURCE_DIR}/NLP_solver_factory.h
                                              ${CMAKE_CURRENT_SOURCE_DIR}/NLP_solver_selection.h
                                              ${CMAKE_CURRENT_SOURCE_DIR}/NLP_solver_status.h

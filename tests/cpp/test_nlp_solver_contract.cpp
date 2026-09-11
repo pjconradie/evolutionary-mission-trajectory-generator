@@ -1,6 +1,7 @@
 #include "IPOPT_status.h"
 #include "NLP_interface.h"
 #include "NLP_solution_acceptance.h"
+#include "NLP_sparse_derivative_layout.h"
 #include "NLP_solver_selection.h"
 #include "SNOPT_status.h"
 
@@ -42,6 +43,7 @@ int main()
     using EMTG::Solvers::NLPStatus;
     using EMTG::Solvers::NLPBackend;
     using EMTG::Solvers::IPOPTTermination;
+    using EMTG::Solvers::SparseDerivativeLayout;
     using EMTG::Solvers::acceptNLPSolution;
     using EMTG::Solvers::resolveNLPBackend;
     using EMTG::Solvers::solverAcceptedSolution;
@@ -121,6 +123,33 @@ int main()
         {
          assert(translateIPOPTTermination(termination) == NLPStatus::Error);
         }
+
+    const SparseDerivativeLayout derivativeLayout(
+        2,
+        3,
+        { 0, 1, 1 },
+        { 0, 0, 1 },
+        { 0, 0, 2, 2, 2 },
+        { 0, 0, 0, 0, 1 });
+    assert(derivativeLayout.objectiveGradient(
+               { 3.0, 5.0, 7.0 },
+               { 11.0, 13.0, 17.0, 19.0, 23.0 })
+           == std::vector<double>({ 27.0, 0.0 }));
+
+    const auto& constraintEntries = derivativeLayout.getConstraintEntries();
+    assert(constraintEntries.size() == 4);
+    assert(constraintEntries[0].row == 0);
+    assert(constraintEntries[0].column == 0);
+    assert(constraintEntries[1].row == 0);
+    assert(constraintEntries[1].column == 1);
+    assert(constraintEntries[2].row == 1);
+    assert(constraintEntries[2].column == 0);
+    assert(constraintEntries[3].row == 1);
+    assert(constraintEntries[3].column == 1);
+    assert(derivativeLayout.constraintJacobian(
+               { 3.0, 5.0, 7.0 },
+               { 11.0, 13.0, 17.0, 19.0, 23.0 })
+           == std::vector<double>({ 5.0, 7.0, 36.0, 23.0 }));
 
     constexpr double tolerance = 1.0e-5;
     assert(acceptNLPSolution(true, 1.0e-6, 1.0e-6, tolerance,
