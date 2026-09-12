@@ -10,9 +10,11 @@ import Mission
 import MissionOptions
 
 from _docker_support import (
+    artifact_directory,
     build_clean_toolchain_image,
     build_volume_name,
     ensure_toolchain_image,
+    remove_build_volume,
     remove_toolchain_image,
     run_probe,
 )
@@ -127,7 +129,8 @@ if ! cmake --build /tmp/emtg-none-build --target emtg -j2 \
 fi
 check none_backend_compile passed
 
-if ! cmake --build /tmp/emtg-none-build --target nlp_solver_contract -j2 \
+if ! cmake --build /tmp/emtg-none-build \
+    --target nlp_pure_contract nlp_interface_contract -j2 \
     >/tmp/nlp-contract-build.log 2>&1; then
     tail -n 150 /tmp/nlp-contract-build.log
     exit 14
@@ -355,10 +358,11 @@ def clean_toolchain_image(repository_root, tmp_path_factory):
 
 @pytest.fixture(scope="session")
 def clean_bootstrap_probe(clean_toolchain_image, repository_root, tmp_path_factory):
-    """Validate essential outputs from a clean toolchain bootstrap."""
-    script = r'''
+    """Build and run the dependency and IPOPT stack without reusable layers."""
+    script = _backend_source_script("IPOPT") + r'''
 set -eu
 check() { printf "EMTG_CHECK %s=%s\n" "$1" "$2"; }
+trap 'for log in /tmp/clean-*.log; do test ! -f "$log" || cp "$log" /artifacts/; done' EXIT
 test "$(uname -m)" = x86_64
 test "$(. /etc/os-release; printf '%s' "$VERSION_ID")" = 12
 case "$(python --version | awk '{print $2}')" in 3.12.*) ;; *) exit 19 ;; esac
@@ -366,15 +370,53 @@ test "$(pkg-config --modversion ipopt)" = 3.11.9
 test -f /opt/emtg-deps/cspice/include/SpiceUsr.h
 test -f /opt/emtg-deps/cspice/lib/libcspice.a
 test "$(ar t /opt/emtg-deps/cspice/lib/libcspice.a | wc -l | tr -d ' ')" = 2229
+g++ -std=c++17 -Wall -Wextra -Werror \
+    /repo/tests/cpp/dependency_probe.cpp \
+    -I/opt/emtg-deps/cspice/include \
+    /opt/emtg-deps/cspice/lib/libcspice.a \
+    -lboost_filesystem -lboost_system -lboost_serialization \
+    -lgsl -lgslcblas $(pkg-config --cflags --libs ipopt) \
+    -lm -o /tmp/dependency_probe \
+    >/tmp/clean-dependency-build.log 2>&1
+check clean_dependency_compile passed
+ldd /tmp/dependency_probe >/tmp/clean-dependency-ldd.log
+! grep -Fq "not found" /tmp/clean-dependency-ldd.log
+/tmp/dependency_probe >/tmp/clean-dependency-runtime.log 2>&1
+check clean_dependency_runtime passed
+cp /tmp/configure.log /tmp/clean-ipopt-configure.log
+grep -Fq "NLP backend: IPOPT" /tmp/clean-ipopt-configure.log
+grep -Fq "IPOPT 3.11.9 found through pkg-config" /tmp/clean-ipopt-configure.log
+! grep -Fqi "snopt" /tmp/clean-ipopt-configure.log
+check clean_ipopt_configure passed
+cmake --build /build \
+    --target ipopt_adapter_compile_contract ipopt_adapter_contract EMTGv9 -j2 \
+    >/tmp/clean-ipopt-build.log 2>&1 \
+    || { tail -n 150 /tmp/clean-ipopt-build.log; exit 20; }
+check clean_ipopt_build passed
+ctest --test-dir /build -R '^ipopt_adapter_contract$' -V \
+    >/tmp/clean-ipopt-ctest.log 2>&1 \
+    || { cat /tmp/clean-ipopt-ctest.log; exit 21; }
+check clean_ipopt_ctest passed
+ldd /build/src/EMTGv9 >/tmp/clean-ipopt-ldd.log
+grep -Fq "libipopt.so" /tmp/clean-ipopt-ldd.log
+! grep -Fqi "snopt" /tmp/clean-ipopt-ldd.log
+! grep -Fq "not found" /tmp/clean-ipopt-ldd.log
+check clean_ipopt_dynamic_linking resolved
 check clean_bootstrap passed
 '''
-    return run_probe(
-        image=clean_toolchain_image,
-        repository_root=repository_root,
-        script=script,
-        probe_name="clean-bootstrap",
-        tmp_path_factory=tmp_path_factory,
-    )
+    volume = f"emtg-pytest-clean-ipopt-{uuid.uuid4().hex}"
+    try:
+        return run_probe(
+            image=clean_toolchain_image,
+            repository_root=repository_root,
+            script=script,
+            probe_name="clean-bootstrap",
+            tmp_path_factory=tmp_path_factory,
+            build_volume=volume,
+            writable_artifacts=artifact_directory(tmp_path_factory),
+        )
+    finally:
+        remove_build_volume(volume)
 
 
 @pytest.fixture(scope="session")

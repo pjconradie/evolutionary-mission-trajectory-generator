@@ -59,7 +59,8 @@ def parse_checks(output: str) -> dict[str, str]:
     return checks
 
 
-def _artifact_directory(tmp_path_factory) -> Path:
+def artifact_directory(tmp_path_factory) -> Path:
+    """Return the configured probe-log directory, creating it if needed."""
     configured = os.environ.get("EMTG_TEST_ARTIFACT_DIR")
     directory = (
         Path(configured).expanduser().resolve()
@@ -130,7 +131,7 @@ def ensure_toolchain_image(repository_root: Path, tmp_path_factory) -> str:
         timeout=COMMAND_TIMEOUT_SECONDS,
         description="Toolchain image build",
     )
-    log = _artifact_directory(tmp_path_factory) / "toolchain-image-build.log"
+    log = artifact_directory(tmp_path_factory) / "toolchain-image-build.log"
     log.write_text(result.stdout + result.stderr, encoding="utf-8")
     if result.returncode != 0:
         pytest.fail(
@@ -168,7 +169,7 @@ def build_clean_toolchain_image(repository_root: Path, tmp_path_factory) -> str:
         timeout=COMMAND_TIMEOUT_SECONDS,
         description="Clean toolchain image build",
     )
-    log = _artifact_directory(tmp_path_factory) / "clean-toolchain-image-build.log"
+    log = artifact_directory(tmp_path_factory) / "clean-toolchain-image-build.log"
     log.write_text(result.stdout + result.stderr, encoding="utf-8")
     if result.returncode != 0:
         _run(
@@ -190,6 +191,17 @@ def remove_toolchain_image(tag: str) -> None:
         ["docker", "image", "rm", "--force", tag],
         timeout=60,
         description="Clean toolchain image removal",
+    )
+    if result.returncode != 0:
+        pytest.fail(result.stderr or result.stdout)
+
+
+def remove_build_volume(volume_name: str) -> None:
+    """Remove exactly one temporary Docker build volume."""
+    result = _run(
+        ["docker", "volume", "rm", "--force", volume_name],
+        timeout=60,
+        description="Temporary build-volume removal",
     )
     if result.returncode != 0:
         pytest.fail(result.stderr or result.stdout)
@@ -263,7 +275,7 @@ def run_probe(
                 check=False,
             )
 
-    log = _artifact_directory(tmp_path_factory) / f"{probe_name}.log"
+    log = artifact_directory(tmp_path_factory) / f"{probe_name}.log"
     log.write_text(result.stdout + result.stderr, encoding="utf-8")
     if result.returncode != 0:
         pytest.fail(

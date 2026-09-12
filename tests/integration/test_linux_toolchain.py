@@ -59,4 +59,10 @@ def test_combined_dependencies_compile_link_and_run(dependency_probe):
 @pytest.mark.clean_bootstrap
 def test_toolchain_builds_from_clean_layers(clean_bootstrap_probe):
     """The pinned toolchain must build and validate without reusable layers."""
+    assert clean_bootstrap_probe["clean_dependency_compile"] == "passed"
+    assert clean_bootstrap_probe["clean_dependency_runtime"] == "passed"
+    assert clean_bootstrap_probe["clean_ipopt_configure"] == "passed"
+    assert clean_bootstrap_probe["clean_ipopt_build"] == "passed"
+    assert clean_bootstrap_probe["clean_ipopt_ctest"] == "passed"
+    assert clean_bootstrap_probe["clean_ipopt_dynamic_linking"] == "resolved"
     assert clean_bootstrap_probe["clean_bootstrap"] == "passed"
