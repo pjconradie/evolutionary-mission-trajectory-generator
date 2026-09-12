@@ -23,4 +23,10 @@ RUN mkdir -p /opt/emtg-deps/gsl \
     && ln -s /usr/lib/x86_64-linux-gnu/libgsl.a /opt/emtg-deps/gsl/libgsl.a \
     && ln -s /usr/lib/x86_64-linux-gnu/libgslcblas.a /opt/emtg-deps/gsl/libgslcblas.a
 
+RUN python -m pip install --no-cache-dir \
+        numpy==2.5.3 \
+        pandas==3.0.5 \
+        python-dateutil==2.9.0.post0 \
+        six==1.17.0
+
 LABEL org.emtg.pytest.toolchain="true"

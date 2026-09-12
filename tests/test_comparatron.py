@@ -26,11 +26,6 @@ def test_comparatron_matches_each_osiris_baseline_to_itself(
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="Mission.Comparatron uses DataFrame.append, removed in pandas 3",
-)
 def test_comparatron_reports_differences_between_osiris_baselines(
     osiris_baselines, tmp_path
 ):

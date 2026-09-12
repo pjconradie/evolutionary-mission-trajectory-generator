@@ -19,6 +19,10 @@ import pdb # Python debugger; use q in command line to quit
 import sys
 import argparse
 
+if '--ipopt-characterization' in sys.argv:
+    from ipopt_characterization import main as run_ipopt_characterization
+    raise SystemExit(run_ipopt_characterization(sys.argv[1:]))
+
 # Can't use a relative path because we use importlib later
 test_directory = getcwd().replace('\\','/') + '/tests/' 
 
