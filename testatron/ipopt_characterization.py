@@ -18,6 +18,20 @@ TESTATRON_ROOT = REPOSITORY_ROOT / "testatron"
 TESTS_ROOT = TESTATRON_ROOT / "tests"
 PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
 DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt"
+PUBLIC_HARDWARE_ROOT = (
+    REPOSITORY_ROOT
+    / "docs"
+    / "0_Users"
+    / "tutorial"
+    / "Tutorial_EMTG_Files"
+    / "Config_Files"
+    / "hardware_models"
+)
+LEGACY_NLSII_LIBRARY = "NLSII_April2017.emtg_launchvehicleopt"
+PUBLIC_NLSII_LIBRARY = "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt"
+LEGACY_UNUSED_THROTTLE_TABLE = "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable"
+INERT_THROTTLE_TABLE = "empty.ThrottleTable"
+TABLE_INDEPENDENT_ENGINE_TYPES = (0, 3, 5, *range(6, 29))
 CLASSIFICATIONS = (
     "reviewable",
     "infeasible",
@@ -39,6 +53,7 @@ class CaseResult:
     output_file: str = ""
     comparison_file: str = ""
     log_file: str = ""
+    compatibility_file: str = ""
     return_code: int | None = None
     duration_seconds: float = 0.0
     objective_value: float | None = None
@@ -97,7 +112,36 @@ def prepare_case(source_options, case_directory, pyemtg_root=PYEMTG_ROOT):
     options.short_output_file_names = 1
     options.background_mode = 1
     options.universe_folder = str(TESTATRON_ROOT / "universe")
+    compatibility_mappings = []
     options.HardwarePath = str(TESTATRON_ROOT / "HardwareModels")
+    if options.LaunchVehicleLibraryFile == LEGACY_NLSII_LIBRARY:
+        options.HardwarePath = str(PUBLIC_HARDWARE_ROOT)
+        options.LaunchVehicleLibraryFile = PUBLIC_NLSII_LIBRARY
+        compatibility_mappings.append(
+            {
+                "option": "LaunchVehicleLibraryFile",
+                "source": LEGACY_NLSII_LIBRARY,
+                "replacement": PUBLIC_NLSII_LIBRARY,
+                "reason": "public replacement library; LaunchVehicleKey preserved",
+            }
+        )
+    if (
+        options.SpacecraftModelInput == 2
+        and options.engine_type in TABLE_INDEPENDENT_ENGINE_TYPES
+        and options.ThrottleTableFile == LEGACY_UNUSED_THROTTLE_TABLE
+    ):
+        options.ThrottleTableFile = INERT_THROTTLE_TABLE
+        compatibility_mappings.append(
+            {
+                "option": "ThrottleTableFile",
+                "source": LEGACY_UNUSED_THROTTLE_TABLE,
+                "replacement": INERT_THROTTLE_TABLE,
+                "reason": (
+                    f"engine_type {options.engine_type} does not use throttle-table "
+                    "performance data"
+                ),
+            }
+        )
     gravity_root = TESTATRON_ROOT / "universe" / "gravity_files"
     for journey in options.Journeys:
         gravity_name = Path(
@@ -108,6 +152,17 @@ def prepare_case(source_options, case_directory, pyemtg_root=PYEMTG_ROOT):
     prepared_options = case_directory / source_options.name
     options.write_options_file(
         str(prepared_options), not options.print_only_non_default_options
+    )
+    (case_directory / "compatibility.json").write_text(
+        json.dumps(
+            {
+                "status": "unreviewed",
+                "source_options": str(source_options),
+                "mappings": compatibility_mappings,
+            },
+            indent=2,
+        )
+        + "\n"
     )
     return prepared_options
 
@@ -198,6 +253,7 @@ def run_case(source_options, executable, output_root, timeout, pyemtg_root=PYEMT
     try:
         prepared_options = prepare_case(source_options, case_directory, pyemtg_root)
         result.prepared_options = str(prepared_options)
+        result.compatibility_file = str(case_directory / "compatibility.json")
     except Exception as error:
         result.detail = f"Unable to prepare options: {error}"
         _write_case_result(case_directory, result)
@@ -236,8 +292,21 @@ def run_case(source_options, executable, output_root, timeout, pyemtg_root=PYEMT
 
     outputs = sorted(case_directory.glob("*.emtg"))
     if not outputs:
-        result.classification = "parse_failed"
-        result.detail = "EMTG produced no .emtg result"
+        log_text = log_file.read_text(errors="replace")
+        missing_dependency = next(
+            (
+                line[line.index("Cannot find") :]
+                for line in log_text.splitlines()
+                if "Cannot find" in line
+            ),
+            "",
+        )
+        if missing_dependency:
+            result.classification = "dependency_blocked"
+            result.detail = missing_dependency
+        else:
+            result.classification = "parse_failed"
+            result.detail = "EMTG produced no .emtg result"
         _write_case_result(case_directory, result)
         return result
 

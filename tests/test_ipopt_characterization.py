@@ -25,13 +25,21 @@ def test_discovery_matches_legacy_testatron_inventory(repository_root):
     assert len(discovered) == 137
 
 
-def test_prepare_case_preserves_optimization_policy(repository_root, tmp_path):
+def test_prepare_case_preserves_optimization_policy(
+    repository_root, tmp_path, monkeypatch
+):
     source = (
         repository_root
         / "testatron"
         / "tests"
         / "output_options"
         / "outputoptions_frameICRF.emtgopt"
+    )
+    public_hardware_root = Path(
+        "/repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models"
+    )
+    monkeypatch.setattr(
+        ipopt_characterization, "PUBLIC_HARDWARE_ROOT", public_hardware_root
     )
     _, MissionOptions = ipopt_characterization._load_pyemtg()
     original = MissionOptions.MissionOptions(str(source))
@@ -61,6 +69,17 @@ def test_prepare_case_preserves_optimization_policy(repository_root, tmp_path):
     assert prepared.NLP_solver_type == 2
     assert prepared.background_mode == 1
     assert Path(prepared.forced_working_directory) == tmp_path
+    assert Path(prepared.HardwarePath) == public_hardware_root
+    assert prepared.LaunchVehicleLibraryFile == ipopt_characterization.PUBLIC_NLSII_LIBRARY
+    assert prepared.LaunchVehicleKey == original.LaunchVehicleKey
+    assert prepared.ThrottleTableFile == ipopt_characterization.INERT_THROTTLE_TABLE
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert compatibility["status"] == "unreviewed"
+    assert [mapping["option"] for mapping in compatibility["mappings"]] == [
+        "LaunchVehicleLibraryFile",
+        "ThrottleTableFile",
+    ]
+    assert "does not use throttle-table" in compatibility["mappings"][1]["reason"]
     assert len(prepared.Journeys) == len(original.Journeys)
 
 
@@ -116,6 +135,64 @@ def test_run_case_records_process_failure(repository_root, tmp_path, monkeypatch
 
     assert result.classification == "process_failed"
     assert result.return_code == 7
+
+
+def test_run_case_records_missing_dependency(repository_root, tmp_path, monkeypatch):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "output_options"
+        / "outputoptions_frameICRF.emtgopt"
+    )
+
+    def prepare(source_options, case_directory, pyemtg_root):
+        prepared = case_directory / source_options.name
+        prepared.write_text("NLP_solver_type 2\n")
+        return prepared
+
+    def missing_dependency(*args, **kwargs):
+        kwargs["stdout"].write(
+            "EMTG failed with error:\nCannot find missing.emtg_launchvehicleopt\n"
+        )
+        return subprocess.CompletedProcess(args[0], 0)
+
+    monkeypatch.setattr(ipopt_characterization, "prepare_case", prepare)
+    monkeypatch.setattr(ipopt_characterization.subprocess, "run", missing_dependency)
+
+    result = ipopt_characterization.run_case(source, "EMTGv9", tmp_path, 1.0)
+
+    assert result.classification == "dependency_blocked"
+    assert result.detail == "Cannot find missing.emtg_launchvehicleopt"
+
+
+def test_run_case_records_inline_missing_dependency(repository_root, tmp_path, monkeypatch):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "output_options"
+        / "outputoptions_frameICRF.emtgopt"
+    )
+
+    def prepare(source_options, case_directory, pyemtg_root):
+        prepared = case_directory / source_options.name
+        prepared.write_text("NLP_solver_type 2\n")
+        return prepared
+
+    def missing_dependency(*args, **kwargs):
+        kwargs["stdout"].write(
+            "Error Cannot find throttle table file: missing.ThrottleTable\n"
+        )
+        return subprocess.CompletedProcess(args[0], 0)
+
+    monkeypatch.setattr(ipopt_characterization, "prepare_case", prepare)
+    monkeypatch.setattr(ipopt_characterization.subprocess, "run", missing_dependency)
+
+    result = ipopt_characterization.run_case(source, "EMTGv9", tmp_path, 1.0)
+
+    assert result.classification == "dependency_blocked"
+    assert result.detail == "Cannot find throttle table file: missing.ThrottleTable"
 
 
 def test_manifests_are_explicitly_unreviewed(tmp_path):
