@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_dep1-2_atMars",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_dep1-2_atMars.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/repo/testatron/ipopt/cases/journey_options/EarthToMars_dep1-2_atMars/EarthToMars_dep1-2_atMars.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/repo/testatron/ipopt/cases/journey_options/EarthToMars_dep1-2_atMars/run.log",
+  "compatibility_file": "/repo/testatron/ipopt/cases/journey_options/EarthToMars_dep1-2_atMars/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.27836983399999937,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

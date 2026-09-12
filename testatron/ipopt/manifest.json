@@ -1,6 +1,6 @@
 {
   "status": "unreviewed",
-  "generated_at": "2026-09-12T02:07:59.222132+00:00",
+  "generated_at": "2026-09-12T02:43:30.601504+00:00",
   "case_count": 1,
   "classifications": {
     "reviewable": 1,
@@ -13,20 +13,20 @@
   },
   "cases": [
     {
-      "case_id": "output_options/outputoptions_frameICRF",
-      "source_options": "/repo/testatron/tests/output_options/outputoptions_frameICRF.emtgopt",
+      "case_id": "spacecraft_options/spacecraftoptions_Chem_TrackACSProp",
+      "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
       "classification": "reviewable",
       "status": "unreviewed",
-      "prepared_options": "/artifacts/cases/output_options/outputoptions_frameICRF/outputoptions_frameICRF.emtgopt",
-      "output_file": "/artifacts/cases/output_options/outputoptions_frameICRF/outputoptions_frameICRF.emtg",
-      "comparison_file": "/artifacts/cases/output_options/outputoptions_frameICRF/comparison.csv",
-      "log_file": "/artifacts/cases/output_options/outputoptions_frameICRF/run.log",
-      "compatibility_file": "/artifacts/cases/output_options/outputoptions_frameICRF/compatibility.json",
+      "prepared_options": "/repo/testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+      "output_file": "/repo/testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/spacecraftoptions_Chem_TrackACSProp.emtg",
+      "comparison_file": "/repo/testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/comparison.csv",
+      "log_file": "/repo/testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/run.log",
+      "compatibility_file": "/repo/testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/compatibility.json",
       "return_code": 0,
-      "duration_seconds": 0.7415846249999998,
-      "objective_value": -0.38436627921522903,
-      "worst_violation": 9.29838814061815e-06,
-      "worst_constraint": "F[6]: j0p0MGAnDSMs: match point ydot",
+      "duration_seconds": 2.1489406260000004,
+      "objective_value": -0.19376880315047795,
+      "worst_violation": -4.03080440120995e-06,
+      "worst_constraint": "F[5]: j0p0MGAnDSMs: match point xdot",
       "detail": "Ready for human review; not a promoted baseline"
     }
   ]

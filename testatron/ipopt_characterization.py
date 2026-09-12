@@ -27,7 +27,10 @@ PUBLIC_HARDWARE_ROOT = (
     / "Config_Files"
     / "hardware_models"
 )
-LEGACY_NLSII_LIBRARY = "NLSII_April2017.emtg_launchvehicleopt"
+LEGACY_NLSII_LIBRARIES = (
+    "NLSII_April2017.emtg_launchvehicleopt",
+    "NLSII_August2018.emtg_launchvehicleopt",
+)
 PUBLIC_NLSII_LIBRARY = "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt"
 LEGACY_UNUSED_THROTTLE_TABLE = "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable"
 INERT_THROTTLE_TABLE = "empty.ThrottleTable"
@@ -114,13 +117,14 @@ def prepare_case(source_options, case_directory, pyemtg_root=PYEMTG_ROOT):
     options.universe_folder = str(TESTATRON_ROOT / "universe")
     compatibility_mappings = []
     options.HardwarePath = str(TESTATRON_ROOT / "HardwareModels")
-    if options.LaunchVehicleLibraryFile == LEGACY_NLSII_LIBRARY:
+    if options.LaunchVehicleLibraryFile in LEGACY_NLSII_LIBRARIES:
+        legacy_library = options.LaunchVehicleLibraryFile
         options.HardwarePath = str(PUBLIC_HARDWARE_ROOT)
         options.LaunchVehicleLibraryFile = PUBLIC_NLSII_LIBRARY
         compatibility_mappings.append(
             {
                 "option": "LaunchVehicleLibraryFile",
-                "source": LEGACY_NLSII_LIBRARY,
+                "source": legacy_library,
                 "replacement": PUBLIC_NLSII_LIBRARY,
                 "reason": "public replacement library; LaunchVehicleKey preserved",
             }
@@ -295,9 +299,14 @@ def run_case(source_options, executable, output_root, timeout, pyemtg_root=PYEMT
         log_text = log_file.read_text(errors="replace")
         missing_dependency = next(
             (
-                line[line.index("Cannot find") :]
+                (
+                    line[line.index("Cannot find") :].strip()
+                    if "Cannot find" in line
+                    else line.strip()
+                )
                 for line in log_text.splitlines()
                 if "Cannot find" in line
+                or ("Launch vehicle '" in line and "not found" in line)
             ),
             "",
         )

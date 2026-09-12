@@ -83,6 +83,26 @@ def test_prepare_case_preserves_optimization_policy(
     assert len(prepared.Journeys) == len(original.Journeys)
 
 
+def test_prepare_case_maps_august_nlsii_library(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "state_representation_tests"
+        / "FreePointArrival_IncomingBplaneRpTA_testatron.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    original = MissionOptions.MissionOptions(str(source))
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert prepared.LaunchVehicleLibraryFile == ipopt_characterization.PUBLIC_NLSII_LIBRARY
+    assert prepared.LaunchVehicleKey == original.LaunchVehicleKey
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert compatibility["mappings"][0]["source"] == "NLSII_August2018.emtg_launchvehicleopt"
+
+
 def test_run_case_records_timeout(repository_root, tmp_path, monkeypatch):
     source = (
         repository_root
@@ -193,6 +213,37 @@ def test_run_case_records_inline_missing_dependency(repository_root, tmp_path, m
 
     assert result.classification == "dependency_blocked"
     assert result.detail == "Cannot find throttle table file: missing.ThrottleTable"
+
+
+def test_run_case_records_missing_launch_vehicle(repository_root, tmp_path, monkeypatch):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "output_options"
+        / "outputoptions_frameICRF.emtgopt"
+    )
+
+    def prepare(source_options, case_directory, pyemtg_root):
+        prepared = case_directory / source_options.name
+        prepared.write_text("NLP_solver_type 2\n")
+        return prepared
+
+    def missing_launch_vehicle(*args, **kwargs):
+        kwargs["stdout"].write(
+            "LaunchVehicleOptionsLibrary::Launch vehicle 'example' not found.\n"
+        )
+        return subprocess.CompletedProcess(args[0], 0)
+
+    monkeypatch.setattr(ipopt_characterization, "prepare_case", prepare)
+    monkeypatch.setattr(
+        ipopt_characterization.subprocess, "run", missing_launch_vehicle
+    )
+
+    result = ipopt_characterization.run_case(source, "EMTGv9", tmp_path, 1.0)
+
+    assert result.classification == "dependency_blocked"
+    assert "Launch vehicle 'example' not found" in result.detail
 
 
 def test_manifests_are_explicitly_unreviewed(tmp_path):
