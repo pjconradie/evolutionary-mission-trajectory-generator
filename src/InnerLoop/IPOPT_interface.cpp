@@ -1,6 +1,7 @@
 #include "IPOPT_interface.h"
 
 #include "IPOPT_status.h"
+#include "NLP_solution_acceptance.h"
 #include "IpIpoptApplication.hpp"
 #include "IpTNLP.hpp"
 
@@ -362,7 +363,82 @@ namespace EMTG
                 });
             if (!valid)
                 this->status = NLPStatus::EvaluationError;
+            else if (needDerivatives
+                     && std::all_of(
+                         this->G.begin(), this->G.end(),
+                         [](const double value)
+                         {
+                             return std::isfinite(value);
+                         }))
+            {
+                this->observeCurrentPoint();
+            }
             return valid;
+        }
+
+        void IPOPT_interface::observeCurrentPoint()
+        {
+            if (!this->myOptions.get_enable_NLP_chaperone())
+                return;
+
+            size_t candidateWorstDecisionVariable = 0;
+            size_t candidateWorstConstraint = 0;
+            double candidateAbsoluteFeasibility = 0.0;
+            double candidateNormalizedFeasibility = 0.0;
+            double candidateFilamentDistance = 0.0;
+            double candidateDecisionVariableInfeasibility = 0.0;
+            try
+            {
+                this->myProblem->check_feasibility(
+                    this->X_unscaled,
+                    this->F,
+                    candidateWorstDecisionVariable,
+                    candidateWorstConstraint,
+                    candidateAbsoluteFeasibility,
+                    candidateNormalizedFeasibility,
+                    candidateFilamentDistance,
+                    candidateDecisionVariableInfeasibility,
+                    true);
+            }
+            catch (...)
+            {
+                return;
+            }
+
+            const double candidateFeasibility = std::max(
+                candidateNormalizedFeasibility,
+                candidateDecisionVariableInfeasibility);
+            if (!isIncumbentCandidateSuperior(
+                    this->F.front() _GETVALUE,
+                    candidateFeasibility,
+                    this->J_NLP_incumbent _GETVALUE,
+                    this->feasibility_metric_NLP_incumbent _GETVALUE,
+                    this->myOptions.get_feasibility_tolerance()))
+            {
+                return;
+            }
+
+            this->J_NLP_incumbent = this->F.front();
+            this->feasibility_metric_NLP_incumbent = candidateFeasibility;
+            this->X_NLP_incumbent_scaled = this->X_scaled;
+            this->X_NLP_incumbent_unscaled = this->X_unscaled;
+            this->F_NLP_incumbent = this->F;
+            this->G_NLP_incumbent = this->G;
+        }
+
+        void IPOPT_interface::restoreIncumbent()
+        {
+            if (!this->myOptions.get_enable_NLP_chaperone()
+                || !std::isfinite(
+                    this->feasibility_metric_NLP_incumbent _GETVALUE))
+            {
+                return;
+            }
+
+            this->X_scaled = this->X_NLP_incumbent_scaled;
+            this->X_unscaled = this->X_NLP_incumbent_unscaled;
+            this->F = this->F_NLP_incumbent;
+            this->G = this->G_NLP_incumbent;
         }
 
         void IPOPT_interface::run_NLP(const bool& X0_is_scaled)
@@ -374,6 +450,13 @@ namespace EMTG
 
             this->X_scaled = this->X0_scaled;
             this->status = NLPStatus::NotRun;
+            this->J_NLP_incumbent = math::LARGE;
+            this->feasibility_metric_NLP_incumbent = math::LARGE;
+            if (this->myOptions.get_enable_NLP_chaperone()
+                && !this->evaluatePoint(this->X0_scaled.data(), true))
+            {
+                return;
+            }
 
             Ipopt::SmartPtr<Ipopt::IpoptApplication> application =
                 IpoptApplicationFactory();
@@ -411,6 +494,10 @@ namespace EMTG
                 this->status = translateIPOPTTermination(
                     translateApplicationStatus(ipoptStatus));
             }
+
+            if (this->status != NLPStatus::EvaluationError)
+                this->evaluatePoint(this->X_scaled.data(), true);
+            this->restoreIncumbent();
 
             this->myProblem->check_feasibility(
                 this->X_unscaled,

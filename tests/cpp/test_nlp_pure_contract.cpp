@@ -5,7 +5,9 @@
 #include "SNOPT_status.h"
 
 #include <cassert>
+#include <cmath>
 #include <initializer_list>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -16,6 +18,9 @@ int main()
     using EMTG::Solvers::NLPStatus;
     using EMTG::Solvers::SparseDerivativeLayout;
     using EMTG::Solvers::acceptNLPSolution;
+       using EMTG::Solvers::isEMTGFeasible;
+       using EMTG::Solvers::isIncumbentCandidateSuperior;
+       using EMTG::Solvers::isObjectiveSuperior;
     using EMTG::Solvers::resolveNLPBackend;
     using EMTG::Solvers::solverAcceptedSolution;
     using EMTG::Solvers::translateIPOPTTermination;
@@ -95,14 +100,45 @@ int main()
     constexpr double tolerance = 1.0e-5;
     assert(acceptNLPSolution(true, 1.0e-6, 1.0e-6, tolerance,
                              NLPStatus::Error));
-    assert(!acceptNLPSolution(true, tolerance, 1.0e-6, tolerance,
-                              NLPStatus::AcceptedSolution));
-    assert(!acceptNLPSolution(true, 1.0e-6, tolerance, tolerance,
-                              NLPStatus::AcceptedSolution));
+       assert(acceptNLPSolution(true, tolerance, 1.0e-6, tolerance,
+                                                  NLPStatus::AcceptedSolution));
+       assert(acceptNLPSolution(true, 1.0e-6, tolerance, tolerance,
+                                                  NLPStatus::AcceptedSolution));
     assert(acceptNLPSolution(false, tolerance, tolerance, tolerance,
                              NLPStatus::AcceptedSolution));
-    assert(!acceptNLPSolution(false, tolerance, tolerance, tolerance,
-                              NLPStatus::IterationLimit));
+       assert(acceptNLPSolution(false, tolerance, tolerance, tolerance,
+                                                  NLPStatus::IterationLimit));
+       assert(isEMTGFeasible(tolerance, tolerance, tolerance));
+       assert(!isEMTGFeasible(
+              std::nextafter(tolerance, std::numeric_limits<double>::infinity()),
+              tolerance,
+              tolerance));
+       assert(!isEMTGFeasible(std::numeric_limits<double>::quiet_NaN(),
+                                             0.0,
+                                             tolerance));
+       assert(!isEMTGFeasible(0.0,
+                                             std::numeric_limits<double>::infinity(),
+                                             tolerance));
+
+       assert(isObjectiveSuperior(-2.0, -1.0));
+       assert(!isObjectiveSuperior(-1.0, -2.0));
+       assert(!isObjectiveSuperior(-1.0 - 5.0e-11, -1.0));
+       assert(isObjectiveSuperior(-1.0 - 2.0e-10, -1.0));
+       assert(!isObjectiveSuperior(
+              std::numeric_limits<double>::quiet_NaN(), -1.0));
+       assert(isObjectiveSuperior(
+              -1.0, std::numeric_limits<double>::infinity()));
+
+       assert(isIncumbentCandidateSuperior(
+              10.0, tolerance, 1.0, tolerance * 2.0, tolerance));
+       assert(!isIncumbentCandidateSuperior(
+              1.0, tolerance * 2.0, 10.0, tolerance, tolerance));
+       assert(isIncumbentCandidateSuperior(
+              -2.0, tolerance, -1.0, tolerance, tolerance));
+       assert(!isIncumbentCandidateSuperior(
+              -1.0 - 5.0e-11, tolerance, -1.0, tolerance, tolerance));
+       assert(isIncumbentCandidateSuperior(
+              10.0, tolerance * 2.0, 1.0, tolerance * 3.0, tolerance));
 
     const auto snopt = resolveNLPBackend(0, NLPBackend::SNOPT);
     assert(snopt.backend == NLPBackend::SNOPT && !snopt.usedLegacyFallback);

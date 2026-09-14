@@ -22,6 +22,8 @@ namespace EMTG
 
             bool evaluatePoint(const double* scaledX,
                                bool needDerivatives);
+            void observeCurrentPoint();
+            void restoreIncumbent();
 
             std::unique_ptr<SparseDerivativeLayout> derivativeLayout;
         };

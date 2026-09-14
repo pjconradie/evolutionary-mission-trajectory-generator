@@ -100,12 +100,64 @@ namespace
         Scenario scenario;
     };
 
+    class FeasibleSeedRegressionProblem final : public EMTG::problem
+    {
+    public:
+        FeasibleSeedRegressionProblem()
+        {
+            this->total_number_of_NLP_parameters = 1;
+            this->total_number_of_constraints = 2;
+            this->Xlowerbounds = { 0.0 };
+            this->Xupperbounds = { 1.0 };
+            this->X_scale_factors = { 1.0 };
+            this->Xdescriptions = { "x" };
+            this->Flowerbounds = { -1.0e+20, 0.0 };
+            this->Fupperbounds = { 1.0e+20, 0.0 };
+            this->Fdescriptions = { "objective", "x equals zero" };
+            this->F_equality_or_inequality = { true };
+            this->iGfun = { 0, 1 };
+            this->jGvar = { 0, 0 };
+            this->G = std::vector<double>(2, 0.0);
+            this->Gdescriptions = { "dF0/dx", "dF1/dx" };
+            this->F = std::vector<doubleType>(2, 0.0);
+        }
+
+        void calcbounds() override {}
+
+        std::vector<double> construct_initial_guess() override
+        {
+            return { 5.0e-6 };
+        }
+
+        void evaluate(const std::vector<doubleType>& decisionVector,
+                      std::vector<doubleType>& functions,
+                      std::vector<double>& derivatives,
+                      const bool& needDerivatives) override
+        {
+            functions[0] = -decisionVector[0];
+            functions[1] = decisionVector[0];
+            if (needDerivatives)
+            {
+                derivatives[0] = -1.0;
+                derivatives[1] = 1.0;
+            }
+        }
+
+        void output(const std::string&) override {}
+
+        doubleType getUnscaledObjective() override
+        {
+            return this->F.front();
+        }
+    };
+
     EMTG::Solvers::NLPoptions makeOptions(const size_t iterationLimit,
-                                           const bool checkDerivatives)
+                                           const bool checkDerivatives,
+                                           const bool enableChaperone = false)
     {
         EMTG::Solvers::NLPoptions options;
         options.set_check_derivatives(checkDerivatives);
-        options.set_enable_NLP_chaperone(false);
+        options.set_enable_NLP_chaperone(enableChaperone);
         options.set_major_iterations_limit(iterationLimit);
         options.set_max_run_time_seconds(30);
         options.set_feasibility_tolerance(1.0e-8);
@@ -120,6 +172,21 @@ namespace
         std::unique_ptr<EMTG::Solvers::NLP_interface> solver =
             EMTG::Solvers::createNLPSolver(&problem, options, 2);
         solver->setX0_unscaled({ 8.0, 0.25 });
+        solver->run_NLP(false);
+        return solver;
+    }
+
+    std::unique_ptr<EMTG::Solvers::NLP_interface> solveSeedRegression(
+        FeasibleSeedRegressionProblem& problem,
+        const bool enableChaperone)
+    {
+        EMTG::Solvers::NLPoptions options =
+            makeOptions(100, false, enableChaperone);
+        options.set_feasibility_tolerance(1.0e-5);
+        std::unique_ptr<EMTG::Solvers::NLP_interface> solver =
+            EMTG::Solvers::createNLPSolver(
+                &problem, options, 2);
+        solver->setX0_unscaled({ 5.0e-6 });
         solver->run_NLP(false);
         return solver;
     }
@@ -171,6 +238,22 @@ int main()
     assert(std::abs(functions[1] _GETVALUE - 3.0) <= 1.0e-8);
     assert(functions[2] _GETVALUE >= 2.0 - 1.0e-8);
     std::cout << "EMTG_IPOPT_SCENARIO successful=passed\n";
+
+        FeasibleSeedRegressionProblem chaperonedSeedProblem;
+        solver = solveSeedRegression(chaperonedSeedProblem, true);
+        assertFiniteResults(*solver);
+            assert(solver->getX_unscaled()[0] _GETVALUE >= 5.0e-6 - 1.0e-12);
+            assert(solver->getX_unscaled()[0] _GETVALUE <= 1.0e-5);
+            assert(solver->getF()[0] _GETVALUE <= -5.0e-6 + 1.0e-12);
+        assert(std::abs(solver->getG()[0] + 1.0) <= 1.0e-12);
+        std::cout << "EMTG_IPOPT_SCENARIO chaperoned_seed=passed\n";
+
+        FeasibleSeedRegressionProblem unchaperonedSeedProblem;
+        solver = solveSeedRegression(unchaperonedSeedProblem, false);
+        assertFiniteResults(*solver);
+        assert(std::abs(solver->getX_unscaled()[0] _GETVALUE) < 1.0e-8);
+        assert(solver->getF()[0] _GETVALUE > -1.0e-8);
+        std::cout << "EMTG_IPOPT_SCENARIO unchaperoned_terminal=passed\n";
 
     DeterministicProblem infeasibleProblem(Scenario::Infeasible);
     solver = solve(infeasibleProblem, makeOptions(200, false));
