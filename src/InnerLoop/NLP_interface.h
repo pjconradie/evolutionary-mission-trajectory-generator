@@ -21,6 +21,7 @@
 
 #include "problem.h"
 #include "EMTG_enums.h"
+#include "NLP_initialization_policy.h"
 #include "NLPoptions.h"
 #include "NLP_solver_status.h"
 
@@ -28,12 +29,6 @@ namespace EMTG
 {
     namespace Solvers
     {
-        enum class NLPInitializationPolicy
-        {
-            Default,
-            NearFeasiblePrimalSeed
-        };
-
         class NLP_interface
         {
 

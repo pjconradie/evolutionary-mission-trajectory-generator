@@ -1,4 +1,5 @@
 #include "IPOPT_status.h"
+#include "NLP_initialization_policy.h"
 #include "NLP_solution_acceptance.h"
 #include "NLP_solver_selection.h"
 #include "NLP_sparse_derivative_layout.h"
@@ -15,12 +16,14 @@ int main()
 {
     using EMTG::Solvers::IPOPTTermination;
     using EMTG::Solvers::NLPBackend;
+        using EMTG::Solvers::NLPInitializationPolicy;
     using EMTG::Solvers::NLPStatus;
     using EMTG::Solvers::SparseDerivativeLayout;
     using EMTG::Solvers::acceptNLPSolution;
-       using EMTG::Solvers::isEMTGFeasible;
-       using EMTG::Solvers::isIncumbentCandidateSuperior;
-       using EMTG::Solvers::isObjectiveSuperior;
+        using EMTG::Solvers::consumeMBHInitializationPolicy;
+        using EMTG::Solvers::isEMTGFeasible;
+        using EMTG::Solvers::isIncumbentCandidateSuperior;
+        using EMTG::Solvers::isObjectiveSuperior;
     using EMTG::Solvers::resolveNLPBackend;
     using EMTG::Solvers::solverAcceptedSolution;
     using EMTG::Solvers::translateIPOPTTermination;
@@ -29,6 +32,18 @@ int main()
     assert(!solverAcceptedSolution(NLPStatus::NotRun));
     assert(solverAcceptedSolution(NLPStatus::AcceptedSolution));
     assert(!solverAcceptedSolution(NLPStatus::IterationLimit));
+
+    bool seededStep = true;
+    assert(consumeMBHInitializationPolicy(seededStep)
+           == NLPInitializationPolicy::NearFeasiblePrimalSeed);
+    assert(!seededStep);
+    assert(consumeMBHInitializationPolicy(seededStep)
+           == NLPInitializationPolicy::Default);
+
+    bool coldStart = false;
+    assert(consumeMBHInitializationPolicy(coldStart)
+           == NLPInitializationPolicy::Default);
+    assert(!coldStart);
 
     for (int inform = 0; inform < 10; ++inform)
         assert(translateSNOPTInform(inform) == NLPStatus::AcceptedSolution);
