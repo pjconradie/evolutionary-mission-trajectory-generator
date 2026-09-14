@@ -1,6 +1,7 @@
 """Fixtures for disposable Linux toolchain integration tests."""
 
 import json
+import time
 import uuid
 from pathlib import Path
 
@@ -505,6 +506,80 @@ check track_acs_replay_run passed
         "generated_mission": str(generated_path),
         "comparison": str(artifacts / "comparison.json"),
         "log": str(artifacts / "run.log"),
+    }
+    (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    checks["comparison"] = comparison
+    checks["result"] = result
+    return checks
+
+
+@pytest.fixture(scope="session")
+def track_acs_refinement_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Refine the committed TrackACSProp solution with direct IPOPT."""
+    artifacts = artifact_directory(tmp_path_factory)
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    baseline_path = source.with_suffix(".emtg")
+    options_path = ipopt_characterization.prepare_refinement(
+        source,
+        baseline_path,
+        artifacts,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/track-acs-ipopt-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/track-acs-ipopt-build.log; exit 28; }}
+check track_acs_refinement_compile passed
+set +e
+timeout 120 /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/artifacts/run.log 2>&1
+refinement_status=$?
+set -e
+cat /artifacts/run.log
+test "$refinement_status" -eq 0 || exit 29
+test -s /artifacts/spacecraftoptions_Chem_TrackACSProp.emtg || exit 30
+check track_acs_refinement_run passed
+'''
+    started = time.monotonic()
+    checks = run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="track-acs-refinement",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=build_volume_name(toolchain_image, "ipopt"),
+        writable_artifacts=artifacts,
+    )
+    duration_seconds = time.monotonic() - started
+    generated_path = artifacts / "spacecraftoptions_Chem_TrackACSProp.emtg"
+    baseline = Mission.Mission(str(baseline_path))
+    generated = Mission.Mission(str(generated_path))
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, generated, 1.0e-5
+    )
+    diagnostics = ipopt_characterization.parse_ipopt_log(
+        (artifacts / "run.log").read_text(errors="replace")
+    )
+    comparison["ipopt"] = diagnostics
+    comparison["duration_seconds"] = duration_seconds
+    (artifacts / "comparison.json").write_text(
+        json.dumps(comparison, indent=2) + "\n"
+    )
+    result = {
+        "status": "unreviewed",
+        "stage": "ipopt_refinement",
+        "acceptable": comparison["acceptable"],
+        "source_options": str(source),
+        "baseline_mission": str(baseline_path),
+        "prepared_options": str(options_path),
+        "generated_mission": str(generated_path),
+        "comparison": str(artifacts / "comparison.json"),
+        "log": str(artifacts / "run.log"),
+        "duration_seconds": duration_seconds,
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     checks["comparison"] = comparison

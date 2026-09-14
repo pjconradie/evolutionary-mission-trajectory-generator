@@ -52,6 +52,19 @@ def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
 
 
 @pytest.mark.solver_runtime
+def test_track_acs_ipopt_refinement_retains_seed(track_acs_refinement_probe):
+    assert track_acs_refinement_probe["track_acs_refinement_compile"] == "passed"
+    assert track_acs_refinement_probe["track_acs_refinement_run"] == "passed"
+    comparison = track_acs_refinement_probe["comparison"]
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert all(comparison["checks"].values())
+    assert comparison["ipopt"]["initial_infeasibility"] <= 1.0e-5
+    assert track_acs_refinement_probe["result"]["status"] == "unreviewed"
+    assert track_acs_refinement_probe["result"]["acceptable"]
+
+
+@pytest.mark.solver_runtime
 def test_mgandsms_acs_derivatives(mgandsms_acs_derivative_probe):
     assert mgandsms_acs_derivative_probe[
         "mgandsms_acs_derivative_compile"

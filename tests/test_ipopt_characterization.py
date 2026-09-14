@@ -159,6 +159,60 @@ def test_track_acs_replay_comparison_is_pandas_independent(repository_root):
     assert not comparison["checks"]["decision_descriptions"]
 
 
+def test_prepare_and_compare_track_acs_refinement(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    baseline_path = source.with_suffix(".emtg")
+    Mission, MissionOptions = ipopt_characterization._load_pyemtg()
+    baseline = Mission.Mission(str(baseline_path))
+
+    prepared_path = ipopt_characterization.prepare_refinement(
+        source, baseline_path, tmp_path
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, baseline, 1.0e-5
+    )
+
+    assert prepared.run_inner_loop == 3
+    assert prepared.NLP_solver_type == 2
+    assert prepared.enable_NLP_chaperone == 1
+    assert prepared.quiet_NLP == 0
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert all(comparison["checks"].values())
+
+    regressed = copy.deepcopy(baseline)
+    regressed.objective_value = -0.19376880315047795
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, regressed, 1.0e-5
+    )
+    assert not comparison["acceptable"]
+    assert not comparison["checks"]["objective_non_regression"]
+
+
+def test_parse_ipopt_refinement_log():
+    log_text = """
+iter    objective    inf_pr   inf_du
+   0 -4.0888621e-01 8.19e-06 1.00e+00
+Number of Iterations....: 8
+Constraint violation....: 1.0e-07  2.0e-07
+EXIT: Optimal Solution Found.
+"""
+
+    diagnostics = ipopt_characterization.parse_ipopt_log(log_text)
+
+    assert diagnostics == {
+        "initial_infeasibility": 8.19e-06,
+        "iterations": 8,
+        "terminal_constraint_violation": 2.0e-07,
+        "native_exit": "Optimal Solution Found.",
+    }
+
+
 def test_run_case_records_timeout(repository_root, tmp_path, monkeypatch):
     source = (
         repository_root

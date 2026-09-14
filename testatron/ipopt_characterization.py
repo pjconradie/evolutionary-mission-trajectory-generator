@@ -6,6 +6,7 @@ import fnmatch
 import importlib
 import json
 import math
+import re
 import subprocess
 import sys
 import time
@@ -150,22 +151,23 @@ def inject_aligned_mission_seed(options, mission):
     options.DisassembleMasterDecisionVector()
 
 
-def prepare_replay(
+def _prepare_seeded_case(
     source_options,
     baseline_mission,
     case_directory,
+    run_inner_loop,
     pyemtg_root=PYEMTG_ROOT,
     execution_repository_root=None,
     execution_directory=None,
 ):
-    """Prepare an evaluate-only replay from an aligned committed mission seed."""
+    """Prepare a run mode from an aligned committed mission seed."""
     Mission, MissionOptions = _load_pyemtg(pyemtg_root)
     case_directory = Path(case_directory)
     prepared_options = prepare_case(source_options, case_directory, pyemtg_root)
     options = MissionOptions.MissionOptions(str(prepared_options))
     baseline = Mission.Mission(str(baseline_mission))
     inject_aligned_mission_seed(options, baseline)
-    options.run_inner_loop = 0
+    options.run_inner_loop = run_inner_loop
     if execution_repository_root is not None:
         execution_repository_root = Path(execution_repository_root)
         options.universe_folder = str(execution_repository_root / "testatron/universe")
@@ -182,6 +184,54 @@ def prepare_replay(
             journey.central_body_gravity_file = str(gravity_root / gravity_name)
     if execution_directory is not None:
         options.forced_working_directory = str(execution_directory)
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+    return prepared_options
+
+
+def prepare_replay(
+    source_options,
+    baseline_mission,
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare an evaluate-only replay from an aligned committed mission seed."""
+    return _prepare_seeded_case(
+        source_options,
+        baseline_mission,
+        case_directory,
+        0,
+        pyemtg_root,
+        execution_repository_root,
+        execution_directory,
+    )
+
+
+def prepare_refinement(
+    source_options,
+    baseline_mission,
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare a direct IPOPT refinement from an aligned committed mission seed."""
+    prepared_options = _prepare_seeded_case(
+        source_options,
+        baseline_mission,
+        case_directory,
+        3,
+        pyemtg_root,
+        execution_repository_root,
+        execution_directory,
+    )
+    _, MissionOptions = _load_pyemtg(pyemtg_root)
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    options.quiet_NLP = 0
+    options.enable_NLP_chaperone = 1
     options.write_options_file(
         str(prepared_options), not options.print_only_non_default_options
     )
@@ -382,6 +432,67 @@ def compare_replay(baseline, generated):
             "mass_kg": 1.0e-6,
         },
         "endpoint_deltas": endpoint_deltas,
+    }
+
+
+def compare_refinement(baseline, generated, feasibility_tolerance):
+    """Check feasibility, topology, and objective non-regression after refinement."""
+    absolute_tolerance = 1.0e-12
+    relative_tolerance = 1.0e-10
+    objective_band = absolute_tolerance + relative_tolerance * max(
+        abs(baseline.objective_value), abs(generated.objective_value)
+    )
+    checks = {
+        "finite_objective": math.isfinite(generated.objective_value),
+        "finite_feasibility": math.isfinite(generated.worst_violation),
+        "feasible": abs(generated.worst_violation) <= feasibility_tolerance,
+        "journey_names": [journey.journey_name for journey in generated.Journeys]
+        == [journey.journey_name for journey in baseline.Journeys],
+        "event_topology": _event_topology(generated) == _event_topology(baseline),
+        "decision_descriptions": [
+            _normalized_description(description)
+            for description in generated.Xdescriptions
+        ]
+        == [
+            _normalized_description(description)
+            for description in baseline.Xdescriptions
+        ],
+        "objective_non_regression": generated.objective_value
+        <= baseline.objective_value + objective_band,
+    }
+    return {
+        "status": "unreviewed",
+        "acceptable": all(checks.values()),
+        "checks": checks,
+        "baseline_objective": baseline.objective_value,
+        "generated_objective": generated.objective_value,
+        "objective_comparison_band": objective_band,
+        "generated_feasibility_metric": abs(generated.worst_violation),
+        "feasibility_tolerance": feasibility_tolerance,
+    }
+
+
+def parse_ipopt_log(log_text):
+    """Extract refinement diagnostics from verbose IPOPT output."""
+    initial_match = re.search(
+        r"^\s*0\s+\S+\s+(?P<inf_pr>\S+)", log_text, re.MULTILINE
+    )
+    iterations_match = re.search(
+        r"Number of Iterations\.*:\s*(?P<iterations>\d+)", log_text
+    )
+    violation_match = re.search(
+        r"Constraint violation\.*:\s+\S+\s+(?P<violation>\S+)", log_text
+    )
+    exit_match = re.search(r"^EXIT:\s*(?P<exit>.+)$", log_text, re.MULTILINE)
+    if not all((initial_match, iterations_match, violation_match, exit_match)):
+        raise ValueError("IPOPT log is missing required refinement diagnostics")
+    return {
+        "initial_infeasibility": float(initial_match.group("inf_pr")),
+        "iterations": int(iterations_match.group("iterations")),
+        "terminal_constraint_violation": float(
+            violation_match.group("violation")
+        ),
+        "native_exit": exit_match.group("exit").strip(),
     }
 
 
