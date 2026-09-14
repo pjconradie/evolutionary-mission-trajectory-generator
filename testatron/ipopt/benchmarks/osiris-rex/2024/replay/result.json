@@ -1,0 +1,12 @@
+{
+  "status": "unreviewed",
+  "stage": "replay",
+  "benchmark": "osiris-rex-2024",
+  "acceptable": true,
+  "source_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_412024_11530/OSIRIS-REx.emtgopt",
+  "baseline_mission": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_412024_11530/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
+  "prepared_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2024/replay/OSIRIS-REx.emtgopt",
+  "generated_mission": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2024/replay/OSIRIS-REx.emtg",
+  "comparison": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2024/replay/comparison.json",
+  "log": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2024/replay/run.log"
+}

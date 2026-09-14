@@ -518,6 +518,80 @@ check track_acs_replay_no_ipopt passed
 
 
 @pytest.fixture(scope="session")
+def osiris_2024_replay_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Replay the immutable NASA 2024 OSIRIS-REx solution without optimization."""
+    artifacts = artifact_directory(tmp_path_factory)
+    baseline_path = (
+        repository_root
+        / "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/"
+        "OSIRIS-REx_412024_11530/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    options_path = ipopt_characterization.prepare_osiris_2024_replay(
+        artifacts,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/osiris-2024-replay-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/osiris-2024-replay-build.log; exit 31; }}
+check osiris_2024_replay_compile passed
+set +e
+timeout 60 /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/artifacts/run.log 2>&1
+replay_status=$?
+set -e
+cat /artifacts/run.log
+test "$replay_status" -eq 0 || exit 32
+test -s /artifacts/OSIRIS-REx.emtg || exit 33
+if grep -Eiq 'This is Ipopt|Number of Iterations|EXIT:' /artifacts/run.log; then
+    exit 34
+fi
+check osiris_2024_replay_run passed
+check osiris_2024_replay_no_ipopt passed
+'''
+    checks = run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="osiris-2024-replay",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=build_volume_name(toolchain_image, "ipopt"),
+        writable_artifacts=artifacts,
+    )
+    generated_path = artifacts / "OSIRIS-REx.emtg"
+    baseline = Mission.Mission(str(baseline_path))
+    generated = Mission.Mission(str(generated_path))
+    comparison = ipopt_characterization.compare_replay(baseline, generated)
+    comparison["feasibility_tolerance"] = 1.0e-5
+    comparison["feasible"] = (
+        comparison["generated_feasibility_metric"]
+        <= comparison["feasibility_tolerance"]
+    )
+    comparison["acceptable"] = comparison["acceptable"] and comparison["feasible"]
+    (artifacts / "comparison.json").write_text(
+        json.dumps(comparison, indent=2) + "\n"
+    )
+    result = {
+        "status": "unreviewed",
+        "stage": "replay",
+        "benchmark": "osiris-rex-2024",
+        "acceptable": comparison["acceptable"],
+        "source_options": str(
+            ipopt_characterization.OSIRIS_2024_PACKAGE / "OSIRIS-REx.emtgopt"
+        ),
+        "baseline_mission": str(baseline_path),
+        "prepared_options": str(options_path),
+        "generated_mission": str(generated_path),
+        "comparison": str(artifacts / "comparison.json"),
+        "log": str(artifacts / "run.log"),
+    }
+    (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    checks["comparison"] = comparison
+    checks["result"] = result
+    return checks
+
+
+@pytest.fixture(scope="session")
 def track_acs_refinement_probe(toolchain_image, repository_root, tmp_path_factory):
     """Refine the committed TrackACSProp solution with direct IPOPT."""
     artifacts = artifact_directory(tmp_path_factory)

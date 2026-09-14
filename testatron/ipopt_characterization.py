@@ -37,6 +37,14 @@ PUBLIC_NLSII_LIBRARY = "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchve
 LEGACY_UNUSED_THROTTLE_TABLE = "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable"
 INERT_THROTTLE_TABLE = "empty.ThrottleTable"
 TABLE_INDEPENDENT_ENGINE_TYPES = (0, 3, 5, *range(6, 29))
+OSIRIS_TUTORIAL_ROOT = (
+    REPOSITORY_ROOT
+    / "docs/0_Users/tutorial/Tutorial_EMTG_Files"
+)
+OSIRIS_2024_PACKAGE = (
+    OSIRIS_TUTORIAL_ROOT
+    / "OSIRIS-REx/results/OSIRIS-REx_412024_11530"
+)
 CLASSIFICATIONS = (
     "reviewable",
     "infeasible",
@@ -105,7 +113,36 @@ def _normalized_description(description):
     return description.replace(": ", ":").strip()
 
 
-def inject_aligned_mission_seed(options, mission):
+def load_xf_descriptions(xf_file):
+    """Load a contiguous ordered decision-description schema from an XF file."""
+    with Path(xf_file).open(newline="") as stream:
+        reader = csv.reader(stream)
+        header = next(reader, None)
+        if header is None:
+            raise ValueError("XF decision-description schema is missing")
+        columns = {name.strip(): index for index, name in enumerate(header)}
+        if not {"Xindex", "Description"}.issubset(columns):
+            raise ValueError("XF decision-description schema is missing")
+        descriptions = []
+        for row in reader:
+            if row and row[0].strip() == "Findex":
+                break
+            if len(row) <= max(columns.values()):
+                raise ValueError("XF decision descriptions are malformed")
+            try:
+                row_index = int(row[columns["Xindex"]])
+            except ValueError as error:
+                raise ValueError("XF decision descriptions are malformed") from error
+            description = row[columns["Description"]].strip()
+            if row_index != len(descriptions) or not description:
+                raise ValueError("XF decision descriptions are missing or out of order")
+            descriptions.append(description)
+    if not descriptions:
+        raise ValueError("XF decision descriptions are missing or out of order")
+    return descriptions
+
+
+def inject_aligned_mission_seed(options, mission, expected_descriptions=None):
     """Inject a mission decision vector after strict ordered alignment checks."""
     bound_absolute_tolerance = 1.0e-12
     bound_relative_tolerance = 1.0e-12
@@ -123,6 +160,8 @@ def inject_aligned_mission_seed(options, mission):
 
     options.AssembleMasterDecisionVector()
     option_descriptions = [entry[0] for entry in options.trialX]
+    if not option_descriptions and expected_descriptions is not None:
+        option_descriptions = list(expected_descriptions)
     if len(option_descriptions) != len(descriptions):
         raise ValueError("Mission and options decision vectors differ in length")
     for index, (option_description, mission_description) in enumerate(
@@ -208,6 +247,53 @@ def prepare_replay(
         execution_repository_root,
         execution_directory,
     )
+
+
+def prepare_osiris_2024_replay(
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare the immutable NASA 2024 package for evaluate-only replay."""
+    source_options = OSIRIS_2024_PACKAGE / "OSIRIS-REx.emtgopt"
+    baseline_mission = (
+        OSIRIS_2024_PACKAGE / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    Mission, MissionOptions = _load_pyemtg(pyemtg_root)
+    case_directory = Path(case_directory)
+    prepared_options = prepare_case(source_options, case_directory, pyemtg_root)
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    baseline = Mission.Mission(str(baseline_mission))
+    xf_file = OSIRIS_2024_PACKAGE / "XFfile.csv"
+    inject_aligned_mission_seed(
+        options,
+        baseline,
+        expected_descriptions=load_xf_descriptions(xf_file),
+    )
+    options.run_inner_loop = 0
+    repository_root = (
+        Path(execution_repository_root)
+        if execution_repository_root is not None
+        else REPOSITORY_ROOT
+    )
+    tutorial_root = (
+        repository_root / "docs/0_Users/tutorial/Tutorial_EMTG_Files"
+    )
+    options.universe_folder = str(tutorial_root / "OSIRIS_universe")
+    options.HardwarePath = str(tutorial_root / "OSIRIS-REx/hardware_models")
+    for journey in options.Journeys:
+        journey.central_body_gravity_file = "DoesNotExist.grv"
+    if execution_directory is not None:
+        options.forced_working_directory = str(execution_directory)
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+    compatibility_path = case_directory / "compatibility.json"
+    compatibility = json.loads(compatibility_path.read_text())
+    compatibility["seed_alignment_source"] = str(xf_file)
+    compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n")
+    return prepared_options
 
 
 def prepare_refinement(

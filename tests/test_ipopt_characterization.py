@@ -160,6 +160,43 @@ def test_track_acs_replay_comparison_is_pandas_independent(repository_root):
     assert not comparison["checks"]["decision_descriptions"]
 
 
+def test_prepare_osiris_2024_replay_injects_aligned_nasa_seed(tmp_path):
+    Mission, MissionOptions = ipopt_characterization._load_pyemtg()
+    baseline_path = (
+        ipopt_characterization.OSIRIS_2024_PACKAGE
+        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    baseline = Mission.Mission(str(baseline_path))
+
+    prepared_path = ipopt_characterization.prepare_osiris_2024_replay(
+        tmp_path,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    prepared.AssembleMasterDecisionVector()
+
+    assert prepared.run_inner_loop == 0
+    assert prepared.NLP_solver_type == 2
+    assert prepared.universe_folder == (
+        "/repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe"
+    )
+    assert prepared.HardwarePath == (
+        "/repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/"
+        "OSIRIS-REx/hardware_models"
+    )
+    assert prepared.forced_working_directory == "/artifacts"
+    assert all(
+        journey.central_body_gravity_file == "DoesNotExist.grv"
+        for journey in prepared.Journeys
+    )
+    assert [entry[0] for entry in prepared.trialX] == baseline.Xdescriptions
+    assert [float(entry[1]) for entry in prepared.trialX] == baseline.DecisionVector
+    assert json.loads((tmp_path / "compatibility.json").read_text())["status"] == (
+        "unreviewed"
+    )
+
+
 def test_prepare_and_compare_track_acs_refinement(repository_root, tmp_path):
     source = (
         repository_root

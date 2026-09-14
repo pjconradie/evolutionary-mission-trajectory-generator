@@ -53,6 +53,20 @@ def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
 
 
 @pytest.mark.solver_runtime
+def test_osiris_2024_replay_matches_nasa_result(osiris_2024_replay_probe):
+    assert osiris_2024_replay_probe["osiris_2024_replay_compile"] == "passed"
+    assert osiris_2024_replay_probe["osiris_2024_replay_run"] == "passed"
+    assert osiris_2024_replay_probe["osiris_2024_replay_no_ipopt"] == "passed"
+    comparison = osiris_2024_replay_probe["comparison"]
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert comparison["feasible"]
+    assert all(comparison["checks"].values())
+    assert osiris_2024_replay_probe["result"]["status"] == "unreviewed"
+    assert osiris_2024_replay_probe["result"]["acceptable"]
+
+
+@pytest.mark.solver_runtime
 def test_track_acs_ipopt_refinement_retains_seed(track_acs_refinement_probe):
     assert track_acs_refinement_probe["track_acs_refinement_compile"] == "passed"
     assert track_acs_refinement_probe["track_acs_refinement_run"] == "passed"
