@@ -191,6 +191,21 @@ namespace
         return solver;
     }
 
+    std::unique_ptr<EMTG::Solvers::NLP_interface> inspectInitialization(
+        FeasibleSeedRegressionProblem& problem,
+        const double seed,
+        const EMTG::Solvers::NLPInitializationPolicy policy)
+    {
+        EMTG::Solvers::NLPoptions options = makeOptions(0, false);
+        options.set_feasibility_tolerance(1.0e-5);
+        std::unique_ptr<EMTG::Solvers::NLP_interface> solver =
+            EMTG::Solvers::createNLPSolver(&problem, options, 2);
+        solver->setX0_unscaled({ seed });
+        solver->setInitializationPolicy(policy);
+        solver->run_NLP(false);
+        return solver;
+    }
+
     template<typename Value>
     void assertFinite(const std::vector<Value>& values)
     {
@@ -239,21 +254,47 @@ int main()
     assert(functions[2] _GETVALUE >= 2.0 - 1.0e-8);
     std::cout << "EMTG_IPOPT_SCENARIO successful=passed\n";
 
-        FeasibleSeedRegressionProblem chaperonedSeedProblem;
-        solver = solveSeedRegression(chaperonedSeedProblem, true);
-        assertFiniteResults(*solver);
-            assert(solver->getX_unscaled()[0] _GETVALUE >= 5.0e-6 - 1.0e-12);
-            assert(solver->getX_unscaled()[0] _GETVALUE <= 1.0e-5);
-            assert(solver->getF()[0] _GETVALUE <= -5.0e-6 + 1.0e-12);
-        assert(std::abs(solver->getG()[0] + 1.0) <= 1.0e-12);
-        std::cout << "EMTG_IPOPT_SCENARIO chaperoned_seed=passed\n";
+    FeasibleSeedRegressionProblem chaperonedSeedProblem;
+    solver = solveSeedRegression(chaperonedSeedProblem, true);
+    assertFiniteResults(*solver);
+    assert(solver->getX_unscaled()[0] _GETVALUE >= 5.0e-6 - 1.0e-12);
+    assert(solver->getX_unscaled()[0] _GETVALUE <= 1.0e-5);
+    assert(solver->getF()[0] _GETVALUE <= -5.0e-6 + 1.0e-12);
+    assert(std::abs(solver->getG()[0] + 1.0) <= 1.0e-12);
+    std::cout << "EMTG_IPOPT_SCENARIO chaperoned_seed=passed\n";
 
-        FeasibleSeedRegressionProblem unchaperonedSeedProblem;
-        solver = solveSeedRegression(unchaperonedSeedProblem, false);
-        assertFiniteResults(*solver);
-        assert(std::abs(solver->getX_unscaled()[0] _GETVALUE) < 1.0e-8);
-        assert(solver->getF()[0] _GETVALUE > -1.0e-8);
-        std::cout << "EMTG_IPOPT_SCENARIO unchaperoned_terminal=passed\n";
+    FeasibleSeedRegressionProblem unchaperonedSeedProblem;
+    solver = solveSeedRegression(unchaperonedSeedProblem, false);
+    assertFiniteResults(*solver);
+    assert(std::abs(solver->getX_unscaled()[0] _GETVALUE) < 1.0e-8);
+    assert(solver->getF()[0] _GETVALUE > -1.0e-8);
+    std::cout << "EMTG_IPOPT_SCENARIO unchaperoned_terminal=passed\n";
+
+    using EMTG::Solvers::NLPInitializationPolicy;
+    FeasibleSeedRegressionProblem nearFeasibleInitializationProblem;
+    solver = inspectInitialization(
+        nearFeasibleInitializationProblem,
+        5.0e-6,
+        NLPInitializationPolicy::NearFeasiblePrimalSeed);
+    assert(std::abs(solver->getX_unscaled()[0] _GETVALUE - 5.0e-6)
+           <= 1.0e-10);
+    std::cout << "EMTG_IPOPT_SCENARIO near_feasible_initialization=passed\n";
+
+    FeasibleSeedRegressionProblem defaultInitializationProblem;
+    solver = inspectInitialization(
+        defaultInitializationProblem,
+        5.0e-6,
+        NLPInitializationPolicy::Default);
+    assert(solver->getX_unscaled()[0] _GETVALUE > 1.0e-3);
+    std::cout << "EMTG_IPOPT_SCENARIO default_initialization=passed\n";
+
+    FeasibleSeedRegressionProblem infeasibleInitializationProblem;
+    solver = inspectInitialization(
+        infeasibleInitializationProblem,
+        5.0e-4,
+        NLPInitializationPolicy::NearFeasiblePrimalSeed);
+    assert(solver->getX_unscaled()[0] _GETVALUE > 1.0e-3);
+    std::cout << "EMTG_IPOPT_SCENARIO infeasible_seed_uses_default=passed\n";
 
     DeterministicProblem infeasibleProblem(Scenario::Infeasible);
     solver = solve(infeasibleProblem, makeOptions(200, false));

@@ -22,6 +22,7 @@ namespace EMTG
 
             bool evaluatePoint(const double* scaledX,
                                bool needDerivatives);
+            bool currentPointIsFeasible();
             void observeCurrentPoint();
             void restoreIncumbent();
 

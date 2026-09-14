@@ -585,6 +585,11 @@ namespace EMTG { namespace Solvers {
 
             }
             
+            this->myNLP->setInitializationPolicy(
+                seeded_step
+                    ? NLPInitializationPolicy::NearFeasiblePrimalSeed
+                    : NLPInitializationPolicy::Default);
+
             //if seeding MBH, only the first step runs from the seed. After that hopping occurs.
             seeded_step = false;
 

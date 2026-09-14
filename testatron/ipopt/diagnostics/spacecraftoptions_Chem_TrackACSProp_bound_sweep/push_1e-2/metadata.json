@@ -1,0 +1,7 @@
+{
+  "status": "unreviewed",
+  "source_options": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "bound_initialization": "1e-2",
+  "launch_vehicle_key": "Atlas_V_411",
+  "trackACS": 1
+}

@@ -1,0 +1,6 @@
+{
+  "status": "unreviewed",
+  "source_options": "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt",
+  "mode": "push_1e-8",
+  "launch_vehicle_key": "Falcon_9_FT_(RTLS)"
+}

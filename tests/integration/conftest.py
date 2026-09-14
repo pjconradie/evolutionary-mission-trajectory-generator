@@ -334,7 +334,9 @@ check ipopt_runtime passed
     )
 
 
-def _prepare_mission_options(source, artifacts, *, mbh):
+def _prepare_mission_options(
+    source, artifacts, *, mbh, launch_vehicle_key="Atlas_V_401"
+):
     options = MissionOptions.MissionOptions(str(source))
     options.NLP_solver_type = 2
     options.background_mode = 1
@@ -351,7 +353,7 @@ def _prepare_mission_options(source, artifacts, *, mbh):
     options.LaunchVehicleLibraryFile = (
         "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt"
     )
-    options.LaunchVehicleKey = "Atlas_V_401"
+    options.LaunchVehicleKey = launch_vehicle_key
     options.snopt_max_run_time = 30
     if mbh:
         options.mission_name = "CoastPhase_EMintercept_MBH_smoke"
@@ -381,10 +383,14 @@ def _mission_runtime_probe(
     source,
     probe_name,
     mbh,
+    launch_vehicle_key="Atlas_V_401",
 ):
     artifacts = tmp_path_factory.mktemp(probe_name)
     mission_name, options_path = _prepare_mission_options(
-        source, artifacts, mbh=mbh
+        source,
+        artifacts,
+        mbh=mbh,
+        launch_vehicle_key=launch_vehicle_key,
     )
     timeout_seconds = 300 if mbh else 180
     script = _backend_source_script("IPOPT") + rf'''
@@ -524,6 +530,27 @@ check mgandsms_acs_derivative_run passed
         tmp_path_factory=tmp_path_factory,
         build_volume=volume,
         writable_artifacts=artifacts,
+    )
+
+
+@pytest.fixture(scope="session")
+def track_acs_chaperone_mission_probe(
+    toolchain_image, repository_root, tmp_path_factory
+):
+    """Run TrackACSProp and parse the chaperoned IPOPT result."""
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    return _mission_runtime_probe(
+        toolchain_image=toolchain_image,
+        repository_root=repository_root,
+        tmp_path_factory=tmp_path_factory,
+        source=source,
+        probe_name="track-acs-chaperone-mission",
+        mbh=False,
+        launch_vehicle_key="Atlas_V_411",
     )
 
 

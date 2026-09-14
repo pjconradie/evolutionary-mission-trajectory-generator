@@ -28,6 +28,12 @@ namespace EMTG
 {
     namespace Solvers
     {
+        enum class NLPInitializationPolicy
+        {
+            Default,
+            NearFeasiblePrimalSeed
+        };
+
         class NLP_interface
         {
 
@@ -41,6 +47,7 @@ namespace EMTG
             //get/set
             inline void setX0_scaled(const std::vector<doubleType>& X0_scaled_in) {this->X0_scaled = X0_scaled_in; }
             inline void setX0_unscaled(const std::vector<doubleType>& X0_unscaled_in) { this->X0_unscaled = X0_unscaled_in; }
+            inline void setInitializationPolicy(const NLPInitializationPolicy policy) { this->initializationPolicy = policy; }
             
 
             inline std::vector<doubleType> getX_scaled() const { return this->X_scaled; }
@@ -112,6 +119,7 @@ namespace EMTG
             problem* myProblem;
             NLPoptions myOptions;
             NLPStatus status;
+            NLPInitializationPolicy initializationPolicy;
             time_t NLP_start_time;
 			time_t mostRecentNLPWriteTime;
             size_t movie_frame_count = 0;

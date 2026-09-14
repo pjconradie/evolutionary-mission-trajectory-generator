@@ -1,0 +1,5 @@
+bound_push 1e-10
+bound_frac 1e-10
+slack_bound_push 1e-10
+slack_bound_frac 1e-10
+bound_relax_factor 0

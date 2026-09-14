@@ -1,0 +1,5 @@
+status=unreviewed
+case=coast
+mode=push_1e-8
+exit_code=0
+duration_seconds=2

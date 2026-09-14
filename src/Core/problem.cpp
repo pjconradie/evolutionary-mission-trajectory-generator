@@ -300,6 +300,8 @@ namespace EMTG
 				}
 
 				myNLP->setJGlobalIncumbent(EMTG::math::LARGE);
+                myNLP->setInitializationPolicy(
+                    Solvers::NLPInitializationPolicy::NearFeasiblePrimalSeed);
                 myNLP->run_NLP(false);
 
                 this->Xopt = myNLP->getX_unscaled();

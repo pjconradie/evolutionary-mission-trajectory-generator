@@ -1,0 +1,23 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: event left state epoch,4639766400,4726166400,5022642.890913,4677646269.31
+1,j0p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote,0,3.162277660168,29.78469183259,2.933964960265
+2,j0p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote,-50.26548245744,50.26548245744,6.28318530718,48.12639165002
+3,j0p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote,-1.570796326795,1.570796326795,6.28318530718,0.05055845829837
+4,j0p0CoastPhase: phase flight time,315621.8600124,86400000,5022642.890913,73053542.646
+5,j0p0CoastPhaseEphemerisPeggedIntercept: event left state mass,1e-13,5000,5000,1012.351632447
+6,j0p0CoastPhaseEphemerisPeggedIntercept: V_infinity_x,-20,20,29.78469183259,-4.874068334572
+7,j0p0CoastPhaseEphemerisPeggedIntercept: V_infinity_y,-20,20,29.78469183259,-2.534973630818
+8,j0p0CoastPhaseEphemerisPeggedIntercept: V_infinity_z,-20,20,29.78469183259,-2.242296804923
+9,j0p0CoastPhase: virtual chemical fuel,0,5000,5000,0.4946226997737
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,-0.2024703264895
+1,j0p0CoastPhaseEphemerisPeggedIntercept: V_infinity_in magnitude,-20,0,-14.0661539959
+2,j0p0CoastPhase: match point x,-1e-13,1e-13,0.01647729517333
+3,j0p0CoastPhase: match point y,-1e-13,1e-13,-0.00655200569657
+4,j0p0CoastPhase: match point z,-1e-13,1e-13,-0.00351541820553
+5,j0p0CoastPhase: match point xdot,-1e-13,1e-13,0.004941524166961
+6,j0p0CoastPhase: match point ydot,-1e-13,1e-13,0.009858523269701
+7,j0p0CoastPhase: match point zdot,-1e-13,1e-13,0.003564158655248
+8,j0p0CoastPhase: match point mass,-1e-13,1e-13,0.002983124126471
+9,j0p0CoastPhase: match point virtual chemical fuel,-1e-13,1e-13,9.892453995473e-05
+10,Mission flight time bounds,0,1,0.8455271139583

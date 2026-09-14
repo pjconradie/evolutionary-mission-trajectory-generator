@@ -28,6 +28,7 @@ namespace EMTG
         EMTG::Solvers::NLP_interface::NLP_interface() :
             myProblem(nullptr),
             status(NLPStatus::NotRun),
+            initializationPolicy(NLPInitializationPolicy::Default),
             nX(1),
             nF(1),
             nG(0),
@@ -39,6 +40,7 @@ namespace EMTG
             myProblem(myProblem_in),
             myOptions(myOptions),
             status(NLPStatus::NotRun),
+            initializationPolicy(NLPInitializationPolicy::Default),
             nX(myProblem->total_number_of_NLP_parameters),
             nF(myProblem->total_number_of_constraints),
             nG(myProblem->Gdescriptions.size()),

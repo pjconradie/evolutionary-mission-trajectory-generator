@@ -426,6 +426,38 @@ namespace EMTG
             this->G_NLP_incumbent = this->G;
         }
 
+        bool IPOPT_interface::currentPointIsFeasible()
+        {
+            size_t currentWorstDecisionVariable = 0;
+            size_t currentWorstConstraint = 0;
+            double currentAbsoluteFeasibility = 0.0;
+            double currentNormalizedFeasibility = 0.0;
+            double currentFilamentDistance = 0.0;
+            double currentDecisionVariableInfeasibility = 0.0;
+            try
+            {
+                this->myProblem->check_feasibility(
+                    this->X_unscaled,
+                    this->F,
+                    currentWorstDecisionVariable,
+                    currentWorstConstraint,
+                    currentAbsoluteFeasibility,
+                    currentNormalizedFeasibility,
+                    currentFilamentDistance,
+                    currentDecisionVariableInfeasibility,
+                    true);
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return isEMTGFeasible(
+                currentNormalizedFeasibility,
+                currentDecisionVariableInfeasibility,
+                this->myOptions.get_feasibility_tolerance());
+        }
+
         void IPOPT_interface::restoreIncumbent()
         {
             if (!this->myOptions.get_enable_NLP_chaperone()
@@ -452,11 +484,19 @@ namespace EMTG
             this->status = NLPStatus::NotRun;
             this->J_NLP_incumbent = math::LARGE;
             this->feasibility_metric_NLP_incumbent = math::LARGE;
-            if (this->myOptions.get_enable_NLP_chaperone()
+            const bool inspectInitialPoint =
+                this->myOptions.get_enable_NLP_chaperone()
+                || this->initializationPolicy
+                    == NLPInitializationPolicy::NearFeasiblePrimalSeed;
+            if (inspectInitialPoint
                 && !this->evaluatePoint(this->X0_scaled.data(), true))
             {
                 return;
             }
+            const bool useNearFeasiblePrimalSeed =
+                this->initializationPolicy
+                    == NLPInitializationPolicy::NearFeasiblePrimalSeed
+                && this->currentPointIsFeasible();
 
             Ipopt::SmartPtr<Ipopt::IpoptApplication> application =
                 IpoptApplicationFactory();
@@ -474,6 +514,20 @@ namespace EMTG
             application->Options()->SetNumericValue(
                 "max_cpu_time",
                 static_cast<double>(this->myOptions.get_max_run_time_seconds()));
+            if (useNearFeasiblePrimalSeed)
+            {
+                constexpr double boundInitialization = 1.0e-8;
+                application->Options()->SetNumericValue(
+                    "bound_push", boundInitialization);
+                application->Options()->SetNumericValue(
+                    "bound_frac", boundInitialization);
+                application->Options()->SetNumericValue(
+                    "slack_bound_push", boundInitialization);
+                application->Options()->SetNumericValue(
+                    "slack_bound_frac", boundInitialization);
+                application->Options()->SetNumericValue(
+                    "bound_relax_factor", 0.0);
+            }
             if (this->myOptions.get_quiet_NLP())
                 application->Options()->SetIntegerValue("print_level", 0);
             if (this->myOptions.get_check_derivatives())

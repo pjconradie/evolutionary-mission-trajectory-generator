@@ -49,6 +49,27 @@ def test_mgandsms_acs_derivatives(mgandsms_acs_derivative_probe):
 
 
 @pytest.mark.solver_runtime
+def test_track_acs_chaperone_retains_feasible_seed(
+    track_acs_chaperone_mission_probe,
+):
+    assert track_acs_chaperone_mission_probe[
+        "track-acs-chaperone-mission_compile"
+    ] == "passed"
+    assert track_acs_chaperone_mission_probe[
+        "track-acs-chaperone-mission_run"
+    ] == "passed"
+    mission = track_acs_chaperone_mission_probe["mission"]
+    seed_objective = -0.4088862070027368
+    comparison_band = 1.0e-12 + 1.0e-10 * max(
+        abs(seed_objective), abs(mission.objective_value)
+    )
+    assert math.isfinite(mission.objective_value)
+    assert mission.objective_value <= seed_objective + comparison_band
+    assert math.isfinite(mission.worst_violation)
+    assert abs(mission.worst_violation) <= 1.0e-5
+
+
+@pytest.mark.solver_runtime
 def test_ipopt_runs_bounded_fixed_seed_mbh_mission(fixed_seed_mbh_mission_probe):
     missions = []
     for run_number, probe in enumerate(fixed_seed_mbh_mission_probe, start=1):
