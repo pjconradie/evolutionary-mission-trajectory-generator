@@ -1,5 +1,6 @@
 """Contracts for the unreviewed IPOPT characterization runner."""
 
+import copy
 import json
 import subprocess
 from pathlib import Path
@@ -101,6 +102,61 @@ def test_prepare_case_maps_august_nlsii_library(repository_root, tmp_path):
     assert prepared.LaunchVehicleKey == original.LaunchVehicleKey
     compatibility = json.loads((tmp_path / "compatibility.json").read_text())
     assert compatibility["mappings"][0]["source"] == "NLSII_August2018.emtg_launchvehicleopt"
+
+
+def test_prepare_track_acs_replay_injects_aligned_truth_seed(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    baseline = source.with_suffix(".emtg")
+    Mission, MissionOptions = ipopt_characterization._load_pyemtg()
+    truth = Mission.Mission(str(baseline))
+
+    prepared_path = ipopt_characterization.prepare_replay(
+        source, baseline, tmp_path
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    prepared.AssembleMasterDecisionVector()
+
+    assert prepared.run_inner_loop == 0
+    assert len(prepared.trialX) == len(truth.DecisionVector)
+    assert [
+        ipopt_characterization._normalized_description(entry[0])
+        for entry in prepared.trialX
+    ] == [
+        ipopt_characterization._normalized_description(description)
+        for description in truth.Xdescriptions
+    ]
+    assert [float(entry[1]) for entry in prepared.trialX] == truth.DecisionVector
+    assert json.loads((tmp_path / "compatibility.json").read_text())[
+        "status"
+    ] == "unreviewed"
+
+
+def test_track_acs_replay_comparison_is_pandas_independent(repository_root):
+    mission_path = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtg"
+    )
+    Mission, _ = ipopt_characterization._load_pyemtg()
+    baseline = Mission.Mission(str(mission_path))
+
+    comparison = ipopt_characterization.compare_replay(baseline, baseline)
+
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert all(comparison["checks"].values())
+
+    misaligned = copy.deepcopy(baseline)
+    misaligned.Xdescriptions[0] = "j0p0: wrong variable"
+    comparison = ipopt_characterization.compare_replay(baseline, misaligned)
+    assert not comparison["acceptable"]
+    assert not comparison["checks"]["decision_descriptions"]
 
 
 def test_run_case_records_timeout(repository_root, tmp_path, monkeypatch):

@@ -5,6 +5,7 @@ import csv
 import fnmatch
 import importlib
 import json
+import math
 import subprocess
 import sys
 import time
@@ -99,6 +100,94 @@ def _load_pyemtg(pyemtg_root=PYEMTG_ROOT):
     )
 
 
+def _normalized_description(description):
+    return description.replace(": ", ":").strip()
+
+
+def inject_aligned_mission_seed(options, mission):
+    """Inject a mission decision vector after strict ordered alignment checks."""
+    bound_absolute_tolerance = 1.0e-12
+    bound_relative_tolerance = 1.0e-12
+    descriptions = list(mission.Xdescriptions)
+    values = list(mission.DecisionVector)
+    lower_bounds = list(mission.Xlowerbounds)
+    upper_bounds = list(mission.Xupperbounds)
+    if not (
+        len(descriptions)
+        == len(values)
+        == len(lower_bounds)
+        == len(upper_bounds)
+    ):
+        raise ValueError("Mission decision vector descriptions, values, and bounds differ in length")
+
+    options.AssembleMasterDecisionVector()
+    option_descriptions = [entry[0] for entry in options.trialX]
+    if len(option_descriptions) != len(descriptions):
+        raise ValueError("Mission and options decision vectors differ in length")
+    for index, (option_description, mission_description) in enumerate(
+        zip(option_descriptions, descriptions)
+    ):
+        if _normalized_description(option_description) != _normalized_description(
+            mission_description
+        ):
+            raise ValueError(
+                f"Decision variable description mismatch at index {index}: "
+                f"{option_description!r} != {mission_description!r}"
+            )
+
+    for index, (value, lower_bound, upper_bound) in enumerate(
+        zip(values, lower_bounds, upper_bounds)
+    ):
+        if not all(math.isfinite(item) for item in (value, lower_bound, upper_bound)):
+            raise ValueError(f"Non-finite decision variable or bound at index {index}")
+        bound_tolerance = bound_absolute_tolerance + bound_relative_tolerance * max(
+            abs(value), abs(lower_bound), abs(upper_bound)
+        )
+        if value < lower_bound - bound_tolerance or value > upper_bound + bound_tolerance:
+            raise ValueError(f"Decision variable at index {index} is outside its bounds")
+
+    options.trialX = list(zip(descriptions, values))
+    options.DisassembleMasterDecisionVector()
+
+
+def prepare_replay(
+    source_options,
+    baseline_mission,
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare an evaluate-only replay from an aligned committed mission seed."""
+    Mission, MissionOptions = _load_pyemtg(pyemtg_root)
+    case_directory = Path(case_directory)
+    prepared_options = prepare_case(source_options, case_directory, pyemtg_root)
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    baseline = Mission.Mission(str(baseline_mission))
+    inject_aligned_mission_seed(options, baseline)
+    options.run_inner_loop = 0
+    if execution_repository_root is not None:
+        execution_repository_root = Path(execution_repository_root)
+        options.universe_folder = str(execution_repository_root / "testatron/universe")
+        options.HardwarePath = str(
+            execution_repository_root
+            / "docs/0_Users/tutorial/Tutorial_EMTG_Files/"
+            "Config_Files/hardware_models"
+        )
+        gravity_root = execution_repository_root / "testatron/universe/gravity_files"
+        for journey in options.Journeys:
+            gravity_name = Path(
+                journey.central_body_gravity_file.replace("\\", "/")
+            ).name
+            journey.central_body_gravity_file = str(gravity_root / gravity_name)
+    if execution_directory is not None:
+        options.forced_working_directory = str(execution_directory)
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+    return prepared_options
+
+
 def prepare_case(source_options, case_directory, pyemtg_root=PYEMTG_ROOT):
     """Write an IPOPT input while preserving the source optimization policy."""
     _, MissionOptions = _load_pyemtg(pyemtg_root)
@@ -173,6 +262,127 @@ def prepare_case(source_options, case_directory, pyemtg_root=PYEMTG_ROOT):
 
 def _topology(mission):
     return tuple(len(journey.missionevents) for journey in mission.Journeys)
+
+
+def _event_topology(mission):
+    return tuple(
+        tuple((event.EventType, event.Location) for event in journey.missionevents)
+        for journey in mission.Journeys
+    )
+
+
+def compare_replay(baseline, generated):
+    """Compare replay semantics directly without the pandas-backed Comparatron."""
+    absolute_tolerance = 1.0e-12
+    relative_tolerance = 1.0e-10
+
+    def close(left, right):
+        return math.isfinite(left) and math.isfinite(right) and math.isclose(
+            left,
+            right,
+            rel_tol=relative_tolerance,
+            abs_tol=absolute_tolerance,
+        )
+
+    checks = {
+        "journey_names": [journey.journey_name for journey in generated.Journeys]
+        == [journey.journey_name for journey in baseline.Journeys],
+        "event_topology": _event_topology(generated) == _event_topology(baseline),
+        "decision_descriptions": [
+            _normalized_description(description)
+            for description in generated.Xdescriptions
+        ]
+        == [
+            _normalized_description(description)
+            for description in baseline.Xdescriptions
+        ],
+        "decision_vector_length": len(generated.DecisionVector)
+        == len(baseline.DecisionVector),
+        "objective": close(generated.objective_value, baseline.objective_value),
+        "total_deterministic_deltav": close(
+            generated.total_deterministic_deltav,
+            baseline.total_deterministic_deltav,
+        ),
+        "total_flight_time_years": close(
+            generated.total_flight_time_years,
+            baseline.total_flight_time_years,
+        ),
+        "final_mass": close(
+            generated.final_mass_including_propellant_margin,
+            baseline.final_mass_including_propellant_margin,
+        ),
+    }
+    endpoint_checks = []
+    endpoint_deltas = {
+        "max_epoch_days": 0.0,
+        "max_position_km": 0.0,
+        "max_velocity_km_s": 0.0,
+        "max_mass_kg": 0.0,
+    }
+    if len(generated.Journeys) == len(baseline.Journeys):
+        for generated_journey, baseline_journey in zip(
+            generated.Journeys, baseline.Journeys
+        ):
+            if not generated_journey.missionevents or not baseline_journey.missionevents:
+                endpoint_checks.append(False)
+                continue
+            for generated_event, baseline_event in (
+                (generated_journey.missionevents[0], baseline_journey.missionevents[0]),
+                (generated_journey.missionevents[-1], baseline_journey.missionevents[-1]),
+            ):
+                epoch_delta = abs(generated_event.JulianDate - baseline_event.JulianDate)
+                mass_delta = abs(generated_event.Mass - baseline_event.Mass)
+                position_deltas = [
+                    abs(generated_value - baseline_value)
+                    for generated_value, baseline_value in zip(
+                        generated_event.SpacecraftState[:3],
+                        baseline_event.SpacecraftState[:3],
+                    )
+                ]
+                velocity_deltas = [
+                    abs(generated_value - baseline_value)
+                    for generated_value, baseline_value in zip(
+                        generated_event.SpacecraftState[3:],
+                        baseline_event.SpacecraftState[3:],
+                    )
+                ]
+                endpoint_deltas["max_epoch_days"] = max(
+                    endpoint_deltas["max_epoch_days"], epoch_delta
+                )
+                endpoint_deltas["max_position_km"] = max(
+                    endpoint_deltas["max_position_km"], *position_deltas
+                )
+                endpoint_deltas["max_velocity_km_s"] = max(
+                    endpoint_deltas["max_velocity_km_s"], *velocity_deltas
+                )
+                endpoint_deltas["max_mass_kg"] = max(
+                    endpoint_deltas["max_mass_kg"], mass_delta
+                )
+                endpoint_checks.append(
+                    epoch_delta <= 1.0e-8
+                    and mass_delta <= 1.0e-6
+                    and max(position_deltas) <= 1.0
+                    and max(velocity_deltas) <= 1.0e-7
+                )
+    checks["journey_endpoints"] = bool(endpoint_checks) and all(endpoint_checks)
+
+    return {
+        "status": "unreviewed",
+        "acceptable": all(checks.values()),
+        "absolute_tolerance": absolute_tolerance,
+        "relative_tolerance": relative_tolerance,
+        "checks": checks,
+        "baseline_objective": baseline.objective_value,
+        "generated_objective": generated.objective_value,
+        "generated_feasibility_metric": abs(generated.worst_violation),
+        "endpoint_tolerances": {
+            "epoch_days": 1.0e-8,
+            "position_km": 1.0,
+            "velocity_km_s": 1.0e-7,
+            "mass_kg": 1.0e-6,
+        },
+        "endpoint_deltas": endpoint_deltas,
+    }
 
 
 def _write_case_result(case_directory, result):

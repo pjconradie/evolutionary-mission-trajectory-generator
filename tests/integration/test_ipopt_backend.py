@@ -39,6 +39,19 @@ def test_ipopt_runs_direct_nlp_mission(direct_nlp_mission_probe):
 
 
 @pytest.mark.solver_runtime
+def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
+    assert track_acs_replay_probe["track_acs_replay_compile"] == "passed"
+    assert track_acs_replay_probe["track_acs_replay_run"] == "passed"
+    comparison = track_acs_replay_probe["comparison"]
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert comparison["feasible"]
+    assert all(comparison["checks"].values())
+    assert track_acs_replay_probe["result"]["status"] == "unreviewed"
+    assert track_acs_replay_probe["result"]["acceptable"]
+
+
+@pytest.mark.solver_runtime
 def test_mgandsms_acs_derivatives(mgandsms_acs_derivative_probe):
     assert mgandsms_acs_derivative_probe[
         "mgandsms_acs_derivative_compile"

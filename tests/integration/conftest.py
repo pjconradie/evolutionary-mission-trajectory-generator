@@ -1,11 +1,14 @@
 """Fixtures for disposable Linux toolchain integration tests."""
 
+import json
 import uuid
 from pathlib import Path
 
 import pytest
 import Mission
 import MissionOptions
+
+from testatron import ipopt_characterization
 
 from _docker_support import (
     artifact_directory,
@@ -438,6 +441,75 @@ def direct_nlp_mission_probe(toolchain_image, repository_root, tmp_path_factory)
         probe_name="direct-nlp-mission",
         mbh=False,
     )
+
+
+@pytest.fixture(scope="session")
+def track_acs_replay_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Replay the committed TrackACSProp solution without optimization."""
+    artifacts = artifact_directory(tmp_path_factory)
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    baseline_path = source.with_suffix(".emtg")
+    options_path = ipopt_characterization.prepare_replay(
+        source,
+        baseline_path,
+        artifacts,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/track-acs-replay-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/track-acs-replay-build.log; exit 25; }}
+check track_acs_replay_compile passed
+set +e
+timeout 60 /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/artifacts/run.log 2>&1
+replay_status=$?
+set -e
+cat /artifacts/run.log
+test "$replay_status" -eq 0 || exit 26
+test -s /artifacts/spacecraftoptions_Chem_TrackACSProp.emtg || exit 27
+check track_acs_replay_run passed
+'''
+    checks = run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="track-acs-replay",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=build_volume_name(toolchain_image, "ipopt"),
+        writable_artifacts=artifacts,
+    )
+    generated_path = artifacts / "spacecraftoptions_Chem_TrackACSProp.emtg"
+    baseline = Mission.Mission(str(baseline_path))
+    generated = Mission.Mission(str(generated_path))
+    comparison = ipopt_characterization.compare_replay(baseline, generated)
+    comparison["feasibility_tolerance"] = 1.0e-5
+    comparison["feasible"] = (
+        comparison["generated_feasibility_metric"]
+        <= comparison["feasibility_tolerance"]
+    )
+    (artifacts / "comparison.json").write_text(
+        json.dumps(comparison, indent=2) + "\n"
+    )
+    result = {
+        "status": "unreviewed",
+        "stage": "replay",
+        "acceptable": comparison["acceptable"] and comparison["feasible"],
+        "source_options": str(source),
+        "baseline_mission": str(baseline_path),
+        "prepared_options": str(options_path),
+        "generated_mission": str(generated_path),
+        "comparison": str(artifacts / "comparison.json"),
+        "log": str(artifacts / "run.log"),
+    }
+    (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    checks["comparison"] = comparison
+    checks["result"] = result
+    return checks
 
 
 @pytest.fixture(scope="session")

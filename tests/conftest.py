@@ -31,6 +31,7 @@ OSIRIS_BASELINES = {
     ),
 }
 
+sys.path.insert(0, str(REPOSITORY_ROOT))
 sys.path.insert(0, str(PYEMTG_ROOT))
 
 

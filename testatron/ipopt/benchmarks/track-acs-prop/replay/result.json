@@ -1,0 +1,11 @@
+{
+  "status": "unreviewed",
+  "stage": "replay",
+  "acceptable": true,
+  "source_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "baseline_mission": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtg",
+  "prepared_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/track-acs-prop/replay/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "generated_mission": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/track-acs-prop/replay/spacecraftoptions_Chem_TrackACSProp.emtg",
+  "comparison": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/track-acs-prop/replay/comparison.json",
+  "log": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/track-acs-prop/replay/run.log"
+}
