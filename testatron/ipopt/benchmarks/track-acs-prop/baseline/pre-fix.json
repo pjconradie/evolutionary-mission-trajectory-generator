@@ -1,0 +1,52 @@
+{
+  "status": "unreviewed",
+  "captured_on": "2026-09-14",
+  "case_id": "spacecraft_options/spacecraftoptions_Chem_TrackACSProp",
+  "capture_method": "Existing artifacts only; EMTG and Docker were not executed.",
+  "context": "Pre-fix IPOPT evidence predating feasible-incumbent retention and conditional near-feasible seed initialization.",
+  "comparison": {
+    "sense": "minimize",
+    "absolute_tolerance": 1e-12,
+    "relative_tolerance": 1e-10,
+    "comparison_band": 4.188862070027368e-11,
+    "objective_regression": 0.21511740385225886,
+    "classification": "confirmed_objective_regression"
+  },
+  "reference": {
+    "objective": -0.4088862070027368,
+    "final_mass_kg": 2044.431035013684,
+    "worst_violation": 8.19265965160306e-06,
+    "feasibility_metric": 8.19265965160306e-06,
+    "feasibility_tolerance": 1e-05,
+    "feasible": true,
+    "options": {
+      "path": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+      "sha256": "50240c807405c2a43b1494ed61ea6d3d8da42717493a79cc867d3e12206d33c0"
+    },
+    "mission": {
+      "path": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtg",
+      "sha256": "9fa43892106ccc3b312c58f9f7a4fbaf947d5186731f8640eade783781a24b40"
+    }
+  },
+  "pre_fix_ipopt": {
+    "objective": -0.19376880315047795,
+    "final_mass_kg": 968.8440157523897,
+    "worst_violation": -4.03080440120995e-06,
+    "feasibility_metric": 4.03080440120995e-06,
+    "feasibility_tolerance": 1e-05,
+    "feasible": true,
+    "duration_seconds": 2.1489406260000004,
+    "result": {
+      "path": "testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/result.json",
+      "sha256": "77ff9a00ab7f16a00c84f17b062cec3ca7aa054b53d36473b778d74d1c805d26"
+    },
+    "mission": {
+      "path": "testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/spacecraftoptions_Chem_TrackACSProp.emtg",
+      "sha256": "58f51847e57d658f8d76daa0a77990bf16ed7099c83e4968cc28b5be784088d5"
+    },
+    "log": {
+      "path": "testatron/ipopt/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/run.log",
+      "sha256": "09d9d3c4946149b950eea76dc04d898d917bf73577449c3b44d63c367bbb88cd"
+    }
+  }
+}
