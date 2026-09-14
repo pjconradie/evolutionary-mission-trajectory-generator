@@ -42,6 +42,7 @@ def test_ipopt_runs_direct_nlp_mission(direct_nlp_mission_probe):
 def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
     assert track_acs_replay_probe["track_acs_replay_compile"] == "passed"
     assert track_acs_replay_probe["track_acs_replay_run"] == "passed"
+    assert track_acs_replay_probe["track_acs_replay_no_ipopt"] == "passed"
     comparison = track_acs_replay_probe["comparison"]
     assert comparison["status"] == "unreviewed"
     assert comparison["acceptable"]

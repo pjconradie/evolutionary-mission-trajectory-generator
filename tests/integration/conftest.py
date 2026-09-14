@@ -473,7 +473,11 @@ set -e
 cat /artifacts/run.log
 test "$replay_status" -eq 0 || exit 26
 test -s /artifacts/spacecraftoptions_Chem_TrackACSProp.emtg || exit 27
+if grep -Eiq 'This is Ipopt|Number of Iterations|EXIT:' /artifacts/run.log; then
+    exit 28
+fi
 check track_acs_replay_run passed
+check track_acs_replay_no_ipopt passed
 '''
     checks = run_probe(
         image=toolchain_image,
