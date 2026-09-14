@@ -435,6 +435,99 @@ def direct_nlp_mission_probe(toolchain_image, repository_root, tmp_path_factory)
 
 
 @pytest.fixture(scope="session")
+def mgandsms_acs_derivative_probe(
+    toolchain_image, repository_root, tmp_path_factory
+):
+    """Check derivatives for MGAnDSMs with ACS propellant tracking enabled."""
+    artifacts = tmp_path_factory.mktemp("mgandsms-acs-derivatives")
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    options = MissionOptions.MissionOptions(str(source))
+    journey = options.Journeys[0]
+    trial_descriptions = {entry[0] for entry in journey.trialX}
+    assert options.mission_type == 6
+    assert options.trackACS == 1
+    assert options.LaunchVehicleKey == "Atlas_V_411"
+    assert journey.phase_type == 6
+    assert journey.initial_impulse_bounds[0] < journey.initial_impulse_bounds[1]
+    assert any(
+        "EphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote"
+        in description
+        for description in trial_descriptions
+    )
+    assert any(
+        "MGAnDSMs: virtual chemical fuel" in description
+        for description in trial_descriptions
+    )
+    options.mission_name = "spacecraftoptions_Chem_TrackACSProp_derivatives"
+    options.NLP_solver_type = 2
+    options.run_inner_loop = 3
+    options.quiet_NLP = 0
+    options.check_derivatives = 1
+    options.background_mode = 1
+    options.short_output_file_names = 1
+    options.override_working_directory = 1
+    options.forced_working_directory = "/artifacts"
+    options.override_mission_subfolder = 1
+    options.forced_mission_subfolder = "."
+    options.universe_folder = "/repo/testatron/universe/"
+    options.HardwarePath = (
+        "/repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/"
+        "Config_Files/hardware_models/"
+    )
+    options.LaunchVehicleLibraryFile = (
+        "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt"
+    )
+    options.LaunchVehicleKey = "Atlas_V_411"
+    for journey in options.Journeys:
+        gravity_file = Path(
+            journey.central_body_gravity_file.replace("\\", "/")
+        ).name
+        journey.central_body_gravity_file = (
+            f"/repo/testatron/universe/gravity_files/{gravity_file}"
+        )
+
+    options_path = artifacts / f"{options.mission_name}.emtgopt"
+    options.write_options_file(str(options_path), True)
+    (artifacts / "ipopt.opt").write_text("max_iter 0\n", encoding="ascii")
+
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/derivative-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/derivative-build.log; exit 23; }}
+check mgandsms_acs_derivative_compile passed
+cd /artifacts
+set +e
+timeout 30 /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/tmp/derivative-runtime.log 2>&1
+derivative_status=$?
+set -e
+cat /tmp/derivative-runtime.log
+test "$derivative_status" -eq 0 || exit 24
+grep -Fq "Starting derivative checker for first derivatives." \
+    /tmp/derivative-runtime.log
+grep -Fq "No errors detected by derivative checker." \
+    /tmp/derivative-runtime.log
+! grep -Eq '^\* (grad_f|jac_g)' /tmp/derivative-runtime.log
+grep -Fq "j0p0MGAnDSMs: match point virtual chemical fuel" \
+    /artifacts/*XFfile.csv
+check mgandsms_acs_derivative_run passed
+'''
+    volume = build_volume_name(toolchain_image, "ipopt")
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="mgandsms-acs-derivatives",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=volume,
+        writable_artifacts=artifacts,
+    )
+
+
+@pytest.fixture(scope="session")
 def fixed_seed_mbh_mission_probe(
     toolchain_image, repository_root, tmp_path_factory
 ):

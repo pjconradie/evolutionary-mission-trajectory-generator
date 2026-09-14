@@ -39,6 +39,16 @@ def test_ipopt_runs_direct_nlp_mission(direct_nlp_mission_probe):
 
 
 @pytest.mark.solver_runtime
+def test_mgandsms_acs_derivatives(mgandsms_acs_derivative_probe):
+    assert mgandsms_acs_derivative_probe[
+        "mgandsms_acs_derivative_compile"
+    ] == "passed"
+    assert mgandsms_acs_derivative_probe[
+        "mgandsms_acs_derivative_run"
+    ] == "passed"
+
+
+@pytest.mark.solver_runtime
 def test_ipopt_runs_bounded_fixed_seed_mbh_mission(fixed_seed_mbh_mission_probe):
     missions = []
     for run_number, probe in enumerate(fixed_seed_mbh_mission_probe, start=1):
