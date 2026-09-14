@@ -439,12 +439,39 @@ def compare_refinement(baseline, generated, feasibility_tolerance):
     """Check feasibility, topology, and objective non-regression after refinement."""
     absolute_tolerance = 1.0e-12
     relative_tolerance = 1.0e-10
+    decision_bounds_complete = (
+        len(generated.DecisionVector)
+        == len(generated.Xlowerbounds)
+        == len(generated.Xupperbounds)
+        and bool(generated.DecisionVector)
+    )
+
+    def decision_value_in_bounds(value, lower_bound, upper_bound):
+        tolerance = absolute_tolerance + relative_tolerance * max(
+            abs(value), abs(lower_bound), abs(upper_bound)
+        )
+        return lower_bound - tolerance <= value <= upper_bound + tolerance
+
     objective_band = absolute_tolerance + relative_tolerance * max(
         abs(baseline.objective_value), abs(generated.objective_value)
     )
     checks = {
         "finite_objective": math.isfinite(generated.objective_value),
         "finite_feasibility": math.isfinite(generated.worst_violation),
+        "decision_bounds_complete": decision_bounds_complete,
+        "finite_decision_vector": bool(generated.DecisionVector)
+        and all(math.isfinite(value) for value in generated.DecisionVector),
+        "decision_vector_in_bounds": decision_bounds_complete
+        and all(
+            decision_value_in_bounds(value, lower_bound, upper_bound)
+            for value, lower_bound, upper_bound in zip(
+                generated.DecisionVector,
+                generated.Xlowerbounds,
+                generated.Xupperbounds,
+            )
+        ),
+        "finite_constraint_vector": bool(generated.ConstraintVector)
+        and all(math.isfinite(value) for value in generated.ConstraintVector),
         "feasible": abs(generated.worst_violation) <= feasibility_tolerance,
         "journey_names": [journey.journey_name for journey in generated.Journeys]
         == [journey.journey_name for journey in baseline.Journeys],
@@ -474,6 +501,11 @@ def compare_refinement(baseline, generated, feasibility_tolerance):
 
 def parse_ipopt_log(log_text):
     """Extract refinement diagnostics from verbose IPOPT output."""
+    initialization_match = re.search(
+        r"^EMTG IPOPT initialization policy:\s*(?P<policy>\S+)$",
+        log_text,
+        re.MULTILINE,
+    )
     initial_match = re.search(
         r"^\s*0\s+\S+\s+(?P<inf_pr>\S+)", log_text, re.MULTILINE
     )
@@ -484,9 +516,18 @@ def parse_ipopt_log(log_text):
         r"Constraint violation\.*:\s+\S+\s+(?P<violation>\S+)", log_text
     )
     exit_match = re.search(r"^EXIT:\s*(?P<exit>.+)$", log_text, re.MULTILINE)
-    if not all((initial_match, iterations_match, violation_match, exit_match)):
+    if not all(
+        (
+            initialization_match,
+            initial_match,
+            iterations_match,
+            violation_match,
+            exit_match,
+        )
+    ):
         raise ValueError("IPOPT log is missing required refinement diagnostics")
     return {
+        "initialization_policy": initialization_match.group("policy"),
         "initial_infeasibility": float(initial_match.group("inf_pr")),
         "iterations": int(iterations_match.group("iterations")),
         "terminal_constraint_violation": float(

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
 
 namespace EMTG
@@ -516,6 +517,10 @@ namespace EMTG
                 static_cast<double>(this->myOptions.get_max_run_time_seconds()));
             if (useNearFeasiblePrimalSeed)
             {
+                if (!this->myOptions.get_quiet_NLP())
+                    std::cout
+                        << "EMTG IPOPT initialization policy: "
+                        << "near-feasible-primal-seed\n";
                 constexpr double boundInitialization = 1.0e-8;
                 application->Options()->SetNumericValue(
                     "bound_push", boundInitialization);

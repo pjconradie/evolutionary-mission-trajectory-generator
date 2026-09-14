@@ -568,6 +568,13 @@ check track_acs_refinement_run passed
     diagnostics = ipopt_characterization.parse_ipopt_log(
         (artifacts / "run.log").read_text(errors="replace")
     )
+    comparison["checks"]["near_feasible_initialization"] = (
+        diagnostics["initialization_policy"] == "near-feasible-primal-seed"
+    )
+    comparison["checks"]["ipopt_native_success"] = (
+        diagnostics["native_exit"] == "Optimal Solution Found."
+    )
+    comparison["acceptable"] = all(comparison["checks"].values())
     comparison["ipopt"] = diagnostics
     comparison["duration_seconds"] = duration_seconds
     (artifacts / "comparison.json").write_text(

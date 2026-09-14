@@ -2,6 +2,7 @@
 
 import copy
 import json
+import math
 import subprocess
 from pathlib import Path
 
@@ -193,9 +194,26 @@ def test_prepare_and_compare_track_acs_refinement(repository_root, tmp_path):
     assert not comparison["acceptable"]
     assert not comparison["checks"]["objective_non_regression"]
 
+    nonfinite = copy.deepcopy(baseline)
+    nonfinite.ConstraintVector[0] = math.nan
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, nonfinite, 1.0e-5
+    )
+    assert not comparison["acceptable"]
+    assert not comparison["checks"]["finite_constraint_vector"]
+
+    out_of_bounds = copy.deepcopy(baseline)
+    out_of_bounds.Xupperbounds[0] = out_of_bounds.DecisionVector[0] - 1.0
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, out_of_bounds, 1.0e-5
+    )
+    assert not comparison["acceptable"]
+    assert not comparison["checks"]["decision_vector_in_bounds"]
+
 
 def test_parse_ipopt_refinement_log():
     log_text = """
+EMTG IPOPT initialization policy: near-feasible-primal-seed
 iter    objective    inf_pr   inf_du
    0 -4.0888621e-01 8.19e-06 1.00e+00
 Number of Iterations....: 8
@@ -206,11 +224,20 @@ EXIT: Optimal Solution Found.
     diagnostics = ipopt_characterization.parse_ipopt_log(log_text)
 
     assert diagnostics == {
+        "initialization_policy": "near-feasible-primal-seed",
         "initial_infeasibility": 8.19e-06,
         "iterations": 8,
         "terminal_constraint_violation": 2.0e-07,
         "native_exit": "Optimal Solution Found.",
     }
+
+    with pytest.raises(ValueError, match="missing required refinement diagnostics"):
+        ipopt_characterization.parse_ipopt_log(
+            log_text.replace(
+                "EMTG IPOPT initialization policy: near-feasible-primal-seed\n",
+                "",
+            )
+        )
 
 
 def test_run_case_records_timeout(repository_root, tmp_path, monkeypatch):
