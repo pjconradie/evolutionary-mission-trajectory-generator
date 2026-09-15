@@ -1,0 +1,37 @@
+{
+  "status": "unreviewed",
+  "acceptable": false,
+  "checks": {
+    "finite_objective": true,
+    "finite_feasibility": true,
+    "decision_bounds_complete": true,
+    "finite_decision_vector": true,
+    "decision_vector_in_bounds": true,
+    "finite_constraint_vector": true,
+    "feasible": true,
+    "journey_names": true,
+    "event_topology": true,
+    "decision_descriptions": true,
+    "objective_non_regression": true,
+    "near_feasible_initialization": true,
+    "ipopt_native_success": false
+  },
+  "baseline_objective": 8.427487845946791,
+  "generated_objective": 8.42748784098366,
+  "objective_sense": "minimize",
+  "objective_relative_tolerance": 0.001,
+  "objective_absolute_tolerance": 1e-08,
+  "objective_comparison_band": 0.00842749784594679,
+  "objective_delta": -4.963130351143263e-09,
+  "objective_absolute_delta": 4.963130351143263e-09,
+  "generated_feasibility_metric": 6.7101326760008e-06,
+  "feasibility_tolerance": 1e-05,
+  "ipopt": {
+    "initialization_policy": "near-feasible-primal-seed",
+    "initial_infeasibility": 6.71e-06,
+    "iterations": 1095,
+    "terminal_constraint_violation": 5.902229300982215e-08,
+    "native_exit": "Restoration Failed!"
+  },
+  "duration_seconds": 9.144141749944538
+}

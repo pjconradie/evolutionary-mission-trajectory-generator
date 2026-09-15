@@ -135,3 +135,4 @@ testatron/universe/ephemeris_files/naif0012.tls
 testatron/universe/ephemeris_files/mar097.bsp
 testatron/universe/ephemeris_files/de430.bsp
 docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/de430.bsp
+*.bsp

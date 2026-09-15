@@ -1,0 +1,15 @@
+{
+  "status": "unreviewed",
+  "tutorial": "Force_Models/LowSIRIS-REx_forcemodel",
+  "stage": "replay",
+  "taxonomy": "deliberate_infeasible",
+  "acceptable": true,
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/LowSIRIS-REx_forcemodel.emtgopt",
+  "reference_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/results/LowSIRIS-REx_forcemodel_11292022_94740/FAILURE_LowSIRIS-REx_forcemodel_Sun(EB)_Sun(BE).emtg",
+  "prepared_options": "LowSIRIS-REx_forcemodel.emtgopt",
+  "generated_mission": "FAILURE_LowSIRIS-REx_forcemodel.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 4.583105874946341,
+  "provenance": "provenance.json"
+}

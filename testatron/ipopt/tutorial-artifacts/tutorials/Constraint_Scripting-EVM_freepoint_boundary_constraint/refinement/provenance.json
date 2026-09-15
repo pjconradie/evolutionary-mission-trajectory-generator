@@ -1,0 +1,76 @@
+{
+  "status": "unreviewed",
+  "tutorial": "Constraint_Scripting/EVM_freepoint_boundary_constraint",
+  "stage": "refinement",
+  "sources": {
+    "source_options": {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Constraint_Scripting/EVM_freepoint_boundary_constraint.emtgopt",
+      "sha256": "75d25b0de039b4649d60c2da6c43370888959d9ad7966d30920f9ac55f3efff4"
+    },
+    "reference_mission": {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Constraint_Scripting/results/EVM_freepoint_boundary_constraint_6222023_161139/EVM_freepoint_boundary_constraint.emtg",
+      "sha256": "80afed2df06aa3fff12c5798460a4ef5d988567e3e538c055e7ec65fdc900f00"
+    },
+    "seed_alignment_source": {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Constraint_Scripting/results/EVM_freepoint_boundary_constraint_6222023_161139/XFfile.csv",
+      "sha256": "69c34e11e9cafda18ae24f46fc6ffe2d3d563b2c0c1692d36542cf07e50cf2ad"
+    }
+  },
+  "dependencies": [
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/EVM_universe/Earth.emtg_universe",
+      "sha256": "8555afaeb1e88b98312f4075f6ab684f9f12ee49301f4758eeb87982cc73ab81"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/EVM_universe/Mars.emtg_universe",
+      "sha256": "5bfdc8e7e515a1da31c9f79c24ed1666b2e274a3078860ebbfe6d8ccf24d0854"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/EVM_universe/Sun.emtg_universe",
+      "sha256": "30ab2e8d8a229514cf75203b82d249c5da178c18049b42776dced47047cc7c74"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/EVM_universe/Venus.emtg_universe",
+      "sha256": "e33a950d8b666398a543a454bc2b65f249cdd4bbfd43b37e4e7445e2185e753d"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/EVM_universe/ephemeris_files/go_get_these_files.txt",
+      "sha256": "e41215a3d3384096ae4c0f7de6da0d8b7b3dc74d2eac7cd3eb9fd5a9e1bf7617"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/EVM_universe/ephemeris_files/naif0012.tls",
+      "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/EVM_universe/ephemeris_files/pck00010.tpc",
+      "sha256": "59468328349aa730d18bf1f8d7e86efe6e40b75dfb921908f99321b3a7a701d2"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/hardware_models/default.emtg_launchvehicleopt",
+      "sha256": "f382c8f6eb2be073ce02432314bd3ea8978cae1c4d845665fa6edd0934264646"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/hardware_models/default.emtg_powersystemsopt",
+      "sha256": "dcb0980fbf7e021b9a8fb0c57265e6ba49894a2296431231941dc9d08ee29857"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/hardware_models/default.emtg_propulsionsystemopt",
+      "sha256": "4dae7025b0b88cde354beee662a176a0accac8361a704f7e5667b3df86337844"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/hardware_models/default.emtg_spacecraftopt",
+      "sha256": "2b3e61e2f368a0187027b25640db05c189445cc6b0c80febd7b85263ca000023"
+    },
+    {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/hardware_models/empty.ThrottleTable",
+      "sha256": "1739781949b2679f42fa5fc0114eb6ba39d615df32d36bfa5d7a02e26e39bf9e"
+    },
+    {
+      "path": "testatron/universe/ephemeris_files/de430.bsp",
+      "sha256": "6e1b277c5f07135a84950604b83e56b736be696a7f3560bcddb1d4aeb944fca1"
+    }
+  ],
+  "generated": [
+    "EVM_freepoint_boundary_constraint.emtg"
+  ]
+}
