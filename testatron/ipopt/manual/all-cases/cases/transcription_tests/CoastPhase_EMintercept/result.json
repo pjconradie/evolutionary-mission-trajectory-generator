@@ -1,0 +1,17 @@
+{
+  "case_id": "transcription_tests/CoastPhase_EMintercept",
+  "source_options": "/repo/testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/transcription_tests/CoastPhase_EMintercept/CoastPhase_EMintercept.emtgopt",
+  "output_file": "/artifacts/cases/transcription_tests/CoastPhase_EMintercept/FAILURE_CoastPhase_EMintercept.emtg",
+  "comparison_file": "/artifacts/cases/transcription_tests/CoastPhase_EMintercept/comparison.csv",
+  "log_file": "/artifacts/cases/transcription_tests/CoastPhase_EMintercept/run.log",
+  "compatibility_file": "/artifacts/cases/transcription_tests/CoastPhase_EMintercept/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.602717668000082,
+  "objective_value": -0.20247032648946992,
+  "worst_violation": 0.01647729517323377,
+  "worst_constraint": "F[2]: j0p0CoastPhase: match point x",
+  "detail": "Worst constraint exceeds source tolerance"
+}

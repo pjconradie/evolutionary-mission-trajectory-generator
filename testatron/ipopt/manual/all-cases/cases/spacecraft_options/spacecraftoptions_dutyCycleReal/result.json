@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_dutyCycleReal",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_dutyCycleReal.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycleReal/spacecraftoptions_dutyCycleReal.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycleReal/FAILURE_spacecraftoptions_dutyCycleReal.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycleReal/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycleReal/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycleReal/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 27.97757492900007,
+  "objective_value": -0.1683355897962155,
+  "worst_violation": 0.049218842363019745,
+  "worst_constraint": "F[7]: j0p0PSFB_Step0: left match point ydot",
+  "detail": "Worst constraint exceeds source tolerance"
+}

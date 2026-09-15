@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraft_LT_multiStage_spacecraftFile",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraft_LT_multiStage_spacecraftFile.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraft_LT_multiStage_spacecraftFile/spacecraft_LT_multiStage_spacecraftFile.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraft_LT_multiStage_spacecraftFile/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraft_LT_multiStage_spacecraftFile/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.3284123329999886,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Cannot find /repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/SpacecraftOptions.cpp, line 73"
+}

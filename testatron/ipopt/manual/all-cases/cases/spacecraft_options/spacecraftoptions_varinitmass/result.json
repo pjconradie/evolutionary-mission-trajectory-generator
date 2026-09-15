@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_varinitmass",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_varinitmass.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_varinitmass/spacecraftoptions_varinitmass.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_varinitmass/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_varinitmass/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.47495933300001525,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMarsPeri",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMarsPeri.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMarsPeri/EarthToMarsPeri.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/EarthToMarsPeri/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMarsPeri/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.21958279100000055,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

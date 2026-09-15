@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_SPICEphem",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_SPICEphem.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_SPICEphem/physicsoptions_SPICEphem.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_SPICEphem/physicsoptions_SPICEphem.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_SPICEphem/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_SPICEphem/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_SPICEphem/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 60.61997177800001,
+  "objective_value": -0.3843641257661641,
+  "worst_violation": 4.22964244513697e-06,
+  "worst_constraint": "F[5]: j0p0MGAnDSMs: match point xdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

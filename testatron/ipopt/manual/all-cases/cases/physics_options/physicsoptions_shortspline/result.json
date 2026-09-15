@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_shortspline",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_shortspline.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_shortspline/physicsoptions_shortspline.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/physicsoptions_shortspline.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 8.117227419999978,
+  "objective_value": -0.342078202697506,
+  "worst_violation": 9.61747054971723e-06,
+  "worst_constraint": "F[5]: j0p0MGAnDSMs: match point xdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

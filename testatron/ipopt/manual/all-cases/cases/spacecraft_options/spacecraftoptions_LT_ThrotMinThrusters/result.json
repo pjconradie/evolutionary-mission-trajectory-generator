@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters/spacecraftoptions_LT_ThrotMinThrusters.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters/spacecraftoptions_LT_ThrotMinThrusters.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.1901660010000796,
+  "objective_value": -0.4188667065742082,
+  "worst_violation": -9.70840742990539e-06,
+  "worst_constraint": "F[30]: j0p0MGALT: match point virtual electric propellant",
+  "detail": "Ready for human review; not a promoted baseline"
+}

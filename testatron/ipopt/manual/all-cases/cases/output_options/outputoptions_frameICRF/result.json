@@ -1,0 +1,17 @@
+{
+  "case_id": "output_options/outputoptions_frameICRF",
+  "source_options": "/repo/testatron/tests/output_options/outputoptions_frameICRF.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/output_options/outputoptions_frameICRF/outputoptions_frameICRF.emtgopt",
+  "output_file": "/artifacts/cases/output_options/outputoptions_frameICRF/outputoptions_frameICRF.emtg",
+  "comparison_file": "/artifacts/cases/output_options/outputoptions_frameICRF/comparison.csv",
+  "log_file": "/artifacts/cases/output_options/outputoptions_frameICRF/run.log",
+  "compatibility_file": "/artifacts/cases/output_options/outputoptions_frameICRF/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6810397500000107,
+  "objective_value": -0.38436627921522903,
+  "worst_violation": 9.29838814061815e-06,
+  "worst_constraint": "F[6]: j0p0MGAnDSMs: match point ydot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

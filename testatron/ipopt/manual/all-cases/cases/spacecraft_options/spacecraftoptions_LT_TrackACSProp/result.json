@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LT_TrackACSProp",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LT_TrackACSProp.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_TrackACSProp/spacecraftoptions_LT_TrackACSProp.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_TrackACSProp/spacecraftoptions_LT_TrackACSProp.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_TrackACSProp/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_TrackACSProp/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_TrackACSProp/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6215200420000428,
+  "objective_value": -0.4535614066911309,
+  "worst_violation": -2.08868706191134e-06,
+  "worst_constraint": "F[22]: j0p0MGALT: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

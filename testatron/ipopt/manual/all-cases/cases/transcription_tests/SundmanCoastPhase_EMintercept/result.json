@@ -1,0 +1,17 @@
+{
+  "case_id": "transcription_tests/SundmanCoastPhase_EMintercept",
+  "source_options": "/repo/testatron/tests/transcription_tests/SundmanCoastPhase_EMintercept.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/transcription_tests/SundmanCoastPhase_EMintercept/SundmanCoastPhase_EMintercept.emtgopt",
+  "output_file": "/artifacts/cases/transcription_tests/SundmanCoastPhase_EMintercept/FAILURE_SundmanCoastPhase_EMintercept.emtg",
+  "comparison_file": "/artifacts/cases/transcription_tests/SundmanCoastPhase_EMintercept/comparison.csv",
+  "log_file": "/artifacts/cases/transcription_tests/SundmanCoastPhase_EMintercept/run.log",
+  "compatibility_file": "/artifacts/cases/transcription_tests/SundmanCoastPhase_EMintercept/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 26.429448969999953,
+  "objective_value": -0.20660393884165573,
+  "worst_violation": 0.04560297872996121,
+  "worst_constraint": "F[10]: j0p0SundmanCoastPhase: match point phase flight time",
+  "detail": "Worst constraint exceeds source tolerance"
+}

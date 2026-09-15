@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/default_PSBI_fixed_inertial_control",
+  "source_options": "/repo/testatron/tests/journey_options/default_PSBI_fixed_inertial_control.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/default_PSBI_fixed_inertial_control/default_PSBI_fixed_inertial_control.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/default_PSBI_fixed_inertial_control/FAILURE_default_PSBI_fixed_inertial_control.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/default_PSBI_fixed_inertial_control/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/default_PSBI_fixed_inertial_control/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/default_PSBI_fixed_inertial_control/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 42.54773739499999,
+  "objective_value": -0.9274501404181796,
+  "worst_violation": 0.0029866626301064867,
+  "worst_constraint": "F[8]: j0p0PSBI_Step0: left match point zdot",
+  "detail": "Worst constraint exceeds source tolerance"
+}

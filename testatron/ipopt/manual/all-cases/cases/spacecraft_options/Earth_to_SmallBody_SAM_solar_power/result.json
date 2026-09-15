@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/Earth_to_SmallBody_SAM_solar_power",
+  "source_options": "/repo/testatron/tests/spacecraft_options/Earth_to_SmallBody_SAM_solar_power.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/Earth_to_SmallBody_SAM_solar_power/Earth_to_SmallBody_SAM_solar_power.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/spacecraft_options/Earth_to_SmallBody_SAM_solar_power/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/Earth_to_SmallBody_SAM_solar_power/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 2.632002750999959,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

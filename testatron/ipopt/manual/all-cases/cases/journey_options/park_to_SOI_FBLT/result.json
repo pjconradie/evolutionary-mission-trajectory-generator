@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/park_to_SOI_FBLT",
+  "source_options": "/repo/testatron/tests/journey_options/park_to_SOI_FBLT.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/park_to_SOI_FBLT/park_to_SOI_FBLT.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.37433258400000113,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Cannot find /repo/testatron/universe//Earth_MAGIC.emtg_universe. Place a breakpoint in /tmp/emtg-source/src/Astrodynamics/universe.cpp, line 85"
+}

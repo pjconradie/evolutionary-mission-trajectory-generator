@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_preFlybyCoast",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_preFlybyCoast.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_preFlybyCoast/globalmissionoptions_MGALT_preFlybyCoast.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_preFlybyCoast/globalmissionoptions_MGALT_preFlybyCoast.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_preFlybyCoast/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_preFlybyCoast/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_preFlybyCoast/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7198808760000013,
+  "objective_value": -0.47803539584318,
+  "worst_violation": -3.7819141670666e-07,
+  "worst_constraint": "F[83]: j0p2MGALT: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

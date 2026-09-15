@@ -1,0 +1,12 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGAnDSMs_obj0.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_April2017.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    }
+  ]
+}

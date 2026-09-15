@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_numtimesteps",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_numtimesteps.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_numtimesteps/globalmissionoptions_MGALT_numtimesteps.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_numtimesteps/FAILURE_globalmissionoptions_MGALT_numtimesteps.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_numtimesteps/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_numtimesteps/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_numtimesteps/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6273692500000001,
+  "objective_value": -0.8666082570216379,
+  "worst_violation": 4.82662052525562e-06,
+  "worst_constraint": "F[9]: j0p0MGALT: step 8 control magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

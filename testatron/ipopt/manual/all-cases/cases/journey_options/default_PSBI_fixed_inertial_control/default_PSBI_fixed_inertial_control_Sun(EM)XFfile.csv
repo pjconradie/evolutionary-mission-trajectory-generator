@@ -1,0 +1,522 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0PSBIEphemerisPeggedLaunchDirectInsertion: event left state epoch,4646764800,4733164800,5022642.890913,4694954498.614
+1,j0p0PSBIEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote,1e-08,3.162277660168,29.78469183259,3.159774086477
+2,j0p0PSBIEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote,-50.26548245744,50.26548245744,6.28318530718,-42.98514456372
+3,j0p0PSBIEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote,-1.570796326795,1.570796326795,6.28318530718,0.4800210642981
+4,j0p0PSBI: phase flight time,315621.8600124,43200000,5022642.890913,36226408.98166
+5,j0p0PSBIEphemerisPeggedIntercept: event left state mass,1e-13,525.2,525.2,487.0968137476
+6,j0p0PSBIEphemerisPeggedIntercept: V_infinity_x,-1,1,29.78469183259,-0.8493954119145
+7,j0p0PSBIEphemerisPeggedIntercept: V_infinity_y,-1,1,29.78469183259,0.110876779823
+8,j0p0PSBIEphemerisPeggedIntercept: V_infinity_z,-1,1,29.78469183259,0.5165479231969
+9,j0p0PSBI: virtual chemical fuel,0,525.2,525.2,0.02476654516945
+10,j0p0PSBI: virtual electric propellant,0,525.2,525.2,38.02612997637
+11,j0p0PSBI_Step0: left state r,20000000,747989353500,149597870.691,151197025.6363
+12,j0p0PSBI_Step0: left state RA,-25.13274122872,25.13274122872,1,-0.4193079627359
+13,j0p0PSBI_Step0: left state DEC,-1.570796326795,1.570796326795,1,-0.1762288748361
+14,j0p0PSBI_Step0: left state v,0,297.8469183259,29.78469183259,32.6501749551
+15,j0p0PSBI_Step0: left state vRA,-25.13274122872,25.13274122872,1,13.65164376005
+16,j0p0PSBI_Step0: left state vDEC,-25.13274122872,25.13274122872,1,0.3811918228479
+17,j0p0PSBI_Step0: left state mass,1e-13,525.2,525.2,525.1864956876
+18,j0p0PSBI_Step0: virtual chemical fuel,0,525.2,525.2,0.01175522704754
+19,j0p0PSBI_Step0: virtual electric propellant,0,525.2,525.2,0.009247704560051
+20,j0p0PSBI_Step0: substep0 u_x,-1,1,1,-0.3563835956534
+21,j0p0PSBI_Step0: substep0 u_y,-1,1,1,-0.2337223848635
+22,j0p0PSBI_Step0: substep0 u_z,-1,1,1,-0.03896963457521
+23,j0p0PSBI_Step1: left state r,20000000,747989353500,149597870.691,152904052.7116
+24,j0p0PSBI_Step1: left state RA,-25.13274122872,25.13274122872,1,-0.06138462437053
+25,j0p0PSBI_Step1: left state DEC,-1.570796326795,1.570796326795,1,-0.02209100810606
+26,j0p0PSBI_Step1: left state v,0,297.8469183259,29.78469183259,32.29731664404
+27,j0p0PSBI_Step1: left state vRA,-25.13274122872,25.13274122872,1,14.00146721902
+28,j0p0PSBI_Step1: left state vDEC,-25.13274122872,25.13274122872,1,6.70350746153
+29,j0p0PSBI_Step1: left state mass,1e-13,525.2,525.2,523.0550926112
+30,j0p0PSBI_Step1: virtual chemical fuel,0,525.2,525.2,0.01917917664652
+31,j0p0PSBI_Step1: virtual electric propellant,0,525.2,525.2,2.136464767211
+32,j0p0PSBI_Step1: substep0 u_x,-1,1,1,-0.3563822680173
+33,j0p0PSBI_Step1: substep0 u_y,-1,1,1,-0.2337146052941
+34,j0p0PSBI_Step1: substep0 u_z,-1,1,1,-0.03896641598798
+35,j0p0PSBI_Step2: left state r,20000000,747989353500,149597870.691,158034275.3772
+36,j0p0PSBI_Step2: left state RA,-25.13274122872,25.13274122872,1,0.278087975782
+37,j0p0PSBI_Step2: left state DEC,-1.570796326795,1.570796326795,1,0.1278627290423
+38,j0p0PSBI_Step2: left state v,0,297.8469183259,29.78469183259,31.38771070145
+39,j0p0PSBI_Step2: left state vRA,-25.13274122872,25.13274122872,1,-20.21040953645
+40,j0p0PSBI_Step2: left state vDEC,-25.13274122872,25.13274122872,1,-9.839076965737
+41,j0p0PSBI_Step2: left state mass,1e-13,525.2,525.2,520.9253712492
+42,j0p0PSBI_Step2: virtual chemical fuel,0,525.2,525.2,0.02109309609504
+43,j0p0PSBI_Step2: virtual electric propellant,0,525.2,525.2,4.261241554068
+44,j0p0PSBI_Step2: substep0 u_x,-1,1,1,-0.3563842162135
+45,j0p0PSBI_Step2: substep0 u_y,-1,1,1,-0.2337160272889
+46,j0p0PSBI_Step2: substep0 u_z,-1,1,1,-0.03896528005273
+47,j0p0PSBI_Step3: left state r,20000000,747989353500,149597870.691,165671407.7619
+48,j0p0PSBI_Step3: left state RA,-25.13274122872,25.13274122872,1,0.6020384833694
+49,j0p0PSBI_Step3: left state DEC,-1.570796326795,1.570796326795,1,0.2533212564235
+50,j0p0PSBI_Step3: left state v,0,297.8469183259,29.78469183259,30.13692737017
+51,j0p0PSBI_Step3: left state vRA,-25.13274122872,25.13274122872,1,5.243758734767
+52,j0p0PSBI_Step3: left state vDEC,-25.13274122872,25.13274122872,1,-3.510674791474
+53,j0p0PSBI_Step3: left state mass,1e-13,525.2,525.2,518.7966713797
+54,j0p0PSBI_Step3: virtual chemical fuel,0,525.2,525.2,0.02168966750901
+55,j0p0PSBI_Step3: virtual electric propellant,0,525.2,525.2,6.384434809525
+56,j0p0PSBI_Step3: substep0 u_x,-1,1,1,-0.3563857205189
+57,j0p0PSBI_Step3: substep0 u_y,-1,1,1,-0.2337177231136
+58,j0p0PSBI_Step3: substep0 u_z,-1,1,1,-0.03896460948058
+59,j0p0PSBI_Step4: left state r,20000000,747989353500,149597870.691,174777302.5952
+60,j0p0PSBI_Step4: left state RA,-25.13274122872,25.13274122872,1,0.9114566508877
+61,j0p0PSBI_Step4: left state DEC,-1.570796326795,1.570796326795,1,0.3443331007003
+62,j0p0PSBI_Step4: left state v,0,297.8469183259,29.78469183259,28.76024647134
+63,j0p0PSBI_Step4: left state vRA,-25.13274122872,25.13274122872,1,8.674224667126
+64,j0p0PSBI_Step4: left state vDEC,-25.13274122872,25.13274122872,1,-5.986409092686
+65,j0p0PSBI_Step4: left state mass,1e-13,525.2,525.2,516.6688323379
+66,j0p0PSBI_Step4: virtual chemical fuel,0,525.2,525.2,0.02193800023281
+67,j0p0PSBI_Step4: virtual electric propellant,0,525.2,525.2,8.506415511712
+68,j0p0PSBI_Step4: substep0 u_x,-1,1,1,-0.3563867286079
+69,j0p0PSBI_Step4: substep0 u_y,-1,1,1,-0.2337194488103
+70,j0p0PSBI_Step4: substep0 u_z,-1,1,1,-0.03896436018143
+71,j0p0PSBI_Step5: left state r,20000000,747989353500,149597870.691,184451665.6035
+72,j0p0PSBI_Step5: left state RA,-25.13274122872,25.13274122872,1,1.204453370661
+73,j0p0PSBI_Step5: left state DEC,-1.570796326795,1.570796326795,1,0.3994998752219
+74,j0p0PSBI_Step5: left state v,0,297.8469183259,29.78469183259,27.41259127513
+75,j0p0PSBI_Step5: left state vRA,-25.13274122872,25.13274122872,1,2.649322233481
+76,j0p0PSBI_Step5: left state vDEC,-25.13274122872,25.13274122872,1,-12.35720663454
+77,j0p0PSBI_Step5: left state mass,1e-13,525.2,525.2,514.5418437493
+78,j0p0PSBI_Step5: virtual chemical fuel,0,525.2,525.2,0.02210523228337
+79,j0p0PSBI_Step5: virtual electric propellant,0,525.2,525.2,10.62739376296
+80,j0p0PSBI_Step5: substep0 u_x,-1,1,1,-0.356387296665
+81,j0p0PSBI_Step5: substep0 u_y,-1,1,1,-0.2337210476626
+82,j0p0PSBI_Step5: substep0 u_z,-1,1,1,-0.03896447330789
+83,j0p0PSBI_Step6: left state r,20000000,747989353500,149597870.691,194031549.7973
+84,j0p0PSBI_Step6: left state RA,-25.13274122872,25.13274122872,1,1.477894961402
+85,j0p0PSBI_Step6: left state DEC,-1.570796326795,1.570796326795,1,0.4225644489157
+86,j0p0PSBI_Step6: left state v,0,297.8469183259,29.78469183259,26.18253327947
+87,j0p0PSBI_Step6: left state vRA,-25.13274122872,25.13274122872,1,-0.2580347659021
+88,j0p0PSBI_Step6: left state vDEC,-25.13274122872,25.13274122872,1,15.59290747347
+89,j0p0PSBI_Step6: left state mass,1e-13,525.2,525.2,512.4157453557
+90,j0p0PSBI_Step6: virtual chemical fuel,0,525.2,525.2,0.02227690180672
+91,j0p0PSBI_Step6: virtual electric propellant,0,525.2,525.2,12.74750502895
+92,j0p0PSBI_Step6: substep0 u_x,-1,1,1,-0.3563875078395
+93,j0p0PSBI_Step6: substep0 u_y,-1,1,1,-0.2337224494792
+94,j0p0PSBI_Step6: substep0 u_z,-1,1,1,-0.03896489026819
+95,j0p0PSBI_Step7: left state r,20000000,747989353500,149597870.691,203076667.7682
+96,j0p0PSBI_Step7: left state RA,-25.13274122872,25.13274122872,1,1.729489227023
+97,j0p0PSBI_Step7: left state DEC,-1.570796326795,1.570796326795,1,0.4194629954376
+98,j0p0PSBI_Step7: left state v,0,297.8469183259,29.78469183259,25.11110413814
+99,j0p0PSBI_Step7: left state vRA,-25.13274122872,25.13274122872,1,-18.89023228838
+100,j0p0PSBI_Step7: left state vDEC,-25.13274122872,25.13274122872,1,-15.72839965616
+101,j0p0PSBI_Step7: left state mass,1e-13,525.2,525.2,510.2905883819
+102,j0p0PSBI_Step7: virtual chemical fuel,0,525.2,525.2,0.02247607016746
+103,j0p0PSBI_Step7: virtual electric propellant,0,525.2,525.2,14.86684391326
+104,j0p0PSBI_Step7: substep0 u_x,-1,1,1,-0.3563874377688
+105,j0p0PSBI_Step7: substep0 u_y,-1,1,1,-0.2337236439408
+106,j0p0PSBI_Step7: substep0 u_z,-1,1,1,-0.03896555619546
+107,j0p0PSBI_Step8: left state r,20000000,747989353500,149597870.691,211309915.7057
+108,j0p0PSBI_Step8: left state RA,-25.13274122872,25.13274122872,1,1.95899566397
+109,j0p0PSBI_Step8: left state DEC,-1.570796326795,1.570796326795,1,0.3963689381166
+110,j0p0PSBI_Step8: left state v,0,297.8469183259,29.78469183259,24.21092400457
+111,j0p0PSBI_Step8: left state vRA,-25.13274122872,25.13274122872,1,-12.40038619502
+112,j0p0PSBI_Step8: left state vDEC,-25.13274122872,25.13274122872,1,-3.070984810222
+113,j0p0PSBI_Step8: left state mass,1e-13,525.2,525.2,508.1664208218
+114,j0p0PSBI_Step8: virtual chemical fuel,0,525.2,525.2,0.02270263648995
+115,j0p0PSBI_Step8: virtual electric propellant,0,525.2,525.2,16.98548011049
+116,j0p0PSBI_Step8: substep0 u_x,-1,1,1,-0.3563870941343
+117,j0p0PSBI_Step8: substep0 u_y,-1,1,1,-0.2337245912794
+118,j0p0PSBI_Step8: substep0 u_z,-1,1,1,-0.03896645904904
+119,j0p0PSBI_Step9: left state r,20000000,747989353500,149597870.691,218573536.3004
+120,j0p0PSBI_Step9: left state RA,-25.13274122872,25.13274122872,1,2.168104247982
+121,j0p0PSBI_Step9: left state DEC,-1.570796326795,1.570796326795,1,0.3586432899582
+122,j0p0PSBI_Step9: left state v,0,297.8469183259,29.78469183259,23.47613730744
+123,j0p0PSBI_Step9: left state vRA,-25.13274122872,25.13274122872,1,-15.34115454248
+124,j0p0PSBI_Step9: left state vDEC,-25.13274122872,25.13274122872,1,18.6944286396
+125,j0p0PSBI_Step9: left state mass,1e-13,525.2,525.2,506.0955675506
+126,j0p0PSBI_Step9: virtual chemical fuel,0,525.2,525.2,0.02294845006276
+127,j0p0PSBI_Step9: virtual electric propellant,0,525.2,525.2,19.05107808577
+128,j0p0PSBI_Step9: substep0 u_x,-1,1,1,-0.3563863378094
+129,j0p0PSBI_Step9: substep0 u_y,-1,1,1,-0.2337250953719
+130,j0p0PSBI_Step9: substep0 u_z,-1,1,1,-0.03896768074753
+131,j0p0PSBI_Step10: left state r,20000000,747989353500,149597870.691,224789692.7114
+132,j0p0PSBI_Step10: left state RA,-25.13274122872,25.13274122872,1,2.359640196181
+133,j0p0PSBI_Step10: left state DEC,-1.570796326795,1.570796326795,1,0.3105101634897
+134,j0p0PSBI_Step10: left state v,0,297.8469183259,29.78469183259,22.89084860434
+135,j0p0PSBI_Step10: left state vRA,-25.13274122872,25.13274122872,1,-21.42564509854
+136,j0p0PSBI_Step10: left state vDEC,-25.13274122872,25.13274122872,1,-19.08034879449
+137,j0p0PSBI_Step10: left state mass,1e-13,525.2,525.2,504.1758740703
+138,j0p0PSBI_Step10: virtual chemical fuel,0,525.2,525.2,0.02320325172755
+139,j0p0PSBI_Step10: virtual electric propellant,0,525.2,525.2,20.96606027715
+140,j0p0PSBI_Step10: substep0 u_x,-1,1,1,-0.3563855415504
+141,j0p0PSBI_Step10: substep0 u_y,-1,1,1,-0.2337253975218
+142,j0p0PSBI_Step10: substep0 u_z,-1,1,1,-0.03896886993069
+143,j0p0PSBI_Step11: left state r,20000000,747989353500,149597870.691,229928810.0735
+144,j0p0PSBI_Step11: left state RA,-25.13274122872,25.13274122872,1,2.536862216728
+145,j0p0PSBI_Step11: left state DEC,-1.570796326795,1.570796326795,1,0.2551336229738
+146,j0p0PSBI_Step11: left state v,0,297.8469183259,29.78469183259,22.44246365489
+147,j0p0PSBI_Step11: left state vRA,-25.13274122872,25.13274122872,1,-24.36800252142
+148,j0p0PSBI_Step11: left state vDEC,-25.13274122872,25.13274122872,1,16.00365627663
+149,j0p0PSBI_Step11: left state mass,1e-13,525.2,525.2,502.3487040073
+150,j0p0PSBI_Step11: virtual chemical fuel,0,525.2,525.2,0.02345704081992
+151,j0p0PSBI_Step11: virtual electric propellant,0,525.2,525.2,22.78899615636
+152,j0p0PSBI_Step11: substep0 u_x,-1,1,1,-0.3563847381698
+153,j0p0PSBI_Step11: substep0 u_y,-1,1,1,-0.2337255549316
+154,j0p0PSBI_Step11: substep0 u_z,-1,1,1,-0.0389700296607
+155,j0p0PSBI_Step12: left state r,20000000,747989353500,149597870.691,233990863.8964
+156,j0p0PSBI_Step12: left state RA,-25.13274122872,25.13274122872,1,2.703036987468
+157,j0p0PSBI_Step12: left state DEC,-1.570796326795,1.570796326795,1,0.1948288108635
+158,j0p0PSBI_Step12: left state v,0,297.8469183259,29.78469183259,22.11851039706
+159,j0p0PSBI_Step12: left state vRA,-25.13274122872,25.13274122872,1,-5.317143399498
+160,j0p0PSBI_Step12: left state vDEC,-25.13274122872,25.13274122872,1,3.489736713929
+161,j0p0PSBI_Step12: left state mass,1e-13,525.2,525.2,500.5868535799
+162,j0p0PSBI_Step12: virtual chemical fuel,0,525.2,525.2,0.02370105085306
+163,j0p0PSBI_Step12: virtual electric propellant,0,525.2,525.2,24.5471488567
+164,j0p0PSBI_Step12: substep0 u_x,-1,1,1,-0.3563839320103
+165,j0p0PSBI_Step12: substep0 u_y,-1,1,1,-0.2337255931675
+166,j0p0PSBI_Step12: substep0 u_z,-1,1,1,-0.03897115057335
+167,j0p0PSBI_Step13: left state r,20000000,747989353500,149597870.691,236995224.8065
+168,j0p0PSBI_Step13: left state RA,-25.13274122872,25.13274122872,1,2.861231440209
+169,j0p0PSBI_Step13: left state DEC,-1.570796326795,1.570796326795,1,0.1312990727064
+170,j0p0PSBI_Step13: left state v,0,297.8469183259,29.78469183259,21.90724907722
+171,j0p0PSBI_Step13: left state vRA,-25.13274122872,25.13274122872,1,-5.11337514227
+172,j0p0PSBI_Step13: left state vDEC,-25.13274122872,25.13274122872,1,22.37788402191
+173,j0p0PSBI_Step13: left state mass,1e-13,525.2,525.2,498.8714879725
+174,j0p0PSBI_Step13: virtual chemical fuel,0,525.2,525.2,0.02392815419964
+175,j0p0PSBI_Step13: virtual electric propellant,0,525.2,525.2,26.25938132164
+176,j0p0PSBI_Step13: substep0 u_x,-1,1,1,-0.3563831174525
+177,j0p0PSBI_Step13: substep0 u_y,-1,1,1,-0.2337255339984
+178,j0p0PSBI_Step13: substep0 u_z,-1,1,1,-0.03897222490435
+179,j0p0PSBI_Step14: left state r,20000000,747989353500,149597870.691,238974385.2423
+180,j0p0PSBI_Step14: left state RA,-25.13274122872,25.13274122872,1,3.014262142794
+181,j0p0PSBI_Step14: left state DEC,-1.570796326795,1.570796326795,1,0.06584322197487
+182,j0p0PSBI_Step14: left state v,0,297.8469183259,29.78469183259,21.7979871262
+183,j0p0PSBI_Step14: left state vRA,-25.13274122872,25.13274122872,1,-4.907788413185
+184,j0p0PSBI_Step14: left state vDEC,-25.13274122872,25.13274122872,1,9.835209136847
+185,j0p0PSBI_Step14: left state mass,1e-13,525.2,525.2,497.1877248694
+186,j0p0PSBI_Step14: virtual chemical fuel,0,525.2,525.2,0.02413298082295
+187,j0p0PSBI_Step14: virtual electric propellant,0,525.2,525.2,27.94058120435
+188,j0p0PSBI_Step14: substep0 u_x,-1,1,1,-0.3563822818653
+189,j0p0PSBI_Step14: substep0 u_y,-1,1,1,-0.2337253901549
+190,j0p0PSBI_Step14: substep0 u_z,-1,1,1,-0.03897324838434
+191,j0p0PSBI_Step15: left state r,20000000,747989353500,149597870.691,239970197.0637
+192,j0p0PSBI_Step15: left state RA,-25.13274122872,25.13274122872,1,3.164726087734
+193,j0p0PSBI_Step15: left state DEC,-1.570796326795,1.570796326795,1,-0.0004737134032013
+194,j0p0PSBI_Step15: left state v,0,297.8469183259,29.78469183259,21.78131977447
+195,j0p0PSBI_Step15: left state vRA,-25.13274122872,25.13274122872,1,-17.26820963029
+196,j0p0PSBI_Step15: left state vDEC,-25.13274122872,25.13274122872,1,-15.2892619198
+197,j0p0PSBI_Step15: left state mass,1e-13,525.2,525.2,495.5227473322
+198,j0p0PSBI_Step15: virtual chemical fuel,0,525.2,525.2,0.02431183973743
+199,j0p0PSBI_Step15: virtual electric propellant,0,525.2,525.2,29.60355205588
+200,j0p0PSBI_Step15: substep0 u_x,-1,1,1,-0.3563814159072
+201,j0p0PSBI_Step15: substep0 u_y,-1,1,1,-0.2337251674159
+202,j0p0PSBI_Step15: substep0 u_z,-1,1,1,-0.03897421782734
+203,j0p0PSBI_Step16: left state r,20000000,747989353500,149597870.691,240031926.5666
+204,j0p0PSBI_Step16: left state RA,-25.13274122872,25.13274122872,1,3.315063341666
+205,j0p0PSBI_Step16: left state DEC,-1.570796326795,1.570796326795,1,-0.06668085222125
+206,j0p0PSBI_Step16: left state v,0,297.8469183259,29.78469183259,21.84924184359
+207,j0p0PSBI_Step16: left state vRA,-25.13274122872,25.13274122872,1,-4.497400641235
+208,j0p0PSBI_Step16: left state vDEC,-25.13274122872,25.13274122872,1,-9.013161248717
+209,j0p0PSBI_Step16: left state mass,1e-13,525.2,525.2,493.8649563003
+210,j0p0PSBI_Step16: virtual chemical fuel,0,525.2,525.2,0.02446247554461
+211,j0p0PSBI_Step16: virtual electric propellant,0,525.2,525.2,31.25986241549
+212,j0p0PSBI_Step16: substep0 u_x,-1,1,1,-0.356380516103
+213,j0p0PSBI_Step16: substep0 u_y,-1,1,1,-0.2337248654785
+214,j0p0PSBI_Step16: substep0 u_z,-1,1,1,-0.03897512908349
+215,j0p0PSBI_Step17: left state r,20000000,747989353500,149597870.691,239216164.4837
+216,j0p0PSBI_Step17: left state RA,-25.13274122872,25.13274122872,1,3.467621000101
+217,j0p0PSBI_Step17: left state DEC,-1.570796326795,1.570796326795,1,-0.131783293757
+218,j0p0PSBI_Step17: left state v,0,297.8469183259,29.78469183259,21.99509248431
+219,j0p0PSBI_Step17: left state vRA,-25.13274122872,25.13274122872,1,-1.154680950378
+220,j0p0PSBI_Step17: left state vDEC,-25.13274122872,25.13274122872,1,-0.3898865843414
+221,j0p0PSBI_Step17: left state mass,1e-13,525.2,525.2,492.2035515923
+222,j0p0PSBI_Step17: virtual chemical fuel,0,525.2,525.2,0.02458369759651
+223,j0p0PSBI_Step17: virtual electric propellant,0,525.2,525.2,32.92026511721
+224,j0p0PSBI_Step17: substep0 u_x,-1,1,1,-0.3563795809511
+225,j0p0PSBI_Step17: substep0 u_y,-1,1,1,-0.2337244787965
+226,j0p0PSBI_Step17: substep0 u_z,-1,1,1,-0.03897597552262
+227,j0p0PSBI_Step18: left state r,20000000,747989353500,149597870.691,237588298.626
+228,j0p0PSBI_Step18: left state RA,-25.13274122872,25.13274122872,1,-2.658490385298
+229,j0p0PSBI_Step18: left state DEC,-1.570796326795,1.570796326795,1,-0.1946609076213
+230,j0p0PSBI_Step18: left state v,0,297.8469183259,29.78469183259,22.21397807424
+231,j0p0PSBI_Step18: left state vRA,-25.13274122872,25.13274122872,1,-19.80768546165
+232,j0p0PSBI_Step18: left state vDEC,-25.13274122872,25.13274122872,1,12.21149216594
+233,j0p0PSBI_Step18: left state mass,1e-13,525.2,525.2,490.5282869032
+234,j0p0PSBI_Step18: virtual chemical fuel,0,525.2,525.2,0.02467495504293
+235,j0p0PSBI_Step18: virtual electric propellant,0,525.2,525.2,34.5949420183
+236,j0p0PSBI_Step18: substep0 u_x,-1,1,1,-0.3563786120712
+237,j0p0PSBI_Step18: substep0 u_y,-1,1,1,-0.2337239980149
+238,j0p0PSBI_Step18: substep0 u_z,-1,1,1,-0.03897674715019
+239,j0p0PSBI_Step19: left state r,20000000,747989353500,149597870.691,235225223.6266
+240,j0p0PSBI_Step19: left state RA,-25.13274122872,25.13274122872,1,-2.494656498401
+241,j0p0PSBI_Step19: left state DEC,-1.570796326795,1.570796326795,1,-0.2539935433183
+242,j0p0PSBI_Step19: left state v,0,297.8469183259,29.78469183259,22.50337066295
+243,j0p0PSBI_Step19: left state vRA,-25.13274122872,25.13274122872,1,-10.19137663475
+244,j0p0PSBI_Step19: left state vDEC,-25.13274122872,25.13274122872,1,16.01661274597
+245,j0p0PSBI_Step19: left state mass,1e-13,525.2,525.2,488.8292804098
+246,j0p0PSBI_Step19: virtual chemical fuel,0,525.2,525.2,0.02473597093823
+247,j0p0PSBI_Step19: virtual electric propellant,0,525.2,525.2,36.29369243728
+248,j0p0PSBI_Step19: substep0 u_x,-1,1,1,-0.3563776156114
+249,j0p0PSBI_Step19: substep0 u_y,-1,1,1,-0.2337234118109
+250,j0p0PSBI_Step19: substep0 u_z,-1,1,1,-0.03897743030811
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,-0.9274501404182
+1,j0p0PSBIEphemerisPeggedIntercept: V_infinity_in magnitude,-1,0,0.0002939483193813
+2,j0p0PSBI_Step0: substep 0 control magnitude,0,1,0.4279650135888
+3,j0p0PSBI_Step0: left match point x,-1e-13,1e-13,0.0008360600338862
+4,j0p0PSBI_Step0: left match point y,-1e-13,1e-13,0.001401476725901
+5,j0p0PSBI_Step0: left match point z,-1e-13,1e-13,-0.0009559898549795
+6,j0p0PSBI_Step0: left match point xdot,-1e-13,1e-13,0.001716566563962
+7,j0p0PSBI_Step0: left match point ydot,-1e-13,1e-13,-1.790064928862e-06
+8,j0p0PSBI_Step0: left match point zdot,-1e-13,1e-13,0.002986662630206
+9,j0p0PSBI_Step0: left match point mass,-1e-13,1e-13,-2.571270448457e-05
+10,j0p0PSBI_Step0: left match point virtual chemical fuel,-1e-13,1e-13,2.238238204025e-05
+11,j0p0PSBI_Step0: left match point virtual electric propellant,-1e-13,1e-13,1.760796755531e-05
+12,j0p0PSBI_Step1: substep 0 control magnitude,0,1,0.4279593663654
+13,j0p0PSBI_Step1: left match point x,-1e-13,1e-13,0.000392852898737
+14,j0p0PSBI_Step1: left match point y,-1e-13,1e-13,-0.0001354118694792
+15,j0p0PSBI_Step1: left match point z,-1e-13,1e-13,-0.0003410226085905
+16,j0p0PSBI_Step1: left match point xdot,-1e-13,1e-13,-0.0005808882843584
+17,j0p0PSBI_Step1: left match point ydot,-1e-13,1e-13,0.001221066243307
+18,j0p0PSBI_Step1: left match point zdot,-1e-13,1e-13,5.374368513826e-05
+19,j0p0PSBI_Step1: left match point mass,-1e-13,1e-13,0.0001422103581895
+20,j0p0PSBI_Step1: left match point virtual chemical fuel,-1e-13,1e-13,1.413547143752e-05
+21,j0p0PSBI_Step1: left match point virtual electric propellant,-1e-13,1e-13,-0.0001501806814041
+22,j0p0PSBI_Step2: substep 0 control magnitude,0,1,0.4279616618664
+23,j0p0PSBI_Step2: left match point x,-1e-13,1e-13,0.0006848216281103
+24,j0p0PSBI_Step2: left match point y,-1e-13,1e-13,0.0001552240825903
+25,j0p0PSBI_Step2: left match point z,-1e-13,1e-13,-0.0004595478968064
+26,j0p0PSBI_Step2: left match point xdot,-1e-13,1e-13,-0.0005627158525235
+27,j0p0PSBI_Step2: left match point ydot,-1e-13,1e-13,0.0006951079767102
+28,j0p0PSBI_Step2: left match point zdot,-1e-13,1e-13,8.286340901527e-05
+29,j0p0PSBI_Step2: left match point mass,-1e-13,1e-13,0.0001453569763855
+30,j0p0PSBI_Step2: left match point virtual chemical fuel,-1e-13,1e-13,3.644172598092e-06
+31,j0p0PSBI_Step2: left match point virtual electric propellant,-1e-13,1e-13,-0.000154771628185
+32,j0p0PSBI_Step3: substep 0 control magnitude,0,1,0.4279637796346
+33,j0p0PSBI_Step3: left match point x,-1e-13,1e-13,0.0007272332138949
+34,j0p0PSBI_Step3: left match point y,-1e-13,1e-13,0.0005698549698307
+35,j0p0PSBI_Step3: left match point z,-1e-13,1e-13,-0.000401994302457
+36,j0p0PSBI_Step3: left match point xdot,-1e-13,1e-13,-0.0003025867123177
+37,j0p0PSBI_Step3: left match point ydot,-1e-13,1e-13,0.0004152527297032
+38,j0p0PSBI_Step3: left match point zdot,-1e-13,1e-13,0.0002858013775918
+39,j0p0PSBI_Step3: left match point mass,-1e-13,1e-13,0.0001473244657589
+40,j0p0PSBI_Step3: left match point virtual chemical fuel,-1e-13,1e-13,1.135893781365e-06
+41,j0p0PSBI_Step3: left match point virtual electric propellant,-1e-13,1e-13,-0.0001578092602217
+42,j0p0PSBI_Step4: substep 0 control magnitude,0,1,0.4279655388514
+43,j0p0PSBI_Step4: left match point x,-1e-13,1e-13,0.0005119274045638
+44,j0p0PSBI_Step4: left match point y,-1e-13,1e-13,0.0008049716051785
+45,j0p0PSBI_Step4: left match point z,-1e-13,1e-13,-0.0002698225036453
+46,j0p0PSBI_Step4: left match point xdot,-1e-13,1e-13,-0.0001971321952519
+47,j0p0PSBI_Step4: left match point ydot,-1e-13,1e-13,0.0003230729682186
+48,j0p0PSBI_Step4: left match point zdot,-1e-13,1e-13,0.0005539663608765
+49,j0p0PSBI_Step4: left match point mass,-1e-13,1e-13,0.0001489842991552
+50,j0p0PSBI_Step4: left match point virtual chemical fuel,-1e-13,1e-13,4.728345845353e-07
+51,j0p0PSBI_Step4: left match point virtual electric propellant,-1e-13,1e-13,-0.0001601387918847
+52,j0p0PSBI_Step5: substep 0 control magnitude,0,1,0.4279668953609
+53,j0p0PSBI_Step5: left match point x,-1e-13,1e-13,0.0001935720599091
+54,j0p0PSBI_Step5: left match point y,-1e-13,1e-13,0.0008221765393884
+55,j0p0PSBI_Step5: left match point z,-1e-13,1e-13,-0.0001474450687527
+56,j0p0PSBI_Step5: left match point xdot,-1e-13,1e-13,-0.0002632093255301
+57,j0p0PSBI_Step5: left match point ydot,-1e-13,1e-13,0.0002329861499266
+58,j0p0PSBI_Step5: left match point zdot,-1e-13,1e-13,0.0007397307401678
+59,j0p0PSBI_Step5: left match point mass,-1e-13,1e-13,0.000150620859649
+60,j0p0PSBI_Step5: left match point virtual chemical fuel,-1e-13,1e-13,3.184159378409e-07
+61,j0p0PSBI_Step5: left match point virtual electric propellant,-1e-13,1e-13,-0.000162064761841
+62,j0p0PSBI_Step6: substep 0 control magnitude,0,1,0.4279678747386
+63,j0p0PSBI_Step6: left match point x,-1e-13,1e-13,-9.261243965401e-05
+64,j0p0PSBI_Step6: left match point y,-1e-13,1e-13,0.0007044905223366
+65,j0p0PSBI_Step6: left match point z,-1e-13,1e-13,-5.233352040075e-05
+66,j0p0PSBI_Step6: left match point xdot,-1e-13,1e-13,-0.0003629028180867
+67,j0p0PSBI_Step6: left match point ydot,-1e-13,1e-13,8.291662055113e-05
+68,j0p0PSBI_Step6: left match point zdot,-1e-13,1e-13,0.0008013379299155
+69,j0p0PSBI_Step6: left match point mass,-1e-13,1e-13,0.0001523291379158
+70,j0p0PSBI_Step6: left match point virtual chemical fuel,-1e-13,1e-13,3.268650482715e-07
+71,j0p0PSBI_Step6: left match point virtual electric propellant,-1e-13,1e-13,-0.0001637288476289
+72,j0p0PSBI_Step7: substep 0 control magnitude,0,1,0.4279685293406
+73,j0p0PSBI_Step7: left match point x,-1e-13,1e-13,-0.0002339138707142
+74,j0p0PSBI_Step7: left match point y,-1e-13,1e-13,0.0005532012309492
+75,j0p0PSBI_Step7: left match point z,-1e-13,1e-13,3.307301164668e-05
+76,j0p0PSBI_Step7: left match point xdot,-1e-13,1e-13,-0.0004269966383629
+77,j0p0PSBI_Step7: left match point ydot,-1e-13,1e-13,-9.909294653181e-05
+78,j0p0PSBI_Step7: left match point zdot,-1e-13,1e-13,0.0007670280447866
+79,j0p0PSBI_Step7: left match point mass,-1e-13,1e-13,0.0001541312479696
+80,j0p0PSBI_Step7: left match point virtual chemical fuel,-1e-13,1e-13,3.792238399594e-07
+81,j0p0PSBI_Step7: left match point virtual electric propellant,-1e-13,1e-13,-0.0001652091031787
+82,j0p0PSBI_Step8: substep 0 control magnitude,0,1,0.4279688427503
+83,j0p0PSBI_Step8: left match point x,-1e-13,1e-13,-0.0002648857204581
+84,j0p0PSBI_Step8: left match point y,-1e-13,1e-13,0.0004248708764579
+85,j0p0PSBI_Step8: left match point z,-1e-13,1e-13,0.0001229985142115
+86,j0p0PSBI_Step8: left match point xdot,-1e-13,1e-13,-0.0004452501095354
+87,j0p0PSBI_Step8: left match point ydot,-1e-13,1e-13,-0.0002480991441906
+88,j0p0PSBI_Step8: left match point zdot,-1e-13,1e-13,0.0006721890791265
+89,j0p0PSBI_Step8: left match point mass,-1e-13,1e-13,0.0001560215528947
+90,j0p0PSBI_Step8: left match point virtual chemical fuel,-1e-13,1e-13,4.313905607094e-07
+91,j0p0PSBI_Step8: left match point virtual electric propellant,-1e-13,1e-13,-0.0001665534699964
+92,j0p0PSBI_Step9: substep 0 control magnitude,0,1,0.4279685994633
+93,j0p0PSBI_Step9: left match point x,-1e-13,1e-13,-0.0002612856913179
+94,j0p0PSBI_Step9: left match point y,-1e-13,1e-13,0.0003321164389058
+95,j0p0PSBI_Step9: left match point z,-1e-13,1e-13,0.0002185782072447
+96,j0p0PSBI_Step9: left match point xdot,-1e-13,1e-13,-0.0004314076604075
+97,j0p0PSBI_Step9: left match point ydot,-1e-13,1e-13,-0.0003535511132112
+98,j0p0PSBI_Step9: left match point zdot,-1e-13,1e-13,0.0005269735908763
+99,j0p0PSBI_Step9: left match point mass,-1e-13,1e-13,0.0001426079660274
+100,j0p0PSBI_Step9: left match point virtual chemical fuel,-1e-13,1e-13,4.680380289525e-07
+101,j0p0PSBI_Step9: left match point virtual electric propellant,-1e-13,1e-13,-0.0001526142415917
+102,j0p0PSBI_Step10: substep 0 control magnitude,0,1,0.4279682096799
+103,j0p0PSBI_Step10: left match point x,-1e-13,1e-13,-0.000255543807948
+104,j0p0PSBI_Step10: left match point y,-1e-13,1e-13,0.0002648268076438
+105,j0p0PSBI_Step10: left match point z,-1e-13,1e-13,0.0003204027332195
+106,j0p0PSBI_Step10: left match point xdot,-1e-13,1e-13,-0.000397703406337
+107,j0p0PSBI_Step10: left match point ydot,-1e-13,1e-13,-0.000428616153385
+108,j0p0PSBI_Step10: left match point zdot,-1e-13,1e-13,0.0003879399115938
+109,j0p0PSBI_Step10: left match point mass,-1e-13,1e-13,0.0001542519329658
+110,j0p0PSBI_Step10: left match point virtual chemical fuel,-1e-13,1e-13,4.851516846893e-07
+111,j0p0PSBI_Step10: left match point virtual electric propellant,-1e-13,1e-13,-0.0001632223992686
+112,j0p0PSBI_Step11: substep 0 control magnitude,0,1,0.4279677322418
+113,j0p0PSBI_Step11: left match point x,-1e-13,1e-13,-0.0002554321611556
+114,j0p0PSBI_Step11: left match point y,-1e-13,1e-13,0.0002164097268387
+115,j0p0PSBI_Step11: left match point z,-1e-13,1e-13,0.0004175075024904
+116,j0p0PSBI_Step11: left match point xdot,-1e-13,1e-13,-0.0003414323249668
+117,j0p0PSBI_Step11: left match point ydot,-1e-13,1e-13,-0.0004775291878015
+118,j0p0PSBI_Step11: left match point zdot,-1e-13,1e-13,0.0002272940350952
+119,j0p0PSBI_Step11: left match point mass,-1e-13,1e-13,0.0001478404594466
+120,j0p0PSBI_Step11: left match point virtual chemical fuel,-1e-13,1e-13,4.832237097605e-07
+121,j0p0PSBI_Step11: left match point virtual electric propellant,-1e-13,1e-13,-0.0001559025000995
+122,j0p0PSBI_Step12: substep 0 control magnitude,0,1,0.4279671838747
+123,j0p0PSBI_Step12: left match point x,-1e-13,1e-13,-0.0002629668886393
+124,j0p0PSBI_Step12: left match point y,-1e-13,1e-13,0.0001832759606218
+125,j0p0PSBI_Step12: left match point z,-1e-13,1e-13,0.0005054432726992
+126,j0p0PSBI_Step12: left match point xdot,-1e-13,1e-13,-0.0002705734231964
+127,j0p0PSBI_Step12: left match point ydot,-1e-13,1e-13,-0.0005124332786702
+128,j0p0PSBI_Step12: left match point zdot,-1e-13,1e-13,6.392288397463e-05
+129,j0p0PSBI_Step12: left match point mass,-1e-13,1e-13,0.0001445870022837
+130,j0p0PSBI_Step12: left match point virtual chemical fuel,-1e-13,1e-13,4.646040234996e-07
+131,j0p0PSBI_Step12: left match point virtual electric propellant,-1e-13,1e-13,-0.0001516276098215
+132,j0p0PSBI_Step13: substep 0 control magnitude,0,1,0.42796657108
+133,j0p0PSBI_Step13: left match point x,-1e-13,1e-13,-0.0002787908717768
+134,j0p0PSBI_Step13: left match point y,-1e-13,1e-13,0.0001667667593837
+135,j0p0PSBI_Step13: left match point z,-1e-13,1e-13,0.0005749896455059
+136,j0p0PSBI_Step13: left match point xdot,-1e-13,1e-13,-0.0001830467986928
+137,j0p0PSBI_Step13: left match point ydot,-1e-13,1e-13,-0.0005348759619258
+138,j0p0PSBI_Step13: left match point zdot,-1e-13,1e-13,-9.753289085064e-05
+139,j0p0PSBI_Step13: left match point mass,-1e-13,1e-13,0.0001432185765025
+140,j0p0PSBI_Step13: left match point virtual chemical fuel,-1e-13,1e-13,4.324130742186e-07
+141,j0p0PSBI_Step13: left match point virtual electric propellant,-1e-13,1e-13,-0.0001491841943865
+142,j0p0PSBI_Step14: substep 0 control magnitude,0,1,0.4279658899027
+143,j0p0PSBI_Step14: left match point x,-1e-13,1e-13,-0.0003064493440296
+144,j0p0PSBI_Step14: left match point y,-1e-13,1e-13,0.0001686587511838
+145,j0p0PSBI_Step14: left match point z,-1e-13,1e-13,0.0006142638985816
+146,j0p0PSBI_Step14: left match point xdot,-1e-13,1e-13,-7.556682760895e-05
+147,j0p0PSBI_Step14: left match point ydot,-1e-13,1e-13,-0.0005435439972663
+148,j0p0PSBI_Step14: left match point zdot,-1e-13,1e-13,-0.0002527573501902
+149,j0p0PSBI_Step14: left match point mass,-1e-13,1e-13,0.0001431062291476
+150,j0p0PSBI_Step14: left match point virtual chemical fuel,-1e-13,1e-13,3.899973787334e-07
+151,j0p0PSBI_Step14: left match point virtual electric propellant,-1e-13,1e-13,-0.0001479866943216
+152,j0p0PSBI_Step15: substep 0 control magnitude,0,1,0.4279651354292
+153,j0p0PSBI_Step15: left match point x,-1e-13,1e-13,-0.0003514771990738
+154,j0p0PSBI_Step15: left match point y,-1e-13,1e-13,0.0001874055975923
+155,j0p0PSBI_Step15: left match point z,-1e-13,1e-13,0.0006112585020216
+156,j0p0PSBI_Step15: left match point xdot,-1e-13,1e-13,5.194314161544e-05
+157,j0p0PSBI_Step15: left match point ydot,-1e-13,1e-13,-0.0005359367055257
+158,j0p0PSBI_Step15: left match point zdot,-1e-13,1e-13,-0.0004078638661425
+159,j0p0PSBI_Step15: left match point mass,-1e-13,1e-13,0.0001439146944753
+160,j0p0PSBI_Step15: left match point virtual chemical fuel,-1e-13,1e-13,3.405539118093e-07
+161,j0p0PSBI_Step15: left match point virtual electric propellant,-1e-13,1e-13,-0.0001477354973452
+162,j0p0PSBI_Step16: substep 0 control magnitude,0,1,0.4279643042216
+163,j0p0PSBI_Step16: left match point x,-1e-13,1e-13,-0.0004193857617351
+164,j0p0PSBI_Step16: left match point y,-1e-13,1e-13,0.0002159513216255
+165,j0p0PSBI_Step16: left match point z,-1e-13,1e-13,0.0005581417267761
+166,j0p0PSBI_Step16: left match point xdot,-1e-13,1e-13,0.0001887817549155
+167,j0p0PSBI_Step16: left match point ydot,-1e-13,1e-13,-0.0005122566189466
+168,j0p0PSBI_Step16: left match point zdot,-1e-13,1e-13,-0.000582026559541
+169,j0p0PSBI_Step16: left match point mass,-1e-13,1e-13,0.0001454459498761
+170,j0p0PSBI_Step16: left match point virtual chemical fuel,-1e-13,1e-13,2.868160837309e-07
+171,j0p0PSBI_Step16: left match point virtual electric propellant,-1e-13,1e-13,-0.0001482652041319
+172,j0p0PSBI_Step17: substep 0 control magnitude,0,1,0.4279633913965
+173,j0p0PSBI_Step17: left match point x,-1e-13,1e-13,-0.0005136094576509
+174,j0p0PSBI_Step17: left match point y,-1e-13,1e-13,0.0002413874887886
+175,j0p0PSBI_Step17: left match point z,-1e-13,1e-13,0.0004531824266766
+176,j0p0PSBI_Step17: left match point xdot,-1e-13,1e-13,0.0003226835802001
+177,j0p0PSBI_Step17: left match point ydot,-1e-13,1e-13,-0.0004772662620381
+178,j0p0PSBI_Step17: left match point zdot,-1e-13,1e-13,-0.0008247612229876
+179,j0p0PSBI_Step17: left match point mass,-1e-13,1e-13,0.0001475724886266
+180,j0p0PSBI_Step17: left match point virtual chemical fuel,-1e-13,1e-13,2.308112183935e-07
+181,j0p0PSBI_Step17: left match point virtual electric propellant,-1e-13,1e-13,-0.0001494803451885
+182,j0p0PSBI_Step18: substep 0 control magnitude,0,1,0.4279623922827
+183,j0p0PSBI_Step18: left match point x,-1e-13,1e-13,-0.0006347770773628
+184,j0p0PSBI_Step18: left match point y,-1e-13,1e-13,0.0002471421728125
+185,j0p0PSBI_Step18: left match point z,-1e-13,1e-13,0.0002988402766819
+186,j0p0PSBI_Step18: left match point xdot,-1e-13,1e-13,0.0004603909526947
+187,j0p0PSBI_Step18: left match point ydot,-1e-13,1e-13,-0.0004385771383098
+188,j0p0PSBI_Step18: left match point zdot,-1e-13,1e-13,-0.001274116448153
+189,j0p0PSBI_Step18: left match point mass,-1e-13,1e-13,0.0001502125420868
+190,j0p0PSBI_Step18: left match point virtual chemical fuel,-1e-13,1e-13,1.737575141179e-07
+191,j0p0PSBI_Step18: left match point virtual electric propellant,-1e-13,1e-13,-0.00015133171194
+192,j0p0PSBI_Step19: substep 0 control magnitude,0,1,0.4279613045718
+193,j0p0PSBI_Step19: left match point x,-1e-13,1e-13,-0.0007786471438967
+194,j0p0PSBI_Step19: left match point y,-1e-13,1e-13,0.0002176917912904
+195,j0p0PSBI_Step19: left match point z,-1e-13,1e-13,9.870580743376e-05
+196,j0p0PSBI_Step19: left match point xdot,-1e-13,1e-13,0.0006397523673124
+197,j0p0PSBI_Step19: left match point ydot,-1e-13,1e-13,-0.0004022637178464
+198,j0p0PSBI_Step19: left match point zdot,-1e-13,1e-13,-0.002215595374817
+199,j0p0PSBI_Step19: left match point mass,-1e-13,1e-13,0.0001533261768411
+200,j0p0PSBI_Step19: left match point virtual chemical fuel,-1e-13,1e-13,1.16176495244e-07
+201,j0p0PSBI_Step19: left match point virtual electric propellant,-1e-13,1e-13,-0.0001538137519547
+202,j0p0PSBI_Step19: right match point x,-1e-13,1e-13,0.001066285617629
+203,j0p0PSBI_Step19: right match point y,-1e-13,1e-13,-0.001598755436137
+204,j0p0PSBI_Step19: right match point z,-1e-13,1e-13,0.001316591085568
+205,j0p0PSBI_Step19: right match point xdot,-1e-13,1e-13,0.0001628325571906
+206,j0p0PSBI_Step19: right match point ydot,-1e-13,1e-13,-0.0001740545480217
+207,j0p0PSBI_Step19: right match point zdot,-1e-13,1e-13,0.0002960864381991
+208,j0p0PSBI_Step19: right match point mass,-1e-13,1e-13,0.000156917193714
+209,j0p0PSBI_Step19: right match point virtual chemical fuel,-1e-13,1e-13,5.821445397256e-08
+210,j0p0PSBI_Step19: right match point virtual electric propellant,-1e-13,1e-13,-0.0001569726450861
+211,j0p0PSBI: Step 1 u_x must match step 0,-1e-13,1e-13,1.327636096837e-06
+212,j0p0PSBI: Step 1 u_y must match step 0,-1e-13,1e-13,7.779569411226e-06
+213,j0p0PSBI: Step 1 u_z must match step 0,-1e-13,1e-13,3.218587229292e-06
+214,j0p0PSBI: Step 2 u_x must match step 0,-1e-13,1e-13,-6.205600830977e-07
+215,j0p0PSBI: Step 2 u_y must match step 0,-1e-13,1e-13,6.35757458467e-06
+216,j0p0PSBI: Step 2 u_z must match step 0,-1e-13,1e-13,4.35452248182e-06
+217,j0p0PSBI: Step 3 u_x must match step 0,-1e-13,1e-13,-2.124865510322e-06
+218,j0p0PSBI: Step 3 u_y must match step 0,-1e-13,1e-13,4.661749906654e-06
+219,j0p0PSBI: Step 3 u_z must match step 0,-1e-13,1e-13,5.025094627853e-06
+220,j0p0PSBI: Step 4 u_x must match step 0,-1e-13,1e-13,-3.132954447316e-06
+221,j0p0PSBI: Step 4 u_y must match step 0,-1e-13,1e-13,2.936053245306e-06
+222,j0p0PSBI: Step 4 u_z must match step 0,-1e-13,1e-13,5.274393778065e-06
+223,j0p0PSBI: Step 5 u_x must match step 0,-1e-13,1e-13,-3.701011570101e-06
+224,j0p0PSBI: Step 5 u_y must match step 0,-1e-13,1e-13,1.337200894569e-06
+225,j0p0PSBI: Step 5 u_z must match step 0,-1e-13,1e-13,5.161267319087e-06
+226,j0p0PSBI: Step 6 u_x must match step 0,-1e-13,1e-13,-3.912186121169e-06
+227,j0p0PSBI: Step 6 u_y must match step 0,-1e-13,1e-13,-6.461574464378e-08
+228,j0p0PSBI: Step 6 u_z must match step 0,-1e-13,1e-13,4.744307015581e-06
+229,j0p0PSBI: Step 7 u_x must match step 0,-1e-13,1e-13,-3.84211537019e-06
+230,j0p0PSBI: Step 7 u_y must match step 0,-1e-13,1e-13,-1.259077275995e-06
+231,j0p0PSBI: Step 7 u_z must match step 0,-1e-13,1e-13,4.078379745809e-06
+232,j0p0PSBI: Step 8 u_x must match step 0,-1e-13,1e-13,-3.498480925845e-06
+233,j0p0PSBI: Step 8 u_y must match step 0,-1e-13,1e-13,-2.206415918193e-06
+234,j0p0PSBI: Step 8 u_z must match step 0,-1e-13,1e-13,3.175526175014e-06
+235,j0p0PSBI: Step 9 u_x must match step 0,-1e-13,1e-13,-2.742155945534e-06
+236,j0p0PSBI: Step 9 u_y must match step 0,-1e-13,1e-13,-2.71050840972e-06
+237,j0p0PSBI: Step 9 u_z must match step 0,-1e-13,1e-13,1.953827679646e-06
+238,j0p0PSBI: Step 10 u_x must match step 0,-1e-13,1e-13,-1.945897016187e-06
+239,j0p0PSBI: Step 10 u_y must match step 0,-1e-13,1e-13,-3.012658313151e-06
+240,j0p0PSBI: Step 10 u_z must match step 0,-1e-13,1e-13,7.646445192577e-07
+241,j0p0PSBI: Step 11 u_x must match step 0,-1e-13,1e-13,-1.14251638017e-06
+242,j0p0PSBI: Step 11 u_y must match step 0,-1e-13,1e-13,-3.170068140768e-06
+243,j0p0PSBI: Step 11 u_z must match step 0,-1e-13,1e-13,-3.950854915447e-07
+244,j0p0PSBI: Step 12 u_x must match step 0,-1e-13,1e-13,-3.363568847892e-07
+245,j0p0PSBI: Step 12 u_y must match step 0,-1e-13,1e-13,-3.208303992808e-06
+246,j0p0PSBI: Step 12 u_z must match step 0,-1e-13,1e-13,-1.515998135138e-06
+247,j0p0PSBI: Step 13 u_x must match step 0,-1e-13,1e-13,4.782009545012e-07
+248,j0p0PSBI: Step 13 u_y must match step 0,-1e-13,1e-13,-3.149134864544e-06
+249,j0p0PSBI: Step 13 u_z must match step 0,-1e-13,1e-13,-2.590329134855e-06
+250,j0p0PSBI: Step 14 u_x must match step 0,-1e-13,1e-13,1.313788102308e-06
+251,j0p0PSBI: Step 14 u_y must match step 0,-1e-13,1e-13,-3.005291428493e-06
+252,j0p0PSBI: Step 14 u_z must match step 0,-1e-13,1e-13,-3.613809134162e-06
+253,j0p0PSBI: Step 15 u_x must match step 0,-1e-13,1e-13,2.179746184439e-06
+254,j0p0PSBI: Step 15 u_y must match step 0,-1e-13,1e-13,-2.782552431579e-06
+255,j0p0PSBI: Step 15 u_z must match step 0,-1e-13,1e-13,-4.58325213093e-06
+256,j0p0PSBI: Step 16 u_x must match step 0,-1e-13,1e-13,3.079550431551e-06
+257,j0p0PSBI: Step 16 u_y must match step 0,-1e-13,1e-13,-2.480615032163e-06
+258,j0p0PSBI: Step 16 u_z must match step 0,-1e-13,1e-13,-5.494508282355e-06
+259,j0p0PSBI: Step 17 u_x must match step 0,-1e-13,1e-13,4.01470226663e-06
+260,j0p0PSBI: Step 17 u_y must match step 0,-1e-13,1e-13,-2.093933029967e-06
+261,j0p0PSBI: Step 17 u_z must match step 0,-1e-13,1e-13,-6.34094740859e-06
+262,j0p0PSBI: Step 18 u_x must match step 0,-1e-13,1e-13,4.983582177487e-06
+263,j0p0PSBI: Step 18 u_y must match step 0,-1e-13,1e-13,-1.613151414337e-06
+264,j0p0PSBI: Step 18 u_z must match step 0,-1e-13,1e-13,-7.112574982981e-06
+265,j0p0PSBI: Step 19 u_x must match step 0,-1e-13,1e-13,5.980042035225e-06
+266,j0p0PSBI: Step 19 u_y must match step 0,-1e-13,1e-13,-1.026947445415e-06
+267,j0p0PSBI: Step 19 u_z must match step 0,-1e-13,1e-13,-7.795732895888e-06
+268,Mission flight time bounds,0,1,0.8385742819829

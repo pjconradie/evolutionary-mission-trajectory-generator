@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_periapseSphericalRADEC",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_periapseSphericalRADEC.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalRADEC/physicsoptions_periapseSphericalRADEC.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalRADEC/physicsoptions_periapseSphericalRADEC.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalRADEC/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalRADEC/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalRADEC/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7819124170000009,
+  "objective_value": -0.6328236919312905,
+  "worst_violation": 3.4738032686513e-07,
+  "worst_constraint": "F[7]: j0p0MGAnDSMs: match point mass",
+  "detail": "Ready for human review; not a promoted baseline"
+}

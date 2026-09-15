@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_chemPropTankConstr",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_chemPropTankConstr.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_chemPropTankConstr/spacecraftoptions_chemPropTankConstr.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_chemPropTankConstr/spacecraftoptions_chemPropTankConstr.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_chemPropTankConstr/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_chemPropTankConstr/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_chemPropTankConstr/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7768290420000312,
+  "objective_value": -0.06345285384386673,
+  "worst_violation": 1.9448031096658e-07,
+  "worst_constraint": "F[1]: j0p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_in magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

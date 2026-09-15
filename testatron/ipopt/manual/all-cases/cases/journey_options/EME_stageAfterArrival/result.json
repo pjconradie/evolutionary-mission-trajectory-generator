@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EME_stageAfterArrival",
+  "source_options": "/repo/testatron/tests/journey_options/EME_stageAfterArrival.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EME_stageAfterArrival/EME_stageAfterArrival.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/EME_stageAfterArrival/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EME_stageAfterArrival/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.21904841700000333,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Cannot find /repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/snapier_multistage.emtg_spacecraftopt. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/SpacecraftOptions.cpp, line 73"
+}

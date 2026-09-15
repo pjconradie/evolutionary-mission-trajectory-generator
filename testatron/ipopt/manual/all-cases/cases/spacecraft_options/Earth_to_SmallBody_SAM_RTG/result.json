@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/Earth_to_SmallBody_SAM_RTG",
+  "source_options": "/repo/testatron/tests/spacecraft_options/Earth_to_SmallBody_SAM_RTG.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/Earth_to_SmallBody_SAM_RTG/Earth_to_SmallBody_SAM_RTG.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/spacecraft_options/Earth_to_SmallBody_SAM_RTG/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/Earth_to_SmallBody_SAM_RTG/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 3.1637231270000257,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

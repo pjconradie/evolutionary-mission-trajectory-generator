@@ -1,0 +1,17 @@
+{
+  "case_id": "solver_options/solveroptions_skip1stNLP",
+  "source_options": "/repo/testatron/tests/solver_options/solveroptions_skip1stNLP.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/solver_options/solveroptions_skip1stNLP/solveroptions_skip1stNLP.emtgopt",
+  "output_file": "/artifacts/cases/solver_options/solveroptions_skip1stNLP/solveroptions_skip1stNLP.emtg",
+  "comparison_file": "/artifacts/cases/solver_options/solveroptions_skip1stNLP/comparison.csv",
+  "log_file": "/artifacts/cases/solver_options/solveroptions_skip1stNLP/run.log",
+  "compatibility_file": "/artifacts/cases/solver_options/solveroptions_skip1stNLP/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 47.01485460399999,
+  "objective_value": -0.6300700237504554,
+  "worst_violation": 7.77694929279172e-06,
+  "worst_constraint": "F[28]: j0p0MGALT: match point mass",
+  "detail": "Ready for human review; not a promoted baseline"
+}

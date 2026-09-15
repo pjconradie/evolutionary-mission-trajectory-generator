@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LT_powdecay",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LT_powdecay.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_powdecay/spacecraftoptions_LT_powdecay.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_powdecay/spacecraftoptions_LT_powdecay.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_powdecay/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_powdecay/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_powdecay/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.620568583000022,
+  "objective_value": -0.47601689083028914,
+  "worst_violation": 6.80838096056569e-06,
+  "worst_constraint": "F[7]: j0p0MGALT: step 5 control magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "solver_options/solveroptions_MBH_RNG_seed",
+  "source_options": "/repo/testatron/tests/solver_options/solveroptions_MBH_RNG_seed.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/solver_options/solveroptions_MBH_RNG_seed/solveroptions_MBH_RNG_seed.emtgopt",
+  "output_file": "/artifacts/cases/solver_options/solveroptions_MBH_RNG_seed/solveroptions_MBH_RNG_seed.emtg",
+  "comparison_file": "/artifacts/cases/solver_options/solveroptions_MBH_RNG_seed/comparison.csv",
+  "log_file": "/artifacts/cases/solver_options/solveroptions_MBH_RNG_seed/run.log",
+  "compatibility_file": "/artifacts/cases/solver_options/solveroptions_MBH_RNG_seed/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 51.19480264800001,
+  "objective_value": -0.6300692523855058,
+  "worst_violation": 7.53238108741093e-06,
+  "worst_constraint": "F[23]: j0p0MGALT: match point y",
+  "detail": "Ready for human review; not a promoted baseline"
+}

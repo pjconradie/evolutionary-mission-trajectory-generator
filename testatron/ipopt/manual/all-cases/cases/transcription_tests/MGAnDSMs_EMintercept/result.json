@@ -1,0 +1,17 @@
+{
+  "case_id": "transcription_tests/MGAnDSMs_EMintercept",
+  "source_options": "/repo/testatron/tests/transcription_tests/MGAnDSMs_EMintercept.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/transcription_tests/MGAnDSMs_EMintercept/MGAnDSMs_EMintercept.emtgopt",
+  "output_file": "/artifacts/cases/transcription_tests/MGAnDSMs_EMintercept/MGAnDSMs_EMintercept.emtg",
+  "comparison_file": "/artifacts/cases/transcription_tests/MGAnDSMs_EMintercept/comparison.csv",
+  "log_file": "/artifacts/cases/transcription_tests/MGAnDSMs_EMintercept/run.log",
+  "compatibility_file": "/artifacts/cases/transcription_tests/MGAnDSMs_EMintercept/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 2.006846792000033,
+  "objective_value": -0.05211301113239533,
+  "worst_violation": -9.87458662395e-09,
+  "worst_constraint": "F[11]: j0p0MGAnDSMs: burn index sum constraint",
+  "detail": "Ready for human review; not a promoted baseline"
+}

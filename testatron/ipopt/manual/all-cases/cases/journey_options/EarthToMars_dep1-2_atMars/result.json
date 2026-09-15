@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_dep1-2_atMars",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_dep1-2_atMars.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMars_dep1-2_atMars/EarthToMars_dep1-2_atMars.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/EarthToMars_dep1-2_atMars/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMars_dep1-2_atMars/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.2200487909999964,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

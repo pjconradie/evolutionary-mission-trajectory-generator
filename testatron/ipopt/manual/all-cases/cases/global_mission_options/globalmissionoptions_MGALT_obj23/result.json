@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_obj23",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_obj23.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj23/globalmissionoptions_MGALT_obj23.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj23/globalmissionoptions_MGALT_obj23.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj23/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj23/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj23/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6772965830000004,
+  "objective_value": 0.8122331101754015,
+  "worst_violation": -2.06584560402301e-06,
+  "worst_constraint": "F[62]: j0p1MGALT: match point virtual electric propellant",
+  "detail": "Ready for human review; not a promoted baseline"
+}

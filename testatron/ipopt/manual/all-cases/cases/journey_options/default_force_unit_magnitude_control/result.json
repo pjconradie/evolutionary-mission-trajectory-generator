@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/default_force_unit_magnitude_control",
+  "source_options": "/repo/testatron/tests/journey_options/default_force_unit_magnitude_control.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/default_force_unit_magnitude_control.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.38142508399999997,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

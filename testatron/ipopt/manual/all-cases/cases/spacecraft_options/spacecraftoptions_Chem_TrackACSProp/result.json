@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_Chem_TrackACSProp",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/spacecraftoptions_Chem_TrackACSProp.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7754832499999793,
+  "objective_value": -0.4088862070027368,
+  "worst_violation": 8.19266041457817e-06,
+  "worst_constraint": "F[8]: j0p0MGAnDSMs: match point mass",
+  "detail": "Ready for human review; not a promoted baseline"
+}

@@ -1,0 +1,12 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/journey_options/AerodynamicDrag_EarthOrbit_Maneuver.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_August2018.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    }
+  ]
+}
