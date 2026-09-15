@@ -3,11 +3,11 @@
   "stage": "ipopt_refinement",
   "benchmark": "osiris-rex-2022",
   "acceptable": true,
-  "source_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_11272022_144557/OSIRIS-REx.emtgopt",
-  "baseline_mission": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_11272022_144557/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
-  "prepared_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2022/ipopt/OSIRIS-REx.emtgopt",
-  "generated_mission": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2022/ipopt/OSIRIS-REx.emtg",
-  "comparison": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2022/ipopt/comparison.json",
-  "log": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/benchmarks/osiris-rex/2022/ipopt/run.log",
-  "duration_seconds": 14.466159709030762
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_11272022_144557/OSIRIS-REx.emtgopt",
+  "baseline_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_11272022_144557/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
+  "prepared_options": "OSIRIS-REx.emtgopt",
+  "generated_mission": "OSIRIS-REx.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 13.712656624848023
 }

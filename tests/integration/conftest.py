@@ -504,12 +504,16 @@ check track_acs_replay_no_ipopt passed
         "status": "unreviewed",
         "stage": "replay",
         "acceptable": comparison["acceptable"] and comparison["feasible"],
-        "source_options": str(source),
-        "baseline_mission": str(baseline_path),
-        "prepared_options": str(options_path),
-        "generated_mission": str(generated_path),
-        "comparison": str(artifacts / "comparison.json"),
-        "log": str(artifacts / "run.log"),
+        "source_options": ipopt_characterization.repo_relative(
+            source, repository_root
+        ),
+        "baseline_mission": ipopt_characterization.repo_relative(
+            baseline_path, repository_root
+        ),
+        "prepared_options": options_path.name,
+        "generated_mission": generated_path.name,
+        "comparison": "comparison.json",
+        "log": "run.log",
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     checks["comparison"] = comparison
@@ -584,12 +588,16 @@ check {check_prefix}_replay_no_ipopt passed
         "stage": "replay",
         "benchmark": benchmark,
         "acceptable": comparison["acceptable"],
-        "source_options": str(baseline_path.parent / "OSIRIS-REx.emtgopt"),
-        "baseline_mission": str(baseline_path),
-        "prepared_options": str(options_path),
-        "generated_mission": str(generated_path),
-        "comparison": str(artifacts / "comparison.json"),
-        "log": str(artifacts / "run.log"),
+        "source_options": ipopt_characterization.repo_relative(
+            baseline_path.parent / "OSIRIS-REx.emtgopt", repository_root
+        ),
+        "baseline_mission": ipopt_characterization.repo_relative(
+            baseline_path, repository_root
+        ),
+        "prepared_options": options_path.name,
+        "generated_mission": generated_path.name,
+        "comparison": "comparison.json",
+        "log": "run.log",
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     checks["comparison"] = comparison
@@ -670,12 +678,16 @@ check {check_prefix}_refinement_run passed
         "stage": "ipopt_refinement",
         "benchmark": benchmark,
         "acceptable": comparison["acceptable"],
-        "source_options": str(baseline_path.parent / "OSIRIS-REx.emtgopt"),
-        "baseline_mission": str(baseline_path),
-        "prepared_options": str(options_path),
-        "generated_mission": str(generated_path),
-        "comparison": str(artifacts / "comparison.json"),
-        "log": str(artifacts / "run.log"),
+        "source_options": ipopt_characterization.repo_relative(
+            baseline_path.parent / "OSIRIS-REx.emtgopt", repository_root
+        ),
+        "baseline_mission": ipopt_characterization.repo_relative(
+            baseline_path, repository_root
+        ),
+        "prepared_options": options_path.name,
+        "generated_mission": generated_path.name,
+        "comparison": "comparison.json",
+        "log": "run.log",
         "duration_seconds": duration_seconds,
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
@@ -803,12 +815,16 @@ check track_acs_refinement_run passed
         "status": "unreviewed",
         "stage": "ipopt_refinement",
         "acceptable": comparison["acceptable"],
-        "source_options": str(source),
-        "baseline_mission": str(baseline_path),
-        "prepared_options": str(options_path),
-        "generated_mission": str(generated_path),
-        "comparison": str(artifacts / "comparison.json"),
-        "log": str(artifacts / "run.log"),
+        "source_options": ipopt_characterization.repo_relative(
+            source, repository_root
+        ),
+        "baseline_mission": ipopt_characterization.repo_relative(
+            baseline_path, repository_root
+        ),
+        "prepared_options": options_path.name,
+        "generated_mission": generated_path.name,
+        "comparison": "comparison.json",
+        "log": "run.log",
         "duration_seconds": duration_seconds,
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")

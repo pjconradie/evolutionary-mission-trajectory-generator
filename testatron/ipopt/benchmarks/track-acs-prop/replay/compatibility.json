@@ -1,6 +1,6 @@
 {
   "status": "unreviewed",
-  "source_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "source_options": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
   "mappings": [
     {
       "option": "LaunchVehicleLibraryFile",

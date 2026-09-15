@@ -60,6 +60,19 @@ CLASSIFICATIONS = (
 )
 
 
+def repo_relative(path, root=None):
+    """Return a repository-relative POSIX path, refusing paths outside the repo."""
+    root = Path(root) if root is not None else REPOSITORY_ROOT
+    resolved = Path(path).resolve()
+    try:
+        return resolved.relative_to(root.resolve()).as_posix()
+    except ValueError as error:
+        raise ValueError(
+            f"Refusing to persist path outside repository root: "
+            f"{resolved} is not under {root}"
+        ) from error
+
+
 @dataclass
 class CaseResult:
     case_id: str
@@ -236,6 +249,10 @@ def _prepare_seeded_case(
     options.write_options_file(
         str(prepared_options), not options.print_only_non_default_options
     )
+    compatibility_path = case_directory / "compatibility.json"
+    compatibility = json.loads(compatibility_path.read_text())
+    compatibility["source_options"] = repo_relative(compatibility["source_options"])
+    compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n")
     return prepared_options
 
 
@@ -303,7 +320,8 @@ def _prepare_osiris_replay(
     )
     compatibility_path = case_directory / "compatibility.json"
     compatibility = json.loads(compatibility_path.read_text())
-    compatibility["seed_alignment_source"] = str(xf_file)
+    compatibility["source_options"] = repo_relative(compatibility["source_options"])
+    compatibility["seed_alignment_source"] = repo_relative(xf_file)
     compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n")
     return prepared_options
 

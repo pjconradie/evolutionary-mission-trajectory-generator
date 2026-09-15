@@ -4,6 +4,7 @@ import copy
 import csv
 import json
 import math
+import re
 import subprocess
 from pathlib import Path
 
@@ -268,8 +269,11 @@ def test_prepare_osiris_2022_replay_injects_aligned_nasa_seed(tmp_path):
     assert [float(entry[1]) for entry in prepared.trialX] == baseline.DecisionVector
     compatibility = json.loads((tmp_path / "compatibility.json").read_text())
     assert compatibility["status"] == "unreviewed"
-    assert compatibility["seed_alignment_source"] == str(
+    assert compatibility["seed_alignment_source"] == ipopt_characterization.repo_relative(
         ipopt_characterization.OSIRIS_2022_PACKAGE / "XFfile.csv"
+    )
+    assert compatibility["source_options"] == ipopt_characterization.repo_relative(
+        ipopt_characterization.OSIRIS_2022_PACKAGE / "OSIRIS-REx.emtgopt"
     )
 
 
@@ -716,3 +720,48 @@ def test_manifests_are_explicitly_unreviewed(tmp_path):
     assert manifest["case_count"] == 1
     assert manifest["classifications"]["reviewable"] == 1
     assert "accepted" not in (tmp_path / "manifest.json").read_text().lower()
+
+
+def test_repo_relative_returns_posix_relative(repository_root):
+    target = repository_root / "testatron" / "ipopt_characterization.py"
+
+    assert (
+        ipopt_characterization.repo_relative(target)
+        == "testatron/ipopt_characterization.py"
+    )
+
+
+def test_repo_relative_rejects_paths_outside_repository(tmp_path):
+    outside = tmp_path / "elsewhere" / "artifact.json"
+
+    with pytest.raises(ValueError, match="outside repository root"):
+        ipopt_characterization.repo_relative(outside)
+
+
+def _iter_json_strings(node):
+    if isinstance(node, dict):
+        for value in node.values():
+            yield from _iter_json_strings(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _iter_json_strings(value)
+    elif isinstance(node, str):
+        yield node
+
+
+def test_benchmark_artifacts_contain_no_absolute_paths(repository_root):
+    benchmark_root = repository_root / "testatron" / "ipopt" / "benchmarks"
+    forbidden = re.compile(r"(^/|/Users/|/home/|/private/var|^[A-Za-z]:\\|/repo/|/artifacts/)")
+
+    offenders = []
+    for artifact in sorted(benchmark_root.rglob("*.json")):
+        payload = json.loads(artifact.read_text())
+        for value in _iter_json_strings(payload):
+            if forbidden.search(value):
+                offenders.append(
+                    f"{artifact.relative_to(repository_root).as_posix()}: {value}"
+                )
+
+    assert not offenders, "non-portable paths in benchmark artifacts:\n" + "\n".join(
+        offenders
+    )
