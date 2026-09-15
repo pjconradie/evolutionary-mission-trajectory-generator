@@ -1,6 +1,7 @@
 """Fixtures for disposable Linux toolchain integration tests."""
 
 import json
+import shutil
 import time
 import uuid
 from pathlib import Path
@@ -847,6 +848,248 @@ check track_acs_refinement_run passed
     checks["comparison"] = comparison
     checks["result"] = result
     return checks
+
+
+@pytest.fixture(scope="session")
+def tutorial_schema_cache():
+    """Cache the three current-model schema probes across tutorial stages."""
+    return {}
+
+
+def _tutorial_artifacts(tmp_path_factory, case, stage):
+    root = artifact_directory(tmp_path_factory) / "tutorials"
+    directory = root / case.case_id.replace("/", "-") / stage
+    if directory.exists():
+        shutil.rmtree(directory)
+    directory.mkdir(parents=True)
+    return directory
+
+
+def _run_tutorial_schema_probe(
+    *,
+    case,
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+):
+    artifacts = _tutorial_artifacts(tmp_path_factory, case, "schema")
+    options_path = ipopt_characterization.prepare_tutorial_schema_probe(
+        case, artifacts, repository_root=repository_root
+    )
+    slug = case.case_id.replace("/", "-").lower()
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/{slug}-schema-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/{slug}-schema-build.log; exit 40; }}
+check tutorial_schema_compile passed
+set +e
+timeout {case.timeout_seconds} /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/artifacts/run.log 2>&1
+schema_status=$?
+set -e
+cat /artifacts/run.log
+test "$schema_status" -eq 0 || exit 41
+schema_file=$(find /artifacts -maxdepth 1 -name '*XFfile.csv' -print | sort | head -n 1)
+test -n "$schema_file" || exit 42
+cp "$schema_file" /artifacts/schema-XFfile.csv
+check tutorial_schema_run passed
+'''
+    run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name=f"tutorial-{slug}-schema",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=build_volume_name(toolchain_image, "ipopt"),
+        writable_artifacts=artifacts,
+        timeout=case.timeout_seconds + 300,
+    )
+    schema_path = artifacts / "schema-XFfile.csv"
+    descriptions = ipopt_characterization.load_xf_descriptions(schema_path)
+    ipopt_characterization.validate_decision_alignment(
+        descriptions,
+        ipopt_characterization.load_xf_descriptions(
+            repository_root / case.seed_alignment_source
+        ),
+    )
+    ipopt_characterization.write_tutorial_provenance(
+        artifacts, case, "schema", [schema_path], repository_root
+    )
+    return descriptions
+
+
+def _run_tutorial_stage(
+    *,
+    case,
+    stage,
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+    schema_cache,
+):
+    schema_descriptions = None
+    if case.schema_probe:
+        if case.case_id not in schema_cache:
+            schema_cache[case.case_id] = _run_tutorial_schema_probe(
+                case=case,
+                toolchain_image=toolchain_image,
+                repository_root=repository_root,
+                tmp_path_factory=tmp_path_factory,
+            )
+        schema_descriptions = schema_cache[case.case_id]
+
+    artifacts = _tutorial_artifacts(tmp_path_factory, case, stage)
+    options_path = ipopt_characterization.prepare_tutorial_case(
+        case,
+        stage,
+        artifacts,
+        repository_root=repository_root,
+        schema_descriptions=schema_descriptions,
+    )
+    options = MissionOptions.MissionOptions(str(options_path))
+    mission_name = options.mission_name
+    replaying_infeasible_seed = (
+        stage == "replay" and case.replay_seed_source == "current_infeasible_trial"
+    )
+    generated_name = (
+        f"FAILURE_{mission_name}.emtg"
+        if case.expected_output == "failure" or replaying_infeasible_seed
+        else f"{mission_name}.emtg"
+    )
+    slug = case.case_id.replace("/", "-").lower()
+    no_ipopt_check = ""
+    if stage == "replay":
+        no_ipopt_check = r'''
+if grep -Eiq 'This is Ipopt|Number of Iterations|EXIT:' /artifacts/run.log; then
+    exit 46
+fi
+check tutorial_replay_no_ipopt passed
+'''
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/{slug}-{stage}-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/{slug}-{stage}-build.log; exit 43; }}
+check tutorial_{stage}_compile passed
+set +e
+timeout {case.timeout_seconds} /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/artifacts/run.log 2>&1
+stage_status=$?
+set -e
+cat /artifacts/run.log
+test "$stage_status" -eq 0 || exit 44
+test -s '/artifacts/{generated_name}' || exit 45
+{no_ipopt_check}
+check tutorial_{stage}_run passed
+'''
+    started = time.monotonic()
+    checks = run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name=f"tutorial-{slug}-{stage}",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=build_volume_name(toolchain_image, "ipopt"),
+        writable_artifacts=artifacts,
+        timeout=case.timeout_seconds + 300,
+    )
+    duration_seconds = time.monotonic() - started
+    generated_path = artifacts / generated_name
+    baseline = Mission.Mission(str(repository_root / case.reference_mission))
+    generated = Mission.Mission(str(generated_path))
+    feasibility_tolerance = options.snopt_feasibility_tolerance
+
+    if case.taxonomy == "deliberate_infeasible" or replaying_infeasible_seed:
+        comparison = ipopt_characterization.compare_deliberate_infeasible(
+            baseline, generated, feasibility_tolerance
+        )
+    elif stage == "replay":
+        comparison = ipopt_characterization.compare_replay(baseline, generated)
+        comparison["feasibility_tolerance"] = feasibility_tolerance
+        comparison["feasible"] = (
+            comparison["generated_feasibility_metric"] <= feasibility_tolerance
+        )
+        comparison["acceptable"] = (
+            comparison["acceptable"] and comparison["feasible"]
+        )
+    else:
+        comparison = ipopt_characterization.compare_refinement(
+            baseline,
+            generated,
+            feasibility_tolerance,
+            objective_policy=ipopt_characterization.tutorial_objective_policy(case),
+            objective_sense=ipopt_characterization.objective_sense(
+                options.objective_type
+            ),
+        )
+        diagnostics = ipopt_characterization.parse_ipopt_log(
+            (artifacts / "run.log").read_text(errors="replace"),
+            initialization_policy=(
+                "infeasible-primal-seed"
+                if case.refinement_seed_source == "current_infeasible_trial"
+                else None
+            ),
+        )
+        if case.refinement_seed_source == "archive":
+            comparison["checks"]["near_feasible_initialization"] = (
+                diagnostics["initial_infeasibility"] <= feasibility_tolerance
+            )
+        else:
+            comparison["checks"]["expected_infeasible_initialization"] = (
+                diagnostics["initial_infeasibility"] > feasibility_tolerance
+            )
+        comparison["checks"]["ipopt_native_success"] = (
+            diagnostics["native_exit"] == "Optimal Solution Found."
+        )
+        comparison["acceptable"] = all(comparison["checks"].values())
+        comparison["ipopt"] = diagnostics
+
+    comparison["duration_seconds"] = duration_seconds
+    (artifacts / "comparison.json").write_text(
+        json.dumps(comparison, indent=2) + "\n"
+    )
+    result = {
+        "status": "unreviewed",
+        "tutorial": case.case_id,
+        "stage": stage,
+        "taxonomy": case.taxonomy,
+        "acceptable": comparison["acceptable"],
+        "source_options": case.source_options,
+        "reference_mission": case.reference_mission,
+        "prepared_options": options_path.name,
+        "generated_mission": generated_path.name,
+        "comparison": "comparison.json",
+        "log": "run.log",
+        "duration_seconds": duration_seconds,
+        "provenance": "provenance.json",
+    }
+    (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    ipopt_characterization.write_tutorial_provenance(
+        artifacts, case, stage, [generated_path], repository_root
+    )
+    checks["comparison"] = comparison
+    checks["result"] = result
+    checks["artifacts"] = artifacts
+    return checks
+
+
+@pytest.fixture
+def tutorial_stage_runner(
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+    tutorial_schema_cache,
+):
+    """Run one independently reported tutorial replay or refinement stage."""
+
+    def run(case, stage):
+        return _run_tutorial_stage(
+            case=case,
+            stage=stage,
+            toolchain_image=toolchain_image,
+            repository_root=repository_root,
+            tmp_path_factory=tmp_path_factory,
+            schema_cache=tutorial_schema_cache,
+        )
+
+    return run
 
 
 @pytest.fixture(scope="session")

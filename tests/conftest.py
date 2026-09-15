@@ -48,6 +48,9 @@ def pytest_addoption(parser):
     group.addoption(
         "--clean-bootstrap", action="store_true", help="run only clean-bootstrap tests"
     )
+    group.addoption(
+        "--tutorials", action="store_true", help="run only tutorial verification tests"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -59,12 +62,13 @@ def pytest_collection_modifyitems(config, items):
             ("integration", config.getoption("--integration")),
             ("regression", config.getoption("--regression")),
             ("clean_bootstrap", config.getoption("--clean-bootstrap")),
+            ("tutorials", config.getoption("--tutorials")),
         )
         if selected
     ]
     if len(selected_categories) > 1:
         raise pytest.UsageError(
-            "--unit, --integration, --regression, and --clean-bootstrap "
+            "--unit, --integration, --regression, --clean-bootstrap, and --tutorials "
             "are mutually exclusive"
         )
 
@@ -73,6 +77,7 @@ def pytest_collection_modifyitems(config, items):
         category == "clean_bootstrap"
         or "clean_bootstrap" in config.option.markexpr
     )
+    tutorials_requested = category == "tutorials" or "tutorials" in config.option.markexpr
     selected = []
     deselected = []
     for item in items:
@@ -80,7 +85,9 @@ def pytest_collection_modifyitems(config, items):
         bootstrap_matches = (
             clean_bootstrap_requested or "clean_bootstrap" not in item.keywords
         )
-        (selected if category_matches and bootstrap_matches else deselected).append(item)
+        tutorials_match = tutorials_requested or "tutorials" not in item.keywords
+        matches = category_matches and bootstrap_matches and tutorials_match
+        (selected if matches else deselected).append(item)
 
     items[:] = selected
     config.hook.pytest_deselected(items=deselected)

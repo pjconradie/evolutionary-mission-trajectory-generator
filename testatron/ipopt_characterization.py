@@ -8,6 +8,7 @@ import importlib
 import json
 import math
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -58,6 +59,170 @@ CLASSIFICATIONS = (
     "timed_out",
     "parse_failed",
     "dependency_blocked",
+)
+
+TUTORIAL_ROOT = "docs/0_Users/tutorial/Tutorial_EMTG_Files"
+TUTORIAL_EPHEMERIS_ROOT = "testatron/universe/ephemeris_files"
+TUTORIAL_SHARED_EPHEMERIS_FILES = (
+    "de430.bsp",
+    "naif0012.tls",
+    "pck00010.tpc",
+)
+
+
+@dataclass(frozen=True)
+class ObjectivePolicy:
+    """Fixed one-sided objective non-regression tolerances."""
+
+    relative_tolerance: float
+    absolute_tolerance: float
+
+
+AUTHORITATIVE_REFINEMENT_POLICY = ObjectivePolicy(1.0e-6, 1.0e-10)
+DEMONSTRATION_REFINEMENT_POLICY = ObjectivePolicy(1.0e-3, 1.0e-8)
+LEGACY_REFINEMENT_POLICY = ObjectivePolicy(1.0e-10, 1.0e-12)
+
+
+@dataclass(frozen=True)
+class TutorialCase:
+    """Immutable execution and reference policy for one current tutorial input."""
+
+    case_id: str
+    source_options: str
+    reference_package: str
+    reference_mission: str
+    seed_alignment_source: str
+    taxonomy: str
+    universe_root: str
+    hardware_root: str
+    ephemeris_root: str = TUTORIAL_EPHEMERIS_ROOT
+    replay_seed_source: str = "archive"
+    refinement_seed_source: str = "archive"
+    refinement_seed_options: str | None = None
+    stages: tuple[str, ...] = ("replay", "refinement")
+    expected_output: str = "success"
+    schema_probe: bool = False
+    timeout_seconds: int = 600
+
+
+def _tutorial_case(
+    group,
+    name,
+    package,
+    mission,
+    universe,
+    hardware_group=None,
+    taxonomy="demonstration",
+    **overrides,
+):
+    source = f"{TUTORIAL_ROOT}/{group}/{name}.emtgopt"
+    package_path = f"{TUTORIAL_ROOT}/{group}/results/{package}"
+    return TutorialCase(
+        case_id=f"{group}/{name}",
+        source_options=source,
+        reference_package=package_path,
+        reference_mission=f"{package_path}/{mission}",
+        seed_alignment_source=f"{package_path}/XFfile.csv",
+        taxonomy=taxonomy,
+        universe_root=f"{TUTORIAL_ROOT}/{universe}",
+        hardware_root=f"{TUTORIAL_ROOT}/{hardware_group or group}/hardware_models",
+        **overrides,
+    )
+
+
+TUTORIAL_CASES = (
+    _tutorial_case(
+        "Config_Files", "LowSIRIS-REx", "LowSIRIS-REx_11292022_132711",
+        "LowSIRIS-REx_Sun(EB)_Sun(BE).emtg", "OSIRIS_universe",
+    ),
+    _tutorial_case(
+        "Config_Files", "LowSIRIS-REx_high_thrust",
+        "LowSIRIS-REx_high_thrust_11292022_133015",
+        "LowSIRIS-REx_high_thrust_Sun(EB)_Sun(BE).emtg", "OSIRIS_universe",
+    ),
+    _tutorial_case(
+        "Config_Files", "LowSIRIS-REx_high_thrust_low_c3",
+        "LowSIRIS-REx_high_thrust_low_c3_11292022_133313",
+        "LowSIRIS-REx_high_thrust_low_c3_Sun(EB)_Sun(BE).emtg",
+        "OSIRIS_universe",
+    ),
+    _tutorial_case(
+        "Journey_Boundaries", "EVM", "EVM_11252022_163915", "EVM.emtg",
+        "EVM_universe",
+    ),
+    _tutorial_case(
+        "Journey_Boundaries", "EVM_freepoint", "EVM_freepoint_11252022_17141",
+        "EVM_freepoint.emtg", "EVM_universe",
+    ),
+    _tutorial_case(
+        "OSIRIS-REx", "OSIRIS-REx", "OSIRIS-REx_412024_11530",
+        "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg", "OSIRIS_universe",
+        taxonomy="authoritative", schema_probe=True,
+    ),
+    _tutorial_case(
+        "Force_Models", "LowSIRIS-REx_forcemodel_nlp",
+        "LowSIRIS-REx_forcemodel_nlp_11292022_94615",
+        "LowSIRIS-REx_forcemodel_nlp_Sun(EB)_Sun(BE).emtg", "OSIRIS_universe",
+        replay_seed_source="current_infeasible_trial",
+        refinement_seed_source="current_infeasible_trial",
+        refinement_seed_options=(
+            f"{TUTORIAL_ROOT}/Force_Models/LowSIRIS-REx_forcemodel.emtgopt"
+        ),
+    ),
+    _tutorial_case(
+        "Force_Models", "LowSIRIS-REx", "LowSIRIS-REx_11292022_93643",
+        "LowSIRIS-REx_Sun(EB)_Sun(BE).emtg", "OSIRIS_universe",
+        schema_probe=True,
+    ),
+    _tutorial_case(
+        "Force_Models", "LowSIRIS-REx_forcemodel",
+        "LowSIRIS-REx_forcemodel_11292022_94740",
+        "FAILURE_LowSIRIS-REx_forcemodel_Sun(EB)_Sun(BE).emtg",
+        "OSIRIS_universe", taxonomy="deliberate_infeasible",
+        replay_seed_source="current_infeasible_trial", refinement_seed_source="none",
+        stages=("replay",), expected_output="failure",
+    ),
+    _tutorial_case(
+        "LowSIRIS-REx", "LowSIRIS-REx_FBLT", "LowSIRIS-REx_FBLT_11252022_15404",
+        "LowSIRIS-REx_FBLT_Sun(EB)_Sun(BE).emtg", "OSIRIS_universe",
+    ),
+    _tutorial_case(
+        "LowSIRIS-REx", "LowSIRIS-REx", "LowSIRIS-REx_412024_11158",
+        "LowSIRIS-REx_Sun(EB)_Sun(BE).emtg", "OSIRIS_universe",
+        taxonomy="authoritative", schema_probe=True,
+    ),
+    _tutorial_case(
+        "Constraint_Scripting", "EVM_freepoint_boundary_constraint",
+        "EVM_freepoint_boundary_constraint_6222023_161139",
+        "EVM_freepoint_boundary_constraint.emtg", "EVM_universe",
+        hardware_group="Journey_Boundaries",
+    ),
+    _tutorial_case(
+        "Constraint_Scripting", "EVM_freepoint", "EVM_freepoint_6222023_16327",
+        "EVM_freepoint.emtg", "EVM_universe", hardware_group="Journey_Boundaries",
+    ),
+    _tutorial_case(
+        "Constraint_Scripting", "EVM_freepoint_maneuver_constraint",
+        "EVM_freepoint_maneuver_constraint_6252023_145734",
+        "EVM_freepoint_maneuver_constraint.emtg", "EVM_universe",
+        hardware_group="Journey_Boundaries",
+    ),
+    _tutorial_case(
+        "Flybys", "EVM", "EVM_11292022_112047", "EVM.emtg", "EVM_universe",
+    ),
+    _tutorial_case(
+        "Flybys", "HighFidelity", "HighFidelity_11292022_124422",
+        "HighFidelity.emtg", "EVM_universe",
+    ),
+    _tutorial_case(
+        "Flybys", "EVM_singlePhase", "EVM_singlePhase_11292022_115245",
+        "EVM_singlePhase.emtg", "EVM_universe",
+    ),
+)
+TUTORIAL_CASES_BY_ID = {case.case_id: case for case in TUTORIAL_CASES}
+EXCLUDED_TUTORIAL_VINTAGES = (
+    "OSIRIS-REx_11272022_144557",
+    "LowSIRIS-REx_11252022_153645",
 )
 
 
@@ -161,6 +326,56 @@ def write_provenance(directory, benchmark_id, stage, generated_missions, root=No
     return provenance
 
 
+def tutorial_provenance(case, stage, generated_files, root=None):
+    """Build portable SHA-256 evidence for one tutorial stage."""
+    root = Path(root) if root is not None else REPOSITORY_ROOT
+    if stage not in case.stages and stage != "schema":
+        raise ValueError(f"Unknown stage {stage!r} for tutorial {case.case_id!r}")
+    source_fields = {
+        "source_options": case.source_options,
+        "reference_mission": case.reference_mission,
+        "seed_alignment_source": case.seed_alignment_source,
+    }
+    if case.refinement_seed_options:
+        source_fields["refinement_seed_options"] = case.refinement_seed_options
+    sources = {
+        name: {"path": relative, "sha256": _sha256(root / relative)}
+        for name, relative in source_fields.items()
+    }
+    dependency_files = []
+    for dependency_root in (case.universe_root, case.hardware_root):
+        for path in sorted((root / dependency_root).rglob("*")):
+            if path.is_file():
+                dependency_files.append(
+                    {"path": repo_relative(path, root), "sha256": _sha256(path)}
+                )
+    case_ephemeris = root / case.universe_root / "ephemeris_files"
+    shared_ephemeris = root / case.ephemeris_root
+    for name in TUTORIAL_SHARED_EPHEMERIS_FILES:
+        if not (case_ephemeris / name).is_file():
+            path = shared_ephemeris / name
+            dependency_files.append(
+                {"path": repo_relative(path, root), "sha256": _sha256(path)}
+            )
+    return {
+        "status": "unreviewed",
+        "tutorial": case.case_id,
+        "stage": stage,
+        "sources": sources,
+        "dependencies": dependency_files,
+        "generated": [Path(path).name for path in generated_files],
+    }
+
+
+def write_tutorial_provenance(directory, case, stage, generated_files, root=None):
+    """Persist portable tutorial provenance into an artifact directory."""
+    provenance = tutorial_provenance(case, stage, generated_files, root)
+    (Path(directory) / "provenance.json").write_text(
+        json.dumps(provenance, indent=2) + "\n"
+    )
+    return provenance
+
+
 @dataclass
 class CaseResult:
     case_id: str
@@ -224,6 +439,109 @@ def _normalized_description(description):
     return description.replace(": ", ":").strip()
 
 
+def validate_decision_alignment(source_descriptions, reference_descriptions):
+    """Require two nonempty decision schemas to match exactly by position."""
+    source_descriptions = list(source_descriptions)
+    reference_descriptions = list(reference_descriptions)
+    if not source_descriptions or not reference_descriptions:
+        raise ValueError("Decision variable descriptions must be nonempty")
+    if len(source_descriptions) != len(reference_descriptions):
+        raise ValueError(
+            "Decision variable description lengths differ: "
+            f"{len(source_descriptions)} != {len(reference_descriptions)}"
+        )
+    for index, (source, reference) in enumerate(
+        zip(source_descriptions, reference_descriptions)
+    ):
+        if _normalized_description(source) != _normalized_description(reference):
+            raise ValueError(
+                f"Decision variable description mismatch at index {index}: "
+                f"{source!r} != {reference!r}"
+            )
+
+
+_WINDOWS_HARDWARE_PATH = re.compile(
+    r"[A-Za-z]:[\\/][^\s\r\n]+[\\/](?P<name>[^\\/\s\r\n]+)"
+)
+
+
+def prepare_tutorial_hardware(case, case_directory, repository_root=REPOSITORY_ROOT):
+    """Copy and portably rewrite one tutorial's declared hardware tree."""
+    repository_root = Path(repository_root)
+    source_root = repository_root / case.hardware_root
+    if not source_root.is_dir():
+        raise FileNotFoundError(f"Tutorial hardware root does not exist: {source_root}")
+    destination = Path(case_directory) / "hardware_models"
+    shutil.copytree(source_root, destination, dirs_exist_ok=True)
+    available = {path.name for path in destination.rglob("*") if path.is_file()}
+    for hardware_file in (path for path in destination.rglob("*") if path.is_file()):
+        try:
+            text = hardware_file.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        missing = {
+            match.group("name")
+            for match in _WINDOWS_HARDWARE_PATH.finditer(text)
+            if match.group("name") not in available
+        }
+        if missing:
+            raise FileNotFoundError(
+                f"Missing tutorial hardware dependencies in {case.hardware_root}: "
+                f"{', '.join(sorted(missing))}"
+            )
+        rewritten = _WINDOWS_HARDWARE_PATH.sub(
+            lambda match: f"/artifacts/hardware_models/{match.group('name')}",
+            text,
+        )
+        if rewritten != text:
+            hardware_file.write_text(rewritten, encoding="utf-8")
+    return destination
+
+
+def prepare_tutorial_universe(case, case_directory, repository_root=REPOSITORY_ROOT):
+    """Stage one tutorial universe and supplement its missing shared kernels."""
+    repository_root = Path(repository_root)
+    source_root = repository_root / case.universe_root
+    ephemeris_root = repository_root / case.ephemeris_root
+    if not source_root.is_dir():
+        raise FileNotFoundError(f"Tutorial universe root does not exist: {source_root}")
+    if not ephemeris_root.is_dir():
+        raise FileNotFoundError(
+            f"Tutorial ephemeris root does not exist: {ephemeris_root}"
+        )
+    destination = Path(case_directory) / "universe"
+    shutil.copytree(source_root, destination, dirs_exist_ok=True)
+    destination_ephemeris = destination / "ephemeris_files"
+    destination_ephemeris.mkdir(parents=True, exist_ok=True)
+    for name in TUTORIAL_SHARED_EPHEMERIS_FILES:
+        source = ephemeris_root / name
+        if not source.is_file():
+            raise FileNotFoundError(f"Tutorial ephemeris file does not exist: {source}")
+        destination_file = destination_ephemeris / source.name
+        if not destination_file.exists():
+            shutil.copy2(source, destination_file)
+    return destination
+
+
+def validate_tutorial_case_dependencies(case, repository_root=REPOSITORY_ROOT):
+    """Fail before execution when a registry source or declared root is absent."""
+    repository_root = Path(repository_root)
+    required = (
+        case.source_options,
+        case.reference_package,
+        case.reference_mission,
+        case.seed_alignment_source,
+        case.universe_root,
+        case.hardware_root,
+        case.ephemeris_root,
+    )
+    missing = [relative for relative in required if not (repository_root / relative).exists()]
+    if missing:
+        raise FileNotFoundError(
+            f"Missing tutorial dependencies for {case.case_id}: {', '.join(missing)}"
+        )
+
+
 def load_xf_descriptions(xf_file):
     """Load a contiguous ordered decision-description schema from an XF file."""
     with Path(xf_file).open(newline="") as stream:
@@ -273,18 +591,7 @@ def inject_aligned_mission_seed(options, mission, expected_descriptions=None):
     option_descriptions = [entry[0] for entry in options.trialX]
     if not option_descriptions and expected_descriptions is not None:
         option_descriptions = list(expected_descriptions)
-    if len(option_descriptions) != len(descriptions):
-        raise ValueError("Mission and options decision vectors differ in length")
-    for index, (option_description, mission_description) in enumerate(
-        zip(option_descriptions, descriptions)
-    ):
-        if _normalized_description(option_description) != _normalized_description(
-            mission_description
-        ):
-            raise ValueError(
-                f"Decision variable description mismatch at index {index}: "
-                f"{option_description!r} != {mission_description!r}"
-            )
+    validate_decision_alignment(option_descriptions, descriptions)
 
     for index, (value, lower_bound, upper_bound) in enumerate(
         zip(values, lower_bounds, upper_bounds)
@@ -309,6 +616,9 @@ def _prepare_seeded_case(
     pyemtg_root=PYEMTG_ROOT,
     execution_repository_root=None,
     execution_directory=None,
+    universe_root=None,
+    hardware_root=None,
+    expected_descriptions=None,
 ):
     """Prepare a run mode from an aligned committed mission seed."""
     Mission, MissionOptions = _load_pyemtg(pyemtg_root)
@@ -316,22 +626,31 @@ def _prepare_seeded_case(
     prepared_options = prepare_case(source_options, case_directory, pyemtg_root)
     options = MissionOptions.MissionOptions(str(prepared_options))
     baseline = Mission.Mission(str(baseline_mission))
-    inject_aligned_mission_seed(options, baseline)
+    inject_aligned_mission_seed(
+        options, baseline, expected_descriptions=expected_descriptions
+    )
     options.run_inner_loop = run_inner_loop
     if execution_repository_root is not None:
         execution_repository_root = Path(execution_repository_root)
-        options.universe_folder = str(execution_repository_root / "testatron/universe")
+        options.universe_folder = str(
+            execution_repository_root / (universe_root or "testatron/universe")
+        )
         options.HardwarePath = str(
             execution_repository_root
-            / "docs/0_Users/tutorial/Tutorial_EMTG_Files/"
-            "Config_Files/hardware_models"
+            / (
+                hardware_root
+                or "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models"
+            )
         )
-        gravity_root = execution_repository_root / "testatron/universe/gravity_files"
+        gravity_root = Path(options.universe_folder) / "gravity_files"
         for journey in options.Journeys:
-            gravity_name = Path(
-                journey.central_body_gravity_file.replace("\\", "/")
-            ).name
-            journey.central_body_gravity_file = str(gravity_root / gravity_name)
+            if journey.central_body_gravity_order == 0:
+                journey.central_body_gravity_file = "DoesNotExist.grv"
+            else:
+                gravity_name = Path(
+                    journey.central_body_gravity_file.replace("\\", "/")
+                ).name
+                journey.central_body_gravity_file = str(gravity_root / gravity_name)
     if execution_directory is not None:
         options.forced_working_directory = str(execution_directory)
     options.write_options_file(
@@ -351,6 +670,9 @@ def prepare_replay(
     pyemtg_root=PYEMTG_ROOT,
     execution_repository_root=None,
     execution_directory=None,
+    universe_root=None,
+    hardware_root=None,
+    expected_descriptions=None,
 ):
     """Prepare an evaluate-only replay from an aligned committed mission seed."""
     return _prepare_seeded_case(
@@ -361,6 +683,9 @@ def prepare_replay(
         pyemtg_root,
         execution_repository_root,
         execution_directory,
+        universe_root,
+        hardware_root,
+        expected_descriptions,
     )
 
 
@@ -511,6 +836,9 @@ def prepare_refinement(
     pyemtg_root=PYEMTG_ROOT,
     execution_repository_root=None,
     execution_directory=None,
+    universe_root=None,
+    hardware_root=None,
+    expected_descriptions=None,
 ):
     """Prepare a direct IPOPT refinement from an aligned committed mission seed."""
     prepared_options = _prepare_seeded_case(
@@ -521,11 +849,154 @@ def prepare_refinement(
         pyemtg_root,
         execution_repository_root,
         execution_directory,
+        universe_root,
+        hardware_root,
+        expected_descriptions,
     )
     _, MissionOptions = _load_pyemtg(pyemtg_root)
     options = MissionOptions.MissionOptions(str(prepared_options))
     options.quiet_NLP = 0
     options.enable_NLP_chaperone = 1
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+    return prepared_options
+
+
+def tutorial_objective_policy(case):
+    """Return the fixed refinement objective policy for a tutorial case."""
+    if case.taxonomy == "authoritative":
+        return AUTHORITATIVE_REFINEMENT_POLICY
+    if case.taxonomy == "demonstration":
+        return DEMONSTRATION_REFINEMENT_POLICY
+    raise ValueError(f"Tutorial case {case.case_id!r} has no refinement policy")
+
+
+def objective_sense(objective_type):
+    """Return the documented optimization direction for an EMTG objective type."""
+    maximizing_types = {2, 3, 4, 6, 9, 11, 12, 14, 15, 16, 17, 18, 19, 26}
+    return "maximize" if objective_type in maximizing_types else "minimize"
+
+
+def prepare_tutorial_schema_probe(
+    case,
+    case_directory,
+    *,
+    repository_root=REPOSITORY_ROOT,
+    execution_repository_root="/repo",
+    execution_directory="/artifacts",
+):
+    """Prepare an evaluate-only current model that emits its decision schema."""
+    if not case.schema_probe:
+        raise ValueError(f"Tutorial case {case.case_id!r} does not need a schema probe")
+    repository_root = Path(repository_root)
+    validate_tutorial_case_dependencies(case, repository_root)
+    prepare_tutorial_universe(case, case_directory, repository_root)
+    prepare_tutorial_hardware(case, case_directory, repository_root)
+    _, MissionOptions = _load_pyemtg()
+    prepared_options = prepare_case(
+        repository_root / case.source_options, case_directory
+    )
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    options.run_inner_loop = 0
+    options.universe_folder = str(Path(execution_directory) / "universe")
+    options.HardwarePath = str(Path(execution_directory) / "hardware_models")
+    options.forced_working_directory = str(execution_directory)
+    for journey in options.Journeys:
+        if journey.central_body_gravity_order == 0:
+            journey.central_body_gravity_file = "DoesNotExist.grv"
+        else:
+            gravity_name = Path(
+                journey.central_body_gravity_file.replace("\\", "/")
+            ).name
+            journey.central_body_gravity_file = str(
+                Path(options.universe_folder) / "gravity_files" / gravity_name
+            )
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+    return prepared_options
+
+
+def prepare_tutorial_case(
+    case,
+    stage,
+    case_directory,
+    *,
+    repository_root=REPOSITORY_ROOT,
+    execution_repository_root="/repo",
+    execution_directory="/artifacts",
+    schema_descriptions=None,
+):
+    """Prepare one tutorial replay or refinement from its declared seed policy."""
+    if stage not in case.stages:
+        raise ValueError(f"Stage {stage!r} is disabled for {case.case_id!r}")
+    repository_root = Path(repository_root)
+    source_options = repository_root / case.source_options
+    seed_source = (
+        case.replay_seed_source
+        if stage == "replay"
+        else case.refinement_seed_source
+    )
+    if case.schema_probe and schema_descriptions is None:
+        raise ValueError(f"Tutorial case {case.case_id!r} requires a schema probe")
+    validate_tutorial_case_dependencies(case, repository_root)
+    prepare_tutorial_universe(case, case_directory, repository_root)
+    prepare_tutorial_hardware(case, case_directory, repository_root)
+
+    if seed_source == "archive":
+        prepare = prepare_replay if stage == "replay" else prepare_refinement
+        return prepare(
+            source_options,
+            repository_root / case.reference_mission,
+            case_directory,
+            execution_repository_root=execution_repository_root,
+            execution_directory=execution_directory,
+            universe_root=str(Path(execution_directory) / "universe"),
+            hardware_root=str(Path(execution_directory) / "hardware_models"),
+            expected_descriptions=schema_descriptions,
+        )
+    if seed_source != "current_infeasible_trial":
+        raise ValueError(f"Unknown tutorial seed source: {seed_source!r}")
+
+    _, MissionOptions = _load_pyemtg()
+    prepared_options = prepare_case(source_options, case_directory)
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    options.AssembleMasterDecisionVector()
+    source_trial = list(options.trialX)
+    if case.refinement_seed_options:
+        seed_options = MissionOptions.MissionOptions(
+            str(repository_root / case.refinement_seed_options)
+        )
+        seed_options.AssembleMasterDecisionVector()
+        validate_decision_alignment(
+            [entry[0] for entry in source_trial],
+            [entry[0] for entry in seed_options.trialX],
+        )
+        source_trial = list(seed_options.trialX)
+    source_descriptions = [entry[0] for entry in source_trial]
+    reference_descriptions = load_xf_descriptions(
+        repository_root / case.seed_alignment_source
+    )
+    validate_decision_alignment(source_descriptions, reference_descriptions)
+    options.trialX = source_trial
+    options.DisassembleMasterDecisionVector()
+    options.run_inner_loop = 0 if stage == "replay" else 3
+    options.quiet_NLP = 0
+    options.enable_NLP_chaperone = 1
+    options.universe_folder = str(Path(execution_directory) / "universe")
+    options.HardwarePath = str(Path(execution_directory) / "hardware_models")
+    options.forced_working_directory = str(execution_directory)
+    for journey in options.Journeys:
+        if journey.central_body_gravity_order == 0:
+            journey.central_body_gravity_file = "DoesNotExist.grv"
+        else:
+            gravity_name = Path(
+                journey.central_body_gravity_file.replace("\\", "/")
+            ).name
+            journey.central_body_gravity_file = str(
+                Path(options.universe_folder) / "gravity_files" / gravity_name
+            )
     options.write_options_file(
         str(prepared_options), not options.print_only_non_default_options
     )
@@ -617,14 +1088,17 @@ def _event_topology(mission):
 
 def _structural_event_topology(mission):
     report_events = {"coast", "match_point"}
-    return tuple(
-        tuple(
-            (event.EventType, event.Location)
-            for event in journey.missionevents
-            if event.EventType not in report_events
-        )
-        for journey in mission.Journeys
-    )
+    topology = []
+    for journey in mission.Journeys:
+        structural_events = []
+        for event in journey.missionevents:
+            identity = (event.EventType, event.Location)
+            if event.EventType in report_events:
+                continue
+            if not structural_events or structural_events[-1] != identity:
+                structural_events.append(identity)
+        topology.append(tuple(structural_events))
+    return tuple(topology)
 
 
 def compare_replay(baseline, generated):
@@ -741,10 +1215,20 @@ def compare_replay(baseline, generated):
     }
 
 
-def compare_refinement(baseline, generated, feasibility_tolerance):
+def compare_refinement(
+    baseline,
+    generated,
+    feasibility_tolerance,
+    *,
+    objective_policy=None,
+    objective_sense="minimize",
+):
     """Check feasibility, topology, and objective non-regression after refinement."""
-    absolute_tolerance = 1.0e-12
-    relative_tolerance = 1.0e-10
+    bound_absolute_tolerance = 1.0e-12
+    bound_relative_tolerance = 1.0e-10
+    objective_policy = objective_policy or LEGACY_REFINEMENT_POLICY
+    if objective_sense not in {"minimize", "maximize"}:
+        raise ValueError(f"Unknown objective sense: {objective_sense!r}")
     decision_bounds_complete = (
         len(generated.DecisionVector)
         == len(generated.Xlowerbounds)
@@ -753,13 +1237,21 @@ def compare_refinement(baseline, generated, feasibility_tolerance):
     )
 
     def decision_value_in_bounds(value, lower_bound, upper_bound):
-        tolerance = absolute_tolerance + relative_tolerance * max(
+        tolerance = bound_absolute_tolerance + bound_relative_tolerance * max(
             abs(value), abs(lower_bound), abs(upper_bound)
         )
         return lower_bound - tolerance <= value <= upper_bound + tolerance
 
-    objective_band = absolute_tolerance + relative_tolerance * max(
-        abs(baseline.objective_value), abs(generated.objective_value)
+    objective_band = (
+        objective_policy.absolute_tolerance
+        + objective_policy.relative_tolerance
+        * max(abs(baseline.objective_value), abs(generated.objective_value))
+    )
+    objective_delta = generated.objective_value - baseline.objective_value
+    objective_non_regression = (
+        objective_delta <= objective_band
+        if objective_sense == "minimize"
+        else objective_delta >= -objective_band
     )
     checks = {
         "finite_objective": math.isfinite(generated.objective_value),
@@ -791,8 +1283,7 @@ def compare_refinement(baseline, generated, feasibility_tolerance):
             _normalized_description(description)
             for description in baseline.Xdescriptions
         ],
-        "objective_non_regression": generated.objective_value
-        <= baseline.objective_value + objective_band,
+        "objective_non_regression": objective_non_regression,
     }
     return {
         "status": "unreviewed",
@@ -800,13 +1291,53 @@ def compare_refinement(baseline, generated, feasibility_tolerance):
         "checks": checks,
         "baseline_objective": baseline.objective_value,
         "generated_objective": generated.objective_value,
+        "objective_sense": objective_sense,
+        "objective_relative_tolerance": objective_policy.relative_tolerance,
+        "objective_absolute_tolerance": objective_policy.absolute_tolerance,
         "objective_comparison_band": objective_band,
+        "objective_delta": objective_delta,
+        "objective_absolute_delta": abs(objective_delta),
         "generated_feasibility_metric": abs(generated.worst_violation),
         "feasibility_tolerance": feasibility_tolerance,
     }
 
 
-def parse_ipopt_log(log_text):
+def compare_deliberate_infeasible(baseline, generated, feasibility_tolerance):
+    """Accept a tutorial replay only when it reproduces the intended failure."""
+    finite_decision_vector = bool(generated.DecisionVector) and all(
+        math.isfinite(value) for value in generated.DecisionVector
+    )
+    finite_constraint_vector = bool(generated.ConstraintVector) and all(
+        math.isfinite(value) for value in generated.ConstraintVector
+    )
+    try:
+        validate_decision_alignment(
+            generated.Xdescriptions, baseline.Xdescriptions
+        )
+        descriptions_match = True
+    except ValueError:
+        descriptions_match = False
+    checks = {
+        "journey_names": [journey.journey_name for journey in generated.Journeys]
+        == [journey.journey_name for journey in baseline.Journeys],
+        "event_topology": _structural_event_topology(generated)
+        == _structural_event_topology(baseline),
+        "decision_descriptions": descriptions_match,
+        "finite_decision_vector": finite_decision_vector,
+        "finite_constraint_vector": finite_constraint_vector,
+        "intentionally_infeasible": math.isfinite(generated.worst_violation)
+        and abs(generated.worst_violation) > feasibility_tolerance,
+    }
+    return {
+        "status": "unreviewed",
+        "acceptable": all(checks.values()),
+        "checks": checks,
+        "generated_feasibility_metric": abs(generated.worst_violation),
+        "feasibility_tolerance": feasibility_tolerance,
+    }
+
+
+def parse_ipopt_log(log_text, initialization_policy=None):
     """Extract refinement diagnostics from verbose IPOPT output."""
     initialization_match = re.search(
         r"^EMTG IPOPT initialization policy:\s*(?P<policy>\S+)$",
@@ -823,18 +1354,16 @@ def parse_ipopt_log(log_text):
         r"Constraint violation\.*:\s+\S+\s+(?P<violation>\S+)", log_text
     )
     exit_match = re.search(r"^EXIT:\s*(?P<exit>.+)$", log_text, re.MULTILINE)
-    if not all(
-        (
-            initialization_match,
-            initial_match,
-            iterations_match,
-            violation_match,
-            exit_match,
-        )
-    ):
+    if not all((initial_match, iterations_match, violation_match, exit_match)):
+        raise ValueError("IPOPT log is missing required refinement diagnostics")
+    if initialization_match is None and initialization_policy is None:
         raise ValueError("IPOPT log is missing required refinement diagnostics")
     return {
-        "initialization_policy": initialization_match.group("policy"),
+        "initialization_policy": (
+            initialization_match.group("policy")
+            if initialization_match is not None
+            else initialization_policy
+        ),
         "initial_infeasibility": float(initial_match.group("inf_pr")),
         "iterations": int(iterations_match.group("iterations")),
         "terminal_constraint_violation": float(

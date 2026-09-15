@@ -72,6 +72,7 @@ The custom category selectors are mutually exclusive.
 | `pytest --regression` | Parser and frozen-reference regression checks | No Docker build |
 | `pytest --integration` | Reusable Docker, compile, and solver-runtime checks | Yes |
 | `pytest --clean-bootstrap` | One uncached toolchain rebuild and validation | Yes, always uncached |
+| `pytest --tutorials` | Current tutorial replay and IPOPT refinement checks | Yes |
 
 Plain `pytest` runs the unit, regression, and normal integration selections but
 excludes clean bootstrap. It can unnecessarily repeat expensive native
@@ -89,6 +90,7 @@ Confirm selection without running a test:
 ```bash
 pytest --clean-bootstrap --collect-only -q
 pytest --integration --collect-only -q
+pytest --tutorials --collect-only -q
 ```
 
 Combining category selectors is an error. For example:
@@ -113,6 +115,7 @@ The markers declared in `pytest.ini` are:
 | `compile` | Configures or compiles native targets |
 | `solver_runtime` | Executes a native NLP solver |
 | `clean_bootstrap` | Rebuilds the toolchain without reusable layers |
+| `tutorials` | Opt-in verification of current tutorial inputs |
 
 Useful focused selections include:
 
@@ -133,6 +136,101 @@ Run a single test by node ID:
 ```bash
 pytest tests/integration/test_ipopt_backend.py::test_track_acs_replay_matches_committed_truth -vv
 ```
+
+## Tutorial Verification
+
+The tutorial gate covers exactly 17 current lesson inputs through 17 replay
+nodes and 16 IPOPT-refinement nodes. Three current inputs also run internal
+schema probes before their visible stages. The probes are prerequisites, not
+separately collected tests, so `pytest --tutorials --collect-only -q` must
+report exactly 33 nodes.
+
+Tutorials are excluded from plain pytest and `--integration`. Opt in with
+either selector:
+
+```bash
+pytest --tutorials -vv
+pytest -m tutorials -vv
+```
+
+The registry assigns each case one acceptance taxonomy:
+
+- `authoritative`: OSIRIS-REx 2024 and LowSIRIS-REx 2024.
+- `demonstration`: the remaining successful current lessons.
+- `deliberate_infeasible`: `Force_Models/LowSIRIS-REx_forcemodel`.
+
+Replay checks same-point fidelity with relative tolerance `1e-10` and absolute
+tolerance `1e-12`. Refinement uses one-sided objective non-regression, allowing
+better solutions: authoritative relative/absolute tolerances are `1e-6` and
+`1e-10`; demonstration tolerances are `1e-3` and `1e-8`. Feasibility uses the
+source mission tolerance. Objective direction follows the configured EMTG
+objective type.
+
+The deliberate Force Models failure is a passing pedagogical assertion, never
+an xfail. Its replay must reproduce the archived infeasible topology with
+finite vectors and a violation above tolerance. The sibling
+`LowSIRIS-REx_forcemodel_nlp` refinement keeps its own model and mission
+identity while importing only the infeasible trial vector from
+`LowSIRIS-REx_forcemodel`. Its replay establishes that infeasible starting
+point; IPOPT refinement must recover from that same seed, report its native
+successful exit, and compare against the pinned converged `_nlp` archive.
+
+Every stage writes isolated artifacts below the configured pytest artifact
+directory. `result.json`, `comparison.json`, and `provenance.json` remain
+`unreviewed`. Provenance records repository-relative POSIX source and
+dependency paths with SHA-256 hashes; host, `/repo`, and `/artifacts` paths are
+not evidence. Tutorial inputs, result packages, and hardware references are
+immutable. The runner copies hardware into the writable stage and rewrites
+legacy Windows paths there only. Never use `--update_truths` with this gate.
+
+Two 2022 result packages are intentionally outside the current-input gate:
+`OSIRIS-REx_11272022_144557` remains covered by its dedicated benchmark, and
+`LowSIRIS-REx_11252022_153645` is retained as historical reference data.
+
+Validate incrementally before a full sweep:
+
+```bash
+pytest --tutorials --collect-only -q
+pytest --tutorials -k 'EVM' -vv
+pytest --tutorials -k 'OSIRIS-REx and not LowSIRIS' -vv
+pytest --tutorials -k 'Force_Models' -vv
+pytest --tutorials -vv
+```
+
+Stop on an unexpected non-green result. Inspect the stage `run.log`,
+`comparison.json`, `result.json`, and `provenance.json`; do not widen a
+tolerance or convert the case to xfail. First determine whether the failure is
+preparation/alignment, dependency portability, EMTG execution, parsing,
+feasibility/topology, or objective non-regression.
+
+### Current reference gaps
+
+The first full 33-node sweep on 2026-09-15 passed 20 nodes and exposed eight
+current-input/reference incompatibilities. These remain normal failures until
+compatible immutable references are reviewed and supplied; they are not
+xfails:
+
+- `Journey_Boundaries/EVM_freepoint`: current and archived schemas contain 33
+  and 48 variables.
+- `LowSIRIS-REx/LowSIRIS-REx_FBLT`: current and archived transcriptions contain
+  138 and 258 variables.
+- `Flybys/HighFidelity`: current and archived schemas contain 77 and 65
+  variables.
+- `Constraint_Scripting/EVM_freepoint` and
+  `Constraint_Scripting/EVM_freepoint_maneuver_constraint`: archived seeds are
+  outside their recorded bounds.
+- `Journey_Boundaries/EVM`,
+  `Constraint_Scripting/EVM_freepoint_boundary_constraint`, and
+  `Flybys/EVM_singlePhase`: aligned IPOPT runs produce finite feasible outputs
+  but terminate with native `Restoration Failed!`, not
+  `Optimal Solution Found.`
+
+The first five cases fail both replay and refinement during strict seed
+preparation. The last three fail only refinement's native-exit assertion. Do
+not resolve these gaps by partial name matching, interpolation, bound clipping,
+case-specific tolerance widening, or accepting a failed IPOPT exit. Either add
+reviewed references matching the current inputs or explicitly revise the gate
+contract before changing these results.
 
 ## Docker Conditions
 
