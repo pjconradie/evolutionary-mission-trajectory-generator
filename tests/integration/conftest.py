@@ -517,24 +517,32 @@ check track_acs_replay_no_ipopt passed
     return checks
 
 
-@pytest.fixture(scope="session")
-def osiris_2024_replay_probe(toolchain_image, repository_root, tmp_path_factory):
-    """Replay the immutable NASA 2024 OSIRIS-REx solution without optimization."""
+def _osiris_replay_probe(
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+    package_name,
+    year,
+    prepare_replay,
+):
+    """Replay one immutable NASA OSIRIS-REx solution without optimization."""
     artifacts = artifact_directory(tmp_path_factory)
     baseline_path = (
         repository_root
         / "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/"
-        "OSIRIS-REx_412024_11530/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+        f"{package_name}/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
     )
-    options_path = ipopt_characterization.prepare_osiris_2024_replay(
+    options_path = prepare_replay(
         artifacts,
         execution_repository_root="/repo",
         execution_directory="/artifacts",
     )
+    check_prefix = f"osiris_{year}"
+    benchmark = f"osiris-rex-{year}"
     script = _backend_source_script("IPOPT") + rf'''
-cmake --build /build --target EMTGv9 -j2 >/tmp/osiris-2024-replay-build.log 2>&1 \
-    || {{ tail -n 150 /tmp/osiris-2024-replay-build.log; exit 31; }}
-check osiris_2024_replay_compile passed
+cmake --build /build --target EMTGv9 -j2 >/tmp/{benchmark}-replay-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/{benchmark}-replay-build.log; exit 31; }}
+check {check_prefix}_replay_compile passed
 set +e
 timeout 60 /build/src/EMTGv9 /artifacts/{options_path.name} \
     >/artifacts/run.log 2>&1
@@ -546,14 +554,14 @@ test -s /artifacts/OSIRIS-REx.emtg || exit 33
 if grep -Eiq 'This is Ipopt|Number of Iterations|EXIT:' /artifacts/run.log; then
     exit 34
 fi
-check osiris_2024_replay_run passed
-check osiris_2024_replay_no_ipopt passed
+check {check_prefix}_replay_run passed
+check {check_prefix}_replay_no_ipopt passed
 '''
     checks = run_probe(
         image=toolchain_image,
         repository_root=repository_root,
         script=script,
-        probe_name="osiris-2024-replay",
+        probe_name=f"{benchmark}-replay",
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
@@ -574,11 +582,9 @@ check osiris_2024_replay_no_ipopt passed
     result = {
         "status": "unreviewed",
         "stage": "replay",
-        "benchmark": "osiris-rex-2024",
+        "benchmark": benchmark,
         "acceptable": comparison["acceptable"],
-        "source_options": str(
-            ipopt_characterization.OSIRIS_2024_PACKAGE / "OSIRIS-REx.emtgopt"
-        ),
+        "source_options": str(baseline_path.parent / "OSIRIS-REx.emtgopt"),
         "baseline_mission": str(baseline_path),
         "prepared_options": str(options_path),
         "generated_mission": str(generated_path),
@@ -589,6 +595,145 @@ check osiris_2024_replay_no_ipopt passed
     checks["comparison"] = comparison
     checks["result"] = result
     return checks
+
+
+def _osiris_refinement_probe(
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+    package_name,
+    year,
+    prepare_refinement,
+):
+    """Refine one aligned NASA OSIRIS-REx seed with direct IPOPT."""
+    artifacts = artifact_directory(tmp_path_factory)
+    baseline_path = (
+        repository_root
+        / "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/"
+        f"{package_name}/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    options_path = prepare_refinement(
+        artifacts,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    check_prefix = f"osiris_{year}"
+    benchmark = f"osiris-rex-{year}"
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/{benchmark}-ipopt-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/{benchmark}-ipopt-build.log; exit 35; }}
+check {check_prefix}_refinement_compile passed
+set +e
+timeout 180 /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/artifacts/run.log 2>&1
+refinement_status=$?
+set -e
+cat /artifacts/run.log
+test "$refinement_status" -eq 0 || exit 36
+test -s /artifacts/OSIRIS-REx.emtg || exit 37
+check {check_prefix}_refinement_run passed
+'''
+    started = time.monotonic()
+    checks = run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name=f"{benchmark}-refinement",
+        tmp_path_factory=tmp_path_factory,
+        build_volume=build_volume_name(toolchain_image, "ipopt"),
+        writable_artifacts=artifacts,
+    )
+    duration_seconds = time.monotonic() - started
+    generated_path = artifacts / "OSIRIS-REx.emtg"
+    baseline = Mission.Mission(str(baseline_path))
+    generated = Mission.Mission(str(generated_path))
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, generated, 1.0e-5
+    )
+    diagnostics = ipopt_characterization.parse_ipopt_log(
+        (artifacts / "run.log").read_text(errors="replace")
+    )
+    comparison["checks"]["near_feasible_initialization"] = (
+        diagnostics["initialization_policy"] == "near-feasible-primal-seed"
+    )
+    comparison["checks"]["ipopt_native_success"] = (
+        diagnostics["native_exit"] == "Optimal Solution Found."
+    )
+    comparison["acceptable"] = all(comparison["checks"].values())
+    comparison["ipopt"] = diagnostics
+    comparison["duration_seconds"] = duration_seconds
+    (artifacts / "comparison.json").write_text(
+        json.dumps(comparison, indent=2) + "\n"
+    )
+    result = {
+        "status": "unreviewed",
+        "stage": "ipopt_refinement",
+        "benchmark": benchmark,
+        "acceptable": comparison["acceptable"],
+        "source_options": str(baseline_path.parent / "OSIRIS-REx.emtgopt"),
+        "baseline_mission": str(baseline_path),
+        "prepared_options": str(options_path),
+        "generated_mission": str(generated_path),
+        "comparison": str(artifacts / "comparison.json"),
+        "log": str(artifacts / "run.log"),
+        "duration_seconds": duration_seconds,
+    }
+    (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    checks["comparison"] = comparison
+    checks["result"] = result
+    return checks
+
+
+@pytest.fixture(scope="session")
+def osiris_2022_replay_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Replay the immutable NASA 2022 OSIRIS-REx solution without optimization."""
+    return _osiris_replay_probe(
+        toolchain_image,
+        repository_root,
+        tmp_path_factory,
+        "OSIRIS-REx_11272022_144557",
+        "2022",
+        ipopt_characterization.prepare_osiris_2022_replay,
+    )
+
+
+@pytest.fixture(scope="session")
+def osiris_2022_refinement_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Refine the aligned NASA 2022 OSIRIS-REx seed with direct IPOPT."""
+    return _osiris_refinement_probe(
+        toolchain_image,
+        repository_root,
+        tmp_path_factory,
+        "OSIRIS-REx_11272022_144557",
+        "2022",
+        ipopt_characterization.prepare_osiris_2022_refinement,
+    )
+
+
+@pytest.fixture(scope="session")
+def osiris_2024_replay_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Replay the immutable NASA 2024 OSIRIS-REx solution without optimization."""
+    return _osiris_replay_probe(
+        toolchain_image,
+        repository_root,
+        tmp_path_factory,
+        "OSIRIS-REx_412024_11530",
+        "2024",
+        ipopt_characterization.prepare_osiris_2024_replay,
+    )
+
+
+@pytest.fixture(scope="session")
+def osiris_2024_refinement_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Refine the aligned NASA 2024 OSIRIS-REx seed with direct IPOPT."""
+    return _osiris_refinement_probe(
+        toolchain_image,
+        repository_root,
+        tmp_path_factory,
+        "OSIRIS-REx_412024_11530",
+        "2024",
+        ipopt_characterization.prepare_osiris_2024_refinement,
+    )
 
 
 @pytest.fixture(scope="session")

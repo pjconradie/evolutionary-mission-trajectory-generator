@@ -1,7 +1,7 @@
 #EMTGv9 .emtgopt file version 2
 
 #mission name
-mission_name spacecraftoptions_Chem_TrackACSProp
+mission_name CoastPhase_EMintercept
 #objective function type
 #0: minimum deltaV
 #1: minimum time
@@ -40,7 +40,7 @@ global_timebounded 1
 #launch window open date (MJD)
 launch_window_open_date 53701
 #flight time bounds (days)
-total_flight_time_bounds 0 500
+total_flight_time_bounds 0 1000
 #DLA in degrees
 DLA_bounds -90 90
 #RLA in degrees
@@ -58,7 +58,7 @@ RLA_bounds -2880 2880
 #9: variable phase type
 #10: ProbeEntryPhase
 #11: ControlLawThrustPhase
-mission_type 6
+mission_type 7
 #NLP solver type
 #0: SNOPT
 #1: WORHP
@@ -82,7 +82,7 @@ MBH_max_not_improve 10000
 #maximum number of trials for MBH
 MBH_max_trials 100000
 #maximum run time for MBH, in seconds
-MBH_max_run_time 60
+MBH_max_run_time 600
 #Maximum step size (uniform) or scale factor (other distributions)
 MBH_max_step_size 1
 #MBH hop probabilty distribution
@@ -104,17 +104,17 @@ snopt_optimality_tolerance 0.0020000000000000000416
 #NLP max step
 NLP_max_step 1
 #NLP major iterations
-snopt_major_iterations 8000
+snopt_major_iterations 1000
 #NLP minor iterations
 snopt_minor_iterations 500
 #NLP max run time (seconds)
-snopt_max_run_time 59
+snopt_max_run_time 25
 #Enable Scalatron?
 enable_Scalatron 1
 #Enable NLP chaperone?
 enable_NLP_chaperone 1
 #Seed MBH?
-seed_MBH 0
+seed_MBH 1
 #Skip first NLP run in an MBH process?
 skip_first_nlp_run 0
 #Stop NLP on goal attain?
@@ -200,7 +200,7 @@ LV_adapter_mass 0
 #15: 1D Throttle table high-thrust
 #16: 1D Throttle table high-Isp
 #17: 2D polynomial fit
-engine_type 3
+engine_type 5
 #number of thruster systems (used to be called number of engines)
 number_of_electric_propulsion_systems 1
 #percentage of time that engine can operate
@@ -236,11 +236,11 @@ throttle_logic_mode 1
 #spacecraft power coefficients A, B, and C
 #represent the power requirements of the spacecraft at a distance r from the sun
 #i.e. heaters, communications, etc
-spacecraft_power_coefficients 1.3999999999999999112 -0.10000000000000000555 0.050000000000000002776
+spacecraft_power_coefficients 0 0 0
 #thrust polynomial coefficients
-engine_input_thrust_coefficients 1 0.10000000000000000555 0.010000000000000000208 0.0010000000000000000208 0 0 0
+engine_input_thrust_coefficients 26.337458999999999065 -51.69439299999999804 90.486508999999998082 -36.720292999999998074 5.1456020000000002312 0 0
 #mass flow rate polynomial coefficients
-engine_input_mass_flow_rate_coefficients 0.69999999999999995559 0 0 0 0 0 0
+engine_input_mass_flow_rate_coefficients 2.5059999999999997833 -5.356799999999999784 6.2538999999999997925 -2.5371999999999998998 0.36985000000000001208 0 0
 #thruster input power bounds (kW)
 engine_input_power_bounds 0.5250000000000000222 2.6000000000000000888
 #Propulsion system efficiency (fraction)
@@ -258,9 +258,9 @@ TCM_pre_flyby 0
 #Post-DSM TCM magnitude as a fraction of DSM magnitude
 TCM_maneuver_fraction 0
 #Track ACS propellant consumption?
-trackACS 1
+trackACS 0
 #ACS propellant consumption (kg/day)
-ACS_kg_per_day 0.10000000000000000555
+ACS_kg_per_day 0
 #Bounds on final mass constraints
 final_mass_constraint_bounds 0 0
 #Constrain final wet mass?
@@ -301,7 +301,7 @@ PropulsionSystemsLibraryFile default.emtg_propulsionsystemopt
 #SpacecraftOptionsFile
 SpacecraftOptionsFile default.emtg_spacecraftopt
 #LaunchVehicleKey
-LaunchVehicleKey Atlas_V_411
+LaunchVehicleKey Falcon_9_FT_(RTLS)
 #PowerSystemKey
 PowerSystemKey 5kW_basic
 #ElectricPropulsionSystemKey
@@ -355,7 +355,7 @@ post_mission_wait_time 0
 #Override the working directory?
 override_working_directory 1
 #User-defined working directory
-forced_working_directory /artifacts/cases/spacecraft_options/spacecraftoptions_Chem_TrackACSProp
+forced_working_directory /artifacts/cases/transcription_tests/CoastPhase_EMintercept
 #Create a mission subfolder?
 override_mission_subfolder 1
 #Mission subfolder
@@ -427,7 +427,7 @@ user_data
 
 BEGIN_JOURNEY
 #Journey name
-journey_name EM_journey
+journey_name EMJ_journey
 #Journey central body name
 journey_central_body Sun
 #destination list, as indices from the Universe file
@@ -447,7 +447,7 @@ sequence
 #9: variable (do not use)
 #10 ProbeEntryPhase
 #11 ControlLawThrustPhase
-phase_type 6
+phase_type 7
 #impulses per phase
 impulses_per_phase 1
 #Thrust control law
@@ -527,7 +527,7 @@ arrival_date_bounds 51544.5 60000
 departure_type 0
 #what are the bounds on the initial impulse for each journey in km/s\
 #you can set a very high upper bound if you are using a launchy vehicle model - the optimizer will find the correct value
-initial_impulse_bounds 0 7
+initial_impulse_bounds 0 5
 #Force free point direct insertion burn to be along the inertial velocity vector?
 force_free_point_direct_insertion_along_velocity_vector 0
 #one entry for each element
@@ -591,7 +591,7 @@ arrival_elements_frame 0
 #Allow journey arrival free point boundary to propagate (otherwise it is a fixed waypoint)
 AllowJourneyFreePointArrivalToPropagate 0
 #Bounds on this journey's final velocity (in km/s)
-final_velocity 0 10 0
+final_velocity 0 20 0
 #Journey forced terminal coast (in days)
 forced_terminal_coast 0
 #Journey forced initial coast (in days)
@@ -754,22 +754,16 @@ END_PHASE_DISTANCE_CONSTRAINT_BLOCK
 
 #trial decision vector
 BEGIN_TRIALX
-p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: event left state epoch ,53701
-p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote ,5.2308810273506001209
-p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote ,27.289918676773538664
-p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote ,0.59500036987691284907
-p0MGAnDSMs: phase flight time ,500.00000000000011369
-p0MGAnDSMsEphemerisPeggedIntercept: event left state mass ,2044.4310350136840952
-p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_x ,-5.3675395976181050628
-p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_y ,4.4923357768832019588
-p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_z ,1.9372228822566235351
-p0MGAnDSMs: virtual chemical fuel ,50.004199024658326778
-p0MGAnDSMs: virtual chemical oxidizer ,0
-p0MGAnDSMsForwardSubPhase0: burn index ,0.23127419624185674429
-p0MGAnDSMsForwardSubPhase0: DSM x component ,8.9374513123629999633e-07
-p0MGAnDSMsForwardSubPhase0: DSM y component ,5.7654751291380528118e-05
-p0MGAnDSMsForwardSubPhase0: DSM z component ,1.0142194089013399332e-05
-p0MGAnDSMsBackwardSubPhase0: burn index ,0.76872580375804322461
+p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: event left state epoch ,54148.767014751058014
+p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote ,2.9339221428186350593
+p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote ,48.243161704296127823
+p0CoastPhaseEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote ,-0.020043483705806552919
+p0CoastPhase: phase flight time ,848.69566147280806945
+p0CoastPhaseEphemerisPeggedIntercept: event left state mass ,2505.333433256848366
+p0CoastPhaseEphemerisPeggedIntercept: V_infinity_x ,-4.5949669721314769788
+p0CoastPhaseEphemerisPeggedIntercept: V_infinity_y ,-3.0772225772421393231
+p0CoastPhaseEphemerisPeggedIntercept: V_infinity_z ,-2.5013380493350645395
+p0CoastPhase: virtual chemical fuel ,4.9999988958000003267e-10
 END_TRIALX
 
 END_JOURNEY

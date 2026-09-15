@@ -53,6 +53,37 @@ def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
 
 
 @pytest.mark.solver_runtime
+def test_osiris_2022_replay_matches_nasa_result(osiris_2022_replay_probe):
+    assert osiris_2022_replay_probe["osiris_2022_replay_compile"] == "passed"
+    assert osiris_2022_replay_probe["osiris_2022_replay_run"] == "passed"
+    assert osiris_2022_replay_probe["osiris_2022_replay_no_ipopt"] == "passed"
+    comparison = osiris_2022_replay_probe["comparison"]
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert comparison["feasible"]
+    assert all(comparison["checks"].values())
+    assert osiris_2022_replay_probe["result"]["status"] == "unreviewed"
+    assert osiris_2022_replay_probe["result"]["acceptable"]
+
+
+@pytest.mark.solver_runtime
+def test_osiris_2022_ipopt_refinement_retains_nasa_seed(
+    osiris_2022_refinement_probe,
+):
+    assert osiris_2022_refinement_probe["osiris_2022_refinement_compile"] == (
+        "passed"
+    )
+    assert osiris_2022_refinement_probe["osiris_2022_refinement_run"] == "passed"
+    comparison = osiris_2022_refinement_probe["comparison"]
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert all(comparison["checks"].values())
+    assert comparison["ipopt"]["initial_infeasibility"] <= 1.0e-5
+    assert osiris_2022_refinement_probe["result"]["status"] == "unreviewed"
+    assert osiris_2022_refinement_probe["result"]["acceptable"]
+
+
+@pytest.mark.solver_runtime
 def test_osiris_2024_replay_matches_nasa_result(osiris_2024_replay_probe):
     assert osiris_2024_replay_probe["osiris_2024_replay_compile"] == "passed"
     assert osiris_2024_replay_probe["osiris_2024_replay_run"] == "passed"
@@ -64,6 +95,23 @@ def test_osiris_2024_replay_matches_nasa_result(osiris_2024_replay_probe):
     assert all(comparison["checks"].values())
     assert osiris_2024_replay_probe["result"]["status"] == "unreviewed"
     assert osiris_2024_replay_probe["result"]["acceptable"]
+
+
+@pytest.mark.solver_runtime
+def test_osiris_2024_ipopt_refinement_retains_nasa_seed(
+    osiris_2024_refinement_probe,
+):
+    assert osiris_2024_refinement_probe["osiris_2024_refinement_compile"] == (
+        "passed"
+    )
+    assert osiris_2024_refinement_probe["osiris_2024_refinement_run"] == "passed"
+    comparison = osiris_2024_refinement_probe["comparison"]
+    assert comparison["status"] == "unreviewed"
+    assert comparison["acceptable"]
+    assert all(comparison["checks"].values())
+    assert comparison["ipopt"]["initial_infeasibility"] <= 1.0e-5
+    assert osiris_2024_refinement_probe["result"]["status"] == "unreviewed"
+    assert osiris_2024_refinement_probe["result"]["acceptable"]
 
 
 @pytest.mark.solver_runtime

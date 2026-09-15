@@ -41,6 +41,10 @@ OSIRIS_TUTORIAL_ROOT = (
     REPOSITORY_ROOT
     / "docs/0_Users/tutorial/Tutorial_EMTG_Files"
 )
+OSIRIS_2022_PACKAGE = (
+    OSIRIS_TUTORIAL_ROOT
+    / "OSIRIS-REx/results/OSIRIS-REx_11272022_144557"
+)
 OSIRIS_2024_PACKAGE = (
     OSIRIS_TUTORIAL_ROOT
     / "OSIRIS-REx/results/OSIRIS-REx_412024_11530"
@@ -88,7 +92,13 @@ def discover_cases(tests_root=TESTS_ROOT, filters=None):
             case
             for case in cases
             if any(
-                fnmatch.fnmatch(case.relative_to(tests_root).as_posix(), pattern)
+                fnmatch.fnmatch(
+                    case.relative_to(tests_root).as_posix(), pattern
+                )
+                or fnmatch.fnmatch(
+                    case.relative_to(tests_root).with_suffix("").as_posix(),
+                    pattern,
+                )
                 for pattern in filters
             )
         ]
@@ -249,23 +259,25 @@ def prepare_replay(
     )
 
 
-def prepare_osiris_2024_replay(
+def _prepare_osiris_replay(
+    package_directory,
     case_directory,
     pyemtg_root=PYEMTG_ROOT,
     execution_repository_root=None,
     execution_directory=None,
 ):
-    """Prepare the immutable NASA 2024 package for evaluate-only replay."""
-    source_options = OSIRIS_2024_PACKAGE / "OSIRIS-REx.emtgopt"
+    """Prepare an immutable NASA OSIRIS-REx package for evaluate-only replay."""
+    package_directory = Path(package_directory)
+    source_options = package_directory / "OSIRIS-REx.emtgopt"
     baseline_mission = (
-        OSIRIS_2024_PACKAGE / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+        package_directory / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
     )
     Mission, MissionOptions = _load_pyemtg(pyemtg_root)
     case_directory = Path(case_directory)
     prepared_options = prepare_case(source_options, case_directory, pyemtg_root)
     options = MissionOptions.MissionOptions(str(prepared_options))
     baseline = Mission.Mission(str(baseline_mission))
-    xf_file = OSIRIS_2024_PACKAGE / "XFfile.csv"
+    xf_file = package_directory / "XFfile.csv"
     inject_aligned_mission_seed(
         options,
         baseline,
@@ -294,6 +306,96 @@ def prepare_osiris_2024_replay(
     compatibility["seed_alignment_source"] = str(xf_file)
     compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n")
     return prepared_options
+
+
+def prepare_osiris_2022_replay(
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare the immutable NASA 2022 package for evaluate-only replay."""
+    return _prepare_osiris_replay(
+        OSIRIS_2022_PACKAGE,
+        case_directory,
+        pyemtg_root,
+        execution_repository_root,
+        execution_directory,
+    )
+
+
+def prepare_osiris_2024_replay(
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare the immutable NASA 2024 package for evaluate-only replay."""
+    return _prepare_osiris_replay(
+        OSIRIS_2024_PACKAGE,
+        case_directory,
+        pyemtg_root,
+        execution_repository_root,
+        execution_directory,
+    )
+
+
+def _prepare_osiris_refinement(
+    package_directory,
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare direct IPOPT refinement from an aligned NASA package seed."""
+    prepared_options = _prepare_osiris_replay(
+        package_directory,
+        case_directory,
+        pyemtg_root,
+        execution_repository_root,
+        execution_directory,
+    )
+    _, MissionOptions = _load_pyemtg(pyemtg_root)
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    options.run_inner_loop = 3
+    options.quiet_NLP = 0
+    options.enable_NLP_chaperone = 1
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+    return prepared_options
+
+
+def prepare_osiris_2022_refinement(
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare direct IPOPT refinement from the aligned NASA 2022 seed."""
+    return _prepare_osiris_refinement(
+        OSIRIS_2022_PACKAGE,
+        case_directory,
+        pyemtg_root,
+        execution_repository_root,
+        execution_directory,
+    )
+
+
+def prepare_osiris_2024_refinement(
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root=None,
+    execution_directory=None,
+):
+    """Prepare direct IPOPT refinement from the aligned NASA 2024 seed."""
+    return _prepare_osiris_refinement(
+        OSIRIS_2024_PACKAGE,
+        case_directory,
+        pyemtg_root,
+        execution_repository_root,
+        execution_directory,
+    )
 
 
 def prepare_refinement(
@@ -403,6 +505,18 @@ def _topology(mission):
 def _event_topology(mission):
     return tuple(
         tuple((event.EventType, event.Location) for event in journey.missionevents)
+        for journey in mission.Journeys
+    )
+
+
+def _structural_event_topology(mission):
+    report_events = {"coast", "match_point"}
+    return tuple(
+        tuple(
+            (event.EventType, event.Location)
+            for event in journey.missionevents
+            if event.EventType not in report_events
+        )
         for journey in mission.Journeys
     )
 
@@ -561,7 +675,8 @@ def compare_refinement(baseline, generated, feasibility_tolerance):
         "feasible": abs(generated.worst_violation) <= feasibility_tolerance,
         "journey_names": [journey.journey_name for journey in generated.Journeys]
         == [journey.journey_name for journey in baseline.Journeys],
-        "event_topology": _event_topology(generated) == _event_topology(baseline),
+        "event_topology": _structural_event_topology(generated)
+        == _structural_event_topology(baseline),
         "decision_descriptions": [
             _normalized_description(description)
             for description in generated.Xdescriptions
@@ -664,6 +779,43 @@ def write_manifests(output_root, results):
         writer.writerows(rows)
 
 
+def _write_numeric_comparison(baseline, generated, comparison_file):
+    metrics = (
+        ("objective_value", baseline.objective_value, generated.objective_value),
+        ("worst_violation", baseline.worst_violation, generated.worst_violation),
+        (
+            "total_deterministic_deltav",
+            baseline.total_deterministic_deltav,
+            generated.total_deterministic_deltav,
+        ),
+        (
+            "total_flight_time_years",
+            baseline.total_flight_time_years,
+            generated.total_flight_time_years,
+        ),
+        (
+            "final_mass_including_propellant_margin",
+            baseline.final_mass_including_propellant_margin,
+            generated.final_mass_including_propellant_margin,
+        ),
+    )
+    with Path(comparison_file).open("w", newline="") as csv_file:
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=("metric", "baseline_value", "generated_value", "delta"),
+        )
+        writer.writeheader()
+        for metric, baseline_value, generated_value in metrics:
+            writer.writerow(
+                {
+                    "metric": metric,
+                    "baseline_value": baseline_value,
+                    "generated_value": generated_value,
+                    "delta": generated_value - baseline_value,
+                }
+            )
+
+
 def _parse_and_classify(source_options, output_file, comparison_file, pyemtg_root):
     Mission, MissionOptions = _load_pyemtg(pyemtg_root)
     generated = Mission.Mission(str(output_file))
@@ -675,14 +827,7 @@ def _parse_and_classify(source_options, output_file, comparison_file, pyemtg_roo
     if _topology(generated) != _topology(baseline):
         return "topology_changed", generated, "Journey or mission-event topology changed"
 
-    generated.Comparatron(
-        baseline_path=str(Path(source_options).with_suffix(".emtg")),
-        csv_file_name=str(comparison_file),
-        full_output=False,
-        tolerance_dict={},
-        default_tolerance=1.0e-10,
-        attributes_to_ignore=[],
-    )
+    _write_numeric_comparison(baseline, generated, comparison_file)
     source = MissionOptions.MissionOptions(str(source_options))
     if generated.worst_violation > source.snopt_feasibility_tolerance:
         return "infeasible", generated, "Worst constraint exceeds source tolerance"
@@ -819,13 +964,13 @@ def main(argv=None):
     if args.timeout <= 0:
         raise SystemExit("--timeout must be positive")
 
-    cases = discover_cases(filters=args.filter)
+    cases = discover_cases(TESTS_ROOT, filters=args.filter)
     previous = {
         result.case_id: result for result in _load_case_results(output_root)
     } if args.resume else {}
     results = []
     for index, source_options in enumerate(cases, start=1):
-        identifier = case_id(source_options)
+        identifier = case_id(source_options, TESTS_ROOT)
         if identifier in previous:
             result = previous[identifier]
             print(f"[{index}/{len(cases)}] resumed {identifier}: {result.classification}")

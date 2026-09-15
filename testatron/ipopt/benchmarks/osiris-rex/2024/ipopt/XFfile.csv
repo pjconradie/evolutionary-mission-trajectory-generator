@@ -1,0 +1,97 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: event left state epoch,4958323200,4989880800,5022642.890479,4958323200.05
+1,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote,0,5.4102,29.78469183517,5.410199945831
+2,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote,-50.26548245744,50.26548245744,6.28318530718,36.89623579144
+3,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote,-1.570796326795,1.570796326795,6.28318530718,1.533889809412
+4,j0p0MGAnDSMs: phase flight time,15781092.99562,220903200,5022642.890479,31557864.69534
+5,j0p0MGAnDSMsEphemerisPeggedFlybyIn: event left state mass,1e-13,10000,10000,1397.182246654
+6,j0p0MGAnDSMsEphemerisPeggedFlybyIn: V_infinity_x,-29.78469183517,29.78469183517,29.78469183517,0.1509382431851
+7,j0p0MGAnDSMsEphemerisPeggedFlybyIn: V_infinity_y,-29.78469183517,29.78469183517,29.78469183517,-0.1273836293239
+8,j0p0MGAnDSMsEphemerisPeggedFlybyIn: V_infinity_z,-29.78469183517,29.78469183517,29.78469183517,5.411219632376
+9,j0p0MGAnDSMs: virtual chemical fuel,0,10000,10000,0.05844971540482
+10,j0p0MGAnDSMs: virtual chemical oxidizer,0,10000,10000,0.05406598547433
+11,j0p0MGAnDSMsForwardSubPhase0: burn index,0.0001,0.9999,1,0.604766669639
+12,j0p0MGAnDSMsForwardSubPhase0: DSM x component,-10,10,10,0.0001557608023379
+13,j0p0MGAnDSMsForwardSubPhase0: DSM y component,-10,10,10,0.0001133567771809
+14,j0p0MGAnDSMsForwardSubPhase0: DSM z component,-10,10,10,1.299863689042e-05
+15,j0p0MGAnDSMsBackwardSubPhase0: burn index,0.0001,0.9999,1,0.3952333303629
+16,j0p1MGAnDSMsEphemerisPeggedUnpoweredFlyby: V_infinity_x,-29.78469183517,29.78469183517,29.78469183517,-5.046324359684
+17,j0p1MGAnDSMsEphemerisPeggedUnpoweredFlyby: V_infinity_y,-29.78469183517,29.78469183517,29.78469183517,-1.855351309892
+18,j0p1MGAnDSMsEphemerisPeggedUnpoweredFlyby: V_infinity_z,-29.78469183517,29.78469183517,29.78469183517,0.6423208082262
+19,j0p1MGAnDSMs: phase flight time,1296001,220903200,5022642.890479,70335422.24241
+20,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: event left state mass,1e-13,10000,10000,786.0791379594
+21,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: V_infinity_x,-29.78469183517,29.78469183517,29.78469183517,-2.514276105359
+22,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: V_infinity_y,-29.78469183517,29.78469183517,29.78469183517,-3.206254659221
+23,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: V_infinity_z,-29.78469183517,29.78469183517,29.78469183517,0.8169442945429
+24,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical fuel,0,10000,10000,343.6550278019
+25,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical oxidizer,0,10000,10000,317.8809007155
+26,j0p1MGAnDSMs: virtual chemical fuel,0,10000,10000,317.4561603519
+27,j0p1MGAnDSMs: virtual chemical oxidizer,0,10000,10000,293.646948324
+28,j0p1MGAnDSMsForwardSubPhase0: burn index,0.0001,0.9999,1,0.7982393798535
+29,j0p1MGAnDSMsForwardSubPhase0: DSM x component,-10,10,10,0.5618160602999
+30,j0p1MGAnDSMsForwardSubPhase0: DSM y component,-10,10,10,-0.7361665920663
+31,j0p1MGAnDSMsForwardSubPhase0: DSM z component,-10,10,10,0.9085010297919
+32,j0p1MGAnDSMsBackwardSubPhase0: burn index,0.0001,0.9999,1,0.2017606201446
+33,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: wait time,63115200,126230400,5022642.890479,63115200.05024
+34,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: event left state mass,1e-13,10000,10000,124.554503111
+35,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote,0,10,29.78469183517,1.649186938394
+36,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote,-50.26548245744,50.26548245744,6.28318530718,39.12196939689
+37,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote,-1.570796326795,1.570796326795,6.28318530718,0.4254475793938
+38,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: virtual chemical fuel,0,10000,10000,33.55899187829
+39,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: virtual chemical oxidizer,0,10000,10000,31.0420674887
+40,j1p0MGAnDSMs: phase flight time,31562.18599125,220903200,5022642.890479,47532547.99348
+41,j1p0MGAnDSMsEphemerisPeggedIntercept: event left state mass,1e-13,10000,10000,59.38915577354
+42,j1p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_x,-6,6,29.78469183517,-4.344827528803
+43,j1p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_y,-6,6,29.78469183517,1.001024705906
+44,j1p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_z,-6,6,29.78469183517,4.015026286136
+45,j1p0MGAnDSMs: virtual chemical fuel,0,10000,10000,0.2964977595073
+46,j1p0MGAnDSMs: virtual chemical oxidizer,0,10000,10000,0.275951657673
+47,j1p0MGAnDSMsForwardSubPhase0: burn index,0.0001,0.9999,1,0.3034074426488
+48,j1p0MGAnDSMsForwardSubPhase0: DSM x component,-10,10,10,-0.01172925243777
+49,j1p0MGAnDSMsForwardSubPhase0: DSM y component,-10,10,10,-0.01641696575222
+50,j1p0MGAnDSMsForwardSubPhase0: DSM z component,-10,10,10,-0.007014286619823
+51,j1p0MGAnDSMsBackwardSubPhase0: burn index,0.0001,0.9999,1,0.6965925573493
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,7.123632471878
+1,j0p0MGAnDSMsForwardSubPhase0: maneuver epoch relative to left boundary constraint,-999.4,0,-997.7910712115
+2,j0p0MGAnDSMsForwardSubPhase0: maneuver epoch relative to right boundary constraint,-999.55,0,-998.5563981525
+3,j0p0MGAnDSMs: match point x,-1e-13,1e-13,7.57214096409e-06
+4,j0p0MGAnDSMs: match point y,-1e-13,1e-13,7.880421349172e-06
+5,j0p0MGAnDSMs: match point z,-1e-13,1e-13,1.917125516071e-06
+6,j0p0MGAnDSMs: match point xdot,-1e-13,1e-13,-1.373472904065e-07
+7,j0p0MGAnDSMs: match point ydot,-1e-13,1e-13,8.767254164127e-06
+8,j0p0MGAnDSMs: match point zdot,-1e-13,1e-13,3.457243490941e-06
+9,j0p0MGAnDSMs: match point mass,-1e-13,1e-13,7.066099223039e-07
+10,j0p0MGAnDSMs: match point virtual chemical fuel,-1e-13,1e-13,-3.68424510022e-07
+11,j0p0MGAnDSMs: match point virtual chemical oxidizer,-1e-13,1e-13,-3.407927993033e-07
+12,j0p0MGAnDSMs: burn index sum constraint,-1e-13,1e-13,1.902034085788e-12
+13,j0p1MGAnDSMsEphemerisPeggedUnpoweredFlyby: flyby v-infinity magnitude match,-1e-13,1e-13,-3.969881164544e-08
+14,j0p1MGAnDSMsEphemerisPeggedUnpoweredFlyby: flyby altitude constraint (above minimum altitude but below [20x/300x] altitude for [rocky/gas] planets,-20,0,1.288666829239e-08
+15,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical fuel constraint,-1e-13,1e-13,-1.873140653856e-08
+16,j0p1MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical oxidizer constraint,-1e-13,1e-13,-1.732667859642e-08
+17,j0p1MGAnDSMsForwardSubPhase0: maneuver epoch relative to left boundary constraint,-999.85,0,-993.5017935379
+18,j0p1MGAnDSMs: match point x,-1e-13,1e-13,-2.466926390305e-07
+19,j0p1MGAnDSMs: match point y,-1e-13,1e-13,-7.009724887994e-07
+20,j0p1MGAnDSMs: match point z,-1e-13,1e-13,-4.678843837846e-08
+21,j0p1MGAnDSMs: match point xdot,-1e-13,1e-13,3.850034929142e-07
+22,j0p1MGAnDSMs: match point ydot,-1e-13,1e-13,2.524270743538e-07
+23,j0p1MGAnDSMs: match point zdot,-1e-13,1e-13,-7.788494845392e-08
+24,j0p1MGAnDSMs: match point mass,-1e-13,1e-13,2.379545710937e-07
+25,j0p1MGAnDSMs: match point virtual chemical fuel,-1e-13,1e-13,-1.236136775844e-07
+26,j0p1MGAnDSMs: match point virtual chemical oxidizer,-1e-13,1e-13,-1.14342794302e-07
+27,j0p1MGAnDSMs: burn index sum constraint,-1e-13,1e-13,-1.901034885066e-12
+28,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: left mass continuity constraint,-1e-13,1e-13,1.16542499691e-06
+29,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: virtual chemical fuel constraint,-1e-13,1e-13,1.054710878634e-11
+30,j1p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: virtual chemical oxidizer constraint,-1e-13,1e-13,9.883636309382e-12
+31,j1p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_in magnitude,-6,0,1.066270146843e-06
+32,j1p0MGAnDSMs: match point x,-1e-13,1e-13,4.817778781987e-06
+33,j1p0MGAnDSMs: match point y,-1e-13,1e-13,4.459072233959e-06
+34,j1p0MGAnDSMs: match point z,-1e-13,1e-13,3.584614550318e-06
+35,j1p0MGAnDSMs: match point xdot,-1e-13,1e-13,-3.88879035091e-06
+36,j1p0MGAnDSMs: match point ydot,-1e-13,1e-13,1.216526019166e-06
+37,j1p0MGAnDSMs: match point zdot,-1e-13,1e-13,1.234442011387e-06
+38,j1p0MGAnDSMs: match point mass,-1e-13,1e-13,8.209817105893e-08
+39,j1p0MGAnDSMs: match point virtual chemical fuel,-1e-13,1e-13,2.93456131252e-07
+40,j1p0MGAnDSMs: match point virtual chemical oxidizer,-1e-13,1e-13,4.405699342558e-07
+41,j1p0MGAnDSMs: burn index sum constraint,-1e-13,1e-13,-1.901478974276e-12
+42,Mission flight time bounds,0,1,0.9621455686539

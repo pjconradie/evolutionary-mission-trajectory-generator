@@ -1,6 +1,7 @@
 """Contracts for the unreviewed IPOPT characterization runner."""
 
 import copy
+import csv
 import json
 import math
 import subprocess
@@ -25,6 +26,78 @@ def test_discovery_matches_legacy_testatron_inventory(repository_root):
 
     assert set(discovered) == set(legacy_cases)
     assert len(discovered) == 137
+
+
+def test_discovery_unions_repeated_filters(repository_root):
+    tests_root = repository_root / "testatron" / "tests"
+
+    discovered = ipopt_characterization.discover_cases(
+        tests_root,
+        filters=[
+            "spacecraft_options/spacecraftoptions_Chem_TrackACSProp",
+            "transcription_tests/CoastPhase_EMintercept",
+        ],
+    )
+
+    assert {
+        path.relative_to(tests_root).as_posix() for path in discovered
+    } == {
+        "spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+        "transcription_tests/CoastPhase_EMintercept.emtgopt",
+    }
+
+
+def test_main_resume_runs_only_missing_filtered_case(tmp_path, monkeypatch):
+    tests_root = tmp_path / "tests"
+    group = tests_root / "group"
+    group.mkdir(parents=True)
+    first = group / "first.emtgopt"
+    second = group / "second.emtgopt"
+    first.write_text("")
+    second.write_text("")
+    output_root = tmp_path / "output"
+    previous = ipopt_characterization.CaseResult(
+        case_id="group/first",
+        source_options=str(first),
+        classification="reviewable",
+    )
+    previous_directory = output_root / "cases/group/first"
+    previous_directory.mkdir(parents=True)
+    ipopt_characterization._write_case_result(previous_directory, previous)
+    executed = []
+
+    def run_case(source_options, executable, output, timeout, pyemtg_root):
+        executed.append(Path(source_options))
+        return ipopt_characterization.CaseResult(
+            case_id="group/second",
+            source_options=str(source_options),
+            classification="reviewable",
+        )
+
+    monkeypatch.setattr(ipopt_characterization, "TESTS_ROOT", tests_root)
+    monkeypatch.setattr(ipopt_characterization, "run_case", run_case)
+
+    exit_code = ipopt_characterization.main(
+        [
+            "--ipopt-characterization",
+            "--emtg",
+            "EMTGv9",
+            "--output-root",
+            str(output_root),
+            "--filter",
+            "group/first",
+            "--filter",
+            "group/second",
+            "--resume",
+        ]
+    )
+
+    assert exit_code == 0
+    assert executed == [second]
+    manifest = json.loads((output_root / "manifest.json").read_text())
+    assert manifest["status"] == "unreviewed"
+    assert manifest["case_count"] == 2
+    assert all(case["status"] == "unreviewed" for case in manifest["cases"])
 
 
 def test_prepare_case_preserves_optimization_policy(
@@ -160,6 +233,70 @@ def test_track_acs_replay_comparison_is_pandas_independent(repository_root):
     assert not comparison["checks"]["decision_descriptions"]
 
 
+def test_prepare_osiris_2022_replay_injects_aligned_nasa_seed(tmp_path):
+    Mission, MissionOptions = ipopt_characterization._load_pyemtg()
+    baseline_path = (
+        ipopt_characterization.OSIRIS_2022_PACKAGE
+        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    baseline = Mission.Mission(str(baseline_path))
+
+    prepared_path = ipopt_characterization.prepare_osiris_2022_replay(
+        tmp_path,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    prepared.AssembleMasterDecisionVector()
+
+    assert baseline.objective_value == pytest.approx(12.396265615671549)
+    assert prepared.run_inner_loop == 0
+    assert prepared.NLP_solver_type == 2
+    assert prepared.universe_folder == (
+        "/repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe"
+    )
+    assert prepared.HardwarePath == (
+        "/repo/docs/0_Users/tutorial/Tutorial_EMTG_Files/"
+        "OSIRIS-REx/hardware_models"
+    )
+    assert prepared.forced_working_directory == "/artifacts"
+    assert all(
+        journey.central_body_gravity_file == "DoesNotExist.grv"
+        for journey in prepared.Journeys
+    )
+    assert [entry[0] for entry in prepared.trialX] == baseline.Xdescriptions
+    assert [float(entry[1]) for entry in prepared.trialX] == baseline.DecisionVector
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert compatibility["status"] == "unreviewed"
+    assert compatibility["seed_alignment_source"] == str(
+        ipopt_characterization.OSIRIS_2022_PACKAGE / "XFfile.csv"
+    )
+
+
+def test_prepare_osiris_2022_refinement_uses_verified_seed(tmp_path):
+    Mission, MissionOptions = ipopt_characterization._load_pyemtg()
+    baseline_path = (
+        ipopt_characterization.OSIRIS_2022_PACKAGE
+        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    baseline = Mission.Mission(str(baseline_path))
+
+    prepared_path = ipopt_characterization.prepare_osiris_2022_refinement(
+        tmp_path,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    prepared.AssembleMasterDecisionVector()
+
+    assert prepared.run_inner_loop == 3
+    assert prepared.NLP_solver_type == 2
+    assert prepared.enable_NLP_chaperone == 1
+    assert prepared.quiet_NLP == 0
+    assert [entry[0] for entry in prepared.trialX] == baseline.Xdescriptions
+    assert [float(entry[1]) for entry in prepared.trialX] == baseline.DecisionVector
+
+
 def test_prepare_osiris_2024_replay_injects_aligned_nasa_seed(tmp_path):
     Mission, MissionOptions = ipopt_characterization._load_pyemtg()
     baseline_path = (
@@ -195,6 +332,112 @@ def test_prepare_osiris_2024_replay_injects_aligned_nasa_seed(tmp_path):
     assert json.loads((tmp_path / "compatibility.json").read_text())["status"] == (
         "unreviewed"
     )
+
+
+def test_prepare_osiris_2024_refinement_uses_verified_seed(tmp_path):
+    Mission, MissionOptions = ipopt_characterization._load_pyemtg()
+    baseline_path = (
+        ipopt_characterization.OSIRIS_2024_PACKAGE
+        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    baseline = Mission.Mission(str(baseline_path))
+
+    prepared_path = ipopt_characterization.prepare_osiris_2024_refinement(
+        tmp_path,
+        execution_repository_root="/repo",
+        execution_directory="/artifacts",
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    prepared.AssembleMasterDecisionVector()
+
+    assert prepared.run_inner_loop == 3
+    assert prepared.NLP_solver_type == 2
+    assert prepared.enable_NLP_chaperone == 1
+    assert prepared.quiet_NLP == 0
+    assert [entry[0] for entry in prepared.trialX] == baseline.Xdescriptions
+    assert [float(entry[1]) for entry in prepared.trialX] == baseline.DecisionVector
+
+
+def test_osiris_2024_objective_regression_is_rejected():
+    Mission, _ = ipopt_characterization._load_pyemtg()
+    baseline_path = (
+        ipopt_characterization.OSIRIS_2024_PACKAGE
+        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+    )
+    baseline = Mission.Mission(str(baseline_path))
+
+    identical = copy.deepcopy(baseline)
+    identical_comparison = ipopt_characterization.compare_refinement(
+        baseline, identical, 1.0e-5
+    )
+    assert identical_comparison["acceptable"]
+    assert identical_comparison["checks"]["objective_non_regression"]
+
+    within_band = copy.deepcopy(baseline)
+    within_band.objective_value += (
+        identical_comparison["objective_comparison_band"] / 2.0
+    )
+    within_band_comparison = ipopt_characterization.compare_refinement(
+        baseline, within_band, 1.0e-5
+    )
+    assert within_band_comparison["acceptable"]
+    assert within_band_comparison["checks"]["objective_non_regression"]
+
+    regressed = copy.deepcopy(baseline)
+    regressed.objective_value += 1.0e-6
+    regression_comparison = ipopt_characterization.compare_refinement(
+        baseline, regressed, 1.0e-5
+    )
+    assert not regression_comparison["acceptable"]
+    assert not regression_comparison["checks"]["objective_non_regression"]
+    assert all(
+        passed
+        for name, passed in regression_comparison["checks"].items()
+        if name != "objective_non_regression"
+    )
+    assert regression_comparison["baseline_objective"] == baseline.objective_value
+    assert regression_comparison["generated_objective"] == regressed.objective_value
+    assert regressed.objective_value > (
+        baseline.objective_value
+        + regression_comparison["objective_comparison_band"]
+    )
+
+
+def test_refinement_compares_structural_event_topology(repository_root):
+    mission_path = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtg"
+    )
+    Mission, _ = ipopt_characterization._load_pyemtg()
+    baseline = Mission.Mission(str(mission_path))
+
+    redistributed_coast = copy.deepcopy(baseline)
+    events = redistributed_coast.Journeys[0].missionevents
+    coast_index = next(
+        index for index, event in enumerate(events) if event.EventType == "coast"
+    )
+    burn_index = next(
+        index for index, event in enumerate(events) if event.EventType == "chem_burn"
+    )
+    events.insert(burn_index + 1, events.pop(coast_index))
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, redistributed_coast, 1.0e-5
+    )
+    assert comparison["checks"]["event_topology"]
+
+    changed_structure = copy.deepcopy(baseline)
+    structural_event = next(
+        event
+        for event in changed_structure.Journeys[0].missionevents
+        if event.EventType not in {"coast", "match_point"}
+    )
+    structural_event.EventType = "coast"
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, changed_structure, 1.0e-5
+    )
+    assert not comparison["acceptable"]
+    assert not comparison["checks"]["event_topology"]
 
 
 def test_prepare_and_compare_track_acs_refinement(repository_root, tmp_path):
@@ -275,6 +518,43 @@ EXIT: Optimal Solution Found.
                 "",
             )
         )
+
+
+def test_parse_and_classify_is_pandas_independent(
+    repository_root, tmp_path, monkeypatch
+):
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    output = source.with_suffix(".emtg")
+    comparison_file = tmp_path / "comparison.csv"
+    Mission, _ = ipopt_characterization._load_pyemtg()
+
+    def reject_comparatron(*args, **kwargs):
+        raise AssertionError("Characterization must not call Mission.Comparatron")
+
+    monkeypatch.setattr(Mission.Mission, "Comparatron", reject_comparatron)
+    classification, mission, detail = ipopt_characterization._parse_and_classify(
+        source,
+        output,
+        comparison_file,
+        ipopt_characterization.PYEMTG_ROOT,
+    )
+
+    assert classification == "reviewable"
+    assert mission.objective_value == pytest.approx(-0.4088862070027368)
+    assert detail == "Ready for human review; not a promoted baseline"
+    rows = list(csv.DictReader(comparison_file.open(newline="")))
+    assert [row["metric"] for row in rows] == [
+        "objective_value",
+        "worst_violation",
+        "total_deterministic_deltav",
+        "total_flight_time_years",
+        "final_mass_including_propellant_margin",
+    ]
+    assert all(float(row["delta"]) == 0.0 for row in rows)
 
 
 def test_run_case_records_timeout(repository_root, tmp_path, monkeypatch):
