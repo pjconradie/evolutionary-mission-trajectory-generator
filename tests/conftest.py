@@ -45,22 +45,34 @@ def pytest_addoption(parser):
     group.addoption(
         "--regression", action="store_true", help="run only regression tests"
     )
+    group.addoption(
+        "--clean-bootstrap", action="store_true", help="run only clean-bootstrap tests"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
     """Filter categories and keep clean bootstrap tests explicitly opt-in."""
     selected_categories = [
         category
-        for category in ("unit", "integration", "regression")
-        if config.getoption(f"--{category}")
+        for category, selected in (
+            ("unit", config.getoption("--unit")),
+            ("integration", config.getoption("--integration")),
+            ("regression", config.getoption("--regression")),
+            ("clean_bootstrap", config.getoption("--clean-bootstrap")),
+        )
+        if selected
     ]
     if len(selected_categories) > 1:
         raise pytest.UsageError(
-            "--unit, --integration, and --regression are mutually exclusive"
+            "--unit, --integration, --regression, and --clean-bootstrap "
+            "are mutually exclusive"
         )
 
     category = selected_categories[0] if selected_categories else None
-    clean_bootstrap_requested = "clean_bootstrap" in config.option.markexpr
+    clean_bootstrap_requested = (
+        category == "clean_bootstrap"
+        or "clean_bootstrap" in config.option.markexpr
+    )
     selected = []
     deselected = []
     for item in items:
