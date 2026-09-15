@@ -9,5 +9,6 @@
   "generated_mission": "OSIRIS-REx.emtg",
   "comparison": "comparison.json",
   "log": "run.log",
-  "duration_seconds": 13.712656624848023
+  "duration_seconds": 14.528255624929443,
+  "provenance": "provenance.json"
 }

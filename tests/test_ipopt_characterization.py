@@ -765,3 +765,59 @@ def test_benchmark_artifacts_contain_no_absolute_paths(repository_root):
     assert not offenders, "non-portable paths in benchmark artifacts:\n" + "\n".join(
         offenders
     )
+
+
+def test_benchmark_registry_has_unique_ids_and_outputs():
+    benchmarks = ipopt_characterization.BENCHMARKS
+    output_roots = [benchmark.output_root for benchmark in benchmarks.values()]
+
+    assert list(benchmarks) == [
+        benchmark.benchmark_id for benchmark in benchmarks.values()
+    ]
+    assert len(output_roots) == len(set(output_roots))
+
+
+def test_benchmark_registry_sources_exist(repository_root):
+    for benchmark in ipopt_characterization.BENCHMARKS.values():
+        for field in ("source_options", "reference_mission", "seed_alignment_source"):
+            relative = getattr(benchmark, field)
+            if relative is None:
+                continue
+            assert not Path(relative).is_absolute()
+            assert (repository_root / relative).is_file()
+
+
+def test_benchmark_provenance_hashes_current_sources(repository_root):
+    provenance = ipopt_characterization.benchmark_provenance(
+        "osiris-rex-2022", "ipopt", ["OSIRIS-REx.emtg"]
+    )
+
+    assert provenance["benchmark"] == "osiris-rex-2022"
+    assert provenance["stage"] == "ipopt"
+    assert provenance["generated"] == ["OSIRIS-REx.emtg"]
+    for record in provenance["sources"].values():
+        assert record["sha256"] == ipopt_characterization._sha256(
+            repository_root / record["path"]
+        )
+
+
+def test_benchmark_provenance_rejects_unknown_stage():
+    with pytest.raises(ValueError, match="Unknown stage"):
+        ipopt_characterization.benchmark_provenance(
+            "track-acs-prop", "optimize", ["ignored.emtg"]
+        )
+
+
+def test_committed_provenance_matches_registry_and_directory(repository_root):
+    for benchmark in ipopt_characterization.BENCHMARKS.values():
+        output_root = repository_root / benchmark.output_root
+        for stage in benchmark.stages:
+            provenance_file = output_root / stage / "provenance.json"
+            assert provenance_file.is_file(), f"missing {provenance_file}"
+            provenance = json.loads(provenance_file.read_text())
+            assert provenance["benchmark"] == benchmark.benchmark_id
+            assert provenance["stage"] == stage
+            for record in provenance["sources"].values():
+                assert record["sha256"] == ipopt_characterization._sha256(
+                    repository_root / record["path"]
+                )

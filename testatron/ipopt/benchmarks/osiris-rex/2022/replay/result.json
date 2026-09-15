@@ -8,5 +8,6 @@
   "prepared_options": "OSIRIS-REx.emtgopt",
   "generated_mission": "OSIRIS-REx.emtg",
   "comparison": "comparison.json",
-  "log": "run.log"
+  "log": "run.log",
+  "provenance": "provenance.json"
 }

@@ -8,5 +8,6 @@
   "generated_mission": "spacecraftoptions_Chem_TrackACSProp.emtg",
   "comparison": "comparison.json",
   "log": "run.log",
-  "duration_seconds": 3.4948450829833746
+  "duration_seconds": 3.3481882920023054,
+  "provenance": "provenance.json"
 }

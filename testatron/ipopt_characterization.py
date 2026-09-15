@@ -3,6 +3,7 @@
 import argparse
 import csv
 import fnmatch
+import hashlib
 import importlib
 import json
 import math
@@ -71,6 +72,93 @@ def repo_relative(path, root=None):
             f"Refusing to persist path outside repository root: "
             f"{resolved} is not under {root}"
         ) from error
+
+
+@dataclass(frozen=True)
+class Benchmark:
+    """Immutable provenance record for one IPOPT benchmark, repo-relative only."""
+    benchmark_id: str
+    source_options: str
+    reference_mission: str
+    output_root: str
+    seed_alignment_source: str | None = None
+    stages: tuple[str, ...] = ("replay", "ipopt")
+
+
+def _osiris_benchmark(benchmark_id, package_directory, year):
+    package = repo_relative(package_directory)
+    return Benchmark(
+        benchmark_id=benchmark_id,
+        source_options=f"{package}/OSIRIS-REx.emtgopt",
+        reference_mission=f"{package}/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
+        seed_alignment_source=f"{package}/XFfile.csv",
+        output_root=f"testatron/ipopt/benchmarks/osiris-rex/{year}",
+    )
+
+
+BENCHMARKS = {
+    benchmark.benchmark_id: benchmark
+    for benchmark in (
+        _osiris_benchmark("osiris-rex-2022", OSIRIS_2022_PACKAGE, "2022"),
+        _osiris_benchmark("osiris-rex-2024", OSIRIS_2024_PACKAGE, "2024"),
+        Benchmark(
+            benchmark_id="track-acs-prop",
+            source_options=(
+                "testatron/tests/spacecraft_options/"
+                "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+            ),
+            reference_mission=(
+                "testatron/tests/spacecraft_options/"
+                "spacecraftoptions_Chem_TrackACSProp.emtg"
+            ),
+            output_root="testatron/ipopt/benchmarks/track-acs-prop",
+        ),
+    )
+}
+
+
+def _sha256(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def benchmark_provenance(benchmark_id, stage, generated_missions, root=None):
+    """Build a repo-relative provenance record with hashes of immutable sources."""
+    root = Path(root) if root is not None else REPOSITORY_ROOT
+    benchmark = BENCHMARKS[benchmark_id]
+    if stage not in benchmark.stages:
+        raise ValueError(
+            f"Unknown stage {stage!r} for benchmark {benchmark_id!r}"
+        )
+    source_fields = ["source_options", "reference_mission", "seed_alignment_source"]
+    sources = {}
+    for field in source_fields:
+        relative = getattr(benchmark, field)
+        if relative is None:
+            continue
+        sources[field] = {
+            "path": relative,
+            "sha256": _sha256(root / relative),
+        }
+    return {
+        "status": "unreviewed",
+        "benchmark": benchmark_id,
+        "stage": stage,
+        "sources": sources,
+        "generated": [Path(mission).name for mission in generated_missions],
+    }
+
+
+def write_provenance(directory, benchmark_id, stage, generated_missions, root=None):
+    """Persist provenance.json into an artifact directory and return the record."""
+    provenance = benchmark_provenance(benchmark_id, stage, generated_missions, root)
+    (Path(directory) / "provenance.json").write_text(
+        json.dumps(provenance, indent=2) + "\n"
+    )
+    return provenance
 
 
 @dataclass

@@ -514,8 +514,12 @@ check track_acs_replay_no_ipopt passed
         "generated_mission": generated_path.name,
         "comparison": "comparison.json",
         "log": "run.log",
+        "provenance": "provenance.json",
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    ipopt_characterization.write_provenance(
+        artifacts, "track-acs-prop", "replay", [generated_path], repository_root
+    )
     checks["comparison"] = comparison
     checks["result"] = result
     return checks
@@ -598,8 +602,12 @@ check {check_prefix}_replay_no_ipopt passed
         "generated_mission": generated_path.name,
         "comparison": "comparison.json",
         "log": "run.log",
+        "provenance": "provenance.json",
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    ipopt_characterization.write_provenance(
+        artifacts, benchmark, "replay", [generated_path], repository_root
+    )
     checks["comparison"] = comparison
     checks["result"] = result
     return checks
@@ -689,8 +697,12 @@ check {check_prefix}_refinement_run passed
         "comparison": "comparison.json",
         "log": "run.log",
         "duration_seconds": duration_seconds,
+        "provenance": "provenance.json",
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    ipopt_characterization.write_provenance(
+        artifacts, benchmark, "ipopt", [generated_path], repository_root
+    )
     checks["comparison"] = comparison
     checks["result"] = result
     return checks
@@ -826,8 +838,12 @@ check track_acs_refinement_run passed
         "comparison": "comparison.json",
         "log": "run.log",
         "duration_seconds": duration_seconds,
+        "provenance": "provenance.json",
     }
     (artifacts / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+    ipopt_characterization.write_provenance(
+        artifacts, "track-acs-prop", "ipopt", [generated_path], repository_root
+    )
     checks["comparison"] = comparison
     checks["result"] = result
     return checks

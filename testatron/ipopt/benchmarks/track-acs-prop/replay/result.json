@@ -7,5 +7,6 @@
   "prepared_options": "spacecraftoptions_Chem_TrackACSProp.emtgopt",
   "generated_mission": "spacecraftoptions_Chem_TrackACSProp.emtg",
   "comparison": "comparison.json",
-  "log": "run.log"
+  "log": "run.log",
+  "provenance": "provenance.json"
 }

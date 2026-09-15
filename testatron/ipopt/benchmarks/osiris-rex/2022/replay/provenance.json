@@ -1,0 +1,22 @@
+{
+  "status": "unreviewed",
+  "benchmark": "osiris-rex-2022",
+  "stage": "replay",
+  "sources": {
+    "source_options": {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_11272022_144557/OSIRIS-REx.emtgopt",
+      "sha256": "9852f30d16bbdb770c15f3c51f40c7e89b171bcb28ba15b632e6d8238c392423"
+    },
+    "reference_mission": {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_11272022_144557/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
+      "sha256": "4f8e0f007264b9e679c4ee541470480a19c87107c3166082be0af4f4fa5a847d"
+    },
+    "seed_alignment_source": {
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_11272022_144557/XFfile.csv",
+      "sha256": "a5bc7cb7b6eba65e5a0a7a95f7c23949ef1fb22226619a7a1cf623397342c68b"
+    }
+  },
+  "generated": [
+    "OSIRIS-REx.emtg"
+  ]
+}
