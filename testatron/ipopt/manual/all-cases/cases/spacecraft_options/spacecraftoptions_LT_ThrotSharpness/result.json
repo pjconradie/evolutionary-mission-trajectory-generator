@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LT_ThrotSharpness",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LT_ThrotSharpness.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotSharpness/spacecraftoptions_LT_ThrotSharpness.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotSharpness/spacecraftoptions_LT_ThrotSharpness.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotSharpness/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotSharpness/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_ThrotSharpness/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.621222416999899,
+  "objective_value": -0.46339735174566327,
+  "worst_violation": -2.06000143761879e-06,
+  "worst_constraint": "F[22]: j0p0MGALT: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

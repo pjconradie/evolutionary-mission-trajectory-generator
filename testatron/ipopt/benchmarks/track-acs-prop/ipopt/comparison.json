@@ -1,0 +1,32 @@
+{
+  "status": "unreviewed",
+  "acceptable": true,
+  "checks": {
+    "finite_objective": true,
+    "finite_feasibility": true,
+    "decision_bounds_complete": true,
+    "finite_decision_vector": true,
+    "decision_vector_in_bounds": true,
+    "finite_constraint_vector": true,
+    "feasible": true,
+    "journey_names": true,
+    "event_topology": true,
+    "decision_descriptions": true,
+    "objective_non_regression": true,
+    "near_feasible_initialization": true,
+    "ipopt_native_success": true
+  },
+  "baseline_objective": -0.4088862070027368,
+  "generated_objective": -0.4088862070027368,
+  "objective_comparison_band": 4.1888620700273686e-11,
+  "generated_feasibility_metric": 8.19266041457817e-06,
+  "feasibility_tolerance": 1e-05,
+  "ipopt": {
+    "initialization_policy": "near-feasible-primal-seed",
+    "initial_infeasibility": 8.19e-06,
+    "iterations": 8,
+    "terminal_constraint_violation": 3.3794664388093243e-06,
+    "native_exit": "Optimal Solution Found."
+  },
+  "duration_seconds": 3.3481882920023054
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "solver_options/solveroptions_ACEfeasibility",
+  "source_options": "/repo/testatron/tests/solver_options/solveroptions_ACEfeasibility.emtgopt",
+  "classification": "timed_out",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/solveroptions_ACEfeasibility.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/run.log",
+  "compatibility_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/compatibility.json",
+  "return_code": null,
+  "duration_seconds": 300.019958178,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Exceeded 300 second process timeout"
+}

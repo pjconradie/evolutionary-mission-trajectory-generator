@@ -1,0 +1,15 @@
+{
+  "status": "unreviewed",
+  "tutorial": "Journey_Boundaries/EVM",
+  "stage": "refinement",
+  "taxonomy": "demonstration",
+  "acceptable": false,
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/EVM.emtgopt",
+  "reference_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/results/EVM_11252022_163915/EVM.emtg",
+  "prepared_options": "EVM.emtgopt",
+  "generated_mission": "EVM.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 14.196812874870375,
+  "provenance": "provenance.json"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "unreviewed",
+  "stage": "ipopt_refinement",
+  "acceptable": true,
+  "source_options": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "baseline_mission": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtg",
+  "prepared_options": "spacecraftoptions_Chem_TrackACSProp.emtgopt",
+  "generated_mission": "spacecraftoptions_Chem_TrackACSProp.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 3.3481882920023054,
+  "provenance": "provenance.json"
+}

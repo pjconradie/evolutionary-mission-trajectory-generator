@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_RLAbounds",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_RLAbounds.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_RLAbounds/globalmissionoptions_MGALT_RLAbounds.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_RLAbounds/FAILURE_globalmissionoptions_MGALT_RLAbounds.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_RLAbounds/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_RLAbounds/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_RLAbounds/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.0432302079999998,
+  "objective_value": -0.8647597929727302,
+  "worst_violation": 3.158155137406e-08,
+  "worst_constraint": "F[3]: j0p0MGALT: step 2 control magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

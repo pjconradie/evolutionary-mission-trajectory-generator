@@ -1,0 +1,17 @@
+{
+  "case_id": "transcription_tests/FBLT_EMintercept",
+  "source_options": "/repo/testatron/tests/transcription_tests/FBLT_EMintercept.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/transcription_tests/FBLT_EMintercept/FBLT_EMintercept.emtgopt",
+  "output_file": "/artifacts/cases/transcription_tests/FBLT_EMintercept/FAILURE_FBLT_EMintercept.emtg",
+  "comparison_file": "/artifacts/cases/transcription_tests/FBLT_EMintercept/comparison.csv",
+  "log_file": "/artifacts/cases/transcription_tests/FBLT_EMintercept/run.log",
+  "compatibility_file": "/artifacts/cases/transcription_tests/FBLT_EMintercept/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 62.47926465399996,
+  "objective_value": -0.30856094784027077,
+  "worst_violation": -0.0003451178500372617,
+  "worst_constraint": "F[23]: j0p0FBLT: match point y",
+  "detail": "Ready for human review; not a promoted baseline"
+}

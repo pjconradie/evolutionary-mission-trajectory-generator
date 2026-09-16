@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_powMargin",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_powMargin.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_powMargin/spacecraftoptions_powMargin.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_powMargin/spacecraftoptions_powMargin.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_powMargin/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_powMargin/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_powMargin/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 3.4897636690000127,
+  "objective_value": -0.341820576988705,
+  "worst_violation": -9.778279469317e-06,
+  "worst_constraint": "F[25]: j0p0MGALT: match point xdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

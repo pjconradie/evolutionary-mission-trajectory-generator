@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_coastphasematchpt",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_coastphasematchpt.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMars_coastphasematchpt/EarthToMars_coastphasematchpt.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/EarthToMars_coastphasematchpt/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMars_coastphasematchpt/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.21914225000000442,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

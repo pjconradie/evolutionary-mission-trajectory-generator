@@ -1,0 +1,15 @@
+{
+  "status": "unreviewed",
+  "tutorial": "LowSIRIS-REx/LowSIRIS-REx",
+  "stage": "replay",
+  "taxonomy": "authoritative",
+  "acceptable": true,
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/LowSIRIS-REx/LowSIRIS-REx.emtgopt",
+  "reference_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/LowSIRIS-REx/results/LowSIRIS-REx_412024_11158/LowSIRIS-REx_Sun(EB)_Sun(BE).emtg",
+  "prepared_options": "LowSIRIS-REx.emtgopt",
+  "generated_mission": "LowSIRIS-REx.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 3.721920165931806,
+  "provenance": "provenance.json"
+}

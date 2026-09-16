@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_periapseCartesian",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_periapseCartesian.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_periapseCartesian/physicsoptions_periapseCartesian.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_periapseCartesian/physicsoptions_periapseCartesian.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_periapseCartesian/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_periapseCartesian/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_periapseCartesian/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.0457393339999896,
+  "objective_value": -0.8676905159245886,
+  "worst_violation": -1.5174093644209e-07,
+  "worst_constraint": "F[17]: j1p0CoastPhase: match point xdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

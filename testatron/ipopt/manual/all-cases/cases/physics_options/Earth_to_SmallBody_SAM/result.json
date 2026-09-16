@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/Earth_to_SmallBody_SAM",
+  "source_options": "/repo/testatron/tests/physics_options/Earth_to_SmallBody_SAM.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/Earth_to_SmallBody_SAM/Earth_to_SmallBody_SAM.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/physics_options/Earth_to_SmallBody_SAM/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/Earth_to_SmallBody_SAM/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 2.8750150430000048,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

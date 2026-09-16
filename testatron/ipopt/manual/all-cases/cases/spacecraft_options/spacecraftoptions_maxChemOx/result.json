@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_maxChemOx",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_maxChemOx.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_maxChemOx/spacecraftoptions_maxChemOx.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_maxChemOx/spacecraftoptions_maxChemOx.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_maxChemOx/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_maxChemOx/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_maxChemOx/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.13864158399997,
+  "objective_value": -0.06345285384386673,
+  "worst_violation": 1.9448031096658e-07,
+  "worst_constraint": "F[1]: j0p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_in magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

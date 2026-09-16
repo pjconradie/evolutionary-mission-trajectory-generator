@@ -1,0 +1,17 @@
+{
+  "case_id": "solver_options/solveroptions_NLPstepsub1",
+  "source_options": "/repo/testatron/tests/solver_options/solveroptions_NLPstepsub1.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/solver_options/solveroptions_NLPstepsub1/solveroptions_NLPstepsub1.emtgopt",
+  "output_file": "/artifacts/cases/solver_options/solveroptions_NLPstepsub1/solveroptions_NLPstepsub1.emtg",
+  "comparison_file": "/artifacts/cases/solver_options/solveroptions_NLPstepsub1/comparison.csv",
+  "log_file": "/artifacts/cases/solver_options/solveroptions_NLPstepsub1/run.log",
+  "compatibility_file": "/artifacts/cases/solver_options/solveroptions_NLPstepsub1/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 52.19062744000007,
+  "objective_value": -0.6300729298926792,
+  "worst_violation": 6.60464729082777e-06,
+  "worst_constraint": "F[23]: j0p0MGALT: match point y",
+  "detail": "Ready for human review; not a promoted baseline"
+}

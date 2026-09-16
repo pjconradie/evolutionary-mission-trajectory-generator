@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthMars_Depart2-2_Arrive2-2",
+  "source_options": "/repo/testatron/tests/journey_options/EarthMars_Depart2-2_Arrive2-2.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthMars_Depart2-2_Arrive2-2/EarthMars_Depart2-2_Arrive2-2.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/EarthMars_Depart2-2_Arrive2-2/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthMars_Depart2-2_Arrive2-2/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.22322912599999967,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

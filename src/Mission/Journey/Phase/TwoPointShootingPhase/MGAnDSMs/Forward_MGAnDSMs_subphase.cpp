@@ -362,7 +362,7 @@ namespace EMTG
 
                 //Step 6.4: tanks
                 //derivatives of virtual fuel
-                SPTM(8, 6) = ((this->chemical_fuel_used - this->ACS_fuel_used - math::SMALL) / StateAfterPropagationBeforeDSM(6)) _GETVALUE;
+                SPTM(8, 6) = ((this->chemical_fuel_used - math::SMALL) / StateAfterPropagationBeforeDSM(6)) _GETVALUE;
                 SPTM(8, 10) = SPTM(6, 10) * this->dFuelConsumedDSM_dMassAtDSM;
                 SPTM(8, 11) = SPTM(6, 10) * this->dFuelConsumedDSM_dMassAtDSM * (PhaseFlightTime / this->BurnIndex) _GETVALUE;
                 if (this->myOptions->trackACS)

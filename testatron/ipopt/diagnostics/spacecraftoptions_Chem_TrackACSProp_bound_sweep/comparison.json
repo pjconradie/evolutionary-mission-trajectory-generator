@@ -1,0 +1,85 @@
+{
+  "status": "unreviewed",
+  "source_case": "spacecraft_options/spacecraftoptions_Chem_TrackACSProp",
+  "seed": {
+    "objective": -0.4088862070027368,
+    "feasibility": 8.19266041457817e-06,
+    "feasibility_tolerance": 1e-05
+  },
+  "constant_options": {
+    "bound_relax_factor": 0,
+    "trackACS": 1,
+    "launch_vehicle_key": "Atlas_V_411"
+  },
+  "runs": [
+    {
+      "value": 0.01,
+      "iteration_0_inf_pr": 0.188,
+      "iterations": 27,
+      "terminal_objective": -0.4088812320006779,
+      "terminal_constraint_violation": 6.924286358070128e-06,
+      "exit": "Optimal Solution Found",
+      "returned_objective": -0.4088862070027368,
+      "returned_feasibility": 8.19266041457817e-06,
+      "initialization_gate": "fail"
+    },
+    {
+      "value": 0.0001,
+      "iteration_0_inf_pr": 0.0018,
+      "iterations": 97,
+      "terminal_objective": -0.4088729543020328,
+      "terminal_constraint_violation": 0.0,
+      "exit": "Optimal Solution Found",
+      "returned_objective": -0.4088862070027368,
+      "returned_feasibility": 8.19266041457817e-06,
+      "initialization_gate": "fail"
+    },
+    {
+      "value": 1e-06,
+      "iteration_0_inf_pr": 1.54e-05,
+      "iterations": 4,
+      "terminal_objective": -0.4088119264662561,
+      "terminal_constraint_violation": 1.7240709393812794e-08,
+      "exit": "Optimal Solution Found",
+      "returned_objective": -0.4088862070027368,
+      "returned_feasibility": 8.19266041457817e-06,
+      "initialization_gate": "fail"
+    },
+    {
+      "value": 1e-08,
+      "iteration_0_inf_pr": 8.19e-06,
+      "iterations": 8,
+      "terminal_objective": -0.4087993939438384,
+      "terminal_constraint_violation": 3.3794664388093243e-06,
+      "exit": "Optimal Solution Found",
+      "returned_objective": -0.4088862070027368,
+      "returned_feasibility": 8.19266041457817e-06,
+      "initialization_gate": "pass"
+    },
+    {
+      "value": 1e-10,
+      "iteration_0_inf_pr": 8.19e-06,
+      "iterations": 11,
+      "terminal_objective": -0.40887383186160786,
+      "terminal_constraint_violation": 1.6206981856608781e-06,
+      "exit": "Optimal Solution Found",
+      "returned_objective": -0.4088862070027368,
+      "returned_feasibility": 8.19266041457817e-06,
+      "initialization_gate": "pass"
+    },
+    {
+      "value": 1e-12,
+      "iteration_0_inf_pr": 8.19e-06,
+      "iterations": 107,
+      "terminal_objective": -0.40887295432706405,
+      "terminal_constraint_violation": 0.0,
+      "exit": "Optimal Solution Found",
+      "returned_objective": -0.4088862070027368,
+      "returned_feasibility": 8.19266041457817e-06,
+      "initialization_gate": "pass"
+    }
+  ],
+  "track_acs_largest_passing_tested_value": 1e-08,
+  "transition_interval": [1e-08, 1e-06],
+  "production_status": "pending cross-case validation and conditional initialization policy"
+}

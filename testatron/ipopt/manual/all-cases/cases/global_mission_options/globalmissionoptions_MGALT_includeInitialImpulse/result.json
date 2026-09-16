@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse/globalmissionoptions_MGALT_includeInitialImpulse.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse/FAILURE_globalmissionoptions_MGALT_includeInitialImpulse.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6203302079999995,
+  "objective_value": -0.8647838718358525,
+  "worst_violation": -6.24745494156298e-06,
+  "worst_constraint": "F[21]: j0p0MGALT: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

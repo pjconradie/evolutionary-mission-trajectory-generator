@@ -1,0 +1,15 @@
+{
+  "status": "unreviewed",
+  "tutorial": "Flybys/EVM_singlePhase",
+  "stage": "refinement",
+  "taxonomy": "demonstration",
+  "acceptable": false,
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Flybys/EVM_singlePhase.emtgopt",
+  "reference_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Flybys/results/EVM_singlePhase_11292022_115245/EVM_singlePhase.emtg",
+  "prepared_options": "EVM_singlePhase.emtgopt",
+  "generated_mission": "EVM_singlePhase.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 9.144141749944538,
+  "provenance": "provenance.json"
+}

@@ -1,0 +1,74 @@
+{
+  "review_status": "unreviewed",
+  "purpose": "Characterize forced global IPOPT bound initialization; not justification for a global constant.",
+  "feasibility_tolerance": 1e-05,
+  "cases": {
+    "CoastPhase": {
+      "default": {
+        "iteration_0": {
+          "objective": -0.50106669,
+          "inf_pr": 0.302,
+          "inf_du": 0.702
+        },
+        "iterations": 510,
+        "ipopt_exit": "Converged to a point of local infeasibility. Problem may be infeasible.",
+        "ipopt_terminal_objective": -0.17499997380979326,
+        "ipopt_terminal_constraint_violation": 0.8421446411312479,
+        "returned_objective": -0.20247,
+        "returned_feasibility": 0.0164773,
+        "returned_feasible": false,
+        "wall_seconds": 2
+      },
+      "forced_1e-8": {
+        "iteration_0": {
+          "objective": -0.50106669,
+          "inf_pr": 0.302,
+          "inf_du": 0.702,
+          "adjusted_slacks": 8
+        },
+        "iterations": 925,
+        "ipopt_exit": "Converged to a point of local infeasibility. Problem may be infeasible.",
+        "ipopt_terminal_objective": -0.17500000000291716,
+        "ipopt_terminal_constraint_violation": 0.03645168498849961,
+        "returned_objective": -0.198559,
+        "returned_feasibility": 8.95147e-06,
+        "returned_feasible": true,
+        "wall_seconds": 2
+      }
+    },
+    "PSFB": {
+      "default": {
+        "iteration_0": {
+          "objective": -0.47998438,
+          "inf_pr": 0.306,
+          "inf_du": 0.618
+        },
+        "iterations": 26,
+        "ipopt_exit": "Maximum CPU time exceeded.",
+        "ipopt_terminal_objective": -0.22524237520108634,
+        "ipopt_terminal_constraint_violation": 0.0029582459404102757,
+        "returned_objective": -0.225095,
+        "returned_feasibility": 7.97018e-06,
+        "returned_feasible": true,
+        "wall_seconds": 28
+      },
+      "forced_1e-8": {
+        "iteration_0": {
+          "objective": -0.47998438,
+          "inf_pr": 0.306,
+          "inf_du": 0.618,
+          "adjusted_slacks": 169
+        },
+        "iterations": 18,
+        "ipopt_exit": "Maximum CPU time exceeded.",
+        "ipopt_terminal_objective": -0.2765408997849473,
+        "ipopt_terminal_constraint_violation": 0.130028853128207,
+        "returned_objective": -0.167995,
+        "returned_feasibility": 8.87197e-05,
+        "returned_feasible": false,
+        "wall_seconds": 29
+      }
+    }
+  },
+  "conclusion": "Forced global 1e-8 initialization is unsafe: both seeds are far from feasible at iteration 0, and PSFB loses its feasible returned incumbent. Reduced pushes must remain conditional on independently verified near-feasible primal seeds."
+}

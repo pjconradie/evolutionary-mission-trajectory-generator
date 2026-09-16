@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_add3rdbody",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_add3rdbody.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_add3rdbody/physicsoptions_add3rdbody.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_add3rdbody/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_add3rdbody/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.7352957509999953,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

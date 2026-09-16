@@ -1,0 +1,17 @@
+{
+  "case_id": "output_options/outputoptions_frameTODBCI",
+  "source_options": "/repo/testatron/tests/output_options/outputoptions_frameTODBCI.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/output_options/outputoptions_frameTODBCI/outputoptions_frameTODBCI.emtgopt",
+  "output_file": "/artifacts/cases/output_options/outputoptions_frameTODBCI/outputoptions_frameTODBCI.emtg",
+  "comparison_file": "/artifacts/cases/output_options/outputoptions_frameTODBCI/comparison.csv",
+  "log_file": "/artifacts/cases/output_options/outputoptions_frameTODBCI/run.log",
+  "compatibility_file": "/artifacts/cases/output_options/outputoptions_frameTODBCI/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.0983058340000014,
+  "objective_value": -0.38436627921522903,
+  "worst_violation": 9.29838814061815e-06,
+  "worst_constraint": "F[6]: j0p0MGAnDSMs: match point ydot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

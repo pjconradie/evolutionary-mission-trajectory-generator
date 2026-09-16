@@ -1,0 +1,17 @@
+{
+  "case_id": "transcription_tests/PSFB_EMintercept",
+  "source_options": "/repo/testatron/tests/transcription_tests/PSFB_EMintercept.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/transcription_tests/PSFB_EMintercept/PSFB_EMintercept.emtgopt",
+  "output_file": "/artifacts/cases/transcription_tests/PSFB_EMintercept/FAILURE_PSFB_EMintercept.emtg",
+  "comparison_file": "/artifacts/cases/transcription_tests/PSFB_EMintercept/comparison.csv",
+  "log_file": "/artifacts/cases/transcription_tests/PSFB_EMintercept/run.log",
+  "compatibility_file": "/artifacts/cases/transcription_tests/PSFB_EMintercept/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 28.559675930000026,
+  "objective_value": -0.22084344483695623,
+  "worst_violation": 0.006698630478113194,
+  "worst_constraint": "F[6]: j0p0PSFB_Step0: left match point xdot",
+  "detail": "Worst constraint exceeds source tolerance"
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_periapseSphericalAZFPA",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_periapseSphericalAZFPA.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalAZFPA/physicsoptions_periapseSphericalAZFPA.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalAZFPA/physicsoptions_periapseSphericalAZFPA.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalAZFPA/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalAZFPA/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_periapseSphericalAZFPA/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7915217510000048,
+  "objective_value": -0.8677232436847934,
+  "worst_violation": 7.94553628705937e-06,
+  "worst_constraint": "F[13]: j1p0CoastPhase: match point y",
+  "detail": "Ready for human review; not a promoted baseline"
+}

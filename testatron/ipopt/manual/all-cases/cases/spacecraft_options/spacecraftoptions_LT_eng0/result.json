@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LT_eng0",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LT_eng0.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng0/spacecraftoptions_LT_eng0.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng0/spacecraftoptions_LT_eng0.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng0/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng0/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng0/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6761836670000321,
+  "objective_value": -0.49406337645816106,
+  "worst_violation": 8.8129312603158e-07,
+  "worst_constraint": "F[14]: j0p0MGALT: step 12 control magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

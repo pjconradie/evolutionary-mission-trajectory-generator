@@ -1263,7 +1263,7 @@ class Mission(object):
         
         #can I test the current mission? did it actually load anything? if not, return
         if not hasattr(self, 'Journeys'):
-            comparison = comparison.append({'Output Name' : 'No Journeys!', 'Match' : False}, ignore_index = True)
+            comparison = concat([comparison, DataFrame([{'Output Name' : 'No Journeys!', 'Match' : False}])], ignore_index = True)
             comparison.to_csv(csv_file_name, index = False)
             return False, comparison
 			
@@ -1271,7 +1271,7 @@ class Mission(object):
         #Make sure the number of journeys are the same between both cases (if they aren't then the missions are set up differently and a comparison is likely meaningless)
         #NOTE: The number of mission events may vary between solutions with the same journey structure so we worry about mission event mismatches later.
         if len(baseline.Journeys) != len(self.Journeys):
-            comparison = comparison.append({'Output Name' : 'Journey Mismatch!', 'Match' : False}, ignore_index = True)
+            comparison = concat([comparison, DataFrame([{'Output Name' : 'Journey Mismatch!', 'Match' : False}])], ignore_index = True)
             comparison.to_csv(csv_file_name, index=False)
             return False, comparison
 
@@ -1422,9 +1422,9 @@ class Mission(object):
 
             n_mevents = n_baseline_mevents
             if (n_baseline_mevents != n_new_mevents):
-                comparison = comparison.append({'Output Name': 'Journey[' + str(i) + '] MissionEvent Mismatch',
-                                                'Baseline Value': n_baseline_mevents, 'New Value': n_new_mevents,
-                                                'Error': abs(n_new_mevents - n_baseline_mevents), 'Match': False})
+                comparison = concat([comparison, DataFrame([{'Output Name': 'Journey[' + str(i) + '] MissionEvent Mismatch',
+                                                             'Baseline Value': n_baseline_mevents, 'New Value': n_new_mevents,
+                                                             'Error': abs(n_new_mevents - n_baseline_mevents), 'Match': False}])])
                 n_mevents = min([n_baseline_mevents, n_new_mevents])
 
             for j in range(n_mevents):
@@ -1526,7 +1526,7 @@ class Mission(object):
 
         #Now ready to merge baseline data with new data into combined dataframes (1 df for numerical data, 1 df for strings)
         #Start with the numerical df. Using an inner join so that only attributes that appear in both baseline and new are kept.
-        numbers_df = merge(baseline_numbers, new_numbers[['attr', 'New Value']], how = 'inner', on = 'attr', copy = False)
+        numbers_df = merge(baseline_numbers, new_numbers[['attr', 'New Value']], how = 'inner', on = 'attr')
         #NOTE: For some reason the merge function is makeing 36 duplicates of every row. Must be a bug but to avoid this
         #       crap we can just use the drop_duplicates function. Whenever this gets fixed we won't care about the unnecessary
         #       drop_duplicates() call.
@@ -1539,7 +1539,7 @@ class Mission(object):
         numbers_df['Tolerance'] = numbers_df['attr_internal'].map(all_tolerances)
         numbers_df['Match'] = numbers_df['Error'] <= numbers_df['Tolerance']
 
-        strs_df = merge(baseline_strs, new_strs, how = 'inner', on = 'attr', copy = False)
+        strs_df = merge(baseline_strs, new_strs, how = 'inner', on = 'attr')
         strs_df.drop_duplicates(keep = 'first', inplace = True)
         strs_df.rename({'attr' : 'Output Name'}, axis = 1, inplace = True)
 
@@ -1552,9 +1552,9 @@ class Mission(object):
             
         #If there are any attributes in the attributes_only_in_xxx lists then append them to comparison df
         if len(attrs_only_in_baseline) != 0:
-            comparison = comparison.append({'Output Name':'Attributes only in Baseline','Baseline Value':attributes_only_in_baseline,'Match':False}, ignore_index = True)
+            comparison = concat([comparison, DataFrame([{'Output Name':'Attributes only in Baseline','Baseline Value':attributes_only_in_baseline,'Match':False}])], ignore_index = True)
         if len(attrs_only_in_new) != 0:
-            comparison = comparison.append({'Output Name':'Attributes only in New','New Value':attributes_only_in_new,'Match':False}, ignore_index = True)
+            comparison = concat([comparison, DataFrame([{'Output Name':'Attributes only in New','New Value':attributes_only_in_new,'Match':False}])], ignore_index = True)
 
                    
         #Return a value of True if the missions are in complete agreement

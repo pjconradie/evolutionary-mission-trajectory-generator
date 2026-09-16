@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/ShuttlePark_to_Molniya",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/ShuttlePark_to_Molniya.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/ShuttlePark_to_Molniya/ShuttlePark_to_Molniya.emtgopt",
+  "output_file": "/artifacts/cases/script_constraint_tests/ShuttlePark_to_Molniya/ShuttlePark_to_Molniya.emtg",
+  "comparison_file": "/artifacts/cases/script_constraint_tests/ShuttlePark_to_Molniya/comparison.csv",
+  "log_file": "/artifacts/cases/script_constraint_tests/ShuttlePark_to_Molniya/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/ShuttlePark_to_Molniya/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 2.997352460000002,
+  "objective_value": 4.0551738051078425,
+  "worst_violation": 2.134976658538e-07,
+  "worst_constraint": "F[4]: j0p0MGAnDSMsFreePointChemRendezvous: virtual chemical fuel constraint",
+  "detail": "Ready for human review; not a promoted baseline"
+}

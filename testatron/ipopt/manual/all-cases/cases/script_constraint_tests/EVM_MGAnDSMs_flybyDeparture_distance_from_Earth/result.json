@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.2924405009999873,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

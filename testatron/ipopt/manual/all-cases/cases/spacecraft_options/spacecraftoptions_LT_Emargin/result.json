@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LT_Emargin",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LT_Emargin.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_Emargin/spacecraftoptions_LT_Emargin.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_Emargin/spacecraftoptions_LT_Emargin.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_Emargin/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_Emargin/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_Emargin/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7891936260000421,
+  "objective_value": -0.46339957971915824,
+  "worst_violation": 5.01421556786674e-06,
+  "worst_constraint": "F[2]: j0p0MGALT: step 0 control magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

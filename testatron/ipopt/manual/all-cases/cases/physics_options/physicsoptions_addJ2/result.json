@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_addJ2",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_addJ2.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_addJ2/physicsoptions_addJ2.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_addJ2/physicsoptions_addJ2.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_addJ2/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_addJ2/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_addJ2/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 2.767114210000017,
+  "objective_value": 3.988489606694454,
+  "worst_violation": 8.14158164535097e-06,
+  "worst_constraint": "F[7]: j0p0MGAnDSMs: match point xdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

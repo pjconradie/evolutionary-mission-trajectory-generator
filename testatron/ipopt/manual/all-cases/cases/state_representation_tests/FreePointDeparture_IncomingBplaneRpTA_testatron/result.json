@@ -1,0 +1,17 @@
+{
+  "case_id": "state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron",
+  "source_options": "/repo/testatron/tests/state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron/FreePointDeparture_IncomingBplaneRpTA_testatron.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron/run.log",
+  "compatibility_file": "/artifacts/cases/state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.4211194169999999,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Cannot find /repo/testatron/universe//Sun_SaturnOrientation.emtg_universe. Place a breakpoint in /tmp/emtg-source/src/Astrodynamics/universe.cpp, line 85"
+}

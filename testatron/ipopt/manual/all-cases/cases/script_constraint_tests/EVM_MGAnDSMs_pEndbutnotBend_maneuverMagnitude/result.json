@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EVM_MGAnDSMs_pEndbutnotBend_maneuverMagnitude",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EVM_MGAnDSMs_pEndbutnotBend_maneuverMagnitude.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_pEndbutnotBend_maneuverMagnitude/EVM_MGAnDSMs_pEndbutnotBend_maneuverMagnitude.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_pEndbutnotBend_maneuverMagnitude/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_pEndbutnotBend_maneuverMagnitude/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.2200972920000197,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

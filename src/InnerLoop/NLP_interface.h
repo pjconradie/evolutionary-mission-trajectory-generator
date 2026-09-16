@@ -21,7 +21,9 @@
 
 #include "problem.h"
 #include "EMTG_enums.h"
+#include "NLP_initialization_policy.h"
 #include "NLPoptions.h"
+#include "NLP_solver_status.h"
 
 namespace EMTG
 {
@@ -35,17 +37,19 @@ namespace EMTG
             NLP_interface();
             NLP_interface(problem* myProblem, 
                 const NLPoptions& myOptions);
+            virtual ~NLP_interface() = default;
 
             //get/set
             inline void setX0_scaled(const std::vector<doubleType>& X0_scaled_in) {this->X0_scaled = X0_scaled_in; }
             inline void setX0_unscaled(const std::vector<doubleType>& X0_unscaled_in) { this->X0_unscaled = X0_unscaled_in; }
+            inline void setInitializationPolicy(const NLPInitializationPolicy policy) { this->initializationPolicy = policy; }
             
 
             inline std::vector<doubleType> getX_scaled() const { return this->X_scaled; }
             inline std::vector<doubleType> getX_unscaled() const { return this->X_unscaled; }
             inline std::vector<doubleType> getF() const { return this->F; }
             inline std::vector<double> getFlowerbounds() const { return this->Flowerbounds; }
-            inline std::vector<double> getFupperbounds() const { return this->Flowerbounds; }
+            inline std::vector<double> getFupperbounds() const { return this->Fupperbounds; }
             inline std::vector<size_t> getiGfun() const { return this->iGfun; }
             inline std::vector<size_t> getjGvar() const { return this->jGvar; }
             inline std::vector<double> getG() const { return this->G; }
@@ -58,6 +62,7 @@ namespace EMTG
             inline std::vector<double> getG_NLP_incumbent() const { return this->G_NLP_incumbent; }
             inline doubleType getfeasibility_metric() const { return this->feasibility_metric; }
             inline doubleType getfeasibility_metric_NLP_incumbent() const { return this->feasibility_metric_NLP_incumbent; }
+            inline NLPStatus getStatus() const { return this->status; }
 
 			inline void setJGlobalIncumbent(const doubleType J) { this->JGlobalIncumbent = J; }
 			inline doubleType getJGlobalIncumbent() { return this->JGlobalIncumbent; }
@@ -108,6 +113,8 @@ namespace EMTG
             //fields
             problem* myProblem;
             NLPoptions myOptions;
+            NLPStatus status;
+            NLPInitializationPolicy initializationPolicy;
             time_t NLP_start_time;
 			time_t mostRecentNLPWriteTime;
             size_t movie_frame_count = 0;

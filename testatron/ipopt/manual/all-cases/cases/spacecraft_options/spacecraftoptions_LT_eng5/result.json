@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LT_eng5",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LT_eng5.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng5/spacecraftoptions_LT_eng5.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng5/spacecraftoptions_LT_eng5.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng5/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng5/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LT_eng5/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.9239377089999152,
+  "objective_value": -0.4188756297240838,
+  "worst_violation": 9.09462688436982e-06,
+  "worst_constraint": "F[28]: j0p0MGALT: match point mass",
+  "detail": "Ready for human review; not a promoted baseline"
+}

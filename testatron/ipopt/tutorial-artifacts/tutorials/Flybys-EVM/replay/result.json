@@ -1,0 +1,15 @@
+{
+  "status": "unreviewed",
+  "tutorial": "Flybys/EVM",
+  "stage": "replay",
+  "taxonomy": "demonstration",
+  "acceptable": true,
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Flybys/EVM.emtgopt",
+  "reference_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Flybys/results/EVM_11292022_112047/EVM.emtg",
+  "prepared_options": "EVM.emtgopt",
+  "generated_mission": "EVM.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 4.239717040909454,
+  "provenance": "provenance.json"
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LVmargin",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LVmargin.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LVmargin/spacecraftoptions_LVmargin.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LVmargin/spacecraftoptions_LVmargin.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LVmargin/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LVmargin/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LVmargin/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7778074169999627,
+  "objective_value": -0.03172646663713944,
+  "worst_violation": 2.39738065666018e-06,
+  "worst_constraint": "F[1]: j0p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_in magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

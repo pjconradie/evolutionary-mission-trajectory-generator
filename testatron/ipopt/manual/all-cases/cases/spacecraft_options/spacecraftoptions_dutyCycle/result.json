@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_dutyCycle",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_dutyCycle.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycle/spacecraftoptions_dutyCycle.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycle/spacecraftoptions_dutyCycle.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycle/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycle/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_dutyCycle/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 27.628780305000078,
+  "objective_value": -0.2250949067804662,
+  "worst_violation": 7.9701783260085e-06,
+  "worst_constraint": "F[8]: j0p0PSFB_Step0: left match point zdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

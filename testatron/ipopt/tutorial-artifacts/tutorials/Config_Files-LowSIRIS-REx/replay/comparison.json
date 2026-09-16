@@ -1,0 +1,35 @@
+{
+  "status": "unreviewed",
+  "acceptable": true,
+  "absolute_tolerance": 1e-12,
+  "relative_tolerance": 1e-10,
+  "checks": {
+    "journey_names": true,
+    "event_topology": true,
+    "decision_descriptions": true,
+    "decision_vector_length": true,
+    "objective": true,
+    "total_deterministic_deltav": true,
+    "total_flight_time_years": true,
+    "final_mass": true,
+    "journey_endpoints": true
+  },
+  "baseline_objective": -0.17403239151054145,
+  "generated_objective": -0.17403239151054145,
+  "generated_feasibility_metric": 7.62217643096401e-06,
+  "endpoint_tolerances": {
+    "epoch_days": 1e-08,
+    "position_km": 1.0,
+    "velocity_km_s": 1e-07,
+    "mass_kg": 1e-06
+  },
+  "endpoint_deltas": {
+    "max_epoch_days": 0.0,
+    "max_position_km": 0.0,
+    "max_velocity_km_s": 0.0,
+    "max_mass_kg": 0.0
+  },
+  "feasibility_tolerance": 1e-05,
+  "feasible": true,
+  "duration_seconds": 5.3212225001771
+}

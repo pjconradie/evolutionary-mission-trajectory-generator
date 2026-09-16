@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_LV_FixedInitMass",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_LV_FixedInitMass.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_LV_FixedInitMass/spacecraftoptions_LV_FixedInitMass.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LV_FixedInitMass/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_LV_FixedInitMass/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.4192614999999478,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

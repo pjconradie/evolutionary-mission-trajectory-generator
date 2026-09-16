@@ -1,0 +1,1265 @@
+#EMTGv9 .emtgopt file version 2
+
+#mission name
+mission_name EVM_PSBI_pEnd_distance
+#objective function type
+#0: minimum deltaV
+#1: minimum time
+#2: maximum final mass
+#3: maximize initial mass
+#4: depart as late as possible in the window
+#5: depart as early as possible in the window
+#6: maximize orbit energy
+#7: minimize launch mass
+#8: arrive as early as possible
+#9: arrive as late as possible
+#10: <PLACEHOLDER FOR FUTURE OBJECTIVE FUNCTIONS>
+#11: maximum dry/wet ratio
+#12: maximum arrival kinetic energy
+#13: minimum BOL power
+#14: maximize log_10(final mass)
+#15: maximum log_e(final mass)
+#16: maximum dry mass margin
+#17: maximum dry mass
+#18: maximum log_10(dry mass)
+#19: maximum log_e(dry mass)
+#20: minimize chemical fuel
+#21: minimize chemical oxidizer
+#22: minimize electric propellant
+#23: minimize total propellant
+#24: minimize waypoint tracking error
+#25: minimize initial impulse magnitude
+#26: maximize distance from central body
+objective_type 2
+#Journey associated with objective function (if applicable)
+objective_journey 0
+#Include the initial impulse in calculating the delta-v objective function?
+include_initial_impulse_in_cost 0
+#0: unbounded, 1: bounded total time (note that the global arrival date bound is by definition the same as the last journey's arrival date bound and is not duplicated
+global_timebounded 1
+#launch window open date (MJD)
+launch_window_open_date 53782
+#flight time bounds (days)
+total_flight_time_bounds 0.0 1000.0
+#DLA in degrees
+DLA_bounds -90.0 90.0
+#RLA in degrees
+RLA_bounds -2880.0 2880.0
+#phase type
+#0: MGALTS
+#1: FBLTS
+#2: MGALT
+#3: FBLT
+#4: PSBI
+#5: PSFB
+#6: MGAnDSMs
+#7: CoastPhase
+#8: SundmanCoastPhase
+#9: variable phase type
+#10: ProbeEntryPhase
+#11: ControlLawThrustPhase
+mission_type 4
+#NLP solver type
+#0: SNOPT
+#1: WORHP
+#2: IPOPT
+NLP_solver_type 2
+#NLP solver mode
+#0: find feasible point only
+#1: find optimal solution
+#2: satisfy equality constraints
+NLP_solver_mode 1
+#Quiet NLP solver?
+quiet_NLP 1
+#Enable ACE feasible point finder?
+ACE_feasible_point_finder 1
+#Write every hop to the MBH archive, even if it is not an improvement?
+MBH_always_write_archive 0
+#include state vector in MBH archive file?
+MBH_archive_state_vector 0
+#quantity Max_not_improve for MBH
+MBH_max_not_improve 10000
+#maximum number of trials for MBH
+MBH_max_trials 1000000
+#maximum run time for MBH, in seconds
+MBH_max_run_time 60
+#Maximum step size (uniform) or scale factor (other distributions)
+MBH_max_step_size 1
+#MBH hop probabilty distribution
+#0: uniform
+#1: Cauchy
+#2: Pareto
+#3: Gaussian
+MBH_hop_distribution 2
+#Pareto distribution alpha
+MBH_Pareto_alpha 1.4
+#Write every MBH improvement for later animation?
+MBH_write_every_improvement 0
+#probability of MBH time hop operation
+MBH_time_hop_probability 0.05
+#feasibility tolerance
+snopt_feasibility_tolerance 1e-05
+#optimality tolerance
+snopt_optimality_tolerance 1e-05
+#NLP max step
+NLP_max_step 1
+#NLP major iterations
+snopt_major_iterations 500
+#NLP minor iterations
+snopt_minor_iterations 500
+#NLP max run time (seconds)
+snopt_max_run_time 15
+#Enable Scalatron?
+enable_Scalatron 1
+#Enable NLP chaperone?
+enable_NLP_chaperone 1
+#Seed MBH?
+seed_MBH 1
+#Skip first NLP run in an MBH process?
+skip_first_nlp_run 0
+#Stop NLP on goal attain?
+NLP_stop_on_goal_attain 0
+#Objective value at which NLP stops
+NLP_objective_goal 0
+#Within an NLP run, how frequently do we check to see if we have found a feasible solution with a better objective function value than we have written out before, and, if true, write it to file? (seconds) ONLY WORKS IF NLP CHAPERONE IS ACTIVE.
+NLP_write_output_check_time 1000000
+#MBH RNG seed (negative number means system clock)
+MBH_RNG_seed -1
+#Print NLP movie frames?
+print_NLP_movie_frames 0
+#Quiet MBH?
+quiet_basinhopping 0
+#SPICE leap seconds kernel - required for SPICE to work
+SPICE_leap_seconds_kernel naif0012.tls
+#SPICE_reference_frame_kernel
+SPICE_reference_frame_kernel pck00010.tpc
+#Universe folder
+universe_folder /repo/testatron/universe
+#0: static, 1: SPICE (default to static if no SPICE file supplied for a body), 2: SplineEphem
+ephemeris_source 2
+#How many sample points should SplineEphem use per orbital period of each body?
+SplineEphem_points_per_period 360
+#How many sample points should SplineEphem use per orbital period of the sun with respect to the central body?
+SplineEphem_non_central_body_sun_points_per_period 10000
+#Truncate SplineEphem at maximum mission epoch?
+#If you enable this option, global search will be impeded but you will save a lot of memory
+#Useful for monte-carlo, launch period analysis, etc.
+SplineEphem_truncate_ephemeris_at_maximum_mission_epoch 0
+#Beginning of the SplineEphem data set
+earliestPossibleEpoch 51554.5
+#End of the SplineEphem data set
+latestPossibleEpoch 88058
+#Propagator type
+#0: Keplerian propagator
+#1: Integrated propagator
+propagatorType 0
+#Integrator type
+#0: rk7813M adaptive step
+#1: rk8 fixed step
+integratorType 1
+#adaptive step integrator tolerance
+integrator_tolerance 1e-08
+#integration step size (maximum for adaptive, fixed for fixed)
+integration_time_step_size 86400
+#number of timesteps per phase
+num_timesteps 20
+#number of spiral segments
+spiral_segments 1
+#Allow the mass at the beginning of the first journey to vary up to the allowed maximum?
+allow_initial_mass_to_vary 0
+#maximum possible mass of the spacecraft (kg)
+maximum_mass 525.2
+#specific impulse of the engine used for low-thrust maneuvers
+IspLT 3000
+#minimum specific impulse for variable specific impulse problems
+IspLT_minimum 1
+#specific impulse of the engine used for impulsive maneuvers
+IspChem 320
+#thrust of the spacecraft, in Newtons
+Thrust 0.1
+#LV margin (as a fraction)
+LV_margin 0
+#LV adapter mass (kg)
+LV_adapter_mass 0
+#low-thrust engine type
+#0: fixed thrust/Isp
+#1: constant Isp, efficiency, EMTG computes input power
+#2: choice of power model, constant efficiency, EMTG chooses Isp
+#3: choice of power model, constant efficiency and Isp
+#4: continuously-varying specific impulse
+#5: custom thrust and mass flow rate polynomial
+#6: AEPS_High_Thrust_and_Isp
+#7: BIT3_High_Thrust_and_Isp
+#8: Halo12_High_Thrust
+#9: Halo12_High_Isp
+#10: NEXTC_High_Thrust
+#11: NEXTC_High_Isp
+#12: PPS5000_High_Thrust
+#13: PPS5000_High_Isp
+#14: 2D Throttle table
+#15: 1D Throttle table high-thrust
+#16: 1D Throttle table high-Isp
+#17: 2D polynomial fit
+engine_type 5
+#number of thruster systems (used to be called number of engines)
+number_of_electric_propulsion_systems 1
+#percentage of time that engine can operate
+engine_duty_cycle 1
+#duty cycle type
+#0: averaged
+#1: realistic
+duty_cycle_type 0
+#scale factor to apply to thrust ONLY, not mass flow rate, can use to approximate cosine loss
+thrust_scale_factor 1
+#Power at 1 AU (kW)
+power_at_1_AU 5
+#power source type. Choices are 0 - fixed, 1 - solar
+power_source_type 1
+#Solar power model type
+#0: classic Sauer model
+#1: polynomial (0th order on the left)
+solar_power_model_type 0
+#solar power coefficients gamma_1 through gamma_5, if all gamma = [1 0 0 0 0], then solar power is a simple 1/r^2
+solar_power_gamma 1.32077 -0.10848 -0.11665 0.10843 -0.01279 0.0 0.0
+#power margin (fraction)
+power_margin 0
+#power system decay rate (fraction per year)
+power_decay_rate 0
+#reference date when the power system begins to decay
+power_system_decay_reference_epoch 51544.5
+#Throttle sharpness (higher means more precise, lower means smoother)
+throttle_sharpness 100
+#Throttle logic mode
+#0: maximum number of thrusters
+#1: minimum number of thrusters
+throttle_logic_mode 1
+#spacecraft power coefficients A, B, and C
+#represent the power requirements of the spacecraft at a distance r from the sun
+#i.e. heaters, communications, etc
+spacecraft_power_coefficients 0 0 0
+#thrust polynomial coefficients
+engine_input_thrust_coefficients 26.337459 -51.694393 90.486509 -36.720293 5.145602 0.0 0.0
+#mass flow rate polynomial coefficients
+engine_input_mass_flow_rate_coefficients 2.506 -5.3568 6.2539 -2.5372 0.36985 0.0 0.0
+#thruster input power bounds (kW)
+engine_input_power_bounds 0.525 2.6
+#Propulsion system efficiency (fraction)
+user_defined_engine_efficiency 0.7
+#spacecraft power model type
+#0: P_sc = A + B/r + C/r^2
+#1: P_sc = A if P > A, A + B(C - P) otherwise
+spacecraft_power_model_type 0
+#Isp for TCMs
+TCM_Isp 200
+#TCM magnitude post-launch (km/s)
+TCM_post_launch 0
+#TCM magnitude before flybys (km/s)
+TCM_pre_flyby 0
+#Post-DSM TCM magnitude as a fraction of DSM magnitude
+TCM_maneuver_fraction 0
+#Track ACS propellant consumption?
+trackACS 0
+#ACS propellant consumption (kg/day)
+ACS_kg_per_day 0
+#Bounds on final mass constraints
+final_mass_constraint_bounds 0.0 0.0
+#Constrain final wet mass?
+constrain_final_mass 0
+#Constrain dry mass?
+constrain_dry_mass 0
+#Constrain electric propellant tank?
+enable_electric_propellant_tank_constraint 0
+#Electric propellant tank capacity (kg)
+maximum_electric_propellant 1000
+#Electric propellant margin (fraction)
+electric_propellant_margin 0
+#Constrain chemical propellant?
+enable_chemical_propellant_tank_constraint 0
+#Chemical fuel tank capacity (kg)
+maximum_chemical_fuel 1000
+#Chemical oxidizer tank capacity (kg)
+maximum_chemical_oxidizer 1000
+#Bipropellant mixture ratio
+bipropellant_mixture_ratio 0.925
+#Chemical propellant margin (fraction)
+chemical_propellant_margin 0
+#Spacecraft object input type
+#0: Assemble from libraries
+#1: Read .emtg_spacecraftoptions file
+#2: Assemble from missionoptions object
+SpacecraftModelInput 2
+#HardwarePath
+HardwarePath /repo/testatron/HardwareModels
+#ThrottleTableFile
+ThrottleTableFile empty.ThrottleTable
+#LaunchVehicleLibraryFile
+LaunchVehicleLibraryFile default.emtg_launchvehicleopt
+#PowerSystemsLibraryFile
+PowerSystemsLibraryFile default.emtg_powersystemsopt
+#PropulsionSystemsLibraryFile
+PropulsionSystemsLibraryFile default.emtg_propulsionsystemopt
+#SpacecraftOptionsFile
+SpacecraftOptionsFile default.emtg_spacecraftopt
+#LaunchVehicleKey
+LaunchVehicleKey Falcon_9_FT_(RTLS)
+#PowerSystemKey
+PowerSystemKey 5kW_basic
+#ElectricPropulsionSystemKey
+ElectricPropulsionSystemKey AEPS_PolyFit_HTandHI
+#ChemicalPropulsionSystemKey
+ChemicalPropulsionSystemKey DefaultChemicalPropulsionSystem
+#solar radiation pressure?
+perturb_SRP 0
+#third body perturbations?
+perturb_thirdbody 0
+#J2?
+perturb_J2 0
+#spacecraft area (for SRP, in m^2)
+spacecraft_area 70
+#Coefficient of reflectivity
+coefficient_of_reflectivity 1
+#Percentage of the Sun seen by the spacecraft
+solar_percentage 1
+#Solar constant (flux density at 1 AU) [W/m^2 = kg/s^3]
+solar_flux 1359.39
+#Speed of light in a vacuum [m/s]
+speed_of_light_vac 299792458
+#Forced post-launch coast, in days
+forced_post_launch_coast 0
+#Forced pre-flyby coast, in days
+forced_pre_flyby_coast 0
+#Forced post-flyby coast, in days
+forced_post_flyby_coast 0
+#Path to waypoint file
+waypoint_file_path ./banana.ephemeris
+#Path to covariance file
+covariance_file_path ./shampoo_bottle.ephemeris
+#state representation for parallel shooting (Cartesian, SphericalRADEC, SphericalAZFPA, COE, MEE)
+ParallelShootingStateRepresentation 1
+#state representation for periapse boundary conditions (Cartesian, SphericalRADEC, SphericalAZFPA, COE, MEE, IncomingBplane, OutgoingBplane, IncomingBplaneRpTA, OutgoingBplaneRpTA)
+PeriapseBoundaryStateRepresentation 1
+#state representation for parallel shooting constraints (Cartesian or same as encoded states)
+ParallelShootingConstraintStateRepresentation 0
+#Write only options that are *not* default into the .emtgopt file?
+print_only_non_default_options 0
+#reference frame for output file (0: J2000_ICRF, 1: J2000_BCI, 2: J2000_BCF, 3: TrueOfDate_BCI, 4: TrueOfDate_BCF, 5: Principle Axes, 6: Topocentric, 7: Polar)
+output_file_frame 1
+#Override default output file name?
+override_default_output_file_name 0
+#User-defined output file name
+forced_output_file_name forced_output_file_name
+#Output ephemeris for time spent waiting between journeys?
+output_dormant_journeys 0
+#How long to output an ephemeris after the mission end (days)
+post_mission_wait_time 0
+#Override the working directory?
+override_working_directory 1
+#User-defined working directory
+forced_working_directory /artifacts/cases/script_constraint_tests/EVM_PSBI_pEnd_distance
+#Create a mission subfolder?
+override_mission_subfolder 1
+#Mission subfolder
+forced_mission_subfolder .
+#Shorten output file names?
+short_output_file_names 1
+#Generate forward-integrated ephemeris?
+generate_forward_integrated_ephemeris 0
+#Consecutive lines in ephemeris file separated by less than this amount of time will be removed when the clean ephemeris file is created. (Seconds)
+forward_integrated_ephemeris_minimum_timestep_kept 120
+#SPICE ID of central body for forward integrated ephemeris
+forward_integrated_ephemeris_central_body_SPICE_ID 10
+#Add control switch line to ephemeris?
+add_control_switch_line_to_ephemeris 0
+#Append mass to ephemeris output?
+append_mass_to_ephemeris_output 0
+#Append control vector to ephemeris output?
+append_control_to_ephemeris_output 0
+#Append thrust magnitude to ephemeris output?
+append_thrust_to_ephemeris_output 0
+#Append mass flow rate to ephemeris output?
+append_mdot_to_ephemeris_output 0
+#Append Isp to ephemeris output?
+append_Isp_to_ephemeris_output 0
+#Append active power to ephemeris output?
+append_active_power_to_ephemeris_output 0
+#Append number of active propulsion systems to ephemeris output?
+append_number_of_active_engines_to_ephemeris_output 0
+#Append throttle level to ephemeris output?
+append_throttle_level_to_ephemeris_output 0
+#Generate bsp?
+call_system_to_generate_bsp 0
+#Where are spice utilities?
+spice_utilities_path C:/utilities/cspice/exe
+#Spice utility extension
+spice_utility_extension .exe
+#PyEMTG path
+pyemtg_path C:/emtg/PyEMTG/
+#SPICE ID of spacecraft
+spacecraft_SPICE_ID -52284
+#Close program after completion?
+background_mode 1
+#Output STMs?
+output_STMs 0
+#Output maneuver and target spec files?
+output_maneuver_and_target_spec_files 0
+#generates a complete output of all acceleration model data at each integration time step (only works for numerically integrated trajectories
+generate_acceleration_model_instrumentation_file 0
+#Stop after a particular journey? (if this value is greater than the number of journeys, do the whole mission)
+stop_after_journey 32767
+#which inner loop solver to run?
+#0: none, evaluate trialX
+#1: run MBH
+#2: run constrained DE
+#3: run NLP using trialX as initial guess
+#4: filament walker
+run_inner_loop 3
+#Should EMTG check the feasibility tolerance of the initial guess when running in MBH mode and skip the NLP solve for that iteration if the feasibility tolerance is greater than feasibilityTolInMBHToSkipNLP?
+checkFeasibilityTolInMBHToSkipNLP 0
+#If checkFeasibilityTolInMBHToSkipNLP is true, then we skip the NLP solve for any MBH iteration whose initial feasibility is greater than the value of this option.
+feasibilityTolInMBHToSkipNLP 1000000
+#Maximum number of hops without improving objective function before trying a random point when the guess is worse than the skip-NLP-solve-tolerance and checkFeasibilityTolInMBHToSkipNLP is true.
+MBH_max_not_improve_with_NLP_skip 10000
+#Check derivatives using NLP finite differencing?
+check_derivatives 0
+
+#Enter any user data that should be appended to the .emtg file.
+#This is typically used in python wrappers
+user_data 
+
+
+
+BEGIN_JOURNEY
+
+#Journey name
+journey_name default
+#Journey central body name
+journey_central_body Sun
+#destination list, as indices from the Universe file
+destination_list 3 4
+#flyby sequence, as indices from the Universe file
+sequence 2
+#phase type
+#0: MGALTS
+#1: FBLTS
+#2: MGALT
+#3: FBLT
+#4: PSBI
+#5: PSFB
+#6: MGAnDSMs
+#7: CoastPhase
+#8: SundmanCoastPhase
+#9: variable (do not use)
+#10 ProbeEntryPhase
+#11 ControlLawThrustPhase
+phase_type 4
+#impulses per phase
+impulses_per_phase 1
+#Thrust control law
+#0: Cartesian (not implemented)
+#1: velocity direction
+#2: anti-velocity direction
+thrust_control_law 1
+#Force unit magnitude control?
+#0: free control magnitude
+#1: force unit magnitude
+#2: force zero magnitude
+force_unit_magnitude_control 0
+#Force fixed inertial control? All control vectors in a phase must be identical if this is selected.
+force_fixed_inertial_control 0
+#Override this journey's number of steps?
+override_num_steps 0
+#Number of time steps for this journey, if overriden
+number_of_steps 20
+#Journey override global duty cycle
+override_duty_cycle 0
+#Journey duty cycle
+duty_cycle 1
+#override propagator type?
+override_PropagatorType 0
+#propagator type
+propagatorType 1
+#Override global integration step size?
+override_integration_step_size 0
+#integration step size (s)
+integration_step_size 86400
+#Override journey flyby altitude?
+override_flyby_altitude_bounds 0
+#Lower and upper bound on journey flyby altitude, if override is active (only applies to the departure flyby, if there is one)
+flyby_altitude_bounds 300.0 1000000.0
+#Override journey periapse arrival altitude?
+PeriapseArrival_override_altitude 0
+#Lower and upper bound on journey periapse arrival altitude, if override is active (km)
+PeriapseArrival_altitude_bounds 300.0 1000000.0
+#PeriapseDeparture altitude bounds (in km)
+PeriapseDeparture_altitude_bounds 185.0 185.0
+#number of interior control points for parallel shooting phase types
+num_interior_control_points 1
+#coast phase match point fraction
+CoastPhaseMatchPointFraction 0.5
+#coast phase forward integration step length (seconds)
+CoastPhaseForwardIntegrationStepLength 86400
+#coast phase backward integration step length (seconds)
+CoastPhaseBackwardIntegrationStepLength 86400
+#Journey-end TCM magnitude (km/s)
+journey_end_TCM 0
+#Enable periapse burns in ephemeris pegged flybys?
+enable_periapse_burns 0
+#Bound the departure epoch?
+bounded_departure_date 0
+#does the journey have time bounds?
+#0: unbounded
+#1: bounded flight time
+#2: bounded arrival date
+#3: bounded aggregate flight time
+timebounded 0
+#Journey departure epoch bounds (MJD, two entries)
+departure_date_bounds 0.0 0.0
+#Journey wait time bounds (days)
+wait_time_bounds 0.0 1000.0
+#Journey flight time bounds (days)
+flight_time_bounds 0.0 0.0
+#Journey arrival date bounds (MJD, two entries)
+arrival_date_bounds 51544.5 60000.0
+#journey departure type
+#0: launch or direct insertion
+#1: depart from parking orbit (you can use this one in place of a launch vehicle model, and the departure burn will be done with the EDS motor)
+#2: free direct departure, i.e. do not burn to get the departure v_infinity (used for when operations about a small body are not modeled but the departure velocity is known)
+#3: flyby (only valid for successive journeys)
+#4: flyby with fixed v-infinity-out (only valid for successive journeys)
+#5: spiral-out from circular orbit (low-thrust missions only)
+#6: zero-turn flyby (for small bodies)
+departure_type 0
+#what are the bounds on the initial impulse for each journey in km/s\
+#you can set a very high upper bound if you are using a launchy vehicle model - the optimizer will find the correct value
+initial_impulse_bounds 0.0 6.97
+#Force free point direct insertion burn to be along the inertial velocity vector?
+force_free_point_direct_insertion_along_velocity_vector 0
+#one entry for each element
+departure_elements_vary_flag 0 0 0 0 0 0
+#cartesian state or SMA, ECC, INC, RAAN, AOP, TA
+departure_elements 0.0 0.0 0.0 0.0 0.0 0.0
+#bounds on elements or state components, two entries for each element
+departure_elements_bounds 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+#Reference epoch (MJD) for journey departure elements
+departure_elements_reference_epoch 51544.5
+#departure free point state representation (Cartesian, SphericalRADEC, SphericalAZFPA, COE, MEE, IncomingBplane, OutgoingBplane, IncomingBplaneRpTA, OutgoingBplaneRpTA)
+departure_elements_state_representation 0
+#reference frame for journey departure elements (0: J2000_ICRF, 1: J2000_BCI, 2: J2000_BCF, 3: TrueOfDate_BCI, 4: TrueOfDate_BCF, 5: Principle Axes, 6: Topocentric, 7: Polar, 8: SAM, 9: ObjectReferenced)
+departure_elements_frame 0
+#Allow journey departure free point boundary to propagate (otherwise it is a fixed waypoint)
+AllowJourneyFreePointDepartureToPropagate 0
+#upper bound on starting mass increment (negative number indicates mass drop) [kg]
+maximum_starting_mass_increment 0
+#lower bound on starting mass increment (negative number indicates mass drop) [kg]
+minimum_starting_mass_increment 0
+#starting mass increment (negative number indicates mass drop) [kg]
+fixed_starting_mass_increment 0
+#ending mass increment (negative number indicates mass drop) [kg]
+fixed_ending_mass_increment 0
+#Vary initial mass increment?
+variable_mass_increment 0
+#Constrain initial mass?
+constrain_initial_mass 0
+#If initial mass for this journey is constrained, enter the constraint value here.
+maximum_initial_mass 0
+#journey departure boundary class
+#0: Ephemeris-pegged (default EMTG)
+#1: Free point
+#2: Ephemeris-referenced
+#3: Periapse
+departure_class 0
+#journey departure ellipsoid axes (3)
+departure_ellipsoid_axes 1e-08 1e-08 1e-08
+#journey arrival type
+#0: insertion into parking orbit (use chemical Isp)
+#1: rendezvous (use chemical Isp)
+#2: intercept with bounded V_infinity
+#3: low-thrust rendezvous (does not work if terminal phase is not low-thrust)
+#4: match final v-infinity vector
+#5: match final v-infinity vector (low-thrust)
+#6: capture spiral
+#7: momentum transfer (kinetic impactor)
+arrival_type 2
+#one entry for each element
+arrival_elements_vary_flag 0 0 0 0 0 0
+#cartesian state or SMA, ECC, INC, RAAN, AOP, TA
+arrival_elements 0.0 0.0 0.0 0.0 0.0 0.0
+#bounds on elements or state components, two entries for each element
+arrival_elements_bounds 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+#Reference epoch (MJD) for journey arrival elements
+arrival_elements_reference_epoch 51544.5
+#arrival free point state representation (Cartesian, SphericalRADEC, SphericalAZFPA, COE, MEE, IncomingBplane, OutgoingBplane, IncomingBplaneRpTA, OutgoingBplaneRpTA)
+arrival_elements_state_representation 0
+#reference frame for journey arrival elements (0: J2000_ICRF, 1: J2000_BCI, 2: J2000_BCF, 3: TrueOfDate_BCI, 4: TrueOfDate_BCF, 5: Principle Axes, 6: Topocentric, 7: Polar, 8: SAM, 9: ObjectReferenced)
+arrival_elements_frame 0
+#Allow journey arrival free point boundary to propagate (otherwise it is a fixed waypoint)
+AllowJourneyFreePointArrivalToPropagate 0
+#Bounds on this journey's final velocity (in km/s)
+final_velocity 0.0 20.0 0.0
+#Journey forced terminal coast (in days)
+forced_terminal_coast 0
+#Journey forced initial coast (in days)
+forced_initial_coast 0
+#journey arrival boundary class
+#0: Ephemeris-pegged (default EMTG)
+#1: Free point
+#2: Ephemeris-referenced
+#3: Periapse
+arrival_class 0
+#journey arrival ellipsoid axes (3)
+arrival_ellipsoid_axes 1e-08 1e-08 1e-08
+#encounter distance (from center of object) for a zero-turn flyby (km)
+zero_turn_flyby_distance 1000
+#encounter distance (from center of object) for an ephemeris-pegged intercept (km)
+terminal_intercept_flyby_distance 1000
+#Starting orbital radius for an Edelbaum escape spiral (km)
+escape_spiral_starting_radius 6678
+#Final orbit radius for an Edelbaum capture spiral (km)
+escape_spiral_final_radius 6678
+#Final orbit radius for an Edelbaum capture spiral (km)
+capture_spiral_final_radius 6678
+#Starting orbital radius for an Edelbaum capture spiral (km)
+capture_spiral_starting_radius 6678
+#Print a target spec for free point arrival at the end of this journey?
+FreePointArrival_print_target_spec 1
+#Journey-end delta-v (km/s)
+journey_end_deltav 0
+#Propulsion system for journey-end maneuver
+#0: Monoprop chemical
+#1: Biprop chemical
+#2: Electric
+journey_end_propulsion_system 0
+#Which bodies are used for third-body perturbation?
+#Expressed as indices in the Universe file
+perturbation_bodies
+#Stage after departure?
+stage_after_departure 0
+#Stage before arrival?
+stage_before_arrival 0
+#Stage after arrival?
+stage_after_arrival 0
+#Freeze this journey's decision variables?
+freeze_decision_variables 0
+#SMA (in km) for ephemeris pegged orbit insertion
+ephemeris_pegged_orbit_insertion_SMA 6678
+#ECC for ephemeris pegged orbit insertion
+ephemeris_pegged_orbit_insertion_ECC 0
+#Lower and upper bounds for ephemeris pegged orbit insertion Delta v (km/s)
+ephemeris_pegged_orbit_insertion_dv_bounds 0 100
+#Impact momentum enhancement factor for planetary defense (also called beta)
+impact_momentum_enhancement_factor 1
+#Aerodynamic drag?
+perturb_drag 0
+#spacecraft area (for aerodynamic drag, in m^2)
+spacecraft_drag_area 70
+#coefficient of drag, i.e. Cd (unitless)
+coefficient_of_drag 2.2
+#Atmospheric density model
+AtmosphericDensityModelKey Exponential
+#File defining atmospheric density model
+AtmosphericDensityModelDataFile DoesNotExist.emtg_densityopt
+#Include central body gravitational harmonics perturbations?
+perturb_central_body_gravity_harmonics 0
+#Maximum degree to include for central body gravitational harmonics
+central_body_gravity_degree 2
+#Maximum order to include for central body gravitational harmonics
+central_body_gravity_order 0
+#STK .grv style gravity model file
+central_body_gravity_file /repo/testatron/universe/gravity_files/DoesNotExist.grv
+#Probe separation impulse (Ns)
+probe_separation_impulse 1
+#Probe mass (kg)
+probe_mass 100
+#one entry for each element
+Probe_AEI_elements_vary_flag 0 0 0 0 0 0
+#cartesian state or SMA, ECC, INC, RAAN, AOP, TA
+Probe_AEI_elements 0.0 0.0 0.0 0.0 0.0 0.0
+#bounds on elements or state components, two entries for each element
+Probe_AEI_elements_bounds 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+#Reference epoch (MJD) for journey probe arrival elements
+Probe_AEI_elements_reference_epoch 51544.5
+#probe arrival free point state representation (Cartesian, SphericalRADEC, SphericalAZFPA, COE)
+Probe_AEI_elements_state_representation 0
+#reference frame for journey arrival elements (0: J2000_ICRF, 1: J2000_BCI, 2: J2000_BCF, 3: TrueOfDate_BCI, 4: TrueOfDate_BCF, 5: Principle Axes, 6: Topocentric, 7: Polar, 8: SAM)
+Probe_AEI_elements_frame 0
+#one entry for each element
+Probe_End_elements_vary_flag 0 0 0 0 0 0
+#cartesian state or SMA, ECC, INC, RAAN, AOP, TA
+Probe_End_elements 0.0 0.0 0.0 0.0 0.0 0.0
+#bounds on elements or state components, two entries for each element
+Probe_End_elements_bounds 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+#Reference epoch (MJD) for journey probe arrival elements
+Probe_End_elements_reference_epoch 51544.5
+#probe arrival free point state representation (Cartesian, SphericalRADEC, SphericalAZFPA, COE)
+Probe_End_elements_state_representation 0
+#reference frame for journey arrival elements (0: J2000_ICRF, 1: J2000_BCI, 2: J2000_BCF, 3: TrueOfDate_BCI, 4: TrueOfDate_BCF, 5: Principle Axes, 6: Topocentric, 7: Polar, 8: SAM)
+Probe_End_elements_frame 0
+# or just final approach?
+ModelProbeSecondPhase 0
+#Allow probe AEI free point boundary to propagate (otherwise it is a fixed waypoint)
+AllowJourneyProbeAEIToPropagate 0
+#Allow probe end free point boundary to propagate (otherwise it is a fixed waypoint)
+AllowJourneyProbeEndToPropagate 0
+#Probe-spacecraft communication distance constraint (km)
+probe_communication_distance_bounds 2000.0 10000.0
+#Aerodynamic drag on probe from separation to AEI?
+perturb_drag_probe_separation_to_AEI 0
+#Aerodynamic drag on probe from AEI to end of probe mission?
+perturb_drag_probe_AEI_to_end 0
+#probe area prior to AEI (for aerodynamic drag, in m^2)
+probe_drag_area_probe_separation_to_AEI 70
+#probe area after AEI (for aerodynamic drag, in m^2)
+probe_drag_area_probe_AEI_to_end 70
+#probe coefficient of drag prior to AEI, i.e. Cd (unitless)
+probe_coefficient_of_drag_probe_separation_to_AEI 2.2
+#probe coefficient of drag after AEI, i.e. Cd (unitless)
+probe_coefficient_of_drag_probe_AEI_to_end 2.2
+#Bounds on the probe's final velocity at AEI (in km/s)
+probe_AEI_velocity 0.0 100.0 0.0
+#Bounds on the probe's final velocity at end of mission (in km/s)
+probe_end_velocity 0.0 100.0 0.0
+#probe separation to AEI match point fraction
+ProbeSeparationToAEI_MatchPointFraction 0.5
+#probe separation to AEI forward integration step length (seconds)
+ProbeSeparationToAEI_ForwardIntegrationStepLength 86400
+#probe separation to AEI backward integration step length (seconds)
+ProbeSeparationToAEI_BackwardIntegrationStepLength 86400
+#probe AEI to end match point fraction
+ProbeAEI_to_end_MatchPointFraction 0.5
+#probe AEI to end forward integration step length (seconds)
+ProbeAEI_to_end_ForwardIntegrationStepLength 86400
+#probe AEI to end backward integration step length (seconds)
+ProbeAEI_to_end_BackwardIntegrationStepLength 86400
+#Print a target spec for the probe state at the end of the first sub-phase?
+Probe_AEI_print_target_spec 1
+#Print a target spec for the probe state at the end of the second sub-phase?
+Probe_end_print_target_spec 1
+#Always print this journey's options to the .emtgopt file?
+print_this_journey_options_no_matter_what 0
+#Override default ephemeris output resolution?
+override_ephemeris_output_resolution 0
+#If overriding default ephemeris output resolution, this is the overriding value (seconds)
+EphemerisOutputResolution 1
+
+#Maneuver constraint code
+#Works for absolute and relative epochs and also magnitudes
+BEGIN_MANEUVER_CONSTRAINT_BLOCK
+END_MANEUVER_CONSTRAINT_BLOCK
+
+
+#Boundary constraint code
+BEGIN_BOUNDARY_CONSTRAINT_BLOCK
+END_BOUNDARY_CONSTRAINT_BLOCK
+
+
+#Phase distance constraint code
+BEGIN_PHASE_DISTANCE_CONSTRAINT_BLOCK
+pEnd_cb_0.7au_2.0au
+END_PHASE_DISTANCE_CONSTRAINT_BLOCK
+
+#trial decision vector
+BEGIN_TRIALX
+p0PSBIEphemerisPeggedLaunchDirectInsertion: event left state epoch ,54609.71612677240045741200
+p0PSBIEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote ,0.00000000000000000000
+p0PSBIEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote ,-44.78234613646635864370
+p0PSBIEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote ,-1.57079632679489655800
+p0PSBI: phase flight time ,480.13920205078096614670
+p0PSBIEphemerisPeggedFlybyIn: event left state mass ,464.24243999471946153790
+p0PSBIEphemerisPeggedFlybyIn: V_infinity_x ,-0.94707326935530034007
+p0PSBIEphemerisPeggedFlybyIn: V_infinity_y ,-2.68544238509812416282
+p0PSBIEphemerisPeggedFlybyIn: V_infinity_z ,-3.96880898115140823279
+p0PSBI: virtual chemical fuel ,0.00000000005252000000
+p0PSBI: virtual electric propellant ,60.95756000722362699662
+p0PSBI_Step0: left state r ,151490839.67832738161087036133
+p0PSBI_Step0: left state RA ,4.20207650872129789832
+p0PSBI_Step0: left state DEC ,-0.36165409561436523411
+p0PSBI_Step0: left state v ,29.40052022790199970359
+p0PSBI_Step0: left state vRA ,5.83225873328557753439
+p0PSBI_Step0: left state vDEC ,-0.18676339601736913210
+p0PSBI_Step0: left state mass ,525.20000000000004547474
+p0PSBI_Step0: virtual chemical fuel ,0.00000000005252000000
+p0PSBI_Step0: virtual electric propellant ,0.00000000005252000000
+p0PSBI_Step0: substep0 u_x ,-0.99389956152158820402
+p0PSBI_Step0: substep0 u_y ,0.10265433832275649984
+p0PSBI_Step0: substep0 u_z ,0.04032057213812922924
+p0PSBI_Step1: left state r ,151975324.18160516023635864258
+p0PSBI_Step1: left state RA ,4.62967855962886076782
+p0PSBI_Step1: left state DEC ,-0.40784468655143513161
+p0PSBI_Step1: left state v ,28.94164804408501723287
+p0PSBI_Step1: left state vRA ,6.21161931238243170128
+p0PSBI_Step1: left state vDEC ,-0.03107326709888269534
+p0PSBI_Step1: left state mass ,518.64113853148467114806
+p0PSBI_Step1: virtual chemical fuel ,-0.00000000084032000000
+p0PSBI_Step1: virtual electric propellant ,6.55886146867282082695
+p0PSBI_Step1: substep0 u_x ,-0.95137531563979349514
+p0PSBI_Step1: substep0 u_y ,-0.30456661009458596556
+p0PSBI_Step1: substep0 u_z ,0.04608892409568721149
+p0PSBI_Step2: left state r ,151581065.16350859403610229492
+p0PSBI_Step2: left state RA ,5.05588005777489613024
+p0PSBI_Step2: left state DEC ,-0.38718933161611568394
+p0PSBI_Step2: left state v ,28.65618625840750866018
+p0PSBI_Step2: left state vRA ,0.30826819904858027144
+p0PSBI_Step2: left state vDEC ,0.13297191259455587442
+p0PSBI_Step2: left state mass ,512.08227706296941050823
+p0PSBI_Step2: virtual chemical fuel ,-0.00000000078780000000
+p0PSBI_Step2: virtual electric propellant ,13.11772293729312544031
+p0PSBI_Step2: substep0 u_x ,-0.78272978407753890373
+p0PSBI_Step2: substep0 u_y ,-0.62201679489651162669
+p0PSBI_Step2: substep0 u_z ,0.02071695010992313790
+p0PSBI_Step3: left state r ,149751017.10771521925926208496
+p0PSBI_Step3: left state RA ,5.46544152306766051197
+p0PSBI_Step3: left state DEC ,-0.30446198985903794032
+p0PSBI_Step3: left state v ,28.66702220497497322071
+p0PSBI_Step3: left state vRA ,0.71199755494194150174
+p0PSBI_Step3: left state vDEC ,0.28141065610267546049
+p0PSBI_Step3: left state mass ,505.52341559445414986840
+p0PSBI_Step3: virtual chemical fuel ,-0.00000000073528000000
+p0PSBI_Step3: virtual electric propellant ,19.67658440591342383641
+p0PSBI_Step3: substep0 u_x ,-0.53430132551638020999
+p0PSBI_Step3: substep0 u_y ,-0.84509252065324402814
+p0PSBI_Step3: substep0 u_z ,-0.01845874248999646028
+p0PSBI_Step4: left state r ,146106536.75074124336242675781
+p0PSBI_Step4: left state RA ,5.85775778101231026085
+p0PSBI_Step4: left state DEC ,-0.17211845668997938219
+p0PSBI_Step4: left state v ,29.07121370132635362893
+p0PSBI_Step4: left state vRA ,1.15906449634453423414
+p0PSBI_Step4: left state vDEC ,0.38624938383144780119
+p0PSBI_Step4: left state mass ,498.96455412593888922856
+p0PSBI_Step4: virtual chemical fuel ,-0.00000000068276000000
+p0PSBI_Step4: virtual electric propellant ,26.23544587453372756158
+p0PSBI_Step4: substep0 u_x ,-0.22784625699403215915
+p0PSBI_Step4: substep0 u_y ,-0.97188227722708231404
+p0PSBI_Step4: substep0 u_z ,-0.05942156580392632392
+p0PSBI_Step5: left state r ,140507141.38939166069030761719
+p0PSBI_Step5: left state RA ,6.24976238307732145927
+p0PSBI_Step5: left state DEC ,-0.00512756194406871479
+p0PSBI_Step5: left state v ,29.93534739626781870925
+p0PSBI_Step5: left state vRA ,1.65111867353989438811
+p0PSBI_Step5: left state vDEC ,0.41706173388818612580
+p0PSBI_Step5: left state mass ,492.40569265742357174531
+p0PSBI_Step5: virtual chemical fuel ,-0.00000000063024000000
+p0PSBI_Step5: virtual electric propellant ,32.79430734315402418133
+p0PSBI_Step5: substep0 u_x ,0.12235569201528084804
+p0PSBI_Step5: substep0 u_y ,-0.98781884795755403594
+p0PSBI_Step5: substep0 u_z ,-0.09614056567700934863
+p0PSBI_Step6: left state r ,133137486.44208413362503051758
+p0PSBI_Step6: left state RA ,0.39081222988422936737
+p0PSBI_Step6: left state DEC ,0.17780138561487146553
+p0PSBI_Step6: left state v ,31.27685588994022225506
+p0PSBI_Step6: left state vRA ,2.16450526600791093301
+p0PSBI_Step6: left state vDEC ,0.35268078972613281508
+p0PSBI_Step6: left state mass ,485.84683118890825426206
+p0PSBI_Step6: virtual chemical fuel ,-0.00000000057772000000
+p0PSBI_Step6: virtual electric propellant ,39.35316881177432435379
+p0PSBI_Step6: substep0 u_x ,0.49365218994835369237
+p0PSBI_Step6: substep0 u_y ,-0.85964199851262801388
+p0PSBI_Step6: substep0 u_z ,-0.13161743752374621685
+p0PSBI_Step7: left state r ,124649519.64577069878578186035
+p0PSBI_Step7: left state RA ,0.89413716957739097779
+p0PSBI_Step7: left state DEC ,0.34322658449924459134
+p0PSBI_Step7: left state v ,33.01512369560776960498
+p0PSBI_Step7: left state vRA ,2.67471233816396392058
+p0PSBI_Step7: left state vDEC ,0.19508388588390701557
+p0PSBI_Step7: left state mass ,479.28796972039305046565
+p0PSBI_Step7: virtual chemical fuel ,-0.00000000052520000000
+p0PSBI_Step7: virtual electric propellant ,45.91203028039462452625
+p0PSBI_Step7: substep0 u_x ,0.56046238588925745283
+p0PSBI_Step7: substep0 u_y ,-0.36028436108942141214
+p0PSBI_Step7: substep0 u_z ,-0.12923057102348778358
+p0PSBI_Step8: left state r ,116397680.66636759042739868164
+p0PSBI_Step8: left state RA ,1.51752737835751716489
+p0PSBI_Step8: left state DEC ,0.42503787513909241369
+p0PSBI_Step8: left state v ,34.97941476557519990820
+p0PSBI_Step8: left state vRA ,3.18872914392347794887
+p0PSBI_Step8: left state vDEC ,-0.02793393100523644534
+p0PSBI_Step8: left state mass ,474.83651993439247007700
+p0PSBI_Step8: virtual chemical fuel ,-0.00000000047268000000
+p0PSBI_Step8: virtual electric propellant ,50.36348006650032971265
+p0PSBI_Step8: substep0 u_x ,0.00000023926579428846
+p0PSBI_Step8: substep0 u_y ,-0.00000010406711381528
+p0PSBI_Step8: substep0 u_z ,0.00000023000835791542
+p0PSBI_Step9: left state r ,110756152.80176179111003875732
+p0PSBI_Step9: left state RA ,2.22131177986532435398
+p0PSBI_Step9: left state DEC ,0.34238187431001465555
+p0PSBI_Step9: left state v ,36.60206706451855040996
+p0PSBI_Step9: left state vRA ,3.74677661107234172277
+p0PSBI_Step9: left state vDEC ,-0.25727502547222513840
+p0PSBI_Step9: left state mass ,474.83651833133865238779
+p0PSBI_Step9: virtual chemical fuel ,-0.00000000042016000000
+p0PSBI_Step9: virtual electric propellant ,50.36348166965909456394
+p0PSBI_Step9: substep0 u_x ,0.00000082095890063805
+p0PSBI_Step9: substep0 u_y ,0.00000067708070816686
+p0PSBI_Step9: substep0 u_z ,-0.00000035163049638687
+p0PSBI_Step10: left state r ,110287793.05840726196765899658
+p0PSBI_Step10: left state RA ,2.89239850322091740509
+p0PSBI_Step10: left state DEC ,0.10491047707550738011
+p0PSBI_Step10: left state v ,36.74082784524318867625
+p0PSBI_Step10: left state vRA ,4.38241465805921137644
+p0PSBI_Step10: left state vDEC ,-0.40662596342392731685
+p0PSBI_Step10: left state mass ,474.83651833139214204493
+p0PSBI_Step10: virtual chemical fuel ,-0.00000000036764000000
+p0PSBI_Step10: virtual electric propellant ,50.36348166971072259912
+p0PSBI_Step10: substep0 u_x ,-0.00000009998091232699
+p0PSBI_Step10: substep0 u_y ,0.00000034851621788512
+p0PSBI_Step10: substep0 u_z ,-0.00000065513491231961
+p0PSBI_Step11: left state r ,115233055.07961766421794891357
+p0PSBI_Step11: left state RA ,3.50293747563256374633
+p0PSBI_Step11: left state DEC ,-0.16479430871316380625
+p0PSBI_Step11: left state v ,35.30730812618681113690
+p0PSBI_Step11: left state vRA ,5.03938438356827589359
+p0PSBI_Step11: left state vDEC ,-0.40339234173048055254
+p0PSBI_Step11: left state mass ,474.83651833144574538892
+p0PSBI_Step11: virtual chemical fuel ,-0.00000000031512000000
+p0PSBI_Step11: virtual electric propellant ,50.36348166976220142033
+p0PSBI_Step11: substep0 u_x ,-0.00000017675356056568
+p0PSBI_Step11: substep0 u_y ,0.00000045593615838335
+p0PSBI_Step11: substep0 u_z ,-0.00000046000408193692
+p0PSBI_Step12: left state r ,123264615.49395839869976043701
+p0PSBI_Step12: left state RA ,4.08544078594779591640
+p0PSBI_Step12: left state DEC ,-0.35496067734657499315
+p0PSBI_Step12: left state v ,33.11381705867410119026
+p0PSBI_Step12: left state vRA ,5.61989302967611337181
+p0PSBI_Step12: left state vDEC ,-0.26712241013103721343
+p0PSBI_Step12: left state mass ,474.83651833149872345530
+p0PSBI_Step12: virtual chemical fuel ,-0.00000000026260000000
+p0PSBI_Step12: virtual electric propellant ,50.36348166981419183230
+p0PSBI_Step12: substep0 u_x ,-0.00000094112046478134
+p0PSBI_Step12: substep0 u_y ,0.00000011853197401379
+p0PSBI_Step12: substep0 u_z ,-0.00000012820459560636
+p0PSBI_Step13: left state r ,131480149.64774693548679351807
+p0PSBI_Step13: left state RA ,4.64117241429030258359
+p0PSBI_Step13: left state DEC ,-0.42471642650976093591
+p0PSBI_Step13: left state v ,31.01574390230551259151
+p0PSBI_Step13: left state vRA ,6.11454205341088297132
+p0PSBI_Step13: left state vDEC ,-0.06939499130000825744
+p0PSBI_Step13: left state mass ,474.83651833155158783484
+p0PSBI_Step13: virtual chemical fuel ,-0.00000000021008000000
+p0PSBI_Step13: virtual electric propellant ,50.36348166986642382881
+p0PSBI_Step13: substep0 u_x ,0.00000004578241141751
+p0PSBI_Step13: substep0 u_y ,0.00000017346217173753
+p0PSBI_Step13: substep0 u_z ,0.00000001473660349305
+p0PSBI_Step14: left state r ,137795102.19959765672683715820
+p0PSBI_Step14: left state RA ,5.14360716169353793248
+p0PSBI_Step14: left state DEC ,-0.38798055969247591257
+p0PSBI_Step14: left state v ,29.48661016162319725709
+p0PSBI_Step14: left state vRA ,0.28791795854118973352
+p0PSBI_Step14: left state vDEC ,0.13413456202479778767
+p0PSBI_Step14: left state mass ,474.83651833160496380515
+p0PSBI_Step14: virtual chemical fuel ,-0.00000000015756000000
+p0PSBI_Step14: virtual electric propellant ,50.36348166991808739112
+p0PSBI_Step14: substep0 u_x ,-0.00000409829252412397
+p0PSBI_Step14: substep0 u_y ,-0.00000461790757333436
+p0PSBI_Step14: substep0 u_z ,0.00000116472383071553
+p0PSBI_Step15: left state r ,141065002.11659592390060424805
+p0PSBI_Step15: left state RA ,5.58486444682993976585
+p0PSBI_Step15: left state DEC ,-0.27868937823494821515
+p0PSBI_Step15: left state v ,28.71950363824473839713
+p0PSBI_Step15: left state vRA ,0.75381423816726922382
+p0PSBI_Step15: left state vDEC ,0.30498489577898979519
+p0PSBI_Step15: left state mass ,474.83647712173382160472
+p0PSBI_Step15: virtual chemical fuel ,-0.00000000010504000000
+p0PSBI_Step15: virtual electric propellant ,50.36352287989424070247
+p0PSBI_Step15: substep0 u_x ,-0.42999380764969930002
+p0PSBI_Step15: substep0 u_y ,-0.88324318223950237794
+p0PSBI_Step15: substep0 u_z ,0.18704760835941902641
+p0PSBI_Step16: left state r ,140746852.79090040922164916992
+p0PSBI_Step16: left state RA ,5.98297628147070525984
+p0PSBI_Step16: left state DEC ,-0.12519535964404071571
+p0PSBI_Step16: left state v ,28.45215080448560129867
+p0PSBI_Step16: left state vRA ,1.25838565764267684699
+p0PSBI_Step16: left state vDEC ,0.41621337403705638280
+p0PSBI_Step16: left state mass ,468.27761565321861780831
+p0PSBI_Step16: virtual chemical fuel ,-0.00000000005252000000
+p0PSBI_Step16: virtual electric propellant ,56.92238434851453376950
+p0PSBI_Step16: substep0 u_x ,-0.11759823521968326698
+p0PSBI_Step16: substep0 u_y ,-0.59522922122849930560
+p0PSBI_Step16: substep0 u_z ,0.10169205518801205379
+p0PSBI_Step17: left state r ,136359806.22548839449882507324
+p0PSBI_Step17: left state RA ,0.09022455374489268820
+p0PSBI_Step17: left state DEC ,0.05357635303947572147
+p0PSBI_Step17: left state v ,29.29641590067737411118
+p0PSBI_Step17: left state vRA ,1.80235815022789935824
+p0PSBI_Step17: left state vDEC ,0.42439159705391915622
+p0PSBI_Step17: left state mass ,464.24261791242389563195
+p0PSBI_Step17: virtual chemical fuel ,0.00000000000000000000
+p0PSBI_Step17: virtual electric propellant ,60.95738208941419600251
+p0PSBI_Step17: substep0 u_x ,0.00000165550888042709
+p0PSBI_Step17: substep0 u_y ,-0.00002679905371139046
+p0PSBI_Step17: substep0 u_z ,0.00000386137919639040
+p0PSBI_Step18: left state r ,128133534.04352484643459320068
+p0PSBI_Step18: left state RA ,0.52665254042802445156
+p0PSBI_Step18: left state DEC ,0.24003105235964516950
+p0PSBI_Step18: left state v ,31.35676172371271164252
+p0PSBI_Step18: left state vRA ,2.34247674341904499329
+p0PSBI_Step18: left state vDEC ,0.31568932978488106755
+p0PSBI_Step18: left state mass ,464.24243999461236853676
+p0PSBI_Step18: virtual chemical fuel ,0.00000000005252000000
+p0PSBI_Step18: virtual electric propellant ,60.95756000733082657916
+p0PSBI_Step18: substep0 u_x ,-0.00000008420673014431
+p0PSBI_Step18: substep0 u_y ,-0.00000052624559709891
+p0PSBI_Step18: substep0 u_z ,0.00000036608520437298
+p0PSBI_Step19: left state r ,117531030.25576846301555633545
+p0PSBI_Step19: left state RA ,1.07938951083648504436
+p0PSBI_Step19: left state DEC ,0.39523905139169679401
+p0PSBI_Step19: left state v ,34.20693509381023744709
+p0PSBI_Step19: left state vRA ,2.86806127605643723655
+p0PSBI_Step19: left state vDEC ,0.11447523450313923377
+p0PSBI_Step19: left state mass ,464.24243999466602872417
+p0PSBI_Step19: virtual chemical fuel ,0.00000000000000000000
+p0PSBI_Step19: virtual electric propellant ,60.95756000727721612975
+p0PSBI_Step19: substep0 u_x ,0.00000019192530498202
+p0PSBI_Step19: substep0 u_y ,-0.00000019285712815620
+p0PSBI_Step19: substep0 u_z ,-0.00000073258137589516
+p1PSBIEphemerisPeggedUnpoweredFlyby: V_infinity_x ,-2.08753417019201847893
+p1PSBIEphemerisPeggedUnpoweredFlyby: V_infinity_y ,-3.56982139052076163921
+p1PSBIEphemerisPeggedUnpoweredFlyby: V_infinity_z ,-2.59972491688203533045
+p1PSBI: phase flight time ,519.86079794921909069672
+p1PSBIEphemerisPeggedIntercept: event left state mass ,428.73507087376890467567
+p1PSBIEphemerisPeggedIntercept: V_infinity_x ,-2.10844348116092206169
+p1PSBIEphemerisPeggedIntercept: V_infinity_y ,-4.63923209304757477867
+p1PSBIEphemerisPeggedIntercept: V_infinity_z ,-2.18522520789638718952
+p1PSBI: virtual chemical fuel ,0.00000000000000000000
+p1PSBI: virtual electric propellant ,35.50736912369352182850
+p1PSBI_Step0: left state r ,107567725.31549479067325592041
+p1PSBI_Step0: left state RA ,1.79479364434587651544
+p1PSBI_Step0: left state DEC ,0.42512497664594883773
+p1PSBI_Step0: left state v ,38.31113439249363494810
+p1PSBI_Step0: left state vRA ,3.43433681351071840027
+p1PSBI_Step0: left state vDEC ,-0.09845774048135425005
+p1PSBI_Step0: left state mass ,464.24243999477198485692
+p1PSBI_Step0: virtual chemical fuel ,0.00000000005252000086
+p1PSBI_Step0: virtual electric propellant ,0.00000000005252000000
+p1PSBI_Step0: substep0 u_x ,-0.00000031742500117282
+p1PSBI_Step0: substep0 u_y ,-0.00000041930284977454
+p1PSBI_Step0: substep0 u_z ,-0.00000040224905040187
+p1PSBI_Step1: left state r ,104718509.48369999229907989502
+p1PSBI_Step1: left state RA ,2.65882045498770125391
+p1PSBI_Step1: left state DEC ,0.23782080251884307742
+p1PSBI_Step1: left state v ,39.17754431793449754196
+p1PSBI_Step1: left state vRA ,4.09905561119278871729
+p1PSBI_Step1: left state vDEC ,-0.33976785907647411022
+p1PSBI_Step1: left state mass ,464.24243999482382605493
+p1PSBI_Step1: virtual chemical fuel ,0.00000000010504000083
+p1PSBI_Step1: virtual electric propellant ,0.00000000019457855136
+p1PSBI_Step1: substep0 u_x ,-0.00000004413893994748
+p1PSBI_Step1: substep0 u_y ,-0.00000015724808666295
+p1PSBI_Step1: substep0 u_z ,0.00000039014356256750
+p1PSBI_Step2: left state r ,113748866.37106628715991973877
+p1PSBI_Step2: left state RA ,3.38353024582305295098
+p1PSBI_Step2: left state DEC ,-0.07580315371046086881
+p1PSBI_Step2: left state v ,36.51927877275960554471
+p1PSBI_Step2: left state vRA ,-1.47319851481361041579
+p1PSBI_Step2: left state vDEC ,-0.42921708616949416637
+p1PSBI_Step2: left state mass ,464.24243926015003580687
+p1PSBI_Step2: virtual chemical fuel ,0.00000000003811397493
+p1PSBI_Step2: virtual electric propellant ,0.00000073501310474969
+p1PSBI_Step2: substep0 u_x ,0.00000001124739168468
+p1PSBI_Step2: substep0 u_y ,-0.00000097224387707318
+p1PSBI_Step2: substep0 u_z ,-0.00000036193591246292
+p1PSBI_Step3: left state r ,128722139.33886273205280303955
+p1PSBI_Step3: left state RA ,3.98297720801259558243
+p1PSBI_Step3: left state DEC ,-0.30734737119825616958
+p1PSBI_Step3: left state v ,32.59183375946687277747
+p1PSBI_Step3: left state vRA ,-0.85128230361065249099
+p1PSBI_Step3: left state vDEC ,-0.35087849607889154413
+p1PSBI_Step3: left state mass ,464.24243926020216122197
+p1PSBI_Step3: virtual chemical fuel ,0.00000000010504000000
+p1PSBI_Step3: virtual electric propellant ,0.00000073515257618743
+p1PSBI_Step3: substep0 u_x ,-0.00000024919820762470
+p1PSBI_Step3: substep0 u_y ,-0.00000044045021996286
+p1PSBI_Step3: substep0 u_z ,-0.00000003572615447922
+p1PSBI_Step4: left state r ,143328980.29153633117675781250
+p1PSBI_Step4: left state RA ,4.50338826206275300024
+p1PSBI_Step4: left state DEC ,-0.41401761537460601836
+p1PSBI_Step4: left state v ,29.19052396478942767999
+p1PSBI_Step4: left state vRA ,-0.34908923680601589012
+p1PSBI_Step4: left state vDEC ,-0.18629973558470069861
+p1PSBI_Step4: left state mass ,464.24243926025394557655
+p1PSBI_Step4: virtual chemical fuel ,0.00000000015756000000
+p1PSBI_Step4: virtual electric propellant ,0.00000073530055062677
+p1PSBI_Step4: substep0 u_x ,-0.00000023300115925551
+p1PSBI_Step4: substep0 u_y ,-0.00000061586107602540
+p1PSBI_Step4: substep0 u_z ,0.00000004015295473891
+p1PSBI_Step5: left state r ,154290550.19884976744651794434
+p1PSBI_Step5: left state RA ,4.95731279132269264665
+p1PSBI_Step5: left state DEC ,-0.42386394204651489659
+p1PSBI_Step5: left state v ,26.84253117324099235930
+p1PSBI_Step5: left state vRA ,0.08562338748441078451
+p1PSBI_Step5: left state vDEC ,0.00474259668427379211
+p1PSBI_Step5: left state mass ,464.24243926030624152190
+p1PSBI_Step5: virtual chemical fuel ,0.00000000021008000000
+p1PSBI_Step5: virtual electric propellant ,0.00000073539846695730
+p1PSBI_Step5: substep0 u_x ,-0.00000076723480824104
+p1PSBI_Step5: substep0 u_y ,-0.00000059988126233090
+p1PSBI_Step5: substep0 u_z ,0.00000016972071237298
+p1PSBI_Step6: left state r ,160273908.51597037911415100098
+p1PSBI_Step6: left state RA ,-0.92862866922914832912
+p1PSBI_Step6: left state DEC ,-0.36853176834529133288
+p1PSBI_Step6: left state v ,25.61834033198963567202
+p1PSBI_Step6: left state vRA ,0.50546043227413051113
+p1PSBI_Step6: left state vDEC ,0.18865018251225507129
+p1PSBI_Step6: left state mass ,464.24243926035813956332
+p1PSBI_Step6: virtual chemical fuel ,0.00000000015756000267
+p1PSBI_Step6: virtual electric propellant ,0.00000073553859265958
+p1PSBI_Step6: substep0 u_x ,-0.00000035244784635236
+p1PSBI_Step6: substep0 u_y ,-0.00000036122610713729
+p1PSBI_Step6: substep0 u_z ,-0.00000020427798053113
+p1PSBI_Step7: left state r ,160816697.05624011158943176270
+p1PSBI_Step7: left state RA ,-0.56944503608761110058
+p1PSBI_Step7: left state DEC ,-0.26847283723356607510
+p1PSBI_Step7: left state v ,25.50901369754008740642
+p1PSBI_Step7: left state vRA ,0.94742610141077321373
+p1PSBI_Step7: left state vDEC ,0.33715420826349529193
+p1PSBI_Step7: left state mass ,464.24243926041026497842
+p1PSBI_Step7: virtual chemical fuel ,0.00000000021008000267
+p1PSBI_Step7: virtual electric propellant ,0.00000073564110286357
+p1PSBI_Step7: substep0 u_x ,0.00000029316570326898
+p1PSBI_Step7: substep0 u_y ,0.00000001293721396678
+p1PSBI_Step7: substep0 u_z ,-0.00000012176168673328
+p1PSBI_Step8: left state r ,155884216.71719789505004882812
+p1PSBI_Step8: left state RA ,-0.22275751557847911499
+p1PSBI_Step8: left state DEC ,-0.13361881615999604556
+p1PSBI_Step8: left state v ,26.51290650783596092310
+p1PSBI_Step8: left state vRA ,1.42897648002074006968
+p1PSBI_Step8: left state vDEC ,0.42039265693157190640
+p1PSBI_Step8: left state mass ,464.24243755956842960586
+p1PSBI_Step8: virtual chemical fuel ,0.00000000015756000311
+p1PSBI_Step8: virtual electric propellant ,0.00000243663401971467
+p1PSBI_Step8: substep0 u_x ,-0.00000027924187584460
+p1PSBI_Step8: substep0 u_y ,-0.00000053129405008789
+p1PSBI_Step8: substep0 u_z ,-0.00000037874783676006
+p1PSBI_Step9: left state r ,145835077.51874941587448120117
+p1PSBI_Step9: left state RA ,0.14534250414862270873
+p1PSBI_Step9: left state DEC ,0.03204418843418843643
+p1PSBI_Step9: left state v ,28.64024199150544802706
+p1PSBI_Step9: left state vRA ,1.94158335865998310510
+p1PSBI_Step9: left state vDEC ,0.41278197600929189548
+p1PSBI_Step9: left state mass ,464.24243755962078239463
+p1PSBI_Step9: virtual chemical fuel ,0.00000000021008000289
+p1PSBI_Step9: virtual electric propellant ,0.00000243675456475856
+p1PSBI_Step9: substep0 u_x ,0.00000003395363168401
+p1PSBI_Step9: substep0 u_y ,-0.00000022085640627445
+p1PSBI_Step9: substep0 u_z ,-0.00000013152738731481
+p1PSBI_Step10: left state r ,131768955.63250981271266937256
+p1PSBI_Step10: left state RA ,0.58798785812391685113
+p1PSBI_Step10: left state DEC ,0.22090452942212790433
+p1PSBI_Step10: left state v ,31.85198872720464535746
+p1PSBI_Step10: left state vRA ,2.46437687094461566062
+p1PSBI_Step10: left state vDEC ,0.30322686782816532514
+p1PSBI_Step10: left state mass ,464.24243755967256674921
+p1PSBI_Step10: virtual chemical fuel ,0.00000000011434193014
+p1PSBI_Step10: virtual electric propellant ,0.00000243687216711115
+p1PSBI_Step10: substep0 u_x ,-0.00000036592088814569
+p1PSBI_Step10: substep0 u_y ,-0.00000009487272334407
+p1PSBI_Step10: substep0 u_z ,0.00000037039514033665
+p1PSBI_Step11: left state r ,116465681.72181887924671173096
+p1PSBI_Step11: left state RA ,1.19408465746244729644
+p1PSBI_Step11: left state DEC ,0.39065412150471767738
+p1PSBI_Step11: left state v ,35.76626071376545468183
+p1PSBI_Step11: left state vRA ,3.00066800211640583029
+p1PSBI_Step11: left state vDEC ,0.09788529356206154830
+p1PSBI_Step11: left state mass ,464.24243394685737484906
+p1PSBI_Step11: virtual chemical fuel ,0.00000000007622795492
+p1PSBI_Step11: virtual electric propellant ,0.00000604986980048749
+p1PSBI_Step11: substep0 u_x ,-0.86617334617593000345
+p1PSBI_Step11: substep0 u_y ,-0.43176001500090011032
+p1PSBI_Step11: substep0 u_z ,-0.25164861210106970191
+p1PSBI_Step12: left state r ,105602555.12696652114391326904
+p1PSBI_Step12: left state RA ,2.02398511322397567369
+p1PSBI_Step12: left state DEC ,0.40191499486812842790
+p1PSBI_Step12: left state v ,39.31077862878725426299
+p1PSBI_Step12: left state vRA ,3.59457998794615818383
+p1PSBI_Step12: left state vDEC ,-0.16814850961640104288
+p1PSBI_Step12: left state mass ,457.14096224427765946530
+p1PSBI_Step12: virtual chemical fuel ,0.00000000003811397971
+p1PSBI_Step12: virtual electric propellant ,7.10147775255453783672
+p1PSBI_Step12: substep0 u_x ,-0.55113379721778077425
+p1PSBI_Step12: substep0 u_y ,-0.76339784461359361245
+p1PSBI_Step12: substep0 u_z ,-0.33686090366210663660
+p1PSBI_Step13: left state r ,107073802.67594358325004577637
+p1PSBI_Step13: left state RA ,2.87071254129512709596
+p1PSBI_Step13: left state DEC ,0.15310340044400150283
+p1PSBI_Step13: left state v ,39.33064334856466359724
+p1PSBI_Step13: left state vRA ,4.26950821171810446231
+p1PSBI_Step13: left state vDEC ,-0.37897482725602671394
+p1PSBI_Step13: left state mass ,450.03949054169794408153
+p1PSBI_Step13: virtual chemical fuel ,0.00000000000000000449
+p1PSBI_Step13: virtual electric propellant ,14.20294945523927765407
+p1PSBI_Step13: substep0 u_x ,-0.05181854375956618242
+p1PSBI_Step13: substep0 u_y ,-0.92640673641465631771
+p1PSBI_Step13: substep0 u_z ,-0.37294154696131398552
+p1PSBI_Step14: left state r ,121501073.90355010330677032471
+p1PSBI_Step14: left state RA ,3.54713289600287851044
+p1PSBI_Step14: left state DEC ,-0.14817012533237639005
+p1PSBI_Step14: left state v ,35.88552290559006507920
+p1PSBI_Step14: left state vRA ,-1.35542702077612986500
+p1PSBI_Step14: left state vDEC ,-0.42492832410205494398
+p1PSBI_Step14: left state mass ,442.93801883911822869777
+p1PSBI_Step14: virtual chemical fuel ,0.00000000005252000315
+p1PSBI_Step14: virtual electric propellant ,21.30442115792401480689
+p1PSBI_Step14: substep0 u_x ,0.36814752181812493426
+p1PSBI_Step14: substep0 u_y ,-0.87462052791049460509
+p1PSBI_Step14: substep0 u_z ,-0.31544624745646088204
+p1PSBI_Step15: left state r ,141740034.08775722980499267578
+p1PSBI_Step15: left state RA ,4.08983262844769512867
+p1PSBI_Step15: left state DEC ,-0.33719579592999515683
+p1PSBI_Step15: left state v ,31.74263931739875133076
+p1PSBI_Step15: left state vRA ,-0.82978021289280334827
+p1PSBI_Step15: left state vDEC ,-0.34323313228368235173
+p1PSBI_Step15: left state mass ,435.83654713653857015743
+p1PSBI_Step15: virtual chemical fuel ,0.00000000000000000293
+p1PSBI_Step15: virtual electric propellant ,28.40589286060875906514
+p1PSBI_Step15: substep0 u_x ,0.62602284948854958202
+p1PSBI_Step15: substep0 u_y ,-0.74768996456325687028
+p1PSBI_Step15: substep0 u_z ,-0.22148388352924752720
+p1PSBI_Step16: left state r ,162166447.63400983810424804688
+p1PSBI_Step16: left state RA ,4.53684031894616168756
+p1PSBI_Step16: left state DEC ,-0.41587646864516281120
+p1PSBI_Step16: left state v ,28.27644230351148735281
+p1PSBI_Step16: left state vRA ,-0.42738037652516425169
+p1PSBI_Step16: left state vDEC ,-0.21234186002175903241
+p1PSBI_Step16: left state mass ,428.73507543395891161708
+p1PSBI_Step16: virtual chemical fuel ,0.00000000000000000000
+p1PSBI_Step16: virtual electric propellant ,35.50736456329349977068
+p1PSBI_Step16: substep0 u_x ,-0.00000026290792853878
+p1PSBI_Step16: substep0 u_y ,-0.00000089613538711841
+p1PSBI_Step16: substep0 u_z ,0.00000009126762012812
+p1PSBI_Step17: left state r ,179987146.61479514837265014648
+p1PSBI_Step17: left state RA ,-1.37981253611856047314
+p1PSBI_Step17: left state DEC ,-0.42398258813092315478
+p1PSBI_Step17: left state v ,25.24879508576886522064
+p1PSBI_Step17: left state vRA ,-0.08890076536199131851
+p1PSBI_Step17: left state vDEC ,-0.07023991869548851241
+p1PSBI_Step17: left state mass ,428.73507087362298761946
+p1PSBI_Step17: virtual chemical fuel ,0.00000000000000000000
+p1PSBI_Step17: virtual electric propellant ,35.50736912373440645752
+p1PSBI_Step17: substep0 u_x ,0.00000034948795857304
+p1PSBI_Step17: substep0 u_y ,-0.00000034790566816323
+p1PSBI_Step17: substep0 u_z ,0.00000001313205966191
+p1PSBI_Step18: left state r ,193674594.95673397183418273926
+p1PSBI_Step18: left state RA ,-1.07654427471509706038
+p1PSBI_Step18: left state DEC ,-0.39241303949395534012
+p1PSBI_Step18: left state v ,23.09289768644547180543
+p1PSBI_Step18: left state vRA ,0.22261569590365226645
+p1PSBI_Step18: left state vDEC ,0.07065810455130261403
+p1PSBI_Step18: left state mass ,428.73507087367516987797
+p1PSBI_Step18: virtual chemical fuel ,0.00000000000000000000
+p1PSBI_Step18: virtual electric propellant ,35.50736912368220288272
+p1PSBI_Step18: substep0 u_x ,0.00000038792534029497
+p1PSBI_Step18: substep0 u_y ,-0.00000034070077292725
+p1PSBI_Step18: substep0 u_z ,0.00000048052440271285
+p1PSBI_Step19: left state r ,202754585.24693447351455688477
+p1PSBI_Step19: left state RA ,-0.81678855958700324891
+p1PSBI_Step19: left state DEC ,-0.33802497197630110293
+p1PSBI_Step19: left state v ,21.72344440750262251072
+p1PSBI_Step19: left state vRA ,0.53158768718091664596
+p1PSBI_Step19: left state vDEC ,0.20129714567501366673
+p1PSBI_Step19: left state mass ,428.73507087372706791939
+p1PSBI_Step19: virtual chemical fuel ,0.00000000000000000000
+p1PSBI_Step19: virtual electric propellant ,35.50736912373530884679
+p1PSBI_Step19: substep0 u_x ,0.00000111020227189229
+p1PSBI_Step19: substep0 u_y ,0.00000028470822566184
+p1PSBI_Step19: substep0 u_z ,-0.00000050187952427283
+END_TRIALX
+
+END_JOURNEY

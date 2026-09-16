@@ -1,0 +1,17 @@
+{
+  "case_id": "solver_options/solveroptions_noChaperone",
+  "source_options": "/repo/testatron/tests/solver_options/solveroptions_noChaperone.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/solver_options/solveroptions_noChaperone/solveroptions_noChaperone.emtgopt",
+  "output_file": "/artifacts/cases/solver_options/solveroptions_noChaperone/solveroptions_noChaperone.emtg",
+  "comparison_file": "/artifacts/cases/solver_options/solveroptions_noChaperone/comparison.csv",
+  "log_file": "/artifacts/cases/solver_options/solveroptions_noChaperone/run.log",
+  "compatibility_file": "/artifacts/cases/solver_options/solveroptions_noChaperone/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 52.263767524999935,
+  "objective_value": -0.6300700807447777,
+  "worst_violation": 8.8944977669133e-06,
+  "worst_constraint": "F[28]: j0p0MGALT: match point mass",
+  "detail": "Ready for human review; not a promoted baseline"
+}

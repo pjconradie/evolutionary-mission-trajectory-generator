@@ -1,0 +1,6 @@
+{
+  "status": "unreviewed",
+  "source_options": "testatron/tests/spacecraft_options/spacecraftoptions_dutyCycle.emtgopt",
+  "mode": "default",
+  "launch_vehicle_key": "Falcon_9_FT_(RTLS)"
+}

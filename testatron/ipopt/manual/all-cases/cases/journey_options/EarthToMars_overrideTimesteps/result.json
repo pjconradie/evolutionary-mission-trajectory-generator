@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_overrideTimesteps",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_overrideTimesteps.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMars_overrideTimesteps/EarthToMars_overrideTimesteps.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/EarthToMars_overrideTimesteps/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMars_overrideTimesteps/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.27180604200000147,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

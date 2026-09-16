@@ -1,0 +1,13 @@
+{
+  "status": "unreviewed",
+  "stage": "replay",
+  "benchmark": "osiris-rex-2024",
+  "acceptable": true,
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_412024_11530/OSIRIS-REx.emtgopt",
+  "baseline_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_412024_11530/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
+  "prepared_options": "OSIRIS-REx.emtgopt",
+  "generated_mission": "OSIRIS-REx.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "provenance": "provenance.json"
+}

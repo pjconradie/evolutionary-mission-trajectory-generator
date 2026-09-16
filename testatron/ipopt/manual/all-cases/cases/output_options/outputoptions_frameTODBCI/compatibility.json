@@ -1,0 +1,18 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/output_options/outputoptions_frameTODBCI.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_April2017.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    },
+    {
+      "option": "ThrottleTableFile",
+      "source": "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable",
+      "replacement": "empty.ThrottleTable",
+      "reason": "engine_type 6 does not use throttle-table performance data"
+    }
+  ]
+}

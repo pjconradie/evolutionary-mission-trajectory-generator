@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EarthMars_RPRangle_force_conjunction",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EarthMars_RPRangle_force_conjunction.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/EarthMars_RPRangle_force_conjunction.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.22149799999999686,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

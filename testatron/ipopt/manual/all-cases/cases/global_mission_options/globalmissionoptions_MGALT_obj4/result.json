@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_obj4",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_obj4.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj4/globalmissionoptions_MGALT_obj4.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj4/FAILURE_globalmissionoptions_MGALT_obj4.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj4/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj4/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj4/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.8453940840000005,
+  "objective_value": -0.9370030805246028,
+  "worst_violation": -6.4169200333687e-07,
+  "worst_constraint": "F[22]: j0p0MGALT: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

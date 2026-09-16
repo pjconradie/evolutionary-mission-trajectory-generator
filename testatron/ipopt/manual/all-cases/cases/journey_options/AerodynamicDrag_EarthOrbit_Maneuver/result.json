@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/AerodynamicDrag_EarthOrbit_Maneuver",
+  "source_options": "/repo/testatron/tests/journey_options/AerodynamicDrag_EarthOrbit_Maneuver.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/AerodynamicDrag_EarthOrbit_Maneuver.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.3234109170000039,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Cannot find /repo/testatron/universe//Earth_MAGIC.emtg_universe. Place a breakpoint in /tmp/emtg-source/src/Astrodynamics/universe.cpp, line 85"
+}

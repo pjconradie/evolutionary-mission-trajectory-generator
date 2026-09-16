@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_obj1",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_obj1.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj1/globalmissionoptions_MGALT_obj1.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj1/FAILURE_globalmissionoptions_MGALT_obj1.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj1/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj1/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_obj1/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.8397518340000003,
+  "objective_value": 0.6930579928784876,
+  "worst_violation": 9.9069833455996e-06,
+  "worst_constraint": "F[28]: j0p0MGALT: match point mass",
+  "detail": "Ready for human review; not a promoted baseline"
+}

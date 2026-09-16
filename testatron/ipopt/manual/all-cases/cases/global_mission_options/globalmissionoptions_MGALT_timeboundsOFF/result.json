@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_timeboundsOFF",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_timeboundsOFF.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_timeboundsOFF/globalmissionoptions_MGALT_timeboundsOFF.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_timeboundsOFF/FAILURE_globalmissionoptions_MGALT_timeboundsOFF.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_timeboundsOFF/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_timeboundsOFF/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_timeboundsOFF/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6233590420000041,
+  "objective_value": -0.9237164279183554,
+  "worst_violation": 0.37232567102656067,
+  "worst_constraint": "F[27]: j0p0MGALT: match point mass",
+  "detail": "Worst constraint exceeds source tolerance"
+}

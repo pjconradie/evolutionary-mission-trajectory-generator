@@ -1,0 +1,15 @@
+{
+  "status": "unreviewed",
+  "acceptable": true,
+  "checks": {
+    "journey_names": true,
+    "event_topology": true,
+    "decision_descriptions": true,
+    "finite_decision_vector": true,
+    "finite_constraint_vector": true,
+    "intentionally_infeasible": true
+  },
+  "generated_feasibility_metric": 0.0005993830127909225,
+  "feasibility_tolerance": 1e-05,
+  "duration_seconds": 4.583105874946341
+}

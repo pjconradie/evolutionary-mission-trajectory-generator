@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EVM_PSBI_pEnd_distance",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EVM_PSBI_pEnd_distance.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EVM_PSBI_pEnd_distance/EVM_PSBI_pEnd_distance.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/script_constraint_tests/EVM_PSBI_pEnd_distance/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EVM_PSBI_pEnd_distance/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.22020716699998388,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "LaunchVehicleOptionsLibrary::Launch vehicle 'Falcon_9_FT_(RTLS)' not found. Place a breakpoint in /tmp/emtg-source/src/HardwareModels/LaunchVehicleOptions.cpp, line 269"
+}

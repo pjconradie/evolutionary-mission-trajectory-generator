@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGAnDSMs_obj0",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGAnDSMs_obj0.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGAnDSMs_obj0/globalmissionoptions_MGAnDSMs_obj0.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGAnDSMs_obj0/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGAnDSMs_obj0/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.476294333999995,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

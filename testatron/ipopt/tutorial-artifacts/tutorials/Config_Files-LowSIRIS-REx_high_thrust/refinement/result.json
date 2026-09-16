@@ -1,0 +1,15 @@
+{
+  "status": "unreviewed",
+  "tutorial": "Config_Files/LowSIRIS-REx_high_thrust",
+  "stage": "refinement",
+  "taxonomy": "demonstration",
+  "acceptable": true,
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/LowSIRIS-REx_high_thrust.emtgopt",
+  "reference_mission": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/results/LowSIRIS-REx_high_thrust_11292022_133015/LowSIRIS-REx_high_thrust_Sun(EB)_Sun(BE).emtg",
+  "prepared_options": "LowSIRIS-REx_high_thrust.emtgopt",
+  "generated_mission": "LowSIRIS-REx_high_thrust.emtg",
+  "comparison": "comparison.json",
+  "log": "run.log",
+  "duration_seconds": 3.512362124864012,
+  "provenance": "provenance.json"
+}
