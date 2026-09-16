@@ -1,8 +1,6 @@
 ---
 created: 2026-09-16
 ---
-
-
 # Manual Testatron Execution (IPOPT)
 
 How to run individual Testatron mission cases against the open-source IPOPT

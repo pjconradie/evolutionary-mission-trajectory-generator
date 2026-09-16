@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "testatron/ipopt/case_lookup.README.md",
+                "file": "daily/2026-09-16.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "case_lookup.README"
+              "title": "2026-09-16"
             }
           }
         ]
@@ -188,9 +188,12 @@
   },
   "active": "2e125fed430ead7e",
   "lastOpenFiles": [
-    "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt",
     "testatron/ipopt/manual_testron_execution.README.md",
+    "testatron/ipopt/manual/coast-retest/run.log",
+    "daily/2026-09-16.md",
+    "daily",
     "testatron/ipopt/case_lookup.README.md",
+    "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt",
     "testatron/ipopt/case_lookup.csv",
     "testatron/ipopt/case_lookup.json",
     "testatron/ipopt/tools/build_case_lookup.py",
@@ -198,9 +201,6 @@
     "testatron/ipopt/manual/coast-retest/XFfile.csv",
     "testatron/ipopt/manual/coast-retest/CoastPhase_EMintercept.emtgopt.bak",
     "testatron/ipopt/manual/coast-retest/CoastPhase_EMintercept.emtg_spacecraftopt",
-    "testatron/ipopt/manual/coast-retest/run-evaluate.log",
-    "testatron/ipopt/manual/coast-retest/CoastPhase_EMintercept.emtg",
-    "testatron/ipopt/manual/coast-retest/CoastPhase_EMintercept.emtgopt",
     "testatron/ipopt/README.md",
     "CoastPhase_EMintercept.md"
   ]
