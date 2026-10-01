@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ipopt.readme"
+              "title": "tests.readme"
             }
           }
         ]
@@ -188,8 +188,10 @@
   },
   "active": "2e125fed430ead7e",
   "lastOpenFiles": [
-    "daily/2026-09-30.md",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.readme..md",
+    "daily/2026-09-30.md",
     "docs/3_NLP_Solvers/IPOPT",
     "docs/3_NLP_Solvers",
     "docs/3_Solvers",
