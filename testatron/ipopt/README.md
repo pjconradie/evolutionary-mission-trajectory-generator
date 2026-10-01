@@ -233,45 +233,12 @@ reviewed references matching the current inputs or explicitly revise the gate
 contract before changing these results.
 
 ## Docker Conditions
-
-Integration tests use a Debian 12 amd64 image, including on ARM64 hosts. The
-pinned image installs IPOPT 3.11.9, NumPy 2.5.3, pandas 3.0.5, and the remaining
-build dependencies. Docker must be running.
-
-Inspect the host and reusable images with:
-
-```bash
-docker info --format 'Server={{.ServerVersion}} Architecture={{.Architecture}} CPUs={{.NCPU}}'
-docker image ls --filter label=org.emtg.pytest.toolchain=true \
-  --format 'IMAGE={{.Repository}}:{{.Tag}} ID={{.ID}} SIZE={{.Size}} CREATED={{.CreatedSince}}'
-```
-
-Normal integration tests use a content-addressed image and persistent,
-backend-specific build volumes:
-
-```text
-emtg-pytest-ipopt-<image-hash>
-emtg-pytest-none-<image-hash>
-```
-
-The first build for a backend can be slow. Later tests reuse its volume. The
-clean-bootstrap test creates a unique uncached image and volume and removes
-those disposable resources when it finishes; it does not warm the reusable
-NONE or IPOPT build volumes.
-
-On a four-core ARM64 host using amd64 emulation, observed times on 2026-09-15
-were:
-
-| Selection | Result | Duration |
-| --- | --- | --- |
-| `pytest --unit` | 23 passed | 2.68 s |
-| `pytest --regression` | 145 passed | 1.62 s |
-| `pytest --integration` | 23 passed | 9 min 55 s |
-| `pytest --clean-bootstrap -vv` | 1 passed | 29 min 50 s |
-
-These are historical measurements, not fixed expectations. A clean build may
-download roughly 150-300 MB when its base image is cached and may need 3-5 GB
-of temporary free disk space.
+Docker-backed tests use the pinned Debian 12 amd64 IPOPT toolchain. The image,
+container, and persistent build-volume lifecycle, including manual build, run,
+inspection, and targeted cleanup commands, is documented in
+[`docs/3_NLP_Solvers/IPOPT/ipopt.readme.md`](../../docs/3_NLP_Solvers/IPOPT/ipopt.readme.md).
+Docker must be running before selecting `--integration`, `--clean-bootstrap`,
+or `--tutorials`.
 
 ## Pytest Artifact Directory
 

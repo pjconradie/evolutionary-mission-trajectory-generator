@@ -1,0 +1,8 @@
+mission_state:
+  in_flight: true # This can be false. Then the spacecraft is still part of the launch/injection vehicle
+  initial_conditions:
+    et_timestamp: 526676400.2
+    utc_timestamp: 2016-09-09T06:58:52.000
+    position: [147061808.6, -31094501.27, -13523257.84]
+    velocity: [0.474986, 26.84188, 11.496813]
+    attitude: [0, 0, 0, 1]

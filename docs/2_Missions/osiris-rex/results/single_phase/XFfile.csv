@@ -1,0 +1,69 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state x,146518586.9408,146518586.9408,149597870.691,146518586.9408
+1,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state y,-31538338.54165,-31538338.54165,149597870.691,-31538338.54165
+2,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state z,-13689417.84495,-13689417.84495,149597870.691,-13689417.84495
+3,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state vx,0.4778907055198,0.47789070552,29.78469183517,0.477890780873
+4,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state vy,26.83090266787,26.83090266787,29.78469183517,26.83090281615
+5,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state vz,11.49199332095,11.49199332095,29.78469183517,11.49199339285
+6,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state mass,525.2,525.2,525.2,525.1999999999
+7,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state epoch,4980121200.2,4980121200.2,5022642.890479,4980121200.2
+8,j0p0MGAnDSMs: phase flight time,315621.8599125,77760000,5022642.890479,32634068.94333
+9,j0p0MGAnDSMsEphemerisPeggedIntercept: event left state mass,1e-13,525.2,525.2,459.6848727913
+10,j0p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_x,-20,20,29.78469183517,-6.528913759576
+11,j0p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_y,-20,20,29.78469183517,-0.5569602139175
+12,j0p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_z,-20,20,29.78469183517,-0.3393211820041
+13,j0p0MGAnDSMs: virtual chemical fuel,0,525.2,525.2,34.0338323161
+14,j0p0MGAnDSMs: virtual chemical oxidizer,0,525.2,525.2,31.48129489239
+15,j0p0MGAnDSMsForwardSubPhase0: burn index,0.0001,0.9999,1,0.2931068663847
+16,j0p0MGAnDSMsForwardSubPhase0: DSM x component,-10,10,10,-0.2193733921461
+17,j0p0MGAnDSMsForwardSubPhase0: DSM y component,-10,10,10,-0.2994697287595
+18,j0p0MGAnDSMsForwardSubPhase0: DSM z component,-10,10,10,-0.1923944747884
+19,j0p0MGAnDSMsBackwardSubPhase0: burn index,0.0001,0.9999,1,0.7068931317781
+20,j1p0MGAnDSMsEphemerisPeggedUnpoweredFlyby: V_infinity_x,-29.78469183517,29.78469183517,29.78469183517,-5.507112071994
+21,j1p0MGAnDSMsEphemerisPeggedUnpoweredFlyby: V_infinity_y,-29.78469183517,29.78469183517,29.78469183517,-0.9087294157478
+22,j1p0MGAnDSMsEphemerisPeggedUnpoweredFlyby: V_infinity_z,-29.78469183517,29.78469183517,29.78469183517,3.449351631151
+23,j1p0MGAnDSMs: phase flight time,31562.18599125,77760000,5022642.890479,37843180.46474
+24,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: event left state mass,1e-13,525.2,525.2,385.3969819757
+25,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: V_infinity_x,-29.78469183517,29.78469183517,29.78469183517,-0.1279063882386
+26,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: V_infinity_y,-29.78469183517,29.78469183517,29.78469183517,-0.06974945989218
+27,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: V_infinity_z,-29.78469183517,29.78469183517,29.78469183517,0.00554965904065
+28,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical fuel,0,525.2,525.2,9.085782724352
+29,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical oxidizer,0,525.2,525.2,8.404349020026
+30,j1p0MGAnDSMs: virtual chemical fuel,0,525.2,525.2,38.59111211203
+31,j1p0MGAnDSMs: virtual chemical oxidizer,0,525.2,525.2,35.69677870363
+32,j1p0MGAnDSMsForwardSubPhase0: burn index,0.0001,0.9999,1,0.8735133127584
+33,j1p0MGAnDSMsForwardSubPhase0: DSM x component,-10,10,10,0.1785382405794
+34,j1p0MGAnDSMsForwardSubPhase0: DSM y component,-10,10,10,0.5177167465362
+35,j1p0MGAnDSMsForwardSubPhase0: DSM z component,-10,10,10,-0.07819722836536
+36,j1p0MGAnDSMsBackwardSubPhase0: burn index,0.0001,0.9999,1,0.1264866878977
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,1.117103479902
+1,j0p0MGAnDSMsEphemerisPeggedIntercept: V_infinity_in magnitude,-20,0,-13.43859325873
+2,j0p0MGAnDSMsForwardSubPhase0: maneuver epoch absolute constraint,-9.999999999977e-05,0,1.965820395355e-09
+3,j0p0MGAnDSMs: match point x,-1e-13,1e-13,-2.909787875328e-09
+4,j0p0MGAnDSMs: match point y,-1e-13,1e-13,4.222875075492e-09
+5,j0p0MGAnDSMs: match point z,-1e-13,1e-13,1.189009212164e-09
+6,j0p0MGAnDSMs: match point xdot,-1e-13,1e-13,-1.562990717198e-09
+7,j0p0MGAnDSMs: match point ydot,-1e-13,1e-13,-2.126918907325e-09
+8,j0p0MGAnDSMs: match point zdot,-1e-13,1e-13,-1.371954191222e-09
+9,j0p0MGAnDSMs: match point mass,-1e-13,1e-13,8.126054623133e-13
+10,j0p0MGAnDSMs: match point virtual chemical fuel,-1e-13,1e-13,-5.040226508138e-13
+11,j0p0MGAnDSMs: match point virtual chemical oxidizer,-1e-13,1e-13,-4.65979121245e-13
+12,j0p0MGAnDSMs: burn index sum constraint,-1e-13,1e-13,-1.837154206541e-09
+13,j0: journey arrival date bounds,-0.00264054894832,0,-0.002640550142873
+14,j1p0MGAnDSMsEphemerisPeggedUnpoweredFlyby: flyby v-infinity magnitude match,-1e-13,1e-13,1.043226449869e-07
+15,j1p0MGAnDSMsEphemerisPeggedUnpoweredFlyby: flyby altitude constraint (above minimum altitude but below [20x/300x] altitude for [rocky/gas] planets,-20,0,-2.231488478393
+16,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical fuel constraint,-1e-13,1e-13,-5.348806968414e-06
+17,j1p0MGAnDSMsEphemerisPeggedChemRendezvous: virtual chemical oxidizer constraint,-1e-13,1e-13,-4.947646445487e-06
+18,j1p0MGAnDSMs: match point x,-1e-13,1e-13,3.622210020562e-06
+19,j1p0MGAnDSMs: match point y,-1e-13,1e-13,2.551695396457e-06
+20,j1p0MGAnDSMs: match point z,-1e-13,1e-13,-4.680107834932e-06
+21,j1p0MGAnDSMs: match point xdot,-1e-13,1e-13,1.580514326354e-06
+22,j1p0MGAnDSMs: match point ydot,-1e-13,1e-13,2.340052999368e-06
+23,j1p0MGAnDSMs: match point zdot,-1e-13,1e-13,-5.71973419195e-07
+24,j1p0MGAnDSMs: match point mass,-1e-13,1e-13,9.984372433653e-06
+25,j1p0MGAnDSMs: match point virtual chemical fuel,-1e-13,1e-13,-5.1866869774e-06
+26,j1p0MGAnDSMs: match point virtual chemical oxidizer,-1e-13,1e-13,-4.797685453859e-06
+27,j1p0MGAnDSMs: burn index sum constraint,-1e-13,1e-13,6.561473586686e-10
+28,j1: journey arrival date bounds,-0.001225927185412,0,-2.777501807438e-07
+29,Mission flight time bounds,0.3333333333333,1,0.9063432279844

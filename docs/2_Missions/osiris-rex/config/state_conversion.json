@@ -1,0 +1,38 @@
+{
+  "et_seconds_past_j2000": 526676400.2,
+  "epoch_mjd_tdb": 57640.291668981314,
+  "input_origin": "SSB",
+  "input_frame": "J2000",
+  "input_position_units": "km",
+  "input_velocity_units": "km/s",
+  "output_origin": "Sun",
+  "output_frame": "J2000",
+  "sun_relative_state_km_km_s": [
+    146518586.94075918,
+    -31538338.541652784,
+    -13689417.844951862,
+    0.47789070551990354,
+    26.83090266786646,
+    11.491993320951249
+  ],
+  "target_event_date_bounds_mjd_tdb": {
+    "earth_periapsis": [
+      58018.00080072228,
+      58019.00080072181
+    ],
+    "bennu_arrival": [
+      58455.00080073066,
+      58456.00080073066
+    ],
+    "first_dsm_epoch": [
+      57750.000789164566,
+      57751.00078916503
+    ]
+  },
+  "target_event_dates_utc": {
+    "earth_periapsis": "2017-09-22",
+    "bennu_arrival": "2018-12-03",
+    "first_dsm_epoch": "2016-12-28"
+  },
+  "target_event_date_source": "https://science.nasa.gov/mission/osiris-rex/in-depth/"
+}
