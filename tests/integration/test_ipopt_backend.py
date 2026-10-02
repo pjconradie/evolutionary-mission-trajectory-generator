@@ -39,6 +39,7 @@ def test_ipopt_runs_direct_nlp_mission(direct_nlp_mission_probe):
 
 
 @pytest.mark.solver_runtime
+@pytest.mark.ipopt_benchmarks
 def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
     assert track_acs_replay_probe["track_acs_replay_compile"] == "passed"
     assert track_acs_replay_probe["track_acs_replay_run"] == "passed"
@@ -53,6 +54,7 @@ def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
 
 
 @pytest.mark.solver_runtime
+@pytest.mark.ipopt_benchmarks
 def test_osiris_2022_replay_matches_nasa_result(osiris_2022_replay_probe):
     assert osiris_2022_replay_probe["osiris_2022_replay_compile"] == "passed"
     assert osiris_2022_replay_probe["osiris_2022_replay_run"] == "passed"
@@ -67,6 +69,7 @@ def test_osiris_2022_replay_matches_nasa_result(osiris_2022_replay_probe):
 
 
 @pytest.mark.solver_runtime
+@pytest.mark.ipopt_benchmarks
 def test_osiris_2022_ipopt_refinement_retains_nasa_seed(
     osiris_2022_refinement_probe,
 ):
@@ -84,6 +87,7 @@ def test_osiris_2022_ipopt_refinement_retains_nasa_seed(
 
 
 @pytest.mark.solver_runtime
+@pytest.mark.ipopt_benchmarks
 def test_osiris_2024_replay_matches_nasa_result(osiris_2024_replay_probe):
     assert osiris_2024_replay_probe["osiris_2024_replay_compile"] == "passed"
     assert osiris_2024_replay_probe["osiris_2024_replay_run"] == "passed"
@@ -98,6 +102,7 @@ def test_osiris_2024_replay_matches_nasa_result(osiris_2024_replay_probe):
 
 
 @pytest.mark.solver_runtime
+@pytest.mark.ipopt_benchmarks
 def test_osiris_2024_ipopt_refinement_retains_nasa_seed(
     osiris_2024_refinement_probe,
 ):
@@ -115,6 +120,7 @@ def test_osiris_2024_ipopt_refinement_retains_nasa_seed(
 
 
 @pytest.mark.solver_runtime
+@pytest.mark.ipopt_benchmarks
 def test_track_acs_ipopt_refinement_retains_seed(track_acs_refinement_probe):
     assert track_acs_refinement_probe["track_acs_refinement_compile"] == "passed"
     assert track_acs_refinement_probe["track_acs_refinement_run"] == "passed"

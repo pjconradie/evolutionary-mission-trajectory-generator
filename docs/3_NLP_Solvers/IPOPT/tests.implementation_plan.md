@@ -203,7 +203,7 @@ moved benchmark stage directories. A repository search found no remaining live
 references to the former artifact paths; the Stage 2 `git mv` commands above
 remain as the historical migration procedure.
 
-## Stage 3: Register Core Pytest Suites
+## Stage 3: Register Core Pytest Suites (Complete 2026-10-02)
 
 Add these markers to [pytest.ini](pytest.ini):
 
@@ -233,6 +233,25 @@ python -m pytest -m ipopt_benchmarks
 ```
 
 Plain `pytest` must continue to collect both marker groups.
+
+### Completion Record
+
+`pytest.ini` now registers `ipopt_tests` and `ipopt_benchmarks` as additive
+suite-ownership markers. The full characterization contract module carries
+`ipopt_tests` in addition to its existing `unit` marker. The six benchmark
+provenance/path guards and the six Docker-backed TrackACS and OSIRIS
+replay/refinement nodes carry `ipopt_benchmarks` in addition to their existing
+unit, integration, Docker, IPOPT-backend, and solver-runtime markers.
+
+Validation passed:
+
+```text
+pytest -m ipopt_tests --collect-only -q      # 59 selected
+pytest -m ipopt_tests -q                     # 59 passed, 203 deselected
+pytest -m ipopt_benchmarks --collect-only -q # 12 selected
+pytest -m ipopt_benchmarks -q                # 12 passed, 250 deselected
+pytest --collect-only -q                      # 228/262 collected, 34 deselected
+```
 
 ## Stage 4: Prove the Layout Change Is Stable
 

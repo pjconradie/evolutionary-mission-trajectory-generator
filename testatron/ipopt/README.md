@@ -116,6 +116,8 @@ The markers declared in `pytest.ini` are:
 | `solver_runtime` | Executes a native NLP solver |
 | `clean_bootstrap` | Rebuilds the toolchain without reusable layers |
 | `tutorials` | Opt-in verification of current tutorial inputs |
+| `ipopt_tests` | Testatron IPOPT case characterization and validation |
+| `ipopt_benchmarks` | IPOPT benchmark replay, refinement, and validation |
 
 Useful focused selections include:
 
@@ -124,6 +126,8 @@ pytest --integration -m solver_runtime
 pytest --integration -m compile
 pytest --integration -m "not compile"
 pytest --integration --ignore=tests/integration/test_none_backend.py
+pytest -m ipopt_tests
+pytest -m ipopt_benchmarks
 ```
 
 The last command is appropriate only when the NONE backend already passed and

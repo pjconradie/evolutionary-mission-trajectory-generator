@@ -14,7 +14,7 @@ import pytest
 from testatron import ipopt_characterization
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.ipopt_tests]
 
 
 def test_tutorial_registry_is_complete_unique_and_pinned(repository_root):
@@ -1072,6 +1072,7 @@ def _iter_json_strings(node):
         yield node
 
 
+@pytest.mark.ipopt_benchmarks
 def test_benchmark_artifacts_contain_no_absolute_paths(repository_root):
     benchmark_root = (
         repository_root / "testatron" / "ipopt" / "tests" / "benchmarks"
@@ -1092,6 +1093,7 @@ def test_benchmark_artifacts_contain_no_absolute_paths(repository_root):
     )
 
 
+@pytest.mark.ipopt_benchmarks
 def test_benchmark_registry_has_unique_ids_and_outputs():
     benchmarks = ipopt_characterization.BENCHMARKS
     output_roots = [benchmark.output_root for benchmark in benchmarks.values()]
@@ -1102,6 +1104,7 @@ def test_benchmark_registry_has_unique_ids_and_outputs():
     assert len(output_roots) == len(set(output_roots))
 
 
+@pytest.mark.ipopt_benchmarks
 def test_benchmark_registry_sources_exist(repository_root):
     for benchmark in ipopt_characterization.BENCHMARKS.values():
         for field in ("source_options", "reference_mission", "seed_alignment_source"):
@@ -1112,6 +1115,7 @@ def test_benchmark_registry_sources_exist(repository_root):
             assert (repository_root / relative).is_file()
 
 
+@pytest.mark.ipopt_benchmarks
 def test_benchmark_provenance_hashes_current_sources(repository_root):
     provenance = ipopt_characterization.benchmark_provenance(
         "osiris-rex-2022", "ipopt", ["OSIRIS-REx.emtg"]
@@ -1126,6 +1130,7 @@ def test_benchmark_provenance_hashes_current_sources(repository_root):
         )
 
 
+@pytest.mark.ipopt_benchmarks
 def test_benchmark_provenance_rejects_unknown_stage():
     with pytest.raises(ValueError, match="Unknown stage"):
         ipopt_characterization.benchmark_provenance(
@@ -1133,6 +1138,7 @@ def test_benchmark_provenance_rejects_unknown_stage():
         )
 
 
+@pytest.mark.ipopt_benchmarks
 def test_committed_provenance_matches_registry_and_directory(repository_root):
     for benchmark in ipopt_characterization.BENCHMARKS.values():
         output_root = repository_root / benchmark.output_root
