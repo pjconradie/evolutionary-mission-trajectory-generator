@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "baseline-artifacts/how_to_generate_results.readme.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "how_to_generate_results.readme"
+              "title": "tests.implementation_plan"
             }
           }
         ]
@@ -83,7 +83,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 439.3828125
   },
   "right": {
     "id": "66aa8d3610c9c55c",
@@ -188,13 +188,13 @@
   },
   "active": "2e125fed430ead7e",
   "lastOpenFiles": [
+    "baseline-artifacts/how_to_generate_results.readme.md",
     "baseline-artifacts/results.md",
     "baseline-artifacts/testatron-source-truth.after.sha256",
     "baseline-artifacts/testatron-source-truth.before.sha256",
     "baseline-artifacts/how_to_interpret_results.readme.md",
     "testatron/ipopt/benchmarks/how_to_generate_results.readme.md",
     "baseline-artifacts/results.readme.md",
-    "baseline-artifacts/how_to_generate_results.readme.md",
     "baseline-artifacts/cases-full/cases/transcription_tests/SundmanCoastPhase_EMintercept/result.json",
     "baseline-artifacts/cases-full/cases/transcription_tests/SundmanCoastPhase_EMintercept/comparison.csv",
     "baseline-artifacts/cases-full/cases/transcription_tests/SundmanCoastPhase_EMintercept/SundmanCoastPhase_EMintercept.emtg",

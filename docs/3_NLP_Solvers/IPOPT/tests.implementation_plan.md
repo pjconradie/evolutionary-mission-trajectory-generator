@@ -7,7 +7,7 @@ Implement [IPOPT Testatron Verification Plan](tests.readme.md) in stages without
 The immutable source options and SNOPT `.emtg` results below `testatron/tests`
 remain untouched throughout this work.
 
-## Stage 0: Capture a Stable Baseline
+## Stage 0: Capture a Stable Baseline (Complete 2026-10-02)
 
 Before moving any files, manually execute the current benchmark and case
 workflows and retain their evidence outside the artifact roots that will move.
@@ -68,6 +68,33 @@ workflows and retain their evidence outside the artifact roots that will move.
    later comparison and must not be silently reclassified as path-move defects.
 
 The Stage 0 output is a baseline report, not promoted truth data.
+
+### Completion Record
+
+Stage 0 completed before any regression-suite or IPOPT artifact-root move.
+The retained evidence is under [baseline-artifacts](../../../baseline-artifacts):
+
+1. The characterization contract suite passed: `58 passed`.
+2. All six Docker-backed TrackACS and OSIRIS replay/refinement benchmark nodes
+   passed. TrackACS uses separate replay and refinement directories. The OSIRIS
+   2022 and 2024 replay/refinement invocations shared a directory per vintage,
+   so each retained OSIRIS directory contains only the later refinement JSON;
+   terminal results establish that both nodes passed. Future captures must use
+   separate replay and refinement directories.
+3. A Docker-backed representative characterization sweep and complete 137-case
+   characterization sweep were retained. The complete manifest records: 69
+   `reviewable`, 5 `infeasible`, 1 `timed_out`, 8 `parse_failed`, and 54
+   `dependency_blocked` cases. These are current behavioral classifications,
+   not SNOPT/IPOPT agreement results.
+4. The 137 immutable source `.emtgopt` files and 137 adjacent SNOPT `.emtg`
+   results were verified unchanged against `HEAD` before and after capture.
+   The two retained SHA-256 reports contain 274 identical records.
+
+See [results.md](../../../baseline-artifacts/results.md) for the execution
+environment and results, and the adjacent generation and interpretation guides
+for reproduction details. The retained full-case manifests include container
+paths and are runtime evidence, not portable committed provenance. Do not
+reclassify known blockers or change comparison semantics as part of Stage 1.
 
 ## Stage 1: Organize Regression Suites
 
