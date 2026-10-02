@@ -96,7 +96,7 @@ for reproduction details. The retained full-case manifests include container
 paths and are runtime evidence, not portable committed provenance. Do not
 reclassify known blockers or change comparison semantics as part of Stage 1.
 
-## Stage 1: Organize Regression Suites
+## Stage 1: Organize Regression Suites (Complete 2026-10-02)
 
 Keep generic regression coverage separate from IPOPT-generated artifact data.
 The following tests validate PyEMTG parsing, option serialization, and mission
@@ -141,6 +141,22 @@ python -m pytest --collect-only -q
 The relocated suites must have the same test outcomes and remain present in
 ordinary pytest collection. Treat any difference as a regression-suite move
 defect before continuing.
+
+### Completion Record
+
+The three modules were moved with `git mv` to `tests/regression/`, preserving
+their `pytest.mark.regression` markers. The mission-parser module now resolves
+its runtime paths through the shared `repository_root` fixture rather than its
+own file location, while retaining one independently reported test for each of
+the 137 immutable Testatron truth files.
+
+Validation passed with the original 145 regression outcomes:
+
+```text
+pytest tests/regression -q     # 145 passed
+pytest -m regression -q        # 145 passed, 116 deselected
+pytest --collect-only -q       # 227/261 collected, 34 deselected
+```
 
 ## Stage 2: Move IPOPT Artifact Roots
 

@@ -8,33 +8,6 @@ from Mission import Mission
 
 pytestmark = pytest.mark.regression
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-TESTATRON_TESTS_ROOT = REPOSITORY_ROOT / "testatron" / "tests"
-OSIRIS_RESULTS_ROOT = (
-    REPOSITORY_ROOT
-    / "docs"
-    / "0_Users"
-    / "tutorial"
-    / "Tutorial_EMTG_Files"
-    / "OSIRIS-REx"
-    / "results"
-)
-OSIRIS_BASELINES = {
-    "2022": (
-        OSIRIS_RESULTS_ROOT
-        / "OSIRIS-REx_11272022_144557"
-        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
-    ),
-    "2024": (
-        OSIRIS_RESULTS_ROOT
-        / "OSIRIS-REx_412024_11530"
-        / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
-    ),
-}
-
-TRUTH_FILES = sorted(TESTATRON_TESTS_ROOT.glob("**/*.emtg"))
-TRUTH_IDS = [str(path.relative_to(TESTATRON_TESTS_ROOT)) for path in TRUTH_FILES]
-
 OSIRIS_EXPECTATIONS = {
     "2022": {
         "total_deterministic_deltav": 12.39626561567154894306,
@@ -53,9 +26,45 @@ OSIRIS_EXPECTATIONS = {
 }
 
 
-def assert_complete_mission_parse(mission, source: Path):
+def osiris_baselines(repository_root: Path) -> dict[str, Path]:
+    """Return the immutable OSIRIS result files from the repository root."""
+    osiris_results_root = (
+        repository_root
+        / "docs"
+        / "0_Users"
+        / "tutorial"
+        / "Tutorial_EMTG_Files"
+        / "OSIRIS-REx"
+        / "results"
+    )
+    return {
+        "2022": (
+            osiris_results_root
+            / "OSIRIS-REx_11272022_144557"
+            / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+        ),
+        "2024": (
+            osiris_results_root
+            / "OSIRIS-REx_412024_11530"
+            / "OSIRIS-REx_Sun(EEB)_Sun(BE).emtg"
+        ),
+    }
+
+
+def pytest_generate_tests(metafunc):
+    """Generate an independently reported parse test for each immutable truth."""
+    if "truth_file" not in metafunc.fixturenames:
+        return
+
+    testatron_tests_root = metafunc.config.rootpath / "testatron" / "tests"
+    truth_files = sorted(testatron_tests_root.glob("**/*.emtg"))
+    truth_ids = [str(path.relative_to(testatron_tests_root)) for path in truth_files]
+    metafunc.parametrize("truth_file", truth_files, ids=truth_ids)
+
+
+def assert_complete_mission_parse(mission, source: Path, repository_root: Path):
     """Require the minimum structure that distinguishes a useful result parse."""
-    relative_source = source.relative_to(REPOSITORY_ROOT)
+    relative_source = source.relative_to(repository_root)
     assert mission.success == 1, f"Mission parser could not open {relative_source}"
     assert mission.mission_name != "bob", (
         f"Mission parser retained its sentinel name for {relative_source}"
@@ -71,20 +80,19 @@ def test_testatron_truth_inventory_contains_137_results(testatron_truth_files):
     )
 
 
-@pytest.mark.parametrize("truth_file", TRUTH_FILES, ids=TRUTH_IDS)
-def test_each_testatron_truth_is_parseable(truth_file):
+def test_each_testatron_truth_is_parseable(truth_file, repository_root):
     """Every committed Testatron result must produce a named mission with journeys."""
-    assert_complete_mission_parse(Mission(str(truth_file)), truth_file)
+    assert_complete_mission_parse(Mission(str(truth_file)), truth_file, repository_root)
 
 
 @pytest.mark.parametrize("vintage", ["2022", "2024"])
-def test_osiris_baseline_preserves_frozen_metrics_and_topology(vintage):
+def test_osiris_baseline_preserves_frozen_metrics_and_topology(vintage, repository_root):
     """Each mandatory OSIRIS result must retain its topology and reference metrics."""
-    baseline = OSIRIS_BASELINES[vintage]
+    baseline = osiris_baselines(repository_root)[vintage]
     expected = OSIRIS_EXPECTATIONS[vintage]
     mission = Mission(str(baseline))
 
-    assert_complete_mission_parse(mission, baseline)
+    assert_complete_mission_parse(mission, baseline, repository_root)
     assert mission.mission_name.strip() == "OSIRIS-REx", (
         f"{vintage} baseline mission name changed"
     )
