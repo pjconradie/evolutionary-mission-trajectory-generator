@@ -212,10 +212,12 @@ ipopt_tests: Testatron IPOPT case characterization and validation
 ipopt_benchmarks: IPOPT benchmark replay, refinement, and validation
 ```
 
-Apply `ipopt_tests` to Python tests that prepare, run, classify, compare, or
-validate data below `testatron/ipopt/tests/tests`. Apply `ipopt_benchmarks` to
-tests that own TrackACSProp and OSIRIS benchmark replay/refinement artifacts
-below `testatron/ipopt/tests/benchmarks`.
+Apply `ipopt_tests` only to the future Docker-backed, per-case suite that
+replays each immutable SNOPT baseline and refines it with IPOPT. That suite
+must compare the result directly against its adjacent SNOPT `.emtg` baseline.
+Do not apply this marker to unit contracts for the runner itself. Apply
+`ipopt_benchmarks` to tests that own TrackACSProp and OSIRIS benchmark
+replay/refinement artifacts below `testatron/ipopt/tests/benchmarks`.
 
 Keep existing markers such as `unit`, `integration`, `docker`,
 `ipopt_backend`, and `solver_runtime`. The new markers express suite ownership;
@@ -237,21 +239,35 @@ Plain `pytest` must continue to collect both marker groups.
 ### Completion Record
 
 `pytest.ini` now registers `ipopt_tests` and `ipopt_benchmarks` as additive
-suite-ownership markers. The full characterization contract module carries
-`ipopt_tests` in addition to its existing `unit` marker. The six benchmark
-provenance/path guards and the six Docker-backed TrackACS and OSIRIS
-replay/refinement nodes carry `ipopt_benchmarks` in addition to their existing
-unit, integration, Docker, IPOPT-backend, and solver-runtime markers.
+suite-ownership markers. The 59 characterization-runner contracts remain
+`unit` tests only. They validate staging, parsing, classification, manifests,
+and current benchmark helper behavior; they do not run EMTG across the
+Testatron corpus and do not establish SNOPT/IPOPT agreement.
+
+This distinction corrects an earlier misunderstanding: the runner contracts
+were temporarily marked `ipopt_tests`, as though validating the runner meant
+they exercised the Testatron IPOPT suite. They do not. The marker was removed
+from those unit tests. `pytest -m ipopt_tests` intentionally selects no tests
+until the per-case IPOPT-to-SNOPT runtime suite exists.
+
+The six benchmark provenance/path guards and six Docker-backed TrackACS and
+OSIRIS replay/refinement nodes carry `ipopt_benchmarks` in addition to their
+existing unit, integration, Docker, IPOPT-backend, and solver-runtime markers.
+The `ipopt_tests` marker is registered and reserved for its intended suite.
+Its runtime implementation is explicitly owned by Stage 7, after Stages 5 and
+6 establish dependency preflight and SNOPT/IPOPT agreement semantics.
 
 Validation passed:
 
 ```text
-pytest -m ipopt_tests --collect-only -q      # 59 selected
-pytest -m ipopt_tests -q                     # 59 passed, 203 deselected
 pytest -m ipopt_benchmarks --collect-only -q # 12 selected
 pytest -m ipopt_benchmarks -q                # 12 passed, 250 deselected
 pytest --collect-only -q                      # 228/262 collected, 34 deselected
 ```
+
+Stage 3 is complete: it establishes correct marker ownership without
+misclassifying unit contracts as IPOPT-to-SNOPT corpus tests. Stage 7 completes
+the deferred per-case `ipopt_tests` runtime suite.
 
 ## Stage 4: Prove the Layout Change Is Stable
 
@@ -347,11 +363,46 @@ Add unit contracts for comparison dimensions, objective sense, tolerance
 boundaries, native exits, and manifest aggregation. Add Docker-backed smoke
 coverage for a public-NLSII case and a SPICE-dependent case.
 
-## Stage 7: Final Verification Gate
+Add a Docker-backed pytest module with one parameterized node for each approved
+`testatron/tests/<group>/<case>.emtgopt` input. Mark every node with
+`ipopt_tests`, `integration`, `docker`, `ipopt_backend`, and `solver_runtime`.
+`pytest -m ipopt_tests -q` must execute the complete approved corpus, report
+each case independently, and fail for any outcome other than `matched_snopt`.
+The 59 runner contracts remain selected only by `unit`.
+
+## Stage 7: Complete the Deferred Stage 3 IPOPT Test Suite
+
+After Stages 5 and 6 provide dependency preflight and direct SNOPT/IPOPT
+comparison semantics, complete the outstanding Stage 3 requirement:
+
+1. Register the parameterized per-case Docker test module as the sole owner of
+   `ipopt_tests`; do not add the marker to runner unit contracts.
+2. Parameterize one independently reported pytest node for every approved
+   `testatron/tests/<group>/<case>.emtgopt` source and its adjacent immutable
+   SNOPT `.emtg` baseline.
+3. Mark every node `ipopt_tests`, `integration`, `docker`, `ipopt_backend`,
+   and `solver_runtime`.
+4. Each node must preflight dependencies, replay the SNOPT seed, refine it with
+   IPOPT, write unreviewed artifacts under `testatron/ipopt/tests/tests`, and
+   fail unless the final classification is `matched_snopt`.
+5. Validate the completed suite:
+
+   ```bash
+   pytest -m ipopt_tests --collect-only -q
+   pytest -m ipopt_tests -q
+   pytest --collect-only -q
+   ```
+
+Stage 3 is complete only after `pytest -m ipopt_tests -q` runs the complete
+approved Testatron corpus as independently reported IPOPT-to-SNOPT comparisons.
+
+## Stage 8: Final Verification Gate
 
 Run the complete core selections after all implementation work:
 
 ```bash
+python -m pytest -m unit
+python -m pytest -m regression
 python -m pytest -m ipopt_benchmarks
 python -m pytest -m ipopt_tests
 python -m pytest --collect-only -q

@@ -116,7 +116,7 @@ The markers declared in `pytest.ini` are:
 | `solver_runtime` | Executes a native NLP solver |
 | `clean_bootstrap` | Rebuilds the toolchain without reusable layers |
 | `tutorials` | Opt-in verification of current tutorial inputs |
-| `ipopt_tests` | Testatron IPOPT case characterization and validation |
+| `ipopt_tests` | Reserved for per-case Docker IPOPT-to-SNOPT agreement checks |
 | `ipopt_benchmarks` | IPOPT benchmark replay, refinement, and validation |
 
 Useful focused selections include:
@@ -126,9 +126,13 @@ pytest --integration -m solver_runtime
 pytest --integration -m compile
 pytest --integration -m "not compile"
 pytest --integration --ignore=tests/integration/test_none_backend.py
-pytest -m ipopt_tests
 pytest -m ipopt_benchmarks
 ```
+
+The runner contracts in `tests/test_ipopt_characterization.py` are unit tests.
+They validate preparation and comparison helpers but do not execute the 137
+Testatron cases. Once the per-case IPOPT-to-SNOPT suite is implemented, select
+it with `pytest -m ipopt_tests`.
 
 The last command is appropriate only when the NONE backend already passed and
 none of its controlling inputs changed. Rerun it when CMake configuration,

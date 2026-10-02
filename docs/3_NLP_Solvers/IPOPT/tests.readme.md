@@ -28,16 +28,24 @@ separately beneath `testatron/ipopt/tests`:
 `testatron/ipopt/tests/tests` is artifact data despite its nested `tests/tests`
 name. Python test code remains below the repository-level `tests/` directory.
 
-`ipopt_tests` and `ipopt_benchmarks` mark the Python tests that create or
-validate their corresponding artifact roots. They are core IPOPT verification
-suites and remain included in plain `pytest`; they are not opt-in selectors
-like `tutorials` or `clean_bootstrap`.
+`ipopt_benchmarks` marks the current Python tests that create or validate the
+benchmark artifact root. `ipopt_tests` is reserved for the future Docker-backed
+per-case suite: each node must replay an immutable SNOPT baseline, refine it
+with IPOPT, and enforce direct SNOPT/IPOPT agreement. The existing
+characterization-runner contracts are `unit` tests; they do not carry
+`ipopt_tests` because they neither execute the corpus nor compare IPOPT against
+SNOPT.
 
 Use focused selections when working on one suite:
 
 ```bash
-pytest -m ipopt_tests
 pytest -m ipopt_benchmarks
+```
+
+After the per-case suite is implemented, run it with:
+
+```bash
+pytest -m ipopt_tests
 ```
 
 ## Baseline Rules

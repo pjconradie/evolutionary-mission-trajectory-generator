@@ -14,7 +14,7 @@ import pytest
 from testatron import ipopt_characterization
 
 
-pytestmark = [pytest.mark.unit, pytest.mark.ipopt_tests]
+pytestmark = pytest.mark.unit
 
 
 def test_tutorial_registry_is_complete_unique_and_pinned(repository_root):
