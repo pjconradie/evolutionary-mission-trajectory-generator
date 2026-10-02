@@ -1,0 +1,3 @@
+stage4_root=/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tests/stage4-20261002T125617Z
+image=emtg-pytest-toolchain:2179aeb75eeb13d3
+volume=emtg-pytest-ipopt-2179aeb75eeb13d3

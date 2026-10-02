@@ -1,0 +1,25 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0SundmanCoastPhaseEphemerisPeggedLaunchDirectInsertion: event left state epoch,4639766400,4726166400,5022642.890913,4676628897.519
+1,j0p0SundmanCoastPhaseEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote,0,3.162277660168,29.78469183259,3.16227788878
+2,j0p0SundmanCoastPhaseEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote,-50.26548245744,50.26548245744,6.28318530718,47.72656353317
+3,j0p0SundmanCoastPhaseEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote,-1.570796326795,1.570796326795,6.28318530718,0.2791286093578
+4,j0p0SundmanCoastPhase: phase Sundman independent variable,1e-13,469975571.5555,1,57188470.15073
+5,j0p0SundmanCoastPhase: phase flight time,315621.8600124,86400000,5022642.890913,71643955.9227
+6,j0p0SundmanCoastPhaseEphemerisPeggedIntercept: event left state mass,1e-13,5000,5000,874.9998757381
+7,j0p0SundmanCoastPhaseEphemerisPeggedIntercept: V_infinity_x,-20,20,29.78469183259,-4.692839938453
+8,j0p0SundmanCoastPhaseEphemerisPeggedIntercept: V_infinity_y,-20,20,29.78469183259,-1.518492854933
+9,j0p0SundmanCoastPhaseEphemerisPeggedIntercept: V_infinity_z,-20,20,29.78469183259,-1.806641193604
+10,j0p0SundmanCoastPhase: virtual chemical fuel,0,5000,5000,4.080131686882e-05
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,-0.1749999751476
+1,j0p0SundmanCoastPhaseEphemerisPeggedIntercept: V_infinity_in magnitude,-20,0,-14.74714176463
+2,j0p0SundmanCoastPhase: match point x,-1e-13,1e-13,0.004442462727952
+3,j0p0SundmanCoastPhase: match point y,-1e-13,1e-13,-0.005283583770256
+4,j0p0SundmanCoastPhase: match point z,-1e-13,1e-13,-0.001960879592969
+5,j0p0SundmanCoastPhase: match point xdot,-1e-13,1e-13,0.009968293370136
+6,j0p0SundmanCoastPhase: match point ydot,-1e-13,1e-13,-0.002712472898039
+7,j0p0SundmanCoastPhase: match point zdot,-1e-13,1e-13,0.000248022709362
+8,j0p0SundmanCoastPhase: match point mass,-1e-13,1e-13,-1.986663846765e-11
+9,j0p0SundmanCoastPhase: match point virtual chemical fuel,-1e-13,1e-13,8.160263373764e-09
+10,j0p0SundmanCoastPhase: match point phase flight time,-1e-13,1e-13,0.005899338591194
+11,Mission flight time bounds,0,1,0.8292124528091

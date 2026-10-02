@@ -269,7 +269,7 @@ Stage 3 is complete: it establishes correct marker ownership without
 misclassifying unit contracts as IPOPT-to-SNOPT corpus tests. Stage 7 completes
 the deferred per-case `ipopt_tests` runtime suite.
 
-## Stage 4: Prove the Layout Change Is Stable
+## Stage 4: Prove the Layout Change Is Stable (Complete 2026-10-02)
 
 Before adding dependency resolution or changing comparison semantics, repeat
 the Stage 0 commands against the moved paths.
@@ -304,6 +304,25 @@ the Stage 0 commands against the moved paths.
 
 A path-only migration must not change numerical results. Treat any difference
 as a relocation regression until its root cause is demonstrated.
+
+### Completion Record
+
+Git retained the moved IPOPT artifact roots as renames, and no live code or
+documentation reference remains to the former roots. The six benchmark stages
+passed after relocation through `pytest -m ipopt_benchmarks -q` (`12 passed`,
+including six fast artifact guards). A fresh representative and full 137-case
+characterization capture ran from the relocated artifact root using the Stage 0
+image and build volume. Immutable source options and SNOPT truths retained
+matching SHA-256 hashes before and after both captures (274 records).
+
+The representative capture differed only at the 300-second timeout boundary:
+`solveroptions_ACEfeasibility` completed in 297.47 seconds rather than timing
+out at 300.01 seconds. The full capture retained the Stage 0 timeout category
+totals except `transcription_tests/SundmanCoastPhase_EMintercept`, which changed
+from `reviewable` to `infeasible`. Its staged options and compatibility records
+were byte-identical to Stage 0, and a fresh one-case retry reproduced the
+infeasible result. This is solver reproducibility behavior, not an artifact
+layout defect; Stage 6 owns its resolution.
 
 ## Stage 5: Make Dependencies Explicit
 
@@ -358,6 +377,16 @@ Do not accept a chaperone-restored incumbent as native IPOPT success. Do not
 weaken a tolerance for an individual case. Calibrate tolerance policies using a
 fixed representative subset and record every approved change in code or a
 versioned manifest.
+
+Before accepting any per-case result, make the IPOPT pipeline reproducible
+under the pinned toolchain. Investigate and eliminate or explicitly control
+solver-state inputs that can change a seeded run, including MBH seed handling,
+threading, random-device initialization, and iteration/time-limit behavior.
+Add a repeat-run contract for a representative seeded case and for
+`transcription_tests/SundmanCoastPhase_EMintercept`; it must demonstrate stable
+classification and agreed comparison values across fresh artifact directories.
+Do not classify a run as `matched_snopt` while identical staged inputs can
+produce materially different outcomes.
 
 Add unit contracts for comparison dimensions, objective sense, tolerance
 boundaries, native exits, and manifest aggregation. Add Docker-backed smoke

@@ -1,0 +1,17 @@
+{
+  "case_id": "solver_options/solveroptions_ACEfeasibility",
+  "source_options": "/repo/testatron/tests/solver_options/solveroptions_ACEfeasibility.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/solveroptions_ACEfeasibility.emtgopt",
+  "output_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/solveroptions_ACEfeasibility.emtg",
+  "comparison_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/comparison.csv",
+  "log_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/run.log",
+  "compatibility_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 297.466051346,
+  "objective_value": -0.6300682378125154,
+  "worst_violation": 7.32835888659734e-06,
+  "worst_constraint": "F[23]: j0p0MGALT: match point y",
+  "detail": "Ready for human review; not a promoted baseline"
+}
