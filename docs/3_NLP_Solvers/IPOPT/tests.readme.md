@@ -14,6 +14,32 @@ an IPOPT run.
 
 Run commands in this document from the repository root.
 
+## IPOPT Suite Layout
+
+The immutable source inputs and SNOPT baselines remain below
+`testatron/tests`. IPOPT-generated characterization evidence is organized
+separately beneath `testatron/ipopt/tests`:
+
+| Root | Contents | Pytest marker |
+| --- | --- | --- |
+| `testatron/ipopt/tests/tests` | Per-case IPOPT Testatron staging, logs, comparisons, and manifests | `ipopt_tests` |
+| `testatron/ipopt/tests/benchmarks` | IPOPT benchmark replay and refinement evidence | `ipopt_benchmarks` |
+
+`testatron/ipopt/tests/tests` is artifact data despite its nested `tests/tests`
+name. Python test code remains below the repository-level `tests/` directory.
+
+`ipopt_tests` and `ipopt_benchmarks` mark the Python tests that create or
+validate their corresponding artifact roots. They are core IPOPT verification
+suites and remain included in plain `pytest`; they are not opt-in selectors
+like `tutorials` or `clean_bootstrap`.
+
+Use focused selections when working on one suite:
+
+```bash
+pytest -m ipopt_tests
+pytest -m ipopt_benchmarks
+```
+
 ## Baseline Rules
 
 - The source option file is `testatron/tests/<group>/<case>.emtgopt`.
@@ -198,20 +224,28 @@ mapping reason, and final staged path must be written to `compatibility.json`.
 
 ## Implementation Plan
 
-1. Add a versioned Testatron dependency manifest for externally provided NAIF
+1. Move `testatron/ipopt/cases` to `testatron/ipopt/tests/tests` and
+	`testatron/ipopt/benchmarks` to `testatron/ipopt/tests/benchmarks` with
+	`git mv`. Update all operational references, the benchmark registry, and
+	generated-evidence paths without changing immutable source inputs or SNOPT
+	baselines.
+2. Register `ipopt_tests` and `ipopt_benchmarks` in `pytest.ini`. Apply them
+	to Python tests that respectively execute or validate case and benchmark
+	evidence. Keep both markers included in ordinary pytest collection.
+3. Add a versioned Testatron dependency manifest for externally provided NAIF
 	kernels, including canonical source URL for provenance, filename, SHA-256,
 	and required destination.
-2. Extend `testatron/ipopt_characterization.py` with a preflight command that
+4. Extend `testatron/ipopt_characterization.py` with a preflight command that
 	validates all Testatron case dependencies without downloading anything. It
 	must reject missing or checksum-mismatched kernels and report the exact
 	required filename, expected destination, canonical source URL, and expected
 	SHA-256 so an operator can provide the correct resource.
-3. Refactor `prepare_case()` into dependency resolution plus staged option
+5. Refactor `prepare_case()` into dependency resolution plus staged option
 	generation. Preserve its current legacy NLSII and guarded throttle-table
 	mappings, and rewrite paths only in the generated option copy.
-4. Extend the case result and comparison output with endpoint deltas, IPOPT
+6. Extend the case result and comparison output with endpoint deltas, IPOPT
 	diagnostics, and a structured SNOPT-agreement result.
-5. Add comparison classifications that distinguish:
+7. Add comparison classifications that distinguish:
 	- `matched_snopt`: native IPOPT success and every approved comparison check
 	  passes.
 	- `mismatch_snopt`: IPOPT completed but differs materially from the SNOPT
@@ -219,16 +253,17 @@ mapping reason, and final staged path must be written to `compatibility.json`.
 	- `dependency_blocked`, `timed_out`, `process_failed`, `parse_failed`,
 	  `infeasible`, and `topology_changed`: operational or physics/solver
 	  outcomes that are not matches.
-6. Add a manifest summary with counts for each classification and a direct list
+8. Add a manifest summary with counts for each classification and a direct list
 	of all non-matches. The all-case acceptance condition is zero unresolved
 	dependencies **and** zero unexplained SNOPT mismatches for the approved
 	comparable set.
-7. Add unit tests for dependency mapping, checksum behavior, path rewriting,
+9. Add unit tests for dependency mapping, checksum behavior, path rewriting,
 	zero-order gravity, comparison bands, objective direction, topology, and
 	native IPOPT exit handling.
-8. Add Docker-backed smoke tests for one case using public NLSII data and one
-	case requiring SPICE kernels. Only add a full-suite CI gate after measuring
-	its cold and warm runtime.
+10. Add Docker-backed smoke tests for one case using public NLSII data and one
+	case requiring SPICE kernels. Run complete `ipopt_tests` and
+	`ipopt_benchmarks` selections as core pytest coverage; record cold and warm
+	runtimes before setting CI resource limits.
 
 ## Execution Model
 
@@ -240,13 +275,15 @@ The supported path is the staged runner in
 `testatron/ipopt_characterization.py`:
 
 1. Preflight public dependencies.
-2. Copy each source option into an isolated writable artifact directory.
+2. Copy each source option into an isolated writable artifact directory below
+	`testatron/ipopt/tests/tests`.
 3. Write the IPOPT-specific staged option and `compatibility.json`.
 4. Run the IPOPT-enabled `/build/src/EMTGv9` inside the Docker toolchain.
 5. Parse the generated mission, compare it directly to the adjacent immutable
 	SNOPT `.emtg` baseline, and write `result.json`, comparison data, and
 	`run.log`.
-6. Update a resumable unreviewed manifest after each case.
+6. Update a resumable unreviewed manifest after each case. Benchmark stages
+	write their evidence below `testatron/ipopt/tests/benchmarks`.
 
 The repository mount is read-only in Docker. Only the selected artifact
 directory is writable. This prevents a test run from modifying SNOPT baselines
@@ -283,3 +320,5 @@ The portable IPOPT Testatron implementation is complete when:
 	as solver verification passes.
 5. Any new or adjusted comparison tolerance is reviewed, versioned, and backed
 	by recorded cross-solver evidence.
+6. `pytest -m ipopt_tests` and `pytest -m ipopt_benchmarks` both pass, and
+	plain pytest collection includes both core marker groups.

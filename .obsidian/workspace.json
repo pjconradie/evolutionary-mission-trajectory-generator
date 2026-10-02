@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "tests.readme"
+              "title": "tests.implementation_plan"
             }
           }
         ]
@@ -186,10 +186,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "2e125fed430ead7e",
+  "active": "7220b65faffa0c40",
   "lastOpenFiles": [
-    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+    "testatron/ipopt/tests/tests",
+    "testatron/ipopt/tests/verification",
+    "testatron/ipopt/tests/benchmarks",
+    "testatron/ipopt/tests",
+    "docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme..md",
     "daily/2026-09-30.md",
     "docs/3_NLP_Solvers/IPOPT",
@@ -201,10 +208,6 @@
     "docs/2_Missions/osiris-rex/docs",
     "docs/2_Missions/osiris-rex/results/high_fidelity/OSIRIS_REx_Low_singlePhase_HighFidelity.emtg",
     "docs/2_Missions/osiris-rex/results/high_fidelity/XFfile.csv",
-    "docs/2_Missions/osiris-rex/results/single_phase/OSIRIS_REx_Low_singlePhase.emtg",
-    "docs/2_Missions/osiris-rex/results/single_phase/XFfile.csv",
-    "docs/2_Missions/osiris-rex/results/single_phase/OSIRIS_REx_Low_singlePhasearchive.emtg_archive",
-    "docs/2_Missions/osiris-rex/results/low/OSIRIS_REx_Low.emtg",
     "docs/2_Missions/osiris-rex/plans/osiris_rex_mgandsm_pipeline.md",
     "docs/2_Missions/osiris-rex/plans/osiris-rex-mgandsm-pipeline.md",
     "docs/2_Missions/osiris-rex/plans/osiris-rexx-mgandsm-pipeline.md",
