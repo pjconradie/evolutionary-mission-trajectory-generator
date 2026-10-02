@@ -1,0 +1,101 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0MGALTEphemerisPeggedLaunchDirectInsertion: event left state epoch,4646764800,4733164800,5022642.890913,4700314549.65
+1,j0p0MGALTEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote,0,3.162277660168,29.78469183259,6.97
+2,j0p0MGALTEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote,-50.26548245744,50.26548245744,6.28318530718,-11.59687345576
+3,j0p0MGALTEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote,-1.570796326795,1.570796326795,6.28318530718,0.4479107709504
+4,j0p0MGALT: phase flight time,315621.8600124,26092800,5022642.890913,26092800
+5,j0p0MGALTEphemerisPeggedLTRendezvous: event left state mass,1e-13,525.2,525.2,454.1844894882
+6,j0p0MGALT: virtual chemical fuel,0,525.2,525.2,0
+7,j0p0MGALT: virtual electric propellant,0,525.2,525.2,71.01551051192
+8,j0p0MGALT: step 0 u_x,-1,1,1,0.5523863867899
+9,j0p0MGALT: step 0 u_y,-1,1,1,0.6775970705947
+10,j0p0MGALT: step 0 u_z,-1,1,1,0.4855218749938
+11,j0p0MGALT: step 1 u_x,-1,1,1,0.5455495536191
+12,j0p0MGALT: step 1 u_y,-1,1,1,-0.4180552495381
+13,j0p0MGALT: step 1 u_z,-1,1,1,0.529333242285
+14,j0p0MGALT: step 2 u_x,-1,1,1,-0.1797798525842
+15,j0p0MGALT: step 2 u_y,-1,1,1,-0.9740310777716
+16,j0p0MGALT: step 2 u_z,-1,1,1,-0.1376324641169
+17,j0p0MGALT: step 3 u_x,-1,1,1,-0.2888613163068
+18,j0p0MGALT: step 3 u_y,-1,1,1,-0.9242680281302
+19,j0p0MGALT: step 3 u_z,-1,1,1,-0.2495752660942
+20,j0p0MGALT: step 4 u_x,-1,1,1,-0.3100572081188
+21,j0p0MGALT: step 4 u_y,-1,1,1,-0.9043271318651
+22,j0p0MGALT: step 4 u_z,-1,1,1,-0.2933548433309
+23,j0p0MGALT: step 5 u_x,-1,1,1,-0.3009141502471
+24,j0p0MGALT: step 5 u_y,-1,1,1,-0.8968639442043
+25,j0p0MGALT: step 5 u_z,-1,1,1,-0.3241694986781
+26,j0p0MGALT: step 6 u_x,-1,1,1,-0.2697948195738
+27,j0p0MGALT: step 6 u_y,-1,1,1,-0.8989457271305
+28,j0p0MGALT: step 6 u_z,-1,1,1,-0.3451195365358
+29,j0p0MGALT: step 7 u_x,-1,1,1,-0.227231143122
+30,j0p0MGALT: step 7 u_y,-1,1,1,-0.9064262618458
+31,j0p0MGALT: step 7 u_z,-1,1,1,-0.3560304522284
+32,j0p0MGALT: step 8 u_x,-1,1,1,-0.1714980820301
+33,j0p0MGALT: step 8 u_y,-1,1,1,-0.9093961179881
+34,j0p0MGALT: step 8 u_z,-1,1,1,-0.3789291046232
+35,j0p0MGALT: step 9 u_x,-1,1,1,-0.1090414906506
+36,j0p0MGALT: step 9 u_y,-1,1,1,-0.9147681136055
+37,j0p0MGALT: step 9 u_z,-1,1,1,-0.3889851292476
+38,j0p0MGALT: step 10 u_x,-1,1,1,-0.04031856024164
+39,j0p0MGALT: step 10 u_y,-1,1,1,-0.9161915079683
+40,j0p0MGALT: step 10 u_z,-1,1,1,-0.3987075359042
+41,j0p0MGALT: step 11 u_x,-1,1,1,0.03292754160694
+42,j0p0MGALT: step 11 u_y,-1,1,1,-0.913860157651
+43,j0p0MGALT: step 11 u_z,-1,1,1,-0.4046919144337
+44,j0p0MGALT: step 12 u_x,-1,1,1,0.1096640122716
+45,j0p0MGALT: step 12 u_y,-1,1,1,-0.9066409172138
+46,j0p0MGALT: step 12 u_z,-1,1,1,-0.4074017656416
+47,j0p0MGALT: step 13 u_x,-1,1,1,0.1886819658728
+48,j0p0MGALT: step 13 u_y,-1,1,1,-0.8936629199598
+49,j0p0MGALT: step 13 u_z,-1,1,1,-0.4071435027595
+50,j0p0MGALT: step 14 u_x,-1,1,1,0.2694424342102
+51,j0p0MGALT: step 14 u_y,-1,1,1,-0.8748171569002
+52,j0p0MGALT: step 14 u_z,-1,1,1,-0.40261128297
+53,j0p0MGALT: step 15 u_x,-1,1,1,0.3506884303703
+54,j0p0MGALT: step 15 u_y,-1,1,1,-0.8485831661307
+55,j0p0MGALT: step 15 u_z,-1,1,1,-0.3961367538696
+56,j0p0MGALT: step 16 u_x,-1,1,1,0.4310961931471
+57,j0p0MGALT: step 16 u_y,-1,1,1,-0.8143638506695
+58,j0p0MGALT: step 16 u_z,-1,1,1,-0.3885455165375
+59,j0p0MGALT: step 17 u_x,-1,1,1,0.5117558989535
+60,j0p0MGALT: step 17 u_y,-1,1,1,-0.7751735958374
+61,j0p0MGALT: step 17 u_z,-1,1,1,-0.3704211814292
+62,j0p0MGALT: step 18 u_x,-1,1,1,0.5861763174227
+63,j0p0MGALT: step 18 u_y,-1,1,1,-0.7293725016195
+64,j0p0MGALT: step 18 u_z,-1,1,1,-0.3527225201017
+65,j0p0MGALT: step 19 u_x,-1,1,1,0.6638992144368
+66,j0p0MGALT: step 19 u_y,-1,1,1,-0.6713771179984
+67,j0p0MGALT: step 19 u_z,-1,1,1,-0.3293791545238
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,-0.8647838718359
+1,j0p0MGALT: step 0 control magnitude,0,1,1.000000000743
+2,j0p0MGALT: step 1 control magnitude,0,1,0.8675184081668
+3,j0p0MGALT: step 2 control magnitude,0,1,1.000000015519
+4,j0p0MGALT: step 3 control magnitude,0,1,1.000000030664
+5,j0p0MGALT: step 4 control magnitude,0,1,1.00000004892
+6,j0p0MGALT: step 5 control magnitude,0,1,1.000000062053
+7,j0p0MGALT: step 6 control magnitude,0,1,1.000000079747
+8,j0p0MGALT: step 7 control magnitude,0,1,1.000000121741
+9,j0p0MGALT: step 8 control magnitude,0,1,1.000000078941
+10,j0p0MGALT: step 9 control magnitude,0,1,1.000000089564
+11,j0p0MGALT: step 10 control magnitude,0,1,1.00000008238
+12,j0p0MGALT: step 11 control magnitude,0,1,1.000000078173
+13,j0p0MGALT: step 12 control magnitude,0,1,1.000000073501
+14,j0p0MGALT: step 13 control magnitude,0,1,1.000000065298
+15,j0p0MGALT: step 14 control magnitude,0,1,1.000000064267
+16,j0p0MGALT: step 15 control magnitude,0,1,1.000000046401
+17,j0p0MGALT: step 16 control magnitude,0,1,1.000000013722
+18,j0p0MGALT: step 17 control magnitude,0,1,1.000000027724
+19,j0p0MGALT: step 18 control magnitude,0,1,1.000000048706
+20,j0p0MGALT: step 19 control magnitude,0,1,1.000000014468
+21,j0p0MGALT: match point x,-1e-13,1e-13,-6.247455041563e-06
+22,j0p0MGALT: match point y,-1e-13,1e-13,4.326592568113e-06
+23,j0p0MGALT: match point z,-1e-13,1e-13,1.837338166557e-06
+24,j0p0MGALT: match point xdot,-1e-13,1e-13,-5.819914929573e-06
+25,j0p0MGALT: match point ydot,-1e-13,1e-13,-2.584418890957e-07
+26,j0p0MGALT: match point zdot,-1e-13,1e-13,-1.049751715179e-07
+27,j0p0MGALT: match point mass,-1e-13,1e-13,1.518350425198e-07
+28,j0p0MGALT: match point virtual chemical fuel,-1e-13,1e-13,0
+29,j0p0MGALT: match point virtual electric propellant,-1e-13,1e-13,-1.518348424125e-07
+30,Mission flight time bounds,0,1,1

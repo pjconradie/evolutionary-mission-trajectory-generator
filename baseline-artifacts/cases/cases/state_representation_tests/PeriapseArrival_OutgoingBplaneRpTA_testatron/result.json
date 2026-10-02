@@ -1,0 +1,17 @@
+{
+  "case_id": "state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron",
+  "source_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/tests/state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/baseline-artifacts/cases/cases/state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron/PeriapseArrival_OutgoingBplaneRpTA_testatron.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/baseline-artifacts/cases/cases/state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron/run.log",
+  "compatibility_file": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/baseline-artifacts/cases/cases/state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron/compatibility.json",
+  "return_code": null,
+  "duration_seconds": 0.0014312499843072146,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Unable to execute EMTG: [Errno 2] No such file or directory: '/path/to/IPOPT-enabled-EMTGv9'"
+}

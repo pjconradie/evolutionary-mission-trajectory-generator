@@ -1,0 +1,12 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMarsPeri_boundedAggFlightTime.emtgopt",
+  "mappings": [
+    {
+      "option": "ThrottleTableFile",
+      "source": "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable",
+      "replacement": "empty.ThrottleTable",
+      "reason": "engine_type 5 does not use throttle-table performance data"
+    }
+  ]
+}

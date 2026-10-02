@@ -2,7 +2,7 @@
 
 ## Goal
 
-Implement [IPOPT Testatron Verification Plan](IPOPT/tests.readme.md) in stages without confusing pre-existing failures with regressions caused by the artifact layout change. Do not begin the Docker deployment plan until the benchmark and case suites are stable, dependency-ready, and pass their approved SNOPT/IPOPT comparison contracts.
+Implement [IPOPT Testatron Verification Plan](tests.readme.md) in stages without confusing pre-existing failures with regressions caused by the artifact layout change. Do not begin the Docker deployment plan until the benchmark and case suites are stable, dependency-ready, and pass their approved SNOPT/IPOPT comparison contracts.
 
 The immutable source options and SNOPT `.emtg` results below `testatron/tests`
 remain untouched throughout this work.
@@ -69,7 +69,53 @@ workflows and retain their evidence outside the artifact roots that will move.
 
 The Stage 0 output is a baseline report, not promoted truth data.
 
-## Stage 1: Move IPOPT Artifact Roots
+## Stage 1: Organize Regression Suites
+
+Keep generic regression coverage separate from IPOPT-generated artifact data.
+The following tests validate PyEMTG parsing, option serialization, and mission
+comparison across frozen Testatron and OSIRIS data; they are not an IPOPT unit
+suite:
+
+```bash
+python -m pytest \
+   tests/test_comparatron.py \
+   tests/test_mission_options.py \
+   tests/test_mission_parser.py -q
+```
+
+After retaining the Stage 0 result, move the suites with Git history preserved:
+
+```bash
+mkdir -p tests/regression
+git mv tests/test_comparatron.py tests/regression/test_comparatron.py
+git mv tests/test_mission_options.py tests/regression/test_mission_options.py
+git mv tests/test_mission_parser.py tests/regression/test_mission_parser.py
+```
+
+Preserve `pytest.mark.regression` on every moved module. Do not move these
+files to `testatron/ipopt/tests/unit`: that root is for IPOPT-generated
+evidence, while these tests cover shared parser, options, and comparison
+behavior independent of the NLP backend.
+
+Update `test_mission_parser.py` to obtain the repository root from the shared
+`repository_root` fixture instead of `Path(__file__).resolve().parents[1]`;
+after the move, that expression resolves to `tests/`, not the repository root.
+
+`pytest.ini` needs no discovery change because `testpaths = tests` recursively
+collects `tests/regression`. Verify the move before any IPOPT artifact-path
+change:
+
+```bash
+python -m pytest tests/regression -q
+python -m pytest -m regression -q
+python -m pytest --collect-only -q
+```
+
+The relocated suites must have the same test outcomes and remain present in
+ordinary pytest collection. Treat any difference as a regression-suite move
+defect before continuing.
+
+## Stage 2: Move IPOPT Artifact Roots
 
 Move artifacts with Git history preserved:
 
@@ -97,7 +143,7 @@ Then update all operational references:
 Python test source; Python tests remain in the repository-level `tests/`
 directory.
 
-## Stage 2: Register Core Pytest Suites
+## Stage 3: Register Core Pytest Suites
 
 Add these markers to [pytest.ini](pytest.ini):
 
@@ -128,7 +174,7 @@ python -m pytest -m ipopt_benchmarks
 
 Plain `pytest` must continue to collect both marker groups.
 
-## Stage 3: Prove the Layout Change Is Stable
+## Stage 4: Prove the Layout Change Is Stable
 
 Before adding dependency resolution or changing comparison semantics, repeat
 the Stage 0 commands against the moved paths.
@@ -164,7 +210,7 @@ the Stage 0 commands against the moved paths.
 A path-only migration must not change numerical results. Treat any difference
 as a relocation regression until its root cause is demonstrated.
 
-## Stage 4: Make Dependencies Explicit
+## Stage 5: Make Dependencies Explicit
 
 After layout stability is established:
 
@@ -189,10 +235,10 @@ After layout stability is established:
    hardware or use placeholders. The gate is zero `dependency_blocked` cases
    for the approved portable corpus.
 
-## Stage 5: Enforce IPOPT-to-SNOPT Agreement
+## Stage 6: Enforce IPOPT-to-SNOPT Agreement
 
 Implement and enforce the two stages defined in
-[IPOPT/tests.readme.md](IPOPT/tests.readme.md):
+[tests.readme.md](tests.readme.md):
 
 1. **Replay:** evaluate the decision vector archived in the immutable SNOPT
    baseline with `run_inner_loop 0`. Neither SNOPT nor IPOPT executes. The
@@ -222,7 +268,7 @@ Add unit contracts for comparison dimensions, objective sense, tolerance
 boundaries, native exits, and manifest aggregation. Add Docker-backed smoke
 coverage for a public-NLSII case and a SPICE-dependent case.
 
-## Stage 6: Final Verification Gate
+## Stage 7: Final Verification Gate
 
 Run the complete core selections after all implementation work:
 
@@ -245,7 +291,7 @@ This plan is complete only when:
 5. Immutable SNOPT sources and baselines retain their original hashes.
 
 Only after these conditions hold may work begin on
-[IPOPT/docker_deployment.readme.md](IPOPT/docker_deployment.readme.md). Do not
+[docker_deployment.readme.md](docker_deployment.readme.md). Do not
 combine Docker lifecycle refactoring with this verification work.
 
 ## Runtime Expectations

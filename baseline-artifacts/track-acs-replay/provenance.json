@@ -1,0 +1,18 @@
+{
+  "status": "unreviewed",
+  "benchmark": "track-acs-prop",
+  "stage": "replay",
+  "sources": {
+    "source_options": {
+      "path": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtgopt",
+      "sha256": "50240c807405c2a43b1494ed61ea6d3d8da42717493a79cc867d3e12206d33c0"
+    },
+    "reference_mission": {
+      "path": "testatron/tests/spacecraft_options/spacecraftoptions_Chem_TrackACSProp.emtg",
+      "sha256": "9fa43892106ccc3b312c58f9f7a4fbaf947d5186731f8640eade783781a24b40"
+    }
+  },
+  "generated": [
+    "spacecraftoptions_Chem_TrackACSProp.emtg"
+  ]
+}

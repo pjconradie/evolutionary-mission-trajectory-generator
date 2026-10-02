@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector",
+  "source_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/tests/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtgopt",
+  "classification": "dependency_blocked",
+  "status": "unreviewed",
+  "prepared_options": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/baseline-artifacts/cases/cases/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/baseline-artifacts/cases/cases/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/run.log",
+  "compatibility_file": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/baseline-artifacts/cases/cases/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/compatibility.json",
+  "return_code": null,
+  "duration_seconds": 0.001405542017892003,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "Unable to execute EMTG: [Errno 2] No such file or directory: '/path/to/IPOPT-enabled-EMTGv9'"
+}
