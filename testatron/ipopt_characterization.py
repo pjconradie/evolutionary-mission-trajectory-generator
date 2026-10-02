@@ -21,7 +21,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 TESTATRON_ROOT = REPOSITORY_ROOT / "testatron"
 TESTS_ROOT = TESTATRON_ROOT / "tests"
 PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
-DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt"
+DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
 PUBLIC_HARDWARE_ROOT = (
     REPOSITORY_ROOT
     / "docs"
@@ -257,7 +257,7 @@ def _osiris_benchmark(benchmark_id, package_directory, year):
         source_options=f"{package}/OSIRIS-REx.emtgopt",
         reference_mission=f"{package}/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
         seed_alignment_source=f"{package}/XFfile.csv",
-        output_root=f"testatron/ipopt/benchmarks/osiris-rex/{year}",
+        output_root=f"testatron/ipopt/tests/benchmarks/osiris-rex/{year}",
     )
 
 
@@ -276,7 +276,7 @@ BENCHMARKS = {
                 "testatron/tests/spacecraft_options/"
                 "spacecraftoptions_Chem_TrackACSProp.emtg"
             ),
-            output_root="testatron/ipopt/benchmarks/track-acs-prop",
+            output_root="testatron/ipopt/tests/benchmarks/track-acs-prop",
         ),
     )
 }

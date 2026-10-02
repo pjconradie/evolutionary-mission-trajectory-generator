@@ -35,7 +35,7 @@ or make it a Testatron truth.
 
 ### Benchmark evidence
 
-`benchmarks/` contains deterministic replay and IPOPT-refinement evidence for:
+`tests/benchmarks/` contains deterministic replay and IPOPT-refinement evidence for:
 
 - `track-acs-prop`
 - `osiris-rex-2022`
@@ -48,7 +48,7 @@ Each benchmark has two stages:
 
 ### Testatron characterization
 
-`cases/`, `manifest.json`, and `manifest.csv` contain incremental IPOPT runs of
+`tests/tests/`, `manifest.json`, and `manifest.csv` contain incremental IPOPT runs of
 Testatron cases. These are characterization results, not replacement truths.
 
 The current general Testatron manifest writer can retain container runtime paths
@@ -264,42 +264,42 @@ individually and writes directly to its owned directory.
 ### TrackACSProp replay
 
 ```bash
-EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/benchmarks/track-acs-prop/replay" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks/track-acs-prop/replay" \
 pytest tests/integration/test_ipopt_backend.py::test_track_acs_replay_matches_committed_truth -vv
 ```
 
 ### TrackACSProp IPOPT refinement
 
 ```bash
-EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/benchmarks/track-acs-prop/ipopt" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks/track-acs-prop/ipopt" \
 pytest tests/integration/test_ipopt_backend.py::test_track_acs_ipopt_refinement_retains_seed -vv
 ```
 
 ### OSIRIS-REx 2022 replay
 
 ```bash
-EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/benchmarks/osiris-rex/2022/replay" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks/osiris-rex/2022/replay" \
 pytest tests/integration/test_ipopt_backend.py::test_osiris_2022_replay_matches_nasa_result -vv
 ```
 
 ### OSIRIS-REx 2022 IPOPT refinement
 
 ```bash
-EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/benchmarks/osiris-rex/2022/ipopt" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks/osiris-rex/2022/ipopt" \
 pytest tests/integration/test_ipopt_backend.py::test_osiris_2022_ipopt_refinement_retains_nasa_seed -vv
 ```
 
 ### OSIRIS-REx 2024 replay
 
 ```bash
-EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/benchmarks/osiris-rex/2024/replay" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks/osiris-rex/2024/replay" \
 pytest tests/integration/test_ipopt_backend.py::test_osiris_2024_replay_matches_nasa_result -vv
 ```
 
 ### OSIRIS-REx 2024 IPOPT refinement
 
 ```bash
-EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/benchmarks/osiris-rex/2024/ipopt" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks/osiris-rex/2024/ipopt" \
 pytest tests/integration/test_ipopt_backend.py::test_osiris_2024_ipopt_refinement_retains_nasa_seed -vv
 ```
 
@@ -343,7 +343,7 @@ Inspect source changes afterward:
 
 ```bash
 git status --short
-git diff -- testatron/ipopt/benchmarks
+git diff -- testatron/ipopt/tests/benchmarks
 ```
 
 Do not promote the generated missions to Testatron truths.

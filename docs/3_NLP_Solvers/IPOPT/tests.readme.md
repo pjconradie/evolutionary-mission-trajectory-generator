@@ -224,11 +224,10 @@ mapping reason, and final staged path must be written to `compatibility.json`.
 
 ## Implementation Plan
 
-1. Move `testatron/ipopt/cases` to `testatron/ipopt/tests/tests` and
-	`testatron/ipopt/benchmarks` to `testatron/ipopt/tests/benchmarks` with
-	`git mv`. Update all operational references, the benchmark registry, and
-	generated-evidence paths without changing immutable source inputs or SNOPT
-	baselines.
+1. Keep IPOPT characterization artifacts below `testatron/ipopt/tests/tests`
+	and benchmark artifacts below `testatron/ipopt/tests/benchmarks`. Update
+	operational references and the benchmark registry without changing immutable
+	source inputs, SNOPT baselines, or historical generated-evidence paths.
 2. Register `ipopt_tests` and `ipopt_benchmarks` in `pytest.ini`. Apply them
 	to Python tests that respectively execute or validate case and benchmark
 	evidence. Keep both markers included in ordinary pytest collection.

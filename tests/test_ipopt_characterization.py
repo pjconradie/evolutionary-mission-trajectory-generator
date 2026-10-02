@@ -219,6 +219,12 @@ def test_discovery_matches_legacy_testatron_inventory(repository_root):
     assert len(discovered) == 137
 
 
+def test_default_output_root_targets_relocated_case_artifacts(repository_root):
+    assert ipopt_characterization.DEFAULT_OUTPUT_ROOT == (
+        repository_root / "testatron" / "ipopt" / "tests" / "tests"
+    )
+
+
 def test_discovery_unions_repeated_filters(repository_root):
     tests_root = repository_root / "testatron" / "tests"
 
@@ -1067,7 +1073,9 @@ def _iter_json_strings(node):
 
 
 def test_benchmark_artifacts_contain_no_absolute_paths(repository_root):
-    benchmark_root = repository_root / "testatron" / "ipopt" / "benchmarks"
+    benchmark_root = (
+        repository_root / "testatron" / "ipopt" / "tests" / "benchmarks"
+    )
     forbidden = re.compile(r"(^/|/Users/|/home/|/private/var|^[A-Za-z]:\\|/repo/|/artifacts/)")
 
     offenders = []

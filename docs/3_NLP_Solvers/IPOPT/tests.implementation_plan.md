@@ -158,7 +158,7 @@ pytest -m regression -q        # 145 passed, 116 deselected
 pytest --collect-only -q       # 227/261 collected, 34 deselected
 ```
 
-## Stage 2: Move IPOPT Artifact Roots
+## Stage 2: Move IPOPT Artifact Roots (Complete 2026-10-02)
 
 Move artifacts with Git history preserved:
 
@@ -185,6 +185,23 @@ Then update all operational references:
 `testatron/ipopt/tests/tests` is intentionally nested artifact data. It is not
 Python test source; Python tests remain in the repository-level `tests/`
 directory.
+
+### Completion Record
+
+The case artifacts now reside below `testatron/ipopt/tests/tests/cases` and
+the benchmark artifacts below `testatron/ipopt/tests/benchmarks`. The moved
+benchmark root contained a historical duplicate `benchmarks/` directory; it
+was flattened so the registry and generated stage directories agree on the
+documented paths.
+
+The benchmark registry, default characterization output root, unit path
+assertions, regeneration commands, and governing layout policy were updated.
+Historical generated evidence still retains its original runtime path strings;
+those records were deliberately not regenerated or rewritten. The focused
+contract suite passed with `59 passed`, including provenance checks against the
+moved benchmark stage directories. A repository search found no remaining live
+references to the former artifact paths; the Stage 2 `git mv` commands above
+remain as the historical migration procedure.
 
 ## Stage 3: Register Core Pytest Suites
 
