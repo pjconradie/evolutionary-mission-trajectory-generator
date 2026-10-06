@@ -1,6 +1,0 @@
-metric,baseline_value,generated_value,delta
-objective_value,7.2557848404393e-07,7.2557848404393e-07,0.0
-worst_violation,-2.6974969800952e-07,5.653244958787018,5.653245228536716
-total_deterministic_deltav,7.2557848404393e-07,7.2557848404393e-07,0.0
-total_flight_time_years,0.7398102422195936,0.7398102422195936,0.0
-final_mass_including_propellant_margin,525.2,525.2,0.0
