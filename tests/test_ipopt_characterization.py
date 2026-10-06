@@ -432,6 +432,103 @@ def test_case_preflight_keeps_gateway_earth_magic_unresolved(repository_root):
     )
 
 
+def test_case_preflight_resolves_sun_saturn_departure_universe(repository_root):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "state_representation_tests"
+        / "FreePointDeparture_IncomingBplaneRpTA_testatron.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert report["acceptable"]
+    sun_universe = next(
+        dependency
+        for dependency in report["dependencies"]
+        if dependency["type"] == "journey_universe"
+        and dependency["central_body"] == "Sun_SaturnOrientation"
+    )
+    assert sun_universe["resolved_path"] == (
+        "testatron/replacement_resources/"
+        "Sun_SaturnOrientation_StateRepresentation.emtg_universe"
+    )
+    assert sun_universe["replacement_resource"]["sha256"] == (
+        "f7c1f02df983500fbe2839662eb6e951e7a9a4b3093661974ef34fdf9f9f8473"
+    )
+
+
+def test_case_preflight_resolves_sun_saturn_arrival_universe(repository_root):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "state_representation_tests"
+        / "FreePointArrival_IncomingBplaneRpTA_testatron.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert report["acceptable"]
+    sun_universe = next(
+        dependency
+        for dependency in report["dependencies"]
+        if dependency["type"] == "journey_universe"
+        and dependency["central_body"] == "Sun_SaturnOrientation"
+    )
+    assert sun_universe["status"] == "valid"
+    assert sun_universe["replacement_resource"]["id"] == (
+        "sun_saturn_orientation_arrival_universe"
+    )
+
+
+def test_prepare_case_stages_spacecraft_replacement_under_requested_name(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "EME_stageAfterArrival.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    staged_model = tmp_path / "hardware_models" / "snapier_multistage.emtg_spacecraftopt"
+    assert Path(prepared.HardwarePath) == tmp_path / "hardware_models"
+    assert staged_model.read_bytes() == (
+        repository_root / "testatron" / "HardwareModels" / "default_2stage.emtg_spacecraftopt"
+    ).read_bytes()
+
+
+def test_case_preflight_resolves_public_hardware_spacecraft_replacement(
+    repository_root,
+):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "spacecraft_options"
+        / "spacecraft_LT_multiStage_spacecraftFile.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert report["acceptable"]
+    spacecraft = next(
+        dependency
+        for dependency in report["dependencies"]
+        if dependency["type"] == "spacecraft_options"
+    )
+    assert spacecraft["replacement_resource"]["id"] == (
+        "multistage_spacecraft_file_public_hardware"
+    )
+
+
 def test_case_preflight_maps_top_level_default_libraries(repository_root):
     source = (
         repository_root

@@ -463,10 +463,10 @@ characterization; do not create an execution filter or exclusion selection.
 5. Add unit contracts for replacement eligibility, checksums, nested
    dependencies, preflight records, and staged `/repo` execution paths. Add
    Docker smoke coverage for each replacement family before the broad rerun.
-6. After every replacement change, run runner contracts, all six benchmark
-   stages, no-network all-137 preflight, and the full all-137 Docker
-   characterization. Retain artifacts and compare classifications with
-   `/tmp/emtg-ipopt-137-stage52-rerun`.
+6. After every replacement change, run focused runner contracts and a Docker
+   smoke for that resource family. Retain artifacts. Run the no-network
+   all-137 preflight and full Docker characterization once, after every
+   resource family resolves, as Stage 5.7.
 7. Do not promote a replacement because EMTG runs. Stage 5.3 completes only
    when all 137 cases have resolved staged dependencies and the full manifest
    has zero `dependency_blocked` outcomes. Stage 6 must still establish replay
@@ -492,6 +492,62 @@ the current case-scoped manifest has one resolved provisional Earth-MAGIC case
 and one Earth-MAGIC dependency-blocked case. No all-137 rerun has yet been
 recorded after this narrow replacement; the required complete rerun remains
 pending resolution of every historical resource family.
+
+### 5.4: Sun/Saturn Orientation Universe
+
+`Sun_SaturnOrientation_StateRepresentation.emtg_universe`, SHA-256
+`f7c1f02df983500fbe2839662eb6e951e7a9a4b3093661974ef34fdf9f9f8473`, is a
+provisional reconstruction for all six state-representation cases. It
+preserves the required contiguous Mercury-to-Mars body layout and uses
+de430-supported barycentric IDs for outer-system menu entries. The four
+Saturn-arrival/periapse cases additionally require the physical Saturn and
+satellite ephemerides in pinned `sat441.bsp`, SHA-256
+`d7e444a9ba7a52b8f448ff0747030789524d2f0c1212e4e2bd7f5fc3c96444d5`.
+
+Focused preflight contracts passed (`2 passed`). The retained Docker smoke at
+`baseline-artifacts/stage54-sun-saturn-departure-barycenter` classified the
+incoming departure case as `reviewable`; the corresponding Saturn-arrival
+smoke with `sat441.bsp`, retained at
+`baseline-artifacts/stage54-sun-saturn-arrival-sat441`, also classified as
+`reviewable`. These resources remain provisional pending Stage 6 comparison
+to immutable SNOPT truth.
+
+### 5.5: Historical Spacecraft Models
+
+The unavailable historical spacecraft files are provisionally replaced by the
+tracked `default_2stage.emtg_spacecraftopt`, SHA-256
+`b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48`, staged
+under each case's requested legacy filename. It supplies the required explicit
+stage transitions for `EME_stageAfterArrival`, `EME_stageBeforeArrival`,
+`default_SCfile_PM`, and `spacecraft_LT_multiStage_spacecraftFile`.
+
+The latter case resolves its historical filename under the public tutorial
+hardware root after launch-library normalization, so it has a separate
+case-scoped manifest entry. `spacecraft_LT_spacecraftFile` has no stage
+transition but its first single-stage candidate caused EMTG to terminate
+during configuration; it therefore uses the same validated two-stage model,
+whose second stage remains unused. Focused staging contracts passed (`2
+passed`). Docker smokes classified all five cases as `reviewable`, retained at
+`baseline-artifacts/stage55-snapier-multistage`,
+`baseline-artifacts/stage55-spacecraft-file`,
+`baseline-artifacts/stage55-spacecraft-file-2stage`, and their corresponding
+per-case artifact directories. These mappings remain provisional pending Stage
+6 comparison to immutable SNOPT truth.
+
+### 5.6: GatewayNRHO Kernel Support
+
+Add a SHA-pinned SPK that defines GatewayNRHO SPICE ID `-60000` at the Park
+case epoch. Do not substitute a different trajectory or body. Validate the
+case with focused contracts and a Docker smoke after the kernel is staged.
+
+### 5.7: Final Full-Corpus Characterization
+
+After Stages 5.4 through 5.6 resolve every declared resource, run the required
+no-network preflight and Docker characterization across all 137 Testatron
+cases without an operational exclusion. Retain artifacts and compare the
+classification manifest with `/tmp/emtg-ipopt-137-stage52-rerun`. Stage 6 then
+determines whether every provisional replacement agrees with immutable SNOPT
+baselines.
 
 ## Stage 6: Enforce IPOPT-to-SNOPT Agreement
 

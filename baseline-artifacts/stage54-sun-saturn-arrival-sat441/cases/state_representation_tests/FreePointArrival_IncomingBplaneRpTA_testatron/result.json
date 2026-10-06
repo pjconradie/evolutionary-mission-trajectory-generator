@@ -1,0 +1,17 @@
+{
+  "case_id": "state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron",
+  "source_options": "/repo/testatron/tests/state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron/FreePointArrival_IncomingBplaneRpTA_testatron.emtgopt",
+  "output_file": "/artifacts/cases/state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron/FAILURE_FreePointArrival_IncomingBplaneRpTA_testatron.emtg",
+  "comparison_file": "/artifacts/cases/state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron/comparison.csv",
+  "log_file": "/artifacts/cases/state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron/run.log",
+  "compatibility_file": "/artifacts/cases/state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.9873697089999922,
+  "objective_value": -0.2321686018620445,
+  "worst_violation": -0.0014067082844008074,
+  "worst_constraint": "F[47]: j0p3MGAnDSMs: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

@@ -1,0 +1,23 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraft_LT_spacecraftFile.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_April2017.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    }
+  ],
+  "replacement_resources": [
+    {
+      "dependency_type": "spacecraft_options",
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/spacecraft_LT_spacecraftFile.emtg_spacecraftopt",
+      "id": "spacecraft_file",
+      "replacement_path": "testatron/HardwareModels/default_2stage.emtg_spacecraftopt",
+      "sha256": "b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48",
+      "review_status": "provisional",
+      "rationale": "The single-stage candidate causes EMTG to terminate before configuration completes. This candidate's first stage is the already runtime-validated schema used by the paired multi-stage file case; its second stage is unused because this case requests no stage transition."
+    }
+  ]
+}

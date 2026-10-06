@@ -1,0 +1,23 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/journey_options/EME_stageAfterArrival.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_April2017.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    }
+  ],
+  "replacement_resources": [
+    {
+      "dependency_type": "spacecraft_options",
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/snapier_multistage.emtg_spacecraftopt",
+      "id": "snapier_multistage_spacecraft",
+      "replacement_path": "testatron/HardwareModels/default_2stage.emtg_spacecraftopt",
+      "sha256": "b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48",
+      "review_status": "provisional",
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history. Both cases request an explicit stage transition, which requires the tracked two-stage model."
+    }
+  ]
+}

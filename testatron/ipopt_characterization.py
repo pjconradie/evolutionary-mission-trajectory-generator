@@ -1466,11 +1466,22 @@ def prepare_case(
             TESTATRON_ROOT / "universe", execution_repository_root
         )
     hardware_root, compatibility_mappings, hardware_overrides = _hardware_root_and_mappings(options)
-    if hardware_overrides:
+    replacement_spacecraft = [
+        dependency
+        for dependency in preflight["dependencies"]
+        if dependency["type"] == "spacecraft_options"
+        and dependency.get("resolved_path")
+    ]
+    if hardware_overrides or replacement_spacecraft:
         staged_hardware_root = case_directory / "hardware_models"
         shutil.copytree(hardware_root, staged_hardware_root, dirs_exist_ok=True)
         for source in hardware_overrides.values():
             shutil.copy2(source, staged_hardware_root / source.name)
+        for dependency in replacement_spacecraft:
+            shutil.copy2(
+                REPOSITORY_ROOT / dependency["resolved_path"],
+                staged_hardware_root / Path(dependency["path"]).name,
+            )
         options.HardwarePath = str(staged_hardware_root)
     else:
         options.HardwarePath = _execution_path(hardware_root, execution_repository_root)

@@ -1,0 +1,23 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraft_LT_spacecraftFile.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_April2017.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    }
+  ],
+  "replacement_resources": [
+    {
+      "dependency_type": "spacecraft_options",
+      "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/spacecraft_LT_spacecraftFile.emtg_spacecraftopt",
+      "id": "spacecraft_file",
+      "replacement_path": "testatron/HardwareModels/default.emtg_spacecraftopt",
+      "sha256": "f9072f866e3002ac5840c71cfa1269aab9ea105711cf3e56713e36d4ae0fc099",
+      "review_status": "provisional",
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history. This case requests no stage transition and can use the tracked single-stage model."
+    }
+  ]
+}

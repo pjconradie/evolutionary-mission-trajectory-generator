@@ -18,6 +18,12 @@
       "destination": "testatron/universe/ephemeris_files/pck00010.tpc",
       "source_url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc",
       "sha256": "59468328349aa730d18bf1f8d7e86efe6e40b75dfb921908f99321b3a7a701d2"
+    },
+    {
+      "filename": "sat441.bsp",
+      "destination": "testatron/universe/ephemeris_files/sat441.bsp",
+      "source_url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/sat441.bsp",
+      "sha256": "d7e444a9ba7a52b8f448ff0747030789524d2f0c1212e4e2bd7f5fc3c96444d5"
     }
   ]
 }

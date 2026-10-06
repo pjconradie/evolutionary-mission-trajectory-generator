@@ -28,22 +28,34 @@
       "review_status": "unresolved"
     },
     {
-      "id": "sun_saturn_orientation_universe",
+      "id": "sun_saturn_orientation_departure_universe",
+      "type": "journey_universe",
+      "requested_path": "testatron/universe/Sun_SaturnOrientation.emtg_universe",
+      "affected_cases": [
+        "state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron",
+        "state_representation_tests/FreePointDeparture_OutgoingBplaneRpTA_testatron"
+      ],
+      "replacement_path": "testatron/replacement_resources/Sun_SaturnOrientation_StateRepresentation.emtg_universe",
+      "source": "Reconstructed from tracked Sun and Sun_barycenters menus, with immutable baseline Sun constants and the required Venus=2, Earth=3, Mars=4 body-code layout.",
+      "sha256": "f7c1f02df983500fbe2839662eb6e951e7a9a4b3093661974ef34fdf9f9f8473",
+      "rationale": "Historical universe file is unavailable in the repository and reachable Git history. This case-scoped candidate preserves the one-journey state-representation departure cases' required body indices and ICRF/TrueOfDate body-orientation inputs.",
+      "review_status": "provisional"
+    },
+    {
+      "id": "sun_saturn_orientation_arrival_universe",
       "type": "journey_universe",
       "requested_path": "testatron/universe/Sun_SaturnOrientation.emtg_universe",
       "affected_cases": [
         "state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron",
         "state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron",
-        "state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron",
-        "state_representation_tests/FreePointDeparture_OutgoingBplaneRpTA_testatron",
         "state_representation_tests/PeriapseArrival_IncomingBplaneRpTA_testatron",
         "state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron"
       ],
-      "replacement_path": null,
-      "source": null,
-      "sha256": null,
-      "rationale": "Historical universe file is unavailable in the repository and reachable Git history.",
-      "review_status": "unresolved"
+      "replacement_path": "testatron/replacement_resources/Sun_SaturnOrientation_StateRepresentation.emtg_universe",
+      "source": "Reconstructed from tracked Sun and Sun_barycenters menus, with immutable baseline Sun constants and the required Venus=2, Earth=3, Mars=4, Saturn=13 body-code layout.",
+      "sha256": "f7c1f02df983500fbe2839662eb6e951e7a9a4b3093661974ef34fdf9f9f8473",
+      "rationale": "Historical universe file is unavailable in the repository and reachable Git history. The separate Saturn-centered journey requires pinned sat441.bsp for physical Saturn and satellite ephemerides.",
+      "review_status": "provisional"
     },
     {
       "id": "snapier_multistage_spacecraft",
@@ -53,25 +65,37 @@
         "journey_options/EME_stageAfterArrival",
         "journey_options/EME_stageBeforeArrival"
       ],
-      "replacement_path": null,
-      "source": null,
-      "sha256": null,
-      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history.",
-      "review_status": "unresolved"
+      "replacement_path": "testatron/HardwareModels/default_2stage.emtg_spacecraftopt",
+      "source": "Tracked Testatron two-stage spacecraft model.",
+      "sha256": "b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48",
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history. Both cases request an explicit stage transition, which requires the tracked two-stage model.",
+      "review_status": "provisional"
     },
     {
       "id": "multistage_spacecraft_file",
       "type": "spacecraft_options",
       "requested_path": "HardwareModels/spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt",
       "affected_cases": [
-        "spacecraft_options/default_SCfile_PM",
+        "spacecraft_options/default_SCfile_PM"
+      ],
+      "replacement_path": "testatron/HardwareModels/default_2stage.emtg_spacecraftopt",
+      "source": "Tracked Testatron two-stage spacecraft model.",
+      "sha256": "b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48",
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history. This case requires a two-stage model.",
+      "review_status": "provisional"
+    },
+    {
+      "id": "multistage_spacecraft_file_public_hardware",
+      "type": "spacecraft_options",
+      "requested_path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt",
+      "affected_cases": [
         "spacecraft_options/spacecraft_LT_multiStage_spacecraftFile"
       ],
-      "replacement_path": null,
-      "source": null,
-      "sha256": null,
-      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history.",
-      "review_status": "unresolved"
+      "replacement_path": "testatron/HardwareModels/default_2stage.emtg_spacecraftopt",
+      "source": "Tracked Testatron two-stage spacecraft model.",
+      "sha256": "b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48",
+      "rationale": "The legacy launch-library mapping selects the public tutorial hardware root. This case requests stage_after_departure and therefore requires a two-stage model.",
+      "review_status": "provisional"
     },
     {
       "id": "spacecraft_file",
@@ -80,11 +104,11 @@
       "affected_cases": [
         "spacecraft_options/spacecraft_LT_spacecraftFile"
       ],
-      "replacement_path": null,
-      "source": null,
-      "sha256": null,
-      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history.",
-      "review_status": "unresolved"
+      "replacement_path": "testatron/HardwareModels/default_2stage.emtg_spacecraftopt",
+      "source": "Tracked Testatron two-stage spacecraft model; the case does not request a stage transition.",
+      "sha256": "b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48",
+      "rationale": "The single-stage candidate causes EMTG to terminate before configuration completes. This candidate's first stage is the already runtime-validated schema used by the paired multi-stage file case; its second stage is unused because this case requests no stage transition.",
+      "review_status": "provisional"
     }
   ]
 }
