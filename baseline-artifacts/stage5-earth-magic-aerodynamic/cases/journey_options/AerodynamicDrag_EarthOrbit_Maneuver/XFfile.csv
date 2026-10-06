@@ -1,0 +1,50 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state SMA,6478,6478,42164,6478
+1,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state ECC,-1e-13,1e-13,1,1e-13
+2,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state INC,-1.745329251994e-15,1.745329251994e-15,1,-1.74533e-15
+3,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state RAAN,-174.5329251994,174.5329251994,1,-73.86173827437
+4,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state AOP,-174.5329251994,174.5329251994,1,-100.2635099509
+5,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state TA,-174.5329251994,174.5329251994,1,-45.86750081829
+6,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state mass,10000,10000,10000,10000
+7,j0p0MGAnDSMsFreePointFreeDirectDeparture: event left state epoch,4646764800,4646764800.001,13713.35817273,4646764800
+8,j0p0MGAnDSMs: phase flight time,1,86400,13713.35817273,2673.969900648
+9,j0p0MGAnDSMsFreePointChemRendezvous: event left state SMA,7078,7078,42164,7078
+10,j0p0MGAnDSMsFreePointChemRendezvous: event left state ECC,-1e-13,1e-13,1,-1e-13
+11,j0p0MGAnDSMsFreePointChemRendezvous: event left state INC,-1.745329251994e-15,1.745329251994e-15,1,-1.74533e-15
+12,j0p0MGAnDSMsFreePointChemRendezvous: event left state RAAN,-174.5329251994,174.5329251994,1,-6.930221698094
+13,j0p0MGAnDSMsFreePointChemRendezvous: event left state AOP,-174.5329251994,174.5329251994,1,-96.23438478282
+14,j0p0MGAnDSMsFreePointChemRendezvous: event left state TA,-174.5329251994,174.5329251994,1,-151.5121837672
+15,j0p0MGAnDSMsFreePointChemRendezvous: event left state mass,1e-13,10000,10000,9389.728787093
+16,j0p0MGAnDSMsFreePointChemRendezvous: V_infinity_x,-20,20,3.074666282971,0.03570824036789
+17,j0p0MGAnDSMsFreePointChemRendezvous: V_infinity_y,-20,20,3.074666282971,0.1642908128324
+18,j0p0MGAnDSMsFreePointChemRendezvous: V_infinity_z,-20,20,3.074666282971,-4.968449147214e-06
+19,j0p0MGAnDSMsFreePointChemRendezvous: virtual chemical fuel,0,10000,10000,254.4459701995
+20,j0p0MGAnDSMsFreePointChemRendezvous: virtual chemical oxidizer,0,10000,10000,235.3625224346
+21,j0p0MGAnDSMs: virtual chemical fuel,0,10000,10000,317.0240067051
+22,j0p0MGAnDSMs: virtual chemical oxidizer,0,10000,10000,293.2472062021
+23,j0p0MGAnDSMsForwardSubPhase0: burn index,0.0001,0.9999,1,0.0001
+24,j0p0MGAnDSMsForwardSubPhase0: DSM x component,-10,10,10,0.0553083017618
+25,j0p0MGAnDSMsForwardSubPhase0: DSM y component,-10,10,10,0.1890655866042
+26,j0p0MGAnDSMsForwardSubPhase0: DSM z component,-10,10,10,2.710586244348e-08
+27,j0p0MGAnDSMsBackwardSubPhase0: burn index,0.0001,0.9999,1,0.01402197329408
+28,j0p0MGAnDSMsBackwardSubPhase1: burn index,0.0001,0.9999,1,0.9858780267058
+29,j0p0MGAnDSMsBackwardSubPhase1: DSM x component,-10,10,10,-0.0001189078337269
+30,j0p0MGAnDSMsBackwardSubPhase1: DSM y component,-10,10,10,-0.0006075377431696
+31,j0p0MGAnDSMsBackwardSubPhase1: DSM z component,-10,10,10,-4.225812062941e-06
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,-0.8899908267995
+1,j0p0MGAnDSMsFreePointChemRendezvous: V_infinity_in magnitude,-20,0,-19.83187341187
+2,j0p0MGAnDSMsFreePointChemRendezvous: virtual chemical fuel constraint,-1e-13,1e-13,-6.247513994822e-07
+3,j0p0MGAnDSMsFreePointChemRendezvous: virtual chemical oxidizer constraint,-1e-13,1e-13,-5.778950377419e-07
+4,j0p0MGAnDSMs: match point x,-1e-13,1e-13,7.428082906816e-08
+5,j0p0MGAnDSMs: match point y,-1e-13,1e-13,2.454628093284e-07
+6,j0p0MGAnDSMs: match point z,-1e-13,1e-13,2.340163176038e-10
+7,j0p0MGAnDSMs: match point xdot,-1e-13,1e-13,7.3396782395e-07
+8,j0p0MGAnDSMs: match point ydot,-1e-13,1e-13,-2.511605010994e-06
+9,j0p0MGAnDSMs: match point zdot,-1e-13,1e-13,-1.941255181406e-09
+10,j0p0MGAnDSMs: match point mass,-1e-13,1e-13,1.389079199907e-06
+11,j0p0MGAnDSMs: match point virtual chemical fuel,-1e-13,1e-13,-7.215995739671e-07
+12,j0p0MGAnDSMs: match point virtual chemical oxidizer,-1e-13,1e-13,-6.674796133609e-07
+13,j0p0MGAnDSMs: burn index sum constraint,-1e-13,1e-13,-1.001421168212e-13
+14,j0: journey flight time bounds,-1,0,-0.9690512742981
+15,Mission flight time bounds,0,1,0.0001024792241786

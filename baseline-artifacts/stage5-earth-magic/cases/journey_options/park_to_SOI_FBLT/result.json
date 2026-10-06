@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/park_to_SOI_FBLT",
+  "source_options": "/repo/testatron/tests/journey_options/park_to_SOI_FBLT.emtgopt",
+  "classification": "parse_failed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/park_to_SOI_FBLT/park_to_SOI_FBLT.emtgopt",
+  "output_file": "",
+  "comparison_file": "",
+  "log_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 3.4919082520000018,
+  "objective_value": null,
+  "worst_violation": null,
+  "worst_constraint": "",
+  "detail": "EMTG produced no .emtg result"
+}

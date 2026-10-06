@@ -387,23 +387,111 @@ exposed a gap in the original preflight scope. Its manifest contained 15
 Extend the no-network preflight and staged preparation path to validate every
 journey's `<journey_central_body>.emtg_universe` resource and every nested
 spacecraft, power-system, propulsion-system, and throttle dependency actually
-loaded by EMTG. Preserve immutable source options and SNOPT baselines. Do not
-invent placeholders or silently substitute hardware: add tracked resources or
-explicit, reviewed compatibility mappings with provenance.
+loaded by EMTG. The full 137-case corpus remains the verification target; do
+not exclude cases solely because their historical runtime resources are absent.
+Preserve immutable source options and SNOPT baselines. A replacement may link
+to an existing tracked input or be newly created, but it must be case-scoped,
+versioned, hashed, and recorded in `compatibility.json` with its source or
+construction rationale. Never silently substitute hardware or universe data.
 
-Rerun the Docker-backed 137-case characterization after each change. Stage 5
-is complete only when preflight and runtime agree: all approved cases have
-their runtime dependencies resolved and the characterization manifest reports
-zero `dependency_blocked` cases.
+Treat every replacement as provisional until Stage 6 replay and refinement
+evidence demonstrates that it preserves the immutable SNOPT baseline's
+decision schema, topology, feasibility, and approved comparison values. A
+replacement that cannot meet those comparisons remains a documented
+`mismatch_snopt` or `dependency_blocked` outcome, not a verification pass.
+
+### Full-Corpus Execution Policy
+
+Every preflight and Docker characterization run selects all 137 cases. The
+Stage 5.2 characterization established that five unavailable resource paths
+blocked 13 cases: `Earth_MAGIC.emtg_universe` blocked 2,
+`Sun_SaturnOrientation.emtg_universe` blocked 6,
+`snapier_multistage.emtg_spacecraftopt` blocks 2,
+`spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt` blocks 2, and
+`spacecraft_LT_spacecraftFile.emtg_spacecraftopt` blocks 1. Their preflight
+records retain the owning case, missing source dependency, and remediation
+status, but they are never omitted from a 137-case run.
+
+Rerun the full Docker characterization after every dependency change. Stage 5
+is complete only when preflight and runtime agree for all 137 cases: every case
+has resolved staged dependencies and the characterization manifest reports zero
+`dependency_blocked` cases.
+
+The latest full characterization, retained at
+`/tmp/emtg-ipopt-137-stage52-rerun`, validated the key-aware composite
+hardware mapping with 83 `reviewable` cases, 25 `infeasible`, 10
+`parse_failed`, 13 `dependency_blocked`, 6 `topology_changed`, and zero
+`process_failed` or `timed_out` cases. The previous fresh all-137 run had 82
+`reviewable` and 11 `parse_failed` cases; `spacecraft_LT_powerFile` changed
+from `parse_failed` to `reviewable`, which is a Stage 6 reproducibility item.
+The focused Docker smoke run for `spacecraft_LT_powerFile` and
+`spacecraft_LT_propFile` classified both as `reviewable` with no dependency,
+parse, timeout, or process failures. The runner contracts passed with 67 tests
+and all six `ipopt_benchmarks` stages passed.
 
 | Classification       |                    Stage 0 | Recent run |
 | -------------------- | -------------------------: | ---------: |
-| `reviewable`         |                         69 |         82 |
+| `reviewable`         |                         69 |         83 |
 | `infeasible`         |                          5 |         25 |
-| `parse_failed`       |                          8 |         11 |
+| `parse_failed`       |                          8 |         10 |
 | `dependency_blocked` |                         54 |         13 |
 | `topology_changed`   |                 not listed |          6 |
 | `timed_out`          | present, count unspecified |          0 |
+
+### 5.3: Resolve Historical Resources
+
+Keep the full 137-case corpus mandatory for every preflight and Docker
+characterization; do not create an execution filter or exclusion selection.
+
+1. Create a tracked, versioned replacement-resource manifest for
+   `Earth_MAGIC.emtg_universe`, `Sun_SaturnOrientation.emtg_universe`,
+   `snapier_multistage.emtg_spacecraftopt`,
+   `spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt`, and
+   `spacecraft_LT_spacecraftFile.emtg_spacecraftopt`. Each record identifies
+   affected case IDs, the original requested path, replacement path or
+   construction source, SHA-256, rationale, and review status.
+2. For each missing universe file, link an existing tracked model or construct
+   a case-scoped replacement that preserves required body lists, central-body
+   parameters, gravity/ephemeris references, and state/frame semantics.
+3. For each missing spacecraft file, link or construct a case-scoped model
+   from explicitly identified tracked power, propulsion, throttle, tank, and
+   stage definitions. Validate and hash every nested dependency.
+4. Extend the shared resolution path used by `preflight_case_dependencies()`
+   and `prepare_case()` so they apply the same case-scoped replacement manifest
+   and write every substitution to `compatibility.json`. Source `.emtgopt`
+   files and immutable SNOPT `.emtg` baselines remain unchanged.
+5. Add unit contracts for replacement eligibility, checksums, nested
+   dependencies, preflight records, and staged `/repo` execution paths. Add
+   Docker smoke coverage for each replacement family before the broad rerun.
+6. After every replacement change, run runner contracts, all six benchmark
+   stages, no-network all-137 preflight, and the full all-137 Docker
+   characterization. Retain artifacts and compare classifications with
+   `/tmp/emtg-ipopt-137-stage52-rerun`.
+7. Do not promote a replacement because EMTG runs. Stage 5.3 completes only
+   when all 137 cases have resolved staged dependencies and the full manifest
+   has zero `dependency_blocked` outcomes. Stage 6 must still establish replay
+   and IPOPT-refinement agreement with immutable SNOPT baselines.
+
+The first case-scoped universe replacement is
+`Earth_MAGIC_AerodynamicDrag.emtg_universe`, SHA-256
+`2cf5480819e33847fae018dcd86afdd77cf120bae2b29c5b891707ff182ed1dc`.
+It is reconstructed from the tracked `Earth_v9` body menu with the immutable
+AerodynamicDrag baseline's Earth constants, and is staged under the requested
+`Earth_MAGIC.emtg_universe` name only for
+`journey_options/AerodynamicDrag_EarthOrbit_Maneuver`. The focused resolver
+contracts passed (`3 passed`; full runner suite: `69 passed`), and the
+2026-10-06 Docker smoke retained at
+`baseline-artifacts/stage5-earth-magic-aerodynamic` classified that case as
+`reviewable`. It remains provisional pending Stage 6 comparison to immutable
+SNOPT truth.
+
+`journey_options/park_to_SOI_FBLT` remains unresolved. Its original universe
+requires `GatewayNRHO` SPICE ID `-60000`, which is absent from the pinned
+kernel pool; it must not inherit the AerodynamicDrag replacement. Consequently
+the current case-scoped manifest has one resolved provisional Earth-MAGIC case
+and one Earth-MAGIC dependency-blocked case. No all-137 rerun has yet been
+recorded after this narrow replacement; the required complete rerun remains
+pending resolution of every historical resource family.
 
 ## Stage 6: Enforce IPOPT-to-SNOPT Agreement
 

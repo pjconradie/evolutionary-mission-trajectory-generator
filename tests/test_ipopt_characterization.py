@@ -341,7 +341,7 @@ def test_case_preflight_accepts_public_nlsii_mapping(repository_root):
     assert all(record["status"] == "valid" for record in report["dependencies"])
 
 
-def test_case_preflight_reports_missing_journey_universe(repository_root):
+def test_case_preflight_accepts_reconstructed_earth_magic_universe(repository_root):
     source = (
         repository_root
         / "testatron"
@@ -352,12 +352,84 @@ def test_case_preflight_reports_missing_journey_universe(repository_root):
 
     report = ipopt_characterization.preflight_case_dependencies(source)
 
-    assert not report["acceptable"]
+    assert report["acceptable"]
     assert {
         (record["type"], record["central_body"], record["status"])
         for record in report["dependencies"]
         if record["type"] == "journey_universe"
-    } == {("journey_universe", "Earth_MAGIC", "missing")}
+    } == {("journey_universe", "Earth_MAGIC", "valid")}
+    earth_magic_universe = next(
+        record
+        for record in report["dependencies"]
+        if record["type"] == "journey_universe"
+    )
+    assert earth_magic_universe["path"] == "testatron/universe/Earth_MAGIC.emtg_universe"
+    assert earth_magic_universe["resolved_path"] == (
+        "testatron/replacement_resources/Earth_MAGIC_AerodynamicDrag.emtg_universe"
+    )
+    assert earth_magic_universe["replacement_resource"] == {
+        "id": "earth_magic_aerodynamic_drag_universe",
+        "replacement_path": "testatron/replacement_resources/Earth_MAGIC_AerodynamicDrag.emtg_universe",
+        "sha256": "2cf5480819e33847fae018dcd86afdd77cf120bae2b29c5b891707ff182ed1dc",
+        "review_status": "provisional",
+        "rationale": (
+            "Historical universe file is unavailable in the repository and reachable "
+            "Git history. This case-scoped candidate preserves the Earth/Moon/Sun "
+            "model required by AerodynamicDrag_EarthOrbit_Maneuver."
+        ),
+    }
+
+
+def test_prepare_case_records_earth_magic_candidate(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "AerodynamicDrag_EarthOrbit_Maneuver.emtgopt"
+    )
+
+    ipopt_characterization.prepare_case(source, tmp_path)
+
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert compatibility["replacement_resources"] == [
+        {
+            "dependency_type": "journey_universe",
+            "path": "testatron/universe/Earth_MAGIC.emtg_universe",
+            "id": "earth_magic_aerodynamic_drag_universe",
+            "replacement_path": "testatron/replacement_resources/Earth_MAGIC_AerodynamicDrag.emtg_universe",
+            "sha256": "2cf5480819e33847fae018dcd86afdd77cf120bae2b29c5b891707ff182ed1dc",
+            "review_status": "provisional",
+            "rationale": (
+                "Historical universe file is unavailable in the repository and reachable "
+                "Git history. This case-scoped candidate preserves the Earth/Moon/Sun "
+                "model required by AerodynamicDrag_EarthOrbit_Maneuver."
+            ),
+        }
+    ]
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    prepared = MissionOptions.MissionOptions(str(tmp_path / source.name))
+    assert Path(prepared.universe_folder) == tmp_path / "universe"
+    assert (tmp_path / "universe" / "Earth_MAGIC.emtg_universe").is_file()
+
+
+def test_case_preflight_keeps_gateway_earth_magic_unresolved(repository_root):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "park_to_SOI_FBLT.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert not report["acceptable"]
+    assert all(
+        dependency["status"] == "missing"
+        for dependency in report["dependencies"]
+        if dependency["type"] == "journey_universe"
+    )
 
 
 def test_case_preflight_maps_top_level_default_libraries(repository_root):

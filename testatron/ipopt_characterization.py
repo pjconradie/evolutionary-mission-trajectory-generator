@@ -23,6 +23,7 @@ TESTS_ROOT = TESTATRON_ROOT / "tests"
 PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
 DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
+REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 PUBLIC_HARDWARE_ROOT = (
     REPOSITORY_ROOT
     / "docs"
@@ -484,6 +485,55 @@ def _dependency_record(dependency_type, path, **details):
     return record
 
 
+def load_replacement_resources(manifest_path=REPLACEMENT_RESOURCE_MANIFEST):
+    """Load unresolved-resource records keyed by case, type, and path."""
+    payload = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    if payload.get("version") != 1:
+        raise ValueError("Unsupported replacement-resource manifest version")
+    records = {}
+    for resource in payload.get("resources", []):
+        for affected_case in resource["affected_cases"]:
+            key = (affected_case, resource["type"], resource["requested_path"])
+            if key in records:
+                raise ValueError(f"Duplicate replacement-resource record: {key}")
+            records[key] = resource
+    return records
+
+
+def _annotate_replacement_resources(dependencies, identifier):
+    """Attach replacement-resource policy to matching dependency records."""
+    resources = load_replacement_resources()
+    for dependency in dependencies:
+        dependency_path = dependency.get("path", dependency.get("library"))
+        resource = resources.get((identifier, dependency["type"], dependency_path))
+        if resource is not None:
+            dependency["replacement_resource"] = {
+                "id": resource["id"],
+                "replacement_path": resource["replacement_path"],
+                "sha256": resource["sha256"],
+                "review_status": resource["review_status"],
+                "rationale": resource["rationale"],
+            }
+
+
+def _resolve_replacement_resources(dependencies):
+    """Validate manifest-approved replacement files for missing dependencies."""
+    for dependency in dependencies:
+        resource = dependency.get("replacement_resource")
+        if (
+            resource is None
+            or dependency["status"] == "valid"
+            or not resource["replacement_path"]
+        ):
+            continue
+        replacement_path = REPOSITORY_ROOT / resource["replacement_path"]
+        if replacement_path.is_file() and _sha256(replacement_path) == resource["sha256"]:
+            dependency["status"] = "valid"
+            dependency["resolved_path"] = repo_relative(replacement_path)
+        else:
+            dependency["replacement_resource"]["resolution_status"] = "invalid"
+
+
 def preflight_case_dependencies(source_options, pyemtg_root=PYEMTG_ROOT):
     """Validate direct case dependencies without staging files or running EMTG."""
     _, MissionOptions = _load_pyemtg(pyemtg_root)
@@ -585,8 +635,11 @@ def preflight_case_dependencies(source_options, pyemtg_root=PYEMTG_ROOT):
             _dependency_record("gravity_file", gravity_root / gravity_name)
         )
 
+    identifier = case_id(source_options)
+    _annotate_replacement_resources(dependencies, identifier)
+    _resolve_replacement_resources(dependencies)
     return {
-        "case_id": case_id(source_options),
+        "case_id": identifier,
         "source_options": repo_relative(source_options),
         "mappings": mappings,
         "dependencies": dependencies,
@@ -1366,6 +1419,26 @@ def prepare_case(
     case_directory.mkdir(parents=True, exist_ok=True)
 
     options = MissionOptions.MissionOptions(str(source_options))
+    try:
+        identifier = case_id(source_options)
+    except ValueError:
+        identifier = None
+    if identifier and any(
+        resource_identifier == identifier
+        for resource_identifier, _, _ in load_replacement_resources()
+    ):
+        preflight = preflight_case_dependencies(source_options, pyemtg_root)
+    else:
+        preflight = {"dependencies": []}
+    replacement_resources = [
+        {
+            "dependency_type": dependency["type"],
+            "path": dependency.get("path", dependency.get("library")),
+            **dependency["replacement_resource"],
+        }
+        for dependency in preflight["dependencies"]
+        if "replacement_resource" in dependency
+    ]
     options.NLP_solver_type = 2
     options.override_working_directory = 1
     options.forced_working_directory = str(case_directory)
@@ -1373,9 +1446,25 @@ def prepare_case(
     options.forced_mission_subfolder = "."
     options.short_output_file_names = 1
     options.background_mode = 1
-    options.universe_folder = _execution_path(
-        TESTATRON_ROOT / "universe", execution_repository_root
-    )
+    replacement_universes = [
+        dependency
+        for dependency in preflight["dependencies"]
+        if dependency["type"] == "journey_universe"
+        and dependency.get("resolved_path")
+    ]
+    if replacement_universes:
+        staged_universe_root = case_directory / "universe"
+        shutil.copytree(TESTATRON_ROOT / "universe", staged_universe_root)
+        for dependency in replacement_universes:
+            shutil.copy2(
+                REPOSITORY_ROOT / dependency["resolved_path"],
+                staged_universe_root / f"{dependency['central_body']}.emtg_universe",
+            )
+        options.universe_folder = str(staged_universe_root)
+    else:
+        options.universe_folder = _execution_path(
+            TESTATRON_ROOT / "universe", execution_repository_root
+        )
     hardware_root, compatibility_mappings, hardware_overrides = _hardware_root_and_mappings(options)
     if hardware_overrides:
         staged_hardware_root = case_directory / "hardware_models"
@@ -1402,6 +1491,7 @@ def prepare_case(
                 "status": "unreviewed",
                 "source_options": str(source_options),
                 "mappings": compatibility_mappings,
+                "replacement_resources": replacement_resources,
             },
             indent=2,
         )

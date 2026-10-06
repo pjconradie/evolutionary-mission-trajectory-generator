@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "resources": [
+    {
+      "id": "earth_magic_aerodynamic_drag_universe",
+      "type": "journey_universe",
+      "requested_path": "testatron/universe/Earth_MAGIC.emtg_universe",
+      "affected_cases": [
+        "journey_options/AerodynamicDrag_EarthOrbit_Maneuver"
+      ],
+      "replacement_path": "testatron/replacement_resources/Earth_MAGIC_AerodynamicDrag.emtg_universe",
+      "source": "Reconstructed from testatron/universe/Earth_v9.emtg_universe body menu and immutable AerodynamicDrag baseline Earth constants.",
+      "sha256": "2cf5480819e33847fae018dcd86afdd77cf120bae2b29c5b891707ff182ed1dc",
+      "rationale": "Historical universe file is unavailable in the repository and reachable Git history. This case-scoped candidate preserves the Earth/Moon/Sun model required by AerodynamicDrag_EarthOrbit_Maneuver.",
+      "review_status": "provisional"
+    },
+    {
+      "id": "earth_magic_gateway_universe",
+      "type": "journey_universe",
+      "requested_path": "testatron/universe/Earth_MAGIC.emtg_universe",
+      "affected_cases": [
+        "journey_options/park_to_SOI_FBLT"
+      ],
+      "replacement_path": null,
+      "source": null,
+      "sha256": null,
+      "rationale": "The original model's GatewayNRHO body uses SPICE ID -60000, which is absent from the pinned kernel pool. No equivalent case-scoped replacement is available.",
+      "review_status": "unresolved"
+    },
+    {
+      "id": "sun_saturn_orientation_universe",
+      "type": "journey_universe",
+      "requested_path": "testatron/universe/Sun_SaturnOrientation.emtg_universe",
+      "affected_cases": [
+        "state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron",
+        "state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron",
+        "state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron",
+        "state_representation_tests/FreePointDeparture_OutgoingBplaneRpTA_testatron",
+        "state_representation_tests/PeriapseArrival_IncomingBplaneRpTA_testatron",
+        "state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron"
+      ],
+      "replacement_path": null,
+      "source": null,
+      "sha256": null,
+      "rationale": "Historical universe file is unavailable in the repository and reachable Git history.",
+      "review_status": "unresolved"
+    },
+    {
+      "id": "snapier_multistage_spacecraft",
+      "type": "spacecraft_options",
+      "requested_path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/snapier_multistage.emtg_spacecraftopt",
+      "affected_cases": [
+        "journey_options/EME_stageAfterArrival",
+        "journey_options/EME_stageBeforeArrival"
+      ],
+      "replacement_path": null,
+      "source": null,
+      "sha256": null,
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history.",
+      "review_status": "unresolved"
+    },
+    {
+      "id": "multistage_spacecraft_file",
+      "type": "spacecraft_options",
+      "requested_path": "HardwareModels/spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt",
+      "affected_cases": [
+        "spacecraft_options/default_SCfile_PM",
+        "spacecraft_options/spacecraft_LT_multiStage_spacecraftFile"
+      ],
+      "replacement_path": null,
+      "source": null,
+      "sha256": null,
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history.",
+      "review_status": "unresolved"
+    },
+    {
+      "id": "spacecraft_file",
+      "type": "spacecraft_options",
+      "requested_path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/spacecraft_LT_spacecraftFile.emtg_spacecraftopt",
+      "affected_cases": [
+        "spacecraft_options/spacecraft_LT_spacecraftFile"
+      ],
+      "replacement_path": null,
+      "source": null,
+      "sha256": null,
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history.",
+      "review_status": "unresolved"
+    }
+  ]
+}
