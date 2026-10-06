@@ -634,14 +634,22 @@ recorded manual decision promotes them.
 
 ### 6.1: Remove Intermediate Results
 
-Before review begins, remove generated Stage 1 through Stage 5 evidence only.
-Retain the Stage 0 Markdown reports, generation/interpretation guides, and the
-two `testatron-source-truth.*.sha256` files. Remove the generated Stage 0 case
-and benchmark outputs, Stage 4 capture, Stage 5 through Stage 5.7 artifact
-directories, and transient solver output. Audit every candidate path with Git
-before removal: delete only generated artifacts, never tracked source,
-implementation, dependency manifest, kernel, replacement resource, or an
-immutable `.emtgopt`/SNOPT `.emtg` pair.
+Before review begins, remove all prior generated Stage 0 through Stage 5.7
+evidence, including `baseline-artifacts`, the obsolete
+`testatron/ipopt/tests/tests/cases` and Stage 4 capture roots, and transient
+solver output. Stage 6 begins with immutable `testatron/tests` source options
+and adjacent SNOPT mission files only. Never remove source implementation,
+dependency manifests, kernels, replacement resources, or an immutable
+`.emtgopt`/SNOPT `.emtg` pair.
+
+#### Completion Record (2026-10-06)
+
+All tracked `baseline-artifacts` content, including reports, hash files,
+benchmark evidence, and Stage 5 through Stage 5.7 characterization artifacts,
+was intentionally removed with `git rm`. The obsolete Stage 0/4 case artifact
+roots and pointer below `testatron/ipopt/tests/tests` were removed as well.
+The cleanup check found no remaining Stage 5 through Stage 5.7 artifact root
+or transient IPOPT output. Stage 6 will generate fresh evidence.
 
 ### 6.2: Corpus Checklist
 
