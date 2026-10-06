@@ -1,0 +1,312 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0FBLTFreePointFreeDirectDeparture: event left state x,4466.169013319,4466.169013319,42164,4466.169013319
+1,j0p0FBLTFreePointFreeDirectDeparture: event left state y,4164.518821526,4164.518821526,42164,4164.518821526
+2,j0p0FBLTFreePointFreeDirectDeparture: event left state z,-2337.666812179,-2337.666812179,42164,-2337.666812179
+3,j0p0FBLTFreePointFreeDirectDeparture: event left state vx,-5.422677798361,-5.422677798361,3.074666282971,-5.422677798361
+4,j0p0FBLTFreePointFreeDirectDeparture: event left state vy,4.440426760061,4.440426760062,3.074666282971,4.440426760061
+5,j0p0FBLTFreePointFreeDirectDeparture: event left state vz,-2.47939236915,-2.47939236915,3.074666282971,-2.47939236915
+6,j0p0FBLTFreePointFreeDirectDeparture: event left state mass,12877.8,12877.8,12877.8,12877.8
+7,j0p0FBLTFreePointFreeDirectDeparture: event left state epoch,5141093090.649,5141100290.649,13713.35817273,5141099893.29
+8,j0p0FBLT: phase flight time,1,599.999616,13713.35817273,551.1197989396
+9,j0p0FBLTFreePointLTRendezvous: event left state x,-10000,10000,42164,-4219.947164353
+10,j0p0FBLTFreePointLTRendezvous: event left state y,-10000,10000,42164,-279.3471317826
+11,j0p0FBLTFreePointLTRendezvous: event left state z,-10000,10000,42164,-4326.141840819
+12,j0p0FBLTFreePointLTRendezvous: event left state vx,-20,20,3.074666282971,8.520370307361
+13,j0p0FBLTFreePointLTRendezvous: event left state vy,-20,20,3.074666282971,5.190495681159
+14,j0p0FBLTFreePointLTRendezvous: event left state vz,-20,20,3.074666282971,-7.799938035104
+15,j0p0FBLTFreePointLTRendezvous: event left state mass,1e-13,12877.8,12877.8,155.9512438062
+16,j0p0FBLT: virtual chemical fuel,0,12877.8,12877.8,5.19167645498e-07
+17,j0p0FBLT: virtual electric propellant,0,12877.8,12877.8,12721.84875619
+18,j0p0FBLT: step 0 u_x,-1,1,1,0.617071876564
+19,j0p0FBLT: step 0 u_y,-1,1,1,-0.5398912004823
+20,j0p0FBLT: step 0 u_z,-1,1,1,-0.5724856282582
+21,j0p0FBLT: step 1 u_x,-1,1,1,0.6181624930058
+22,j0p0FBLT: step 1 u_y,-1,1,1,-0.5368856192003
+23,j0p0FBLT: step 1 u_z,-1,1,1,-0.5741332320086
+24,j0p0FBLT: step 2 u_x,-1,1,1,0.6193070902402
+25,j0p0FBLT: step 2 u_y,-1,1,1,-0.5336810597375
+26,j0p0FBLT: step 2 u_z,-1,1,1,-0.5758847615812
+27,j0p0FBLT: step 3 u_x,-1,1,1,0.6205123859568
+28,j0p0FBLT: step 3 u_y,-1,1,1,-0.5302752241026
+29,j0p0FBLT: step 3 u_z,-1,1,1,-0.5777305340405
+30,j0p0FBLT: step 4 u_x,-1,1,1,0.6217855417866
+31,j0p0FBLT: step 4 u_y,-1,1,1,-0.5266599316162
+32,j0p0FBLT: step 4 u_z,-1,1,1,-0.5796654734203
+33,j0p0FBLT: step 5 u_x,-1,1,1,0.6231329399238
+34,j0p0FBLT: step 5 u_y,-1,1,1,-0.5227907312152
+35,j0p0FBLT: step 5 u_z,-1,1,1,-0.5817174532443
+36,j0p0FBLT: step 6 u_x,-1,1,1,0.6245602122904
+37,j0p0FBLT: step 6 u_y,-1,1,1,-0.5186617968514
+38,j0p0FBLT: step 6 u_z,-1,1,1,-0.5838788289119
+39,j0p0FBLT: step 7 u_x,-1,1,1,0.6260844253356
+40,j0p0FBLT: step 7 u_y,-1,1,1,-0.514217210704
+41,j0p0FBLT: step 7 u_z,-1,1,1,-0.5861731467729
+42,j0p0FBLT: step 8 u_x,-1,1,1,0.6277176071276
+43,j0p0FBLT: step 8 u_y,-1,1,1,-0.5094012287662
+44,j0p0FBLT: step 8 u_z,-1,1,1,-0.5886263666991
+45,j0p0FBLT: step 9 u_x,-1,1,1,0.6294691325955
+46,j0p0FBLT: step 9 u_y,-1,1,1,-0.5042159722628
+47,j0p0FBLT: step 9 u_z,-1,1,1,-0.5912147414421
+48,j0p0FBLT: step 10 u_x,-1,1,1,0.6314032661312
+49,j0p0FBLT: step 10 u_y,-1,1,1,-0.4984183293725
+50,j0p0FBLT: step 10 u_z,-1,1,1,-0.5940615211392
+51,j0p0FBLT: step 11 u_x,-1,1,1,0.6334071787953
+52,j0p0FBLT: step 11 u_y,-1,1,1,-0.4923376188059
+53,j0p0FBLT: step 11 u_z,-1,1,1,-0.5969916429748
+54,j0p0FBLT: step 12 u_x,-1,1,1,0.635626039691
+55,j0p0FBLT: step 12 u_y,-1,1,1,-0.4855459607103
+56,j0p0FBLT: step 12 u_z,-1,1,1,-0.6001871915897
+57,j0p0FBLT: step 13 u_x,-1,1,1,0.6380689196543
+58,j0p0FBLT: step 13 u_y,-1,1,1,-0.4779587062009
+59,j0p0FBLT: step 13 u_z,-1,1,1,-0.6036750256867
+60,j0p0FBLT: step 14 u_x,-1,1,1,0.6407663735167
+61,j0p0FBLT: step 14 u_y,-1,1,1,-0.4694543752236
+62,j0p0FBLT: step 14 u_z,-1,1,1,-0.6074792608394
+63,j0p0FBLT: step 15 u_x,-1,1,1,0.6437677016257
+64,j0p0FBLT: step 15 u_y,-1,1,1,-0.4598345609225
+65,j0p0FBLT: step 15 u_z,-1,1,1,-0.6116496805054
+66,j0p0FBLT: step 16 u_x,-1,1,1,0.647130684427
+67,j0p0FBLT: step 16 u_y,-1,1,1,-0.4488396483732
+68,j0p0FBLT: step 16 u_z,-1,1,1,-0.6162506443412
+69,j0p0FBLT: step 17 u_x,-1,1,1,0.6509667691395
+70,j0p0FBLT: step 17 u_y,-1,1,1,-0.4359775630055
+71,j0p0FBLT: step 17 u_z,-1,1,1,-0.6214224328195
+72,j0p0FBLT: step 18 u_x,-1,1,1,0.6553228762014
+73,j0p0FBLT: step 18 u_y,-1,1,1,-0.4209534912855
+74,j0p0FBLT: step 18 u_z,-1,1,1,-0.6271762884527
+75,j0p0FBLT: step 19 u_x,-1,1,1,0.6603871097547
+76,j0p0FBLT: step 19 u_y,-1,1,1,-0.4028141947616
+77,j0p0FBLT: step 19 u_z,-1,1,1,-0.6337425354637
+78,j0p0FBLT: step 20 u_x,-1,1,1,0.6663492406233
+79,j0p0FBLT: step 20 u_y,-1,1,1,-0.3803861637324
+80,j0p0FBLT: step 20 u_z,-1,1,1,-0.6413151084517
+81,j0p0FBLT: step 21 u_x,-1,1,1,0.6735848230334
+82,j0p0FBLT: step 21 u_y,-1,1,1,-0.3512127594486
+83,j0p0FBLT: step 21 u_z,-1,1,1,-0.6503330663003
+84,j0p0FBLT: step 22 u_x,-1,1,1,0.6823101491948
+85,j0p0FBLT: step 22 u_y,-1,1,1,-0.3124471068022
+86,j0p0FBLT: step 22 u_z,-1,1,1,-0.6609309193683
+87,j0p0FBLT: step 23 u_x,-1,1,1,0.6930408466071
+88,j0p0FBLT: step 23 u_y,-1,1,1,-0.2566300892895
+89,j0p0FBLT: step 23 u_z,-1,1,1,-0.6736730644439
+90,j0p0FBLT: step 24 u_x,-1,1,1,0.7055092621401
+91,j0p0FBLT: step 24 u_y,-1,1,1,-0.169229722262
+92,j0p0FBLT: step 24 u_z,-1,1,1,-0.6881990980938
+93,j0p0FBLT: step 25 u_x,-1,1,1,0.7147270122864
+94,j0p0FBLT: step 25 u_y,-1,1,1,-0.02385238023777
+95,j0p0FBLT: step 25 u_z,-1,1,1,-0.6989966936992
+96,j0p0FBLT: step 26 u_x,-1,1,1,0.7055841624085
+97,j0p0FBLT: step 26 u_y,-1,1,1,0.1630761581827
+98,j0p0FBLT: step 26 u_z,-1,1,1,-0.6896065316492
+99,j0p0FBLT: step 27 u_x,-1,1,1,0.6818971877848
+100,j0p0FBLT: step 27 u_y,-1,1,1,0.3065430658266
+101,j0p0FBLT: step 27 u_z,-1,1,1,-0.6641141340412
+102,j0p0FBLT: step 28 u_x,-1,1,1,0.6588871796419
+103,j0p0FBLT: step 28 u_y,-1,1,1,0.3971964687512
+104,j0p0FBLT: step 28 u_z,-1,1,1,-0.6388291298757
+105,j0p0FBLT: step 29 u_x,-1,1,1,0.6408391530385
+106,j0p0FBLT: step 29 u_y,-1,1,1,0.4549451289434
+107,j0p0FBLT: step 29 u_z,-1,1,1,-0.6183446583003
+108,j0p0FBLT: step 30 u_x,-1,1,1,0.6339503500386
+109,j0p0FBLT: step 30 u_y,-1,1,1,0.4755937033705
+110,j0p0FBLT: step 30 u_z,-1,1,1,-0.6098504654466
+111,j0p0FBLT: step 31 u_x,-1,1,1,0.6217957953607
+112,j0p0FBLT: step 31 u_y,-1,1,1,0.5088183774349
+113,j0p0FBLT: step 31 u_z,-1,1,1,-0.5953770694832
+114,j0p0FBLT: step 32 u_x,-1,1,1,0.6122475136508
+115,j0p0FBLT: step 32 u_y,-1,1,1,0.5331654236001
+116,j0p0FBLT: step 32 u_z,-1,1,1,-0.5838558217274
+117,j0p0FBLT: step 33 u_x,-1,1,1,0.6043007101838
+118,j0p0FBLT: step 33 u_y,-1,1,1,0.552296958767
+119,j0p0FBLT: step 33 u_z,-1,1,1,-0.5742723473131
+120,j0p0FBLT: step 34 u_x,-1,1,1,0.5973797911208
+121,j0p0FBLT: step 34 u_y,-1,1,1,0.5680998812761
+122,j0p0FBLT: step 34 u_z,-1,1,1,-0.5660387959326
+123,j0p0FBLT: step 35 u_x,-1,1,1,0.5911629738024
+124,j0p0FBLT: step 35 u_y,-1,1,1,0.5816325524547
+125,j0p0FBLT: step 35 u_z,-1,1,1,-0.5587753765878
+126,j0p0FBLT: step 36 u_x,-1,1,1,0.5851882564057
+127,j0p0FBLT: step 36 u_y,-1,1,1,0.5938837935764
+128,j0p0FBLT: step 36 u_z,-1,1,1,-0.5521383470436
+129,j0p0FBLT: step 37 u_x,-1,1,1,0.5795052823032
+130,j0p0FBLT: step 37 u_y,-1,1,1,0.6050043977878
+131,j0p0FBLT: step 37 u_z,-1,1,1,-0.5460250153686
+132,j0p0FBLT: step 38 u_x,-1,1,1,0.5739513377225
+133,j0p0FBLT: step 38 u_y,-1,1,1,0.6153500059063
+134,j0p0FBLT: step 38 u_z,-1,1,1,-0.5403001427695
+135,j0p0FBLT: step 39 u_x,-1,1,1,0.5684136790408
+136,j0p0FBLT: step 39 u_y,-1,1,1,0.6251947711169
+137,j0p0FBLT: step 39 u_z,-1,1,1,-0.5348246451921
+138,j0p0FBLT: step 40 u_x,-1,1,1,0.5628429904395
+139,j0p0FBLT: step 40 u_y,-1,1,1,0.6346627709215
+140,j0p0FBLT: step 40 u_z,-1,1,1,-0.5295384314059
+141,j0p0FBLT: step 41 u_x,-1,1,1,0.5571427407647
+142,j0p0FBLT: step 41 u_y,-1,1,1,0.6439618143414
+143,j0p0FBLT: step 41 u_z,-1,1,1,-0.5243139945811
+144,j0p0FBLT: step 42 u_x,-1,1,1,0.5512462746442
+145,j0p0FBLT: step 42 u_y,-1,1,1,0.6532232695953
+146,j0p0FBLT: step 42 u_z,-1,1,1,-0.5190635064183
+147,j0p0FBLT: step 43 u_x,-1,1,1,0.5450595611641
+148,j0p0FBLT: step 43 u_y,-1,1,1,0.6626115282063
+149,j0p0FBLT: step 43 u_z,-1,1,1,-0.5136692115422
+150,j0p0FBLT: step 44 u_x,-1,1,1,0.538525165476
+151,j0p0FBLT: step 44 u_y,-1,1,1,0.6722042134961
+152,j0p0FBLT: step 44 u_z,-1,1,1,-0.5080670879137
+153,j0p0FBLT: step 45 u_x,-1,1,1,0.5315499985536
+154,j0p0FBLT: step 45 u_y,-1,1,1,0.6821294827472
+155,j0p0FBLT: step 45 u_z,-1,1,1,-0.5021493757216
+156,j0p0FBLT: step 46 u_x,-1,1,1,0.5240241459725
+157,j0p0FBLT: step 46 u_y,-1,1,1,0.692511761802
+158,j0p0FBLT: step 46 u_z,-1,1,1,-0.4958086183089
+159,j0p0FBLT: step 47 u_x,-1,1,1,0.5158709699313
+160,j0p0FBLT: step 47 u_y,-1,1,1,0.7034450067139
+161,j0p0FBLT: step 47 u_z,-1,1,1,-0.4889195246054
+162,j0p0FBLT: step 48 u_x,-1,1,1,0.5069775210546
+163,j0p0FBLT: step 48 u_y,-1,1,1,0.7150552749429
+164,j0p0FBLT: step 48 u_z,-1,1,1,-0.481320879858
+165,j0p0FBLT: step 49 u_x,-1,1,1,0.4971680317378
+166,j0p0FBLT: step 49 u_y,-1,1,1,0.7275399380986
+167,j0p0FBLT: step 49 u_z,-1,1,1,-0.4727680575563
+168,j0p0FBLT: step 50 u_x,-1,1,1,0.4863503679354
+169,j0p0FBLT: step 50 u_y,-1,1,1,0.7410908877195
+170,j0p0FBLT: step 50 u_z,-1,1,1,-0.4628689598795
+171,j0p0FBLT: step 51 u_x,-1,1,1,0.4743288048991
+172,j0p0FBLT: step 51 u_y,-1,1,1,0.7559969051203
+173,j0p0FBLT: step 51 u_z,-1,1,1,-0.451088609263
+174,j0p0FBLT: step 52 u_x,-1,1,1,0.4607956186407
+175,j0p0FBLT: step 52 u_y,-1,1,1,0.7726225634533
+176,j0p0FBLT: step 52 u_z,-1,1,1,-0.4367171339547
+177,j0p0FBLT: step 53 u_x,-1,1,1,0.4455513536009
+178,j0p0FBLT: step 53 u_y,-1,1,1,0.7914025407884
+179,j0p0FBLT: step 53 u_z,-1,1,1,-0.4185285058687
+180,j0p0FBLT: step 54 u_x,-1,1,1,0.4281140618582
+181,j0p0FBLT: step 54 u_y,-1,1,1,0.8128975354187
+182,j0p0FBLT: step 54 u_z,-1,1,1,-0.3948620911647
+183,j0p0FBLT: step 55 u_x,-1,1,1,0.4078808157196
+184,j0p0FBLT: step 55 u_y,-1,1,1,0.8377396801376
+185,j0p0FBLT: step 55 u_z,-1,1,1,-0.3630779890019
+186,j0p0FBLT: step 56 u_x,-1,1,1,0.3832111750177
+187,j0p0FBLT: step 56 u_y,-1,1,1,0.8664849369135
+188,j0p0FBLT: step 56 u_z,-1,1,1,-0.3199269613364
+189,j0p0FBLT: step 57 u_x,-1,1,1,0.3474034137532
+190,j0p0FBLT: step 57 u_y,-1,1,1,0.8988343235745
+191,j0p0FBLT: step 57 u_z,-1,1,1,-0.2672228296717
+192,j0p0FBLT: step 58 u_x,-1,1,1,0.2651339102373
+193,j0p0FBLT: step 58 u_y,-1,1,1,0.9309786654671
+194,j0p0FBLT: step 58 u_z,-1,1,1,-0.250964583288
+195,j0p0FBLT: step 59 u_x,-1,1,1,-0.1318101515864
+196,j0p0FBLT: step 59 u_y,-1,1,1,0.9490720843032
+197,j0p0FBLT: step 59 u_z,-1,1,1,-0.2861626558702
+198,j1p0CoastPhaseFreePointFreeDirectDeparture: event left state mass,1e-13,12877.8,12877.8,155.9512438065
+199,j1p0CoastPhase: phase flight time,1,1200,13713.35817273,1200
+200,j1p0CoastPhaseFreePointLTRendezvous: event left state VINFout,5.350883104685,5.350883104685,3.074666282971,5.350883104685
+201,j1p0CoastPhaseFreePointLTRendezvous: event left state RHAout,0.3106494082332,0.3106494082332,1,0.3106494082332
+202,j1p0CoastPhaseFreePointLTRendezvous: event left state DHAout,0.1098178618647,0.1098178618647,1,0.1098178618647
+203,j1p0CoastPhaseFreePointLTRendezvous: event left state BRADIUSout,10000,20000,42164,14300.19304882
+204,j1p0CoastPhaseFreePointLTRendezvous: event left state BTHETAout,-12.56637061436,12.56637061436,1,1.830367098971
+205,j1p0CoastPhaseFreePointLTRendezvous: event left state TAout,0,2.617993877991,1,1.431854849518
+206,j1p0CoastPhaseFreePointLTRendezvous: event left state mass,1e-13,12877.8,12877.8,155.9512438068
+207,j1p0CoastPhase: virtual chemical fuel,0,12877.8,12877.8,5.19167645498e-07
+208,j2p0CoastPhaseFreePointFreeDirectDeparture: event left state mass,1e-13,12877.8,12877.8,155.951243807
+209,j2p0CoastPhaseFreePointFreeDirectDeparture: journey initial mass increment multiplier,1e-13,1,1,0.009878592229207
+210,j2p0CoastPhase: phase flight time,1,864000,13713.35817273,263393.8952667
+211,j2p0CoastPhaseEphemerisReferencedInterceptInterior: event interface state vMAG,0,20,3.074666282971,5.406702768862
+212,j2p0CoastPhaseEphemerisReferencedInterceptInterior: event interface state vRA,-25.13274122872,25.13274122872,1,-18.53914228453
+213,j2p0CoastPhaseEphemerisReferencedInterceptInterior: event interface state vDEC,-282.7433388231,282.7433388231,1,-100.4211060514
+214,j2p0CoastPhaseEphemerisReferencedInterceptInterior: event interface state RA,-50.26548245744,50.26548245744,1,44.29501306507
+215,j2p0CoastPhaseEphemerisReferencedInterceptInterior: event interface state DEC,-1.570796326795,1.570796326795,1,0.1003764876093
+216,j2p0CoastPhaseEphemerisReferencedInterceptInterior: event left state mass,1e-13,12877.8,12877.8,106.558282661
+217,j2p0CoastPhase: virtual chemical fuel,0,12877.8,12877.8,5.19167645498e-07
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,-0.008274571950257
+1,j0p0FBLT: step 0 control magnitude,1,1,1.000000001883
+2,j0p0FBLT: step 1 control magnitude,1,1,1.00000000198
+3,j0p0FBLT: step 2 control magnitude,1,1,1.000000002083
+4,j0p0FBLT: step 3 control magnitude,1,1,1.000000002193
+5,j0p0FBLT: step 4 control magnitude,1,1,1.00000000231
+6,j0p0FBLT: step 5 control magnitude,1,1,1.000000002436
+7,j0p0FBLT: step 6 control magnitude,1,1,1.00000000257
+8,j0p0FBLT: step 7 control magnitude,1,1,1.000000002715
+9,j0p0FBLT: step 8 control magnitude,1,1,1.00000000287
+10,j0p0FBLT: step 9 control magnitude,1,1,1.000000003037
+11,j0p0FBLT: step 10 control magnitude,1,1,1.000000003217
+12,j0p0FBLT: step 11 control magnitude,1,1,1.000000003411
+13,j0p0FBLT: step 12 control magnitude,1,1,1.000000003622
+14,j0p0FBLT: step 13 control magnitude,1,1,1.00000000385
+15,j0p0FBLT: step 14 control magnitude,1,1,1.000000004098
+16,j0p0FBLT: step 15 control magnitude,1,1,1.000000004369
+17,j0p0FBLT: step 16 control magnitude,1,1,1.000000004665
+18,j0p0FBLT: step 17 control magnitude,1,1,1.00000000499
+19,j0p0FBLT: step 18 control magnitude,1,1,1.000000005348
+20,j0p0FBLT: step 19 control magnitude,1,1,1.000000005744
+21,j0p0FBLT: step 20 control magnitude,1,1,1.000000006183
+22,j0p0FBLT: step 21 control magnitude,1,1,1.000000006672
+23,j0p0FBLT: step 22 control magnitude,1,1,1.00000000721
+24,j0p0FBLT: step 23 control magnitude,1,1,1.000000007776
+25,j0p0FBLT: step 24 control magnitude,1,1,1.00000000824
+26,j0p0FBLT: step 25 control magnitude,1,1,1.000000007969
+27,j0p0FBLT: step 26 control magnitude,1,1,1.000000006051
+28,j0p0FBLT: step 27 control magnitude,1,1,1.000000004474
+29,j0p0FBLT: step 28 control magnitude,1,1,1.000000003731
+30,j0p0FBLT: step 29 control magnitude,1,1,1.000000003432
+31,j0p0FBLT: step 30 control magnitude,1,1,1.000000003603
+32,j0p0FBLT: step 31 control magnitude,1,1,1.000000003605
+33,j0p0FBLT: step 32 control magnitude,1,1,1.00000000373
+34,j0p0FBLT: step 33 control magnitude,1,1,1.00000000394
+35,j0p0FBLT: step 34 control magnitude,1,1,1.000000004223
+36,j0p0FBLT: step 35 control magnitude,1,1,1.000000004575
+37,j0p0FBLT: step 36 control magnitude,1,1,1.000000004992
+38,j0p0FBLT: step 37 control magnitude,1,1,1.000000005484
+39,j0p0FBLT: step 38 control magnitude,1,1,1.00000000606
+40,j0p0FBLT: step 39 control magnitude,1,1,1.000000006729
+41,j0p0FBLT: step 40 control magnitude,1,1,1.000000007508
+42,j0p0FBLT: step 41 control magnitude,1,1,1.000000008415
+43,j0p0FBLT: step 42 control magnitude,1,1,1.000000009473
+44,j0p0FBLT: step 43 control magnitude,1,1,1.000000010707
+45,j0p0FBLT: step 44 control magnitude,1,1,1.000000012157
+46,j0p0FBLT: step 45 control magnitude,1,1,1.000000013866
+47,j0p0FBLT: step 46 control magnitude,1,1,1.000000015893
+48,j0p0FBLT: step 47 control magnitude,1,1,1.000000018314
+49,j0p0FBLT: step 48 control magnitude,1,1,1.000000021233
+50,j0p0FBLT: step 49 control magnitude,1,1,1.000000024778
+51,j0p0FBLT: step 50 control magnitude,1,1,1.000000029136
+52,j0p0FBLT: step 51 control magnitude,1,1,1.000000034558
+53,j0p0FBLT: step 52 control magnitude,1,1,1.000000041403
+54,j0p0FBLT: step 53 control magnitude,1,1,1.000000050243
+55,j0p0FBLT: step 54 control magnitude,1,1,1.000000062045
+56,j0p0FBLT: step 55 control magnitude,1,1,1.000000078803
+57,j0p0FBLT: step 56 control magnitude,1,1,1.000000105573
+58,j0p0FBLT: step 57 control magnitude,1,1,1.00000015691
+59,j0p0FBLT: step 58 control magnitude,1,1,1.000000243989
+60,j0p0FBLT: step 59 control magnitude,1,1,1.00000040144
+61,j0p0FBLT: match point x,-1e-13,1e-13,-5.239261899161e-07
+62,j0p0FBLT: match point y,-1e-13,1e-13,2.411068397144e-06
+63,j0p0FBLT: match point z,-1e-13,1e-13,-7.806453393736e-07
+64,j0p0FBLT: match point xdot,-1e-13,1e-13,1.91377258578e-05
+65,j0p0FBLT: match point ydot,-1e-13,1e-13,-0.0002377189651149
+66,j0p0FBLT: match point zdot,-1e-13,1e-13,4.619131895489e-05
+67,j0p0FBLT: match point mass,-1e-13,1e-13,2.507255836519e-08
+68,j0p0FBLT: match point virtual chemical fuel,-1e-13,1e-13,4.031493310177e-11
+69,j0p0FBLT: match point virtual electric propellant,-1e-13,1e-13,-2.507256465082e-08
+70,j0: journey flight time bounds,-1,0,-0.08146641390589
+71,j1p0CoastPhaseFreePointFreeDirectDeparture: left mass continuity constraint,-1e-13,1e-13,2.269049019662e-14
+72,j1p0CoastPhase: match point x,-1e-13,1e-13,-6.985464312086e-07
+73,j1p0CoastPhase: match point y,-1e-13,1e-13,-6.792634078821e-06
+74,j1p0CoastPhase: match point z,-1e-13,1e-13,4.14436930255e-06
+75,j1p0CoastPhase: match point xdot,-1e-13,1e-13,-2.969411403262e-05
+76,j1p0CoastPhase: match point ydot,-1e-13,1e-13,-0.0001890529379172
+77,j1p0CoastPhase: match point zdot,-1e-13,1e-13,0.0001407202914843
+78,j1p0CoastPhase: match point mass,-1e-13,1e-13,1.899591957225e-14
+79,j1p0CoastPhase: match point virtual chemical fuel,-1e-13,1e-13,4.031493310177e-11
+80,j1: journey flight time bounds,0,0,0
+81,j2p0CoastPhaseFreePointFreeDirectDeparture: left mass continuity constraint,-1e-13,1e-13,1.530576301075e-14
+82,j2p0CoastPhaseFreePointFreeDirectDeparture: journey initial mass constraint,-0.1203621736632,0,-0.112087601713
+83,j2p0CoastPhase: match point x,-1e-13,1e-13,-1.716432982865e-09
+84,j2p0CoastPhase: match point y,-1e-13,1e-13,3.739417017799e-09
+85,j2p0CoastPhase: match point z,-1e-13,1e-13,-4.223924284685e-09
+86,j2p0CoastPhase: match point xdot,-1e-13,1e-13,-1.482942314952e-11
+87,j2p0CoastPhase: match point ydot,-1e-13,1e-13,1.137107318174e-11
+88,j2p0CoastPhase: match point zdot,-1e-13,1e-13,1.38332554362e-11
+89,j2p0CoastPhase: match point mass,-1e-13,1e-13,6.323145065004e-15
+90,j2p0CoastPhase: match point virtual chemical fuel,-1e-13,1e-13,4.031493310177e-11
+91,Mission flight time bounds,0,1,0.3068808044741

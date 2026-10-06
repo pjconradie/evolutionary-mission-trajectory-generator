@@ -24,6 +24,9 @@ PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
 DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
+STAGED_EARLIEST_POSSIBLE_EPOCHS = {
+    "journey_options/park_to_SOI_FBLT": 58860.0,
+}
 PUBLIC_HARDWARE_ROOT = (
     REPOSITORY_ROOT
     / "docs"
@@ -1446,6 +1449,9 @@ def prepare_case(
     options.forced_mission_subfolder = "."
     options.short_output_file_names = 1
     options.background_mode = 1
+    staged_earliest_possible_epoch = STAGED_EARLIEST_POSSIBLE_EPOCHS.get(identifier)
+    if staged_earliest_possible_epoch is not None:
+        options.earliestPossibleEpoch = staged_earliest_possible_epoch
     replacement_universes = [
         dependency
         for dependency in preflight["dependencies"]
@@ -1503,6 +1509,7 @@ def prepare_case(
                 "source_options": str(source_options),
                 "mappings": compatibility_mappings,
                 "replacement_resources": replacement_resources,
+                "staged_earliest_possible_epoch": staged_earliest_possible_epoch,
             },
             indent=2,
         )

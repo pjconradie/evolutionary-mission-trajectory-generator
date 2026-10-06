@@ -536,9 +536,22 @@ per-case artifact directories. These mappings remain provisional pending Stage
 
 ### 5.6: GatewayNRHO Kernel Support
 
-Add a SHA-pinned SPK that defines GatewayNRHO SPICE ID `-60000` at the Park
-case epoch. Do not substitute a different trajectory or body. Validate the
-case with focused contracts and a Docker smoke after the kernel is staged.
+The NASA DSG NRHO reference SPK
+`receding_horiz_3189_1burnApo_DiffCorr_15yr.bsp` provides the required
+GatewayNRHO target ID `-60000`. It is staged under
+`testatron/universe/ephemeris_files` and SHA-pinned as
+`114bf4bf418237d28b8945e05d7a04d90358199f62d50f9bf14f38b13985f8ec`.
+
+The Park-only Earth-MAGIC replacement retains GatewayNRHO as body code 3 and
+adds the contiguous body codes 4 through 10 required by the source case's
+third-body perturbation list. Its generated IPOPT options set a kernel-safe
+`earliestPossibleEpoch` so EMTG's spline initialization does not probe before
+the DSG SPK coverage window; the source `.emtgopt` and immutable SNOPT output
+remain unchanged. Focused preflight/staging contracts passed (`2 passed`). The
+initial 300-second Docker smoke reached IPOPT but timed out; the retained
+900-second smoke at `baseline-artifacts/stage56-gateway-nrho-spline-window`
+classified `park_to_SOI_FBLT` as `reviewable`. The resource remains
+provisional pending Stage 6 comparison to immutable SNOPT truth.
 
 ### 5.7: Final Full-Corpus Characterization
 

@@ -413,7 +413,7 @@ def test_prepare_case_records_earth_magic_candidate(repository_root, tmp_path):
     assert (tmp_path / "universe" / "Earth_MAGIC.emtg_universe").is_file()
 
 
-def test_case_preflight_keeps_gateway_earth_magic_unresolved(repository_root):
+def test_case_preflight_resolves_gateway_earth_magic_universe(repository_root):
     source = (
         repository_root
         / "testatron"
@@ -424,12 +424,37 @@ def test_case_preflight_keeps_gateway_earth_magic_unresolved(repository_root):
 
     report = ipopt_characterization.preflight_case_dependencies(source)
 
-    assert not report["acceptable"]
-    assert all(
-        dependency["status"] == "missing"
+    assert report["acceptable"]
+    earth_universe = next(
+        dependency
         for dependency in report["dependencies"]
         if dependency["type"] == "journey_universe"
+        and dependency["central_body"] == "Earth_MAGIC"
     )
+    assert earth_universe["resolved_path"] == (
+        "testatron/replacement_resources/Earth_MAGIC_Park.emtg_universe"
+    )
+    assert earth_universe["replacement_resource"]["sha256"] == (
+        "caf346cc228aa5f349df3140d60e6cfe8af7f423358baa1c365d163296978e03"
+    )
+
+
+def test_prepare_case_aligns_gateway_spline_window(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "park_to_SOI_FBLT.emtgopt"
+    )
+
+    ipopt_characterization.prepare_case(source, tmp_path)
+
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    prepared = MissionOptions.MissionOptions(str(tmp_path / source.name))
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert prepared.earliestPossibleEpoch == 58860.0
+    assert compatibility["staged_earliest_possible_epoch"] == 58860.0
 
 
 def test_case_preflight_resolves_sun_saturn_departure_universe(repository_root):

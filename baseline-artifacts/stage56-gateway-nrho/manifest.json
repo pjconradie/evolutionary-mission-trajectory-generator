@@ -1,0 +1,33 @@
+{
+  "status": "unreviewed",
+  "generated_at": "2026-10-06T11:25:05.772413+00:00",
+  "case_count": 1,
+  "classifications": {
+    "reviewable": 0,
+    "infeasible": 0,
+    "topology_changed": 0,
+    "process_failed": 0,
+    "timed_out": 0,
+    "parse_failed": 1,
+    "dependency_blocked": 0
+  },
+  "cases": [
+    {
+      "case_id": "journey_options/park_to_SOI_FBLT",
+      "source_options": "/repo/testatron/tests/journey_options/park_to_SOI_FBLT.emtgopt",
+      "classification": "parse_failed",
+      "status": "unreviewed",
+      "prepared_options": "/artifacts/cases/journey_options/park_to_SOI_FBLT/park_to_SOI_FBLT.emtgopt",
+      "output_file": "",
+      "comparison_file": "",
+      "log_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/run.log",
+      "compatibility_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/compatibility.json",
+      "return_code": 0,
+      "duration_seconds": 3.930493793,
+      "objective_value": null,
+      "worst_violation": null,
+      "worst_constraint": "",
+      "detail": "EMTG produced no .emtg result"
+    }
+  ]
+}

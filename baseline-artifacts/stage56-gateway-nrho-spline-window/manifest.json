@@ -1,0 +1,33 @@
+{
+  "status": "unreviewed",
+  "generated_at": "2026-10-06T11:45:25.386674+00:00",
+  "case_count": 1,
+  "classifications": {
+    "reviewable": 1,
+    "infeasible": 0,
+    "topology_changed": 0,
+    "process_failed": 0,
+    "timed_out": 0,
+    "parse_failed": 0,
+    "dependency_blocked": 0
+  },
+  "cases": [
+    {
+      "case_id": "journey_options/park_to_SOI_FBLT",
+      "source_options": "/repo/testatron/tests/journey_options/park_to_SOI_FBLT.emtgopt",
+      "classification": "reviewable",
+      "status": "unreviewed",
+      "prepared_options": "/artifacts/cases/journey_options/park_to_SOI_FBLT/park_to_SOI_FBLT.emtgopt",
+      "output_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/FAILURE_park_to_SOI_FBLT.emtg",
+      "comparison_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/comparison.csv",
+      "log_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/run.log",
+      "compatibility_file": "/artifacts/cases/journey_options/park_to_SOI_FBLT/compatibility.json",
+      "return_code": 0,
+      "duration_seconds": 347.3938656570001,
+      "objective_value": -0.0082745719502572,
+      "worst_violation": -0.000237718965014905,
+      "worst_constraint": "F[65]: j0p0FBLT: match point ydot",
+      "detail": "Ready for human review; not a promoted baseline"
+    }
+  ]
+}

@@ -21,11 +21,11 @@
       "affected_cases": [
         "journey_options/park_to_SOI_FBLT"
       ],
-      "replacement_path": null,
-      "source": null,
-      "sha256": null,
-      "rationale": "The original model's GatewayNRHO body uses SPICE ID -60000, which is absent from the pinned kernel pool. No equivalent case-scoped replacement is available.",
-      "review_status": "unresolved"
+      "replacement_path": "testatron/replacement_resources/Earth_MAGIC_Park.emtg_universe",
+      "source": "Reconstructed from testatron/universe/Earth_v9.emtg_universe and Sun_barycenters.emtg_universe body menus with immutable Park baseline Earth constants. GatewayNRHO retains SPICE ID -60000 and MJD 58900 reference epoch.",
+      "sha256": "caf346cc228aa5f349df3140d60e6cfe8af7f423358baa1c365d163296978e03",
+      "rationale": "The pinned DSG receding_horiz_3189_1burnApo_DiffCorr_15yr.bsp SPK provides target -60000 throughout the required reference epoch. This candidate supplies the contiguous Moon through Neptune menu required by Park's third-body perturbation lists.",
+      "review_status": "provisional"
     },
     {
       "id": "sun_saturn_orientation_departure_universe",
