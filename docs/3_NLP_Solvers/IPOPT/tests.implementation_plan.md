@@ -596,16 +596,96 @@ Do not use `--filter` or omit the Park case. Once all 137 cases finish, record
 the manifest totals and compare them with `/tmp/emtg-ipopt-137-stage52-rerun`
 before beginning Stage 6.
 
+#### Completion Record (2026-10-06)
+
+The no-network preflight passed all 137 records. The restarted unfiltered
+Docker characterization completed all 137 cases using `python -u`; its
+manifest is retained at `baseline-artifacts/stage57-final-137/manifest.json`.
+It reports 87 `reviewable`, 31 `infeasible`, 10 `parse_failed`, 8
+`topology_changed`, and 1 `timed_out` cases, with zero `dependency_blocked`
+and zero `process_failed` cases.
+
+The previous comparison root, `/tmp/emtg-ipopt-137-stage52-rerun`, was a
+temporary untracked artifact location and is no longer present. Its recorded
+Stage 5.2 totals provide the available comparison:
+
+| Classification | Stage 5.2 | Stage 5.7 | Change |
+| --- | ---: | ---: | ---: |
+| `reviewable` | 83 | 87 | +4 |
+| `infeasible` | 25 | 31 | +6 |
+| `parse_failed` | 10 | 10 | 0 |
+| `dependency_blocked` | 13 | 0 | -13 |
+| `topology_changed` | 6 | 8 | +2 |
+| `timed_out` | 0 | 1 | +1 |
+| `process_failed` | 0 | 0 | 0 |
+
+The 13 eliminated dependency blocks became 4 `reviewable`, 6 `infeasible`, 2
+`topology_changed`, and 1 `timed_out` outcome. Stage 5 resource closure is
+complete; these remain runtime classifications only, not evidence of
+IPOPT-to-SNOPT agreement.
+
 ## Stage 6: Enforce IPOPT-to-SNOPT Agreement
+
+Stage 6 determines whether IPOPT results can become curated baselines without
+altering the immutable SNOPT source of truth. Every source
+`testatron/tests/<group>/<case>.emtgopt` and its adjacent SNOPT
+`<case>.emtg` remain immutable. IPOPT outputs are candidate evidence until a
+recorded manual decision promotes them.
+
+### 6.1: Remove Intermediate Results
+
+Before review begins, remove generated Stage 1 through Stage 5 evidence only.
+Retain the Stage 0 Markdown reports, generation/interpretation guides, and the
+two `testatron-source-truth.*.sha256` files. Remove the generated Stage 0 case
+and benchmark outputs, Stage 4 capture, Stage 5 through Stage 5.7 artifact
+directories, and transient solver output. Audit every candidate path with Git
+before removal: delete only generated artifacts, never tracked source,
+implementation, dependency manifest, kernel, replacement resource, or an
+immutable `.emtgopt`/SNOPT `.emtg` pair.
+
+### 6.2: Corpus Checklist
+
+Create the tracked checklist
+`docs/3_NLP_Solvers/IPOPT/stage6_checklist.md`. Process paired source/SNOPT
+files in this order, sorting case basenames lexicographically within each group:
+
+| Order | Group | Paired cases |
+| ----: | ----- | -----------: |
+| 1 | `global_mission_options` | 28 |
+| 2 | `journey_options` | 33 |
+| 3 | `mission_tests` | 0 |
+| 4 | `output_options` | 5 |
+| 5 | `physics_options` | 10 |
+| 6 | `script_constraint_tests` | 13 |
+| 7 | `solver_options` | 5 |
+| 8 | `spacecraft_options` | 30 |
+| 9 | `state_representation_tests` | 6 |
+| 10 | `transcription_tests` | 7 |
+
+`mission_tests` contains only its placement marker and remains an explicit
+zero-case section. The checklist must have one row for every one of the 137
+paired cases, recording immutable input hashes, replay/refinement status,
+classification, decision-log reference, candidate artifact location, manual
+decision, and README status.
+
+### 6.3: Replay and Refinement Evidence
 
 Implement and enforce the two stages defined in
 [tests.readme.md](tests.readme.md):
 
-1. **Replay:** evaluate the decision vector archived in the immutable SNOPT
-   baseline with `run_inner_loop 0`. Neither SNOPT nor IPOPT executes. The
-   replay validates the current transcription, staged dependencies, and schema.
-2. **Refinement:** after replay succeeds, run IPOPT from that aligned seed and
-   compare directly against the immutable SNOPT baseline.
+1. **Replay:** extract the decision vector and schema from the immutable SNOPT
+   baseline, inject the aligned seed into staged options, and set
+   `run_inner_loop 0`. Neither SNOPT nor IPOPT executes. Replay validates the
+   current transcription, staged dependencies, decision schema, and baseline
+   feasibility.
+2. **Refinement:** only after replay succeeds, run IPOPT from the same aligned
+   seed and compare the result directly against the immutable SNOPT baseline.
+
+Write replay/refinement candidates into a timestamped Stage 6 evidence root
+under `testatron/ipopt/tests/tests/`. Each case must retain source and baseline
+hashes, staging compatibility, replay/refinement options, generated mission,
+native solver log, and comparison JSON. Do not overwrite the SNOPT pair or
+promote generated results automatically.
 
 Comparison evidence must include objective, total delta-v, flight time, final
 mass, departure/arrival state deltas, topology, decision schema, feasibility,
@@ -635,16 +715,36 @@ classification and agreed comparison values across fresh artifact directories.
 Do not classify a run as `matched_snopt` while identical staged inputs can
 produce materially different outcomes.
 
-Add unit contracts for comparison dimensions, objective sense, tolerance
-boundaries, native exits, and manifest aggregation. Add Docker-backed smoke
-coverage for a public-NLSII case and a SPICE-dependent case.
+### 6.4: Decision and Promotion Log
 
-Add a Docker-backed pytest module with one parameterized node for each approved
-`testatron/tests/<group>/<case>.emtgopt` input. Mark every node with
-`ipopt_tests`, `integration`, `docker`, `ipopt_backend`, and `solver_runtime`.
-`pytest -m ipopt_tests -q` must execute the complete approved corpus, report
-each case independently, and fail for any outcome other than `matched_snopt`.
-The 59 runner contracts remain selected only by `unit`.
+Create the tracked
+`docs/3_NLP_Solvers/IPOPT/stage6_decision_log.md`. For every checklist row,
+record the replay/refinement evidence, comparison result, classification, and a
+manual `approve`, `reject`, or `defer` decision with rationale. Only an
+explicit `approve` decision may promote a candidate IPOPT result into the
+curated final baseline location below `testatron/ipopt/tests/tests/`. A
+promoted IPOPT result supplements its immutable SNOPT reference; it never
+replaces or rewrites it.
+
+### 6.5: Approved-Case Documentation
+
+For each manually approved IPOPT baseline, create the sidecar
+`testatron/tests/<group>/<case>.readme.md`. It must contain these short
+sections:
+
+1. **Concept of Operations:** mission type, departure/arrival configuration,
+   and operational scenario illustrated by the test.
+2. **Objective:** objective function and the material constraints or option
+   variation being exercised.
+3. **Results:** immutable SNOPT and approved IPOPT identifiers and metrics,
+   final classification, promotion decision, and link to the Stage 6 decision
+   log/evidence.
+
+Add unit contracts for immutable input hashes, decision-schema alignment,
+comparison dimensions, objective sense, tolerance boundaries, native exits,
+decision-log serialization, promotion eligibility, README metadata, and
+manifest aggregation. Add Docker-backed smoke coverage for a public-NLSII case
+and a SPICE-dependent case before processing the corpus.
 
 ## Stage 7: Complete the Deferred Stage 3 IPOPT Test Suite
 

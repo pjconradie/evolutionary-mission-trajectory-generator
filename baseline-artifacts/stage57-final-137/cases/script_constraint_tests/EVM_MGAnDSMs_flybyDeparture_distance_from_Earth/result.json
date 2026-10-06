@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth.emtgopt",
+  "classification": "topology_changed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth.emtgopt",
+  "output_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth.emtg",
+  "comparison_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/comparison.csv",
+  "log_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 2.3786921260000327,
+  "objective_value": -0.29630737257355716,
+  "worst_violation": 4.73433942694914e-06,
+  "worst_constraint": "F[7]: j0p0MGAnDSMs: match point mass",
+  "detail": "Journey or mission-event topology changed"
+}

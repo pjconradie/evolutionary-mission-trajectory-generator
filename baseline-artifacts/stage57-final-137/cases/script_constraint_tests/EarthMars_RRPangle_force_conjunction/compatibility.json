@@ -1,0 +1,14 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EarthMars_RRPangle_force_conjunction.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "default.emtg_launchvehicleopt",
+      "replacement": "default.emtg_launchvehicleopt",
+      "reason": "tracked public performance library for LaunchVehicleKey Falcon_9_FT_(RTLS)"
+    }
+  ],
+  "replacement_resources": [],
+  "staged_earliest_possible_epoch": null
+}

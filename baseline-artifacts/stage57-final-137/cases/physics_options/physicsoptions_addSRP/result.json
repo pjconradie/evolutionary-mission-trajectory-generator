@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_addSRP",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_addSRP.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_addSRP/physicsoptions_addSRP.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_addSRP/FAILURE_physicsoptions_addSRP.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_addSRP/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_addSRP/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_addSRP/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7342078760000277,
+  "objective_value": -0.38436627921522903,
+  "worst_violation": 1.575868557866931e-05,
+  "worst_constraint": "F[6]: j0p0MGAnDSMs: match point ydot",
+  "detail": "Worst constraint exceeds source tolerance"
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "physics_options/physicsoptions_shortspline",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_shortspline.emtgopt",
+  "classification": "topology_changed",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/physics_options/physicsoptions_shortspline/physicsoptions_shortspline.emtgopt",
+  "output_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/physicsoptions_shortspline.emtg",
+  "comparison_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/comparison.csv",
+  "log_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/run.log",
+  "compatibility_file": "/artifacts/cases/physics_options/physicsoptions_shortspline/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 6.819658337000078,
+  "objective_value": -0.08465713883976288,
+  "worst_violation": 9.97324594239793e-06,
+  "worst_constraint": "F[8]: j0p0MGAnDSMs: match point mass",
+  "detail": "Journey or mission-event topology changed"
+}

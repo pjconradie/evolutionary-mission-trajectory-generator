@@ -1,0 +1,24 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/journey_options/AerodynamicDrag_EarthOrbit_Maneuver.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_August2018.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    }
+  ],
+  "replacement_resources": [
+    {
+      "dependency_type": "journey_universe",
+      "path": "testatron/universe/Earth_MAGIC.emtg_universe",
+      "id": "earth_magic_aerodynamic_drag_universe",
+      "replacement_path": "testatron/replacement_resources/Earth_MAGIC_AerodynamicDrag.emtg_universe",
+      "sha256": "2cf5480819e33847fae018dcd86afdd77cf120bae2b29c5b891707ff182ed1dc",
+      "review_status": "provisional",
+      "rationale": "Historical universe file is unavailable in the repository and reachable Git history. This case-scoped candidate preserves the Earth/Moon/Sun model required by AerodynamicDrag_EarthOrbit_Maneuver."
+    }
+  ],
+  "staged_earliest_possible_epoch": null
+}

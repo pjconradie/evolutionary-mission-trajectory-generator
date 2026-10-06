@@ -1,0 +1,17 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_postlaunchCoast",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_postlaunchCoast.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_postlaunchCoast/globalmissionoptions_MGALT_postlaunchCoast.emtgopt",
+  "output_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_postlaunchCoast/FAILURE_globalmissionoptions_MGALT_postlaunchCoast.emtg",
+  "comparison_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_postlaunchCoast/comparison.csv",
+  "log_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_postlaunchCoast/run.log",
+  "compatibility_file": "/artifacts/cases/global_mission_options/globalmissionoptions_MGALT_postlaunchCoast/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.668860584000015,
+  "objective_value": -0.8645525448269662,
+  "worst_violation": 2.03403246695271e-06,
+  "worst_constraint": "F[21]: j0p0MGALT: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

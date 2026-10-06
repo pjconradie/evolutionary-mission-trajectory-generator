@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction.emtgopt",
+  "output_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction/FAILURE_EarthMarsLikePointFreePointChemRendezvous_RPRconjunction.emtg",
+  "comparison_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction/comparison.csv",
+  "log_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 15.822724215999983,
+  "objective_value": -0.4711270694828393,
+  "worst_violation": -0.00852775913368553,
+  "worst_constraint": "F[4]: j0p0MGALTFreePointChemRendezvous: Sun-Probe-Earth constraint",
+  "detail": "Ready for human review; not a promoted baseline"
+}

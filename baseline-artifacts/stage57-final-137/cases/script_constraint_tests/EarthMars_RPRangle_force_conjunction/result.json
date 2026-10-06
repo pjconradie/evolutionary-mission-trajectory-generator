@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EarthMars_RPRangle_force_conjunction",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EarthMars_RPRangle_force_conjunction.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/EarthMars_RPRangle_force_conjunction.emtgopt",
+  "output_file": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/FAILURE_EarthMars_RPRangle_force_conjunction.emtg",
+  "comparison_file": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/comparison.csv",
+  "log_file": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EarthMars_RPRangle_force_conjunction/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7226320830000077,
+  "objective_value": -0.5016220673462872,
+  "worst_violation": -46685.58374828511,
+  "worst_constraint": "F[27]: j0p0MGALT: match point zdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

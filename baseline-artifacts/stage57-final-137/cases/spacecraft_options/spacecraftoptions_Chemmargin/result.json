@@ -1,0 +1,17 @@
+{
+  "case_id": "spacecraft_options/spacecraftoptions_Chemmargin",
+  "source_options": "/repo/testatron/tests/spacecraft_options/spacecraftoptions_Chemmargin.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chemmargin/spacecraftoptions_Chemmargin.emtgopt",
+  "output_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chemmargin/spacecraftoptions_Chemmargin.emtg",
+  "comparison_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chemmargin/comparison.csv",
+  "log_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chemmargin/run.log",
+  "compatibility_file": "/artifacts/cases/spacecraft_options/spacecraftoptions_Chemmargin/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.9918485420000707,
+  "objective_value": -0.0017311507470991103,
+  "worst_violation": 8.58228252052056e-06,
+  "worst_constraint": "F[3]: j0p0MGAnDSMs: match point x",
+  "detail": "Ready for human review; not a promoted baseline"
+}

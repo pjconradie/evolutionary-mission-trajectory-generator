@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EME_stageAfterArrival",
+  "source_options": "/repo/testatron/tests/journey_options/EME_stageAfterArrival.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EME_stageAfterArrival/EME_stageAfterArrival.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/EME_stageAfterArrival/EME_stageAfterArrival.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/EME_stageAfterArrival/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/EME_stageAfterArrival/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EME_stageAfterArrival/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 2.0430442090000156,
+  "objective_value": -0.13005528848895953,
+  "worst_violation": -9.13604661165505e-06,
+  "worst_constraint": "F[57]: j1p0MGALT: match point xdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

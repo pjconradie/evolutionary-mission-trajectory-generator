@@ -1,0 +1,24 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/spacecraft_options/default_SCfile_PM.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "default.emtg_launchvehicleopt",
+      "replacement": "default.emtg_launchvehicleopt",
+      "reason": "tracked public performance library for LaunchVehicleKey Falcon_9_FT_(RTLS)"
+    }
+  ],
+  "replacement_resources": [
+    {
+      "dependency_type": "spacecraft_options",
+      "path": "HardwareModels/spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt",
+      "id": "multistage_spacecraft_file",
+      "replacement_path": "testatron/HardwareModels/default_2stage.emtg_spacecraftopt",
+      "sha256": "b96ffb74fdd72d377a3840dd4b41b24a724b3c6cd37660a2a15344920d0c2b48",
+      "review_status": "provisional",
+      "rationale": "Historical spacecraft model is unavailable in the repository and reachable Git history. This case requires a two-stage model."
+    }
+  ],
+  "staged_earliest_possible_epoch": null
+}

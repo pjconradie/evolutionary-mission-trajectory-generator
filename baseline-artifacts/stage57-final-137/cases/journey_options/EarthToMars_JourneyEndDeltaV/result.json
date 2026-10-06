@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_JourneyEndDeltaV",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_JourneyEndDeltaV.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMars_JourneyEndDeltaV/EarthToMars_JourneyEndDeltaV.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/EarthToMars_JourneyEndDeltaV/FAILURE_EarthToMars_JourneyEndDeltaV.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/EarthToMars_JourneyEndDeltaV/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/EarthToMars_JourneyEndDeltaV/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMars_JourneyEndDeltaV/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6720676670000216,
+  "objective_value": 816789.4958936953,
+  "worst_violation": -21253.202052213903,
+  "worst_constraint": "F[25]: j0p0MGALT: match point ydot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "solver_options/solveroptions_ACEfeasibility",
+  "source_options": "/repo/testatron/tests/solver_options/solveroptions_ACEfeasibility.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/solveroptions_ACEfeasibility.emtgopt",
+  "output_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/solveroptions_ACEfeasibility.emtg",
+  "comparison_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/comparison.csv",
+  "log_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/run.log",
+  "compatibility_file": "/artifacts/cases/solver_options/solveroptions_ACEfeasibility/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 297.07044638699995,
+  "objective_value": -0.6125869565583836,
+  "worst_violation": 0.03888846471277142,
+  "worst_constraint": "F[22]: j0p0MGALT: match point x",
+  "detail": "Worst constraint exceeds source tolerance"
+}

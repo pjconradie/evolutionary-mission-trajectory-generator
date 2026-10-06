@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_ForcedInitialCoast",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_ForcedInitialCoast.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMars_ForcedInitialCoast/EarthToMars_ForcedInitialCoast.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/EarthToMars_ForcedInitialCoast/FAILURE_EarthToMars_ForcedInitialCoast.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/EarthToMars_ForcedInitialCoast/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/EarthToMars_ForcedInitialCoast/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMars_ForcedInitialCoast/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6769194590000325,
+  "objective_value": 36412.932593945065,
+  "worst_violation": -1079.2765828991346,
+  "worst_constraint": "F[25]: j0p0MGALT: match point ydot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

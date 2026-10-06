@@ -1,0 +1,27 @@
+Xindex, Description, Lowerbound, Upperbound, ScaleFactor, Value
+0,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: event left state epoch,4646764800,4733164800,5022642.890913,4699481112.718
+1,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote,0,3.162277660168,29.78469183259,5.505551213168
+2,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: RA of departure asymptote,-50.26548245744,50.26548245744,6.28318530718,38.65043007736
+3,j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: DEC of departure asymptote,-1.570796326795,1.570796326795,6.28318530718,0.6976893206811
+4,j0p0MGAnDSMs: phase flight time,315621.8600206,26092800,5022642.890913,25961205.44121
+5,j0p0MGAnDSMsEphemerisPeggedLTRendezvous: event left state mass,1e-13,525.2,525.2,248.8631667843
+6,j0p0MGAnDSMs: virtual chemical fuel,0,525.2,525.2,143.5516016705
+7,j0p0MGAnDSMs: virtual chemical oxidizer,0,525.2,525.2,132.7852315452
+8,j0p0MGAnDSMsForwardSubPhase0: burn index,0.0001,0.9999,1,0.8659340213603
+9,j0p0MGAnDSMsForwardSubPhase0: DSM x component,-10,10,10,0.230412818298
+10,j0p0MGAnDSMsForwardSubPhase0: DSM y component,-10,10,10,-2.299173946932
+11,j0p0MGAnDSMsForwardSubPhase0: DSM z component,-10,10,10,-0.3926191873526
+12,j0p0MGAnDSMsBackwardSubPhase0: burn index,0.0001,0.9999,1,0.1340659786398
+Findex, Description, Lowerbound, Upperbound, Value
+0,objective function,-1e+30,1e+30,2.343809021948
+1,j0p0MGAnDSMs: match point x,-1e-13,1e-13,-7.459500558428e-06
+2,j0p0MGAnDSMs: match point y,-1e-13,1e-13,2.055268288865e-06
+3,j0p0MGAnDSMs: match point z,-1e-13,1e-13,2.20617739248e-06
+4,j0p0MGAnDSMs: match point xdot,-1e-13,1e-13,-3.1942312233e-06
+5,j0p0MGAnDSMs: match point ydot,-1e-13,1e-13,-2.28666348063e-06
+6,j0p0MGAnDSMs: match point zdot,-1e-13,1e-13,-1.22472547242e-06
+7,j0p0MGAnDSMs: match point mass,-1e-13,1e-13,1.322233767551
+8,j0p0MGAnDSMs: match point virtual chemical fuel,-1e-13,1e-13,0.7627083339189
+9,j0p0MGAnDSMs: match point virtual chemical oxidizer,-1e-13,1e-13,0.7055052088749
+10,j0p0MGAnDSMs: burn index sum constraint,-1e-13,1e-13,9.992007221626e-14
+11,Mission flight time bounds,0,1,0.9949566716187

@@ -1,0 +1,24 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_August2018.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    }
+  ],
+  "replacement_resources": [
+    {
+      "dependency_type": "journey_universe",
+      "path": "testatron/universe/Sun_SaturnOrientation.emtg_universe",
+      "id": "sun_saturn_orientation_arrival_universe",
+      "replacement_path": "testatron/replacement_resources/Sun_SaturnOrientation_StateRepresentation.emtg_universe",
+      "sha256": "f7c1f02df983500fbe2839662eb6e951e7a9a4b3093661974ef34fdf9f9f8473",
+      "review_status": "provisional",
+      "rationale": "Historical universe file is unavailable in the repository and reachable Git history. The separate Saturn-centered journey requires pinned sat441.bsp for physical Saturn and satellite ephemerides."
+    }
+  ],
+  "staged_earliest_possible_epoch": null
+}

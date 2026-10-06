@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_fixedEndMassInc",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_fixedEndMassInc.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMars_fixedEndMassInc/EarthToMars_fixedEndMassInc.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/EarthToMars_fixedEndMassInc/FAILURE_EarthToMars_fixedEndMassInc.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/EarthToMars_fixedEndMassInc/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/EarthToMars_fixedEndMassInc/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMars_fixedEndMassInc/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7229732509999849,
+  "objective_value": 0.9779382342128313,
+  "worst_violation": 0.4767956055120601,
+  "worst_constraint": "F[7]: j0p0MGAnDSMs: match point mass",
+  "detail": "Worst constraint exceeds source tolerance"
+}

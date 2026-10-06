@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/default_force_unit_magnitude_control",
+  "source_options": "/repo/testatron/tests/journey_options/default_force_unit_magnitude_control.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/default_force_unit_magnitude_control.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/default_force_unit_magnitude_control.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/default_force_unit_magnitude_control/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 1.1557665419999807,
+  "objective_value": -0.8484435713187031,
+  "worst_violation": 8.83536915785577e-06,
+  "worst_constraint": "F[6]: j0p0MGALT: step 5 control magnitude",
+  "detail": "Ready for human review; not a promoted baseline"
+}

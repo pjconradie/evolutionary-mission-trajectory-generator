@@ -1,0 +1,20 @@
+{
+  "status": "unreviewed",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_ForcedInitialCoast.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "default.emtg_launchvehicleopt",
+      "replacement": "default.emtg_launchvehicleopt",
+      "reason": "tracked public performance library for LaunchVehicleKey Falcon_9_FT_(RTLS)"
+    },
+    {
+      "option": "ThrottleTableFile",
+      "source": "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable",
+      "replacement": "empty.ThrottleTable",
+      "reason": "engine_type 5 does not use throttle-table performance data"
+    }
+  ],
+  "replacement_resources": [],
+  "staged_earliest_possible_epoch": null
+}

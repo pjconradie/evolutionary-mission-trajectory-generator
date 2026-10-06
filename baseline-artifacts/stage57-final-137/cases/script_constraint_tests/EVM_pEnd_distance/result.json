@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EVM_pEnd_distance",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EVM_pEnd_distance.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EVM_pEnd_distance/EVM_pEnd_distance.emtgopt",
+  "output_file": "/artifacts/cases/script_constraint_tests/EVM_pEnd_distance/FAILURE_EVM_pEnd_distance.emtg",
+  "comparison_file": "/artifacts/cases/script_constraint_tests/EVM_pEnd_distance/comparison.csv",
+  "log_file": "/artifacts/cases/script_constraint_tests/EVM_pEnd_distance/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EVM_pEnd_distance/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 13.370087630000057,
+  "objective_value": -0.8998285726949962,
+  "worst_violation": 5.388934989990871e-05,
+  "worst_constraint": "F[27]: j0p0MGALT: match point mass",
+  "detail": "Worst constraint exceeds source tolerance"
+}

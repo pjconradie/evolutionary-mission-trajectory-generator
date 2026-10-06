@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMars_ForcedTerminalCoast",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMars_ForcedTerminalCoast.emtgopt",
+  "classification": "reviewable",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMars_ForcedTerminalCoast/EarthToMars_ForcedTerminalCoast.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/EarthToMars_ForcedTerminalCoast/FAILURE_EarthToMars_ForcedTerminalCoast.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/EarthToMars_ForcedTerminalCoast/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/EarthToMars_ForcedTerminalCoast/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMars_ForcedTerminalCoast/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.6739625419999697,
+  "objective_value": 36000.73535961313,
+  "worst_violation": -1109.4714803023098,
+  "worst_constraint": "F[24]: j0p0MGALT: match point xdot",
+  "detail": "Ready for human review; not a promoted baseline"
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "journey_options/EarthToMarsParkingOrbit_PatchedConic",
+  "source_options": "/repo/testatron/tests/journey_options/EarthToMarsParkingOrbit_PatchedConic.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/journey_options/EarthToMarsParkingOrbit_PatchedConic/EarthToMarsParkingOrbit_PatchedConic.emtgopt",
+  "output_file": "/artifacts/cases/journey_options/EarthToMarsParkingOrbit_PatchedConic/FAILURE_EarthToMarsParkingOrbit_PatchedConic.emtg",
+  "comparison_file": "/artifacts/cases/journey_options/EarthToMarsParkingOrbit_PatchedConic/comparison.csv",
+  "log_file": "/artifacts/cases/journey_options/EarthToMarsParkingOrbit_PatchedConic/run.log",
+  "compatibility_file": "/artifacts/cases/journey_options/EarthToMarsParkingOrbit_PatchedConic/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.7270476670000221,
+  "objective_value": 1.390591224479455,
+  "worst_violation": 2.7760900735424623,
+  "worst_constraint": "F[10]: j0p0MGAnDSMs: match point mass",
+  "detail": "Worst constraint exceeds source tolerance"
+}

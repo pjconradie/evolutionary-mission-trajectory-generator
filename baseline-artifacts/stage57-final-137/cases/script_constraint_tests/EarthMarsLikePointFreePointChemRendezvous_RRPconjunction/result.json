@@ -1,0 +1,17 @@
+{
+  "case_id": "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction",
+  "source_options": "/repo/testatron/tests/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction.emtgopt",
+  "classification": "infeasible",
+  "status": "unreviewed",
+  "prepared_options": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction.emtgopt",
+  "output_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction/FAILURE_EarthMarsLikePointFreePointChemRendezvous_RRPconjunction.emtg",
+  "comparison_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction/comparison.csv",
+  "log_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction/run.log",
+  "compatibility_file": "/artifacts/cases/script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction/compatibility.json",
+  "return_code": 0,
+  "duration_seconds": 0.5224805420000393,
+  "objective_value": -0.7943948644389521,
+  "worst_violation": 2.361014844477016,
+  "worst_constraint": "F[25]: j0p0MGALT: match point x",
+  "detail": "Worst constraint exceeds source tolerance"
+}
