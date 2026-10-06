@@ -219,6 +219,214 @@ def test_discovery_matches_legacy_testatron_inventory(repository_root):
     assert len(discovered) == 137
 
 
+def test_kernel_preflight_reports_missing_and_mismatched_dependencies(tmp_path):
+    root = tmp_path / "repository"
+    manifest_path = root / "testatron" / "kernel_dependencies.json"
+    valid_kernel = root / "testatron" / "universe" / "ephemeris_files" / "valid.bsp"
+    valid_kernel.parent.mkdir(parents=True)
+    valid_kernel.write_text("valid", encoding="ascii")
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "dependencies": [
+                    {
+                        "filename": "valid.bsp",
+                        "destination": "testatron/universe/ephemeris_files/valid.bsp",
+                        "source_url": "https://example.invalid/valid.bsp",
+                        "sha256": ipopt_characterization._sha256(valid_kernel),
+                    },
+                    {
+                        "filename": "missing.tls",
+                        "destination": "testatron/universe/ephemeris_files/missing.tls",
+                        "source_url": "https://example.invalid/missing.tls",
+                        "sha256": "0" * 64,
+                    },
+                    {
+                        "filename": "mismatched.tpc",
+                        "destination": "testatron/universe/ephemeris_files/mismatched.tpc",
+                        "source_url": "https://example.invalid/mismatched.tpc",
+                        "sha256": "0" * 64,
+                    },
+                ],
+            }
+        ),
+        encoding="ascii",
+    )
+    (valid_kernel.parent / "mismatched.tpc").write_text("wrong", encoding="ascii")
+
+    report = ipopt_characterization.preflight_kernel_dependencies(manifest_path, root)
+
+    assert not report["acceptable"]
+    assert [dependency["status"] for dependency in report["dependencies"]] == [
+        "valid",
+        "missing",
+        "checksum_mismatch",
+    ]
+    assert report["dependencies"][2]["actual_sha256"] == ipopt_characterization._sha256(
+        valid_kernel.parent / "mismatched.tpc"
+    )
+
+
+def test_main_preflight_reports_unresolved_journey_universes_without_executable(
+    repository_root, tmp_path
+):
+    output_root = tmp_path / "preflight"
+
+    exit_code = ipopt_characterization.main(
+        ["--preflight", "--output-root", str(output_root)]
+    )
+
+    assert exit_code == 1
+    report = json.loads((output_root / "preflight.json").read_text())
+    assert not report["acceptable"]
+    assert report["kernels"]["acceptable"]
+    assert len(report["cases"]) == 137
+    assert any(
+        dependency["type"] == "journey_universe"
+        and dependency["status"] == "missing"
+        for case in report["cases"]
+        for dependency in case["dependencies"]
+    )
+
+
+def test_case_preflight_maps_falcon_rtls_to_public_library(repository_root):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "EarthToMarsRendezvous.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert report["acceptable"]
+    assert {mapping["option"] for mapping in report["mappings"]} == {
+        "LaunchVehicleLibraryFile",
+        "ThrottleTableFile",
+    }
+    assert {
+        mapping["option"]: mapping for mapping in report["mappings"]
+    }["LaunchVehicleLibraryFile"] == {
+        "option": "LaunchVehicleLibraryFile",
+        "source": ipopt_characterization.TESTATRON_DEFAULT_LIBRARY,
+        "replacement": ipopt_characterization.PUBLIC_DEFAULT_LIBRARY,
+        "reason": "tracked public performance library for LaunchVehicleKey Falcon_9_FT_(RTLS)",
+    }
+    assert {
+        (record["type"], record["status"])
+        for record in report["dependencies"]
+    } >= {
+        ("launch_vehicle_library", "valid"),
+        ("launch_vehicle_key", "valid"),
+        ("spacecraft_options", "valid"),
+    }
+
+
+def test_case_preflight_accepts_public_nlsii_mapping(repository_root):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "physics_options"
+        / "physicsoptions_SPICEphem.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert report["acceptable"]
+    assert report["mappings"][0]["option"] == "LaunchVehicleLibraryFile"
+    assert all(record["status"] == "valid" for record in report["dependencies"])
+
+
+def test_case_preflight_reports_missing_journey_universe(repository_root):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "AerodynamicDrag_EarthOrbit_Maneuver.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert not report["acceptable"]
+    assert {
+        (record["type"], record["central_body"], record["status"])
+        for record in report["dependencies"]
+        if record["type"] == "journey_universe"
+    } == {("journey_universe", "Earth_MAGIC", "missing")}
+
+
+def test_case_preflight_maps_top_level_default_libraries(repository_root):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "spacecraft_options"
+        / "spacecraft_LT_powerFile.emtgopt"
+    )
+
+    report = ipopt_characterization.preflight_case_dependencies(source)
+
+    assert report["acceptable"]
+    assert {
+        (record["type"], Path(record["path"]).name, record["status"])
+        for record in report["dependencies"]
+        if record["type"]
+        in {"power_system_library", "propulsion_system_library"}
+    } >= {
+        ("power_system_library", "default.emtg_powersystemsopt", "valid"),
+        ("propulsion_system_library", "default.emtg_propulsionsystemopt", "valid"),
+    }
+    assert {
+        (record["type"], record["key"], record["status"])
+        for record in report["dependencies"]
+        if record["type"].endswith("_key")
+        and record["type"] != "launch_vehicle_key"
+    } == {
+        ("power_system_key", "7kWarray_800Wbus", "valid"),
+        ("electric_propulsion_system_key", "AEPS_PolyFit_HTandHI", "valid"),
+        (
+            "chemical_propulsion_system_key",
+            "DefaultChemicalPropulsionSystem",
+            "valid",
+        ),
+    }
+    assert {
+        mapping["option"] for mapping in report["mappings"]
+    } >= {"PowerSystemsLibraryFile", "PropulsionSystemsLibraryFile"}
+
+
+def test_prepare_case_stages_top_level_default_libraries(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "spacecraft_options"
+        / "spacecraft_LT_powerFile.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    staged_hardware = tmp_path / "hardware_models"
+    assert Path(prepared.HardwarePath) == staged_hardware
+    assert (staged_hardware / "default.emtg_powersystemsopt").read_bytes() == (
+        repository_root / "testatron" / "HardwareModels" / "default.emtg_powersystemsopt"
+    ).read_bytes()
+    assert (staged_hardware / "default.emtg_propulsionsystemopt").read_bytes() == (
+        repository_root / "HardwareModels" / "default.emtg_propulsionsystemopt"
+    ).read_bytes()
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert {
+        mapping["option"] for mapping in compatibility["mappings"]
+    } >= {"PowerSystemsLibraryFile", "PropulsionSystemsLibraryFile"}
+
+
 def test_default_output_root_targets_relocated_case_artifacts(repository_root):
     assert ipopt_characterization.DEFAULT_OUTPUT_ROOT == (
         repository_root / "testatron" / "ipopt" / "tests" / "tests"
@@ -373,6 +581,31 @@ def test_prepare_case_maps_august_nlsii_library(repository_root, tmp_path):
     assert prepared.LaunchVehicleKey == original.LaunchVehicleKey
     compatibility = json.loads((tmp_path / "compatibility.json").read_text())
     assert compatibility["mappings"][0]["source"] == "NLSII_August2018.emtg_launchvehicleopt"
+
+
+def test_prepare_case_maps_falcon_rtls_to_public_library(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "EarthToMarsRendezvous.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    original = MissionOptions.MissionOptions(str(source))
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert prepared.HardwarePath == "/repo/HardwareModels"
+    assert prepared.LaunchVehicleLibraryFile == ipopt_characterization.PUBLIC_DEFAULT_LIBRARY
+    assert prepared.LaunchVehicleKey == original.LaunchVehicleKey
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert any(
+        mapping["reason"]
+        == "tracked public performance library for LaunchVehicleKey Falcon_9_FT_(RTLS)"
+        for mapping in compatibility["mappings"]
+    )
 
 
 def test_prepare_track_acs_replay_injects_aligned_truth_seed(

@@ -22,6 +22,7 @@ TESTATRON_ROOT = REPOSITORY_ROOT / "testatron"
 TESTS_ROOT = TESTATRON_ROOT / "tests"
 PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
 DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
+KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 PUBLIC_HARDWARE_ROOT = (
     REPOSITORY_ROOT
     / "docs"
@@ -31,11 +32,19 @@ PUBLIC_HARDWARE_ROOT = (
     / "Config_Files"
     / "hardware_models"
 )
+PUBLIC_DEFAULT_HARDWARE_ROOT = REPOSITORY_ROOT / "HardwareModels"
 LEGACY_NLSII_LIBRARIES = (
     "NLSII_April2017.emtg_launchvehicleopt",
     "NLSII_August2018.emtg_launchvehicleopt",
 )
 PUBLIC_NLSII_LIBRARY = "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt"
+TESTATRON_DEFAULT_LIBRARY = "default.emtg_launchvehicleopt"
+PUBLIC_DEFAULT_LIBRARY = "default.emtg_launchvehicleopt"
+PUBLIC_DEFAULT_LIBRARY_KEYS = ("Falcon_9_FT_(RTLS)",)
+TESTATRON_DEFAULT_HARDWARE_FILES = (
+    "default.emtg_powersystemsopt",
+    "default.emtg_propulsionsystemopt",
+)
 LEGACY_UNUSED_THROTTLE_TABLE = "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable"
 INERT_THROTTLE_TABLE = "empty.ThrottleTable"
 TABLE_INDEPENDENT_ENGINE_TYPES = (0, 3, 5, *range(6, 29))
@@ -288,6 +297,336 @@ def _sha256(path):
         for chunk in iter(lambda: handle.read(65536), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def load_kernel_manifest(manifest_path=KERNEL_MANIFEST):
+    """Load and validate the versioned, operator-provided kernel manifest."""
+    manifest_path = Path(manifest_path)
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if payload.get("version") != 1:
+        raise ValueError("kernel manifest must declare version 1")
+    dependencies = payload.get("dependencies")
+    if not isinstance(dependencies, list) or not dependencies:
+        raise ValueError("kernel manifest must declare one or more dependencies")
+
+    names = set()
+    for dependency in dependencies:
+        if not isinstance(dependency, dict):
+            raise ValueError("kernel manifest dependency must be an object")
+        required = {"filename", "destination", "source_url", "sha256"}
+        if set(dependency) != required:
+            raise ValueError(
+                "kernel manifest dependency fields must be "
+                "filename, destination, source_url, and sha256"
+            )
+        filename = dependency["filename"]
+        destination = Path(dependency["destination"])
+        expected_hash = dependency["sha256"]
+        if (
+            not isinstance(filename, str)
+            or not filename
+            or Path(filename).name != filename
+            or filename in names
+        ):
+            raise ValueError(f"invalid or duplicate kernel filename: {filename!r}")
+        if destination.is_absolute() or destination.name != filename:
+            raise ValueError(f"invalid kernel destination: {destination}")
+        if not isinstance(dependency["source_url"], str) or not dependency[
+            "source_url"
+        ].startswith("https://"):
+            raise ValueError(f"invalid kernel source URL for {filename}")
+        if not isinstance(expected_hash, str) or not re.fullmatch(
+            r"[0-9a-f]{64}", expected_hash
+        ):
+            raise ValueError(f"invalid SHA-256 for {filename}")
+        names.add(filename)
+    return payload
+
+
+def preflight_kernel_dependencies(manifest_path=KERNEL_MANIFEST, root=REPOSITORY_ROOT):
+    """Validate operator-provided kernels without downloading or running EMTG."""
+    root = Path(root)
+    manifest_path = Path(manifest_path)
+    manifest = load_kernel_manifest(manifest_path)
+    dependencies = []
+    for dependency in manifest["dependencies"]:
+        destination = root / dependency["destination"]
+        record = {
+            "filename": dependency["filename"],
+            "destination": dependency["destination"],
+            "source_url": dependency["source_url"],
+            "expected_sha256": dependency["sha256"],
+        }
+        if not destination.is_file():
+            record["status"] = "missing"
+        else:
+            actual_hash = _sha256(destination)
+            record["actual_sha256"] = actual_hash
+            record["status"] = (
+                "valid" if actual_hash == dependency["sha256"] else "checksum_mismatch"
+            )
+        dependencies.append(record)
+    return {
+        "status": "unreviewed",
+        "manifest": repo_relative(manifest_path, root),
+        "dependencies": dependencies,
+        "acceptable": all(record["status"] == "valid" for record in dependencies),
+    }
+
+
+def _hardware_root_and_mappings(options):
+    """Return the staged hardware root and explicit compatibility mappings."""
+    hardware_root = TESTATRON_ROOT / "HardwareModels"
+    mappings = []
+    hardware_overrides = {}
+    if options.LaunchVehicleLibraryFile in LEGACY_NLSII_LIBRARIES:
+        legacy_library = options.LaunchVehicleLibraryFile
+        hardware_root = PUBLIC_HARDWARE_ROOT
+        options.LaunchVehicleLibraryFile = PUBLIC_NLSII_LIBRARY
+        mappings.append(
+            {
+                "option": "LaunchVehicleLibraryFile",
+                "source": legacy_library,
+                "replacement": PUBLIC_NLSII_LIBRARY,
+                "reason": "public replacement library; LaunchVehicleKey preserved",
+            }
+        )
+        if options.SpacecraftModelInput == 0:
+            required_keys = {
+                options.PowerSystemsLibraryFile: (options.PowerSystemKey,),
+                options.PropulsionSystemsLibraryFile: (
+                    options.ElectricPropulsionSystemKey,
+                    options.ChemicalPropulsionSystemKey,
+                ),
+            }
+            for filename, keys in required_keys.items():
+                if filename not in TESTATRON_DEFAULT_HARDWARE_FILES:
+                    continue
+                testatron_library = TESTATRON_ROOT / "HardwareModels" / filename
+                public_library = PUBLIC_DEFAULT_HARDWARE_ROOT / filename
+                source = testatron_library
+                if not set(keys).issubset(_library_keys(testatron_library)):
+                    source = public_library
+                hardware_overrides[filename] = source
+                mappings.append(
+                    {
+                        "option": (
+                            "PowerSystemsLibraryFile"
+                            if filename == options.PowerSystemsLibraryFile
+                            else "PropulsionSystemsLibraryFile"
+                        ),
+                        "source": filename,
+                        "replacement": filename,
+                        "reason": (
+                            "tracked default library staged with public NLSII hardware; "
+                            f"selected keys: {', '.join(keys)}"
+                        ),
+                    }
+                )
+    elif (
+        options.LaunchVehicleLibraryFile == TESTATRON_DEFAULT_LIBRARY
+        and options.LaunchVehicleKey in PUBLIC_DEFAULT_LIBRARY_KEYS
+    ):
+        hardware_root = PUBLIC_DEFAULT_HARDWARE_ROOT
+        options.LaunchVehicleLibraryFile = PUBLIC_DEFAULT_LIBRARY
+        mappings.append(
+            {
+                "option": "LaunchVehicleLibraryFile",
+                "source": TESTATRON_DEFAULT_LIBRARY,
+                "replacement": PUBLIC_DEFAULT_LIBRARY,
+                "reason": (
+                    "tracked public performance library for "
+                    f"LaunchVehicleKey {options.LaunchVehicleKey}"
+                ),
+            }
+        )
+    if (
+        options.SpacecraftModelInput == 2
+        and options.engine_type in TABLE_INDEPENDENT_ENGINE_TYPES
+        and options.ThrottleTableFile == LEGACY_UNUSED_THROTTLE_TABLE
+    ):
+        options.ThrottleTableFile = INERT_THROTTLE_TABLE
+        mappings.append(
+            {
+                "option": "ThrottleTableFile",
+                "source": LEGACY_UNUSED_THROTTLE_TABLE,
+                "replacement": INERT_THROTTLE_TABLE,
+                "reason": (
+                    f"engine_type {options.engine_type} does not use throttle-table "
+                    "performance data"
+                ),
+            }
+        )
+    return hardware_root, mappings, hardware_overrides
+
+
+def _launch_vehicle_keys(library_path):
+    """Read the launch-vehicle keys from a plain EMTG option library."""
+    return {
+        line.split()[0]
+        for line in Path(library_path).read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+
+
+def _library_keys(library_path):
+    """Read model keys from a plain EMTG hardware library."""
+    return _launch_vehicle_keys(library_path)
+
+
+def _dependency_record(dependency_type, path, **details):
+    record = {
+        "type": dependency_type,
+        "path": repo_relative(path),
+        **details,
+    }
+    record["status"] = "valid" if Path(path).is_file() else "missing"
+    return record
+
+
+def preflight_case_dependencies(source_options, pyemtg_root=PYEMTG_ROOT):
+    """Validate direct case dependencies without staging files or running EMTG."""
+    _, MissionOptions = _load_pyemtg(pyemtg_root)
+    source_options = Path(source_options)
+    options = MissionOptions.MissionOptions(str(source_options))
+    hardware_root, mappings, hardware_overrides = _hardware_root_and_mappings(options)
+    dependencies = []
+
+    launch_library = hardware_root / options.LaunchVehicleLibraryFile
+    library_record = _dependency_record(
+        "launch_vehicle_library", launch_library, key=options.LaunchVehicleKey
+    )
+    dependencies.append(library_record)
+    if library_record["status"] == "valid":
+        dependencies.append(
+            {
+                "type": "launch_vehicle_key",
+                "library": repo_relative(launch_library),
+                "key": options.LaunchVehicleKey,
+                "status": (
+                    "valid"
+                    if options.LaunchVehicleKey in _launch_vehicle_keys(launch_library)
+                    else "missing"
+                ),
+            }
+        )
+
+    if options.SpacecraftModelInput in (1, 2):
+        dependencies.append(
+            _dependency_record(
+                "spacecraft_options",
+                hardware_root / options.SpacecraftOptionsFile,
+            )
+        )
+        if options.engine_type not in TABLE_INDEPENDENT_ENGINE_TYPES:
+            dependencies.append(
+                _dependency_record(
+                    "throttle_table", hardware_root / options.ThrottleTableFile
+                )
+            )
+    elif options.SpacecraftModelInput == 0:
+        power_library = hardware_overrides.get(
+            options.PowerSystemsLibraryFile,
+            hardware_root / options.PowerSystemsLibraryFile,
+        )
+        propulsion_library = hardware_overrides.get(
+            options.PropulsionSystemsLibraryFile,
+            hardware_root / options.PropulsionSystemsLibraryFile,
+        )
+        power_record = _dependency_record("power_system_library", power_library)
+        propulsion_record = _dependency_record(
+            "propulsion_system_library", propulsion_library
+        )
+        dependencies.extend((power_record, propulsion_record))
+        if power_record["status"] == "valid":
+            dependencies.append(
+                {
+                    "type": "power_system_key",
+                    "library": repo_relative(power_library),
+                    "key": options.PowerSystemKey,
+                    "status": (
+                        "valid"
+                        if options.PowerSystemKey in _library_keys(power_library)
+                        else "missing"
+                    ),
+                }
+            )
+        if propulsion_record["status"] == "valid":
+            propulsion_keys = _library_keys(propulsion_library)
+            for dependency_type, key in (
+                ("electric_propulsion_system_key", options.ElectricPropulsionSystemKey),
+                ("chemical_propulsion_system_key", options.ChemicalPropulsionSystemKey),
+            ):
+                dependencies.append(
+                    {
+                        "type": dependency_type,
+                        "library": repo_relative(propulsion_library),
+                        "key": key,
+                        "status": "valid" if key in propulsion_keys else "missing",
+                    }
+                )
+
+    universe_root = TESTATRON_ROOT / "universe"
+    gravity_root = universe_root / "gravity_files"
+    for journey in options.Journeys:
+        dependencies.append(
+            _dependency_record(
+                "journey_universe",
+                universe_root / f"{journey.journey_central_body}.emtg_universe",
+                central_body=journey.journey_central_body,
+            )
+        )
+        if journey.central_body_gravity_order == 0:
+            continue
+        gravity_name = Path(
+            journey.central_body_gravity_file.replace("\\", "/")
+        ).name
+        dependencies.append(
+            _dependency_record("gravity_file", gravity_root / gravity_name)
+        )
+
+    return {
+        "case_id": case_id(source_options),
+        "source_options": repo_relative(source_options),
+        "mappings": mappings,
+        "dependencies": dependencies,
+        "acceptable": all(record["status"] == "valid" for record in dependencies),
+    }
+
+
+def preflight_cases(tests_root=TESTS_ROOT, filters=None, pyemtg_root=PYEMTG_ROOT):
+    """Return no-network dependency reports for every selected Testatron case."""
+    return [
+        preflight_case_dependencies(source_options, pyemtg_root)
+        for source_options in discover_cases(tests_root, filters)
+    ]
+
+
+def write_preflight_report(
+    output_root,
+    manifest_path=KERNEL_MANIFEST,
+    root=REPOSITORY_ROOT,
+    tests_root=TESTS_ROOT,
+    filters=None,
+    pyemtg_root=PYEMTG_ROOT,
+):
+    """Write no-network kernel and per-case dependency preflight evidence."""
+    output_root = Path(output_root)
+    output_root.mkdir(parents=True, exist_ok=True)
+    kernels = preflight_kernel_dependencies(manifest_path, root)
+    cases = preflight_cases(tests_root, filters, pyemtg_root)
+    report = {
+        "status": "unreviewed",
+        "kernels": kernels,
+        "cases": cases,
+        "acceptable": kernels["acceptable"] and all(
+            case["acceptable"] for case in cases
+        ),
+    }
+    (output_root / "preflight.json").write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8"
+    )
+    return report
 
 
 def benchmark_provenance(benchmark_id, stage, generated_missions, root=None):
@@ -1003,7 +1342,23 @@ def prepare_tutorial_case(
     return prepared_options
 
 
-def prepare_case(source_options, case_directory, pyemtg_root=PYEMTG_ROOT):
+def _execution_path(path, execution_repository_root):
+    """Map a repository path to its execution-root equivalent when possible."""
+    if execution_repository_root is None:
+        return str(path)
+    try:
+        relative_path = Path(path).relative_to(REPOSITORY_ROOT)
+    except ValueError:
+        return str(path)
+    return str(Path(execution_repository_root) / relative_path)
+
+
+def prepare_case(
+    source_options,
+    case_directory,
+    pyemtg_root=PYEMTG_ROOT,
+    execution_repository_root="/repo",
+):
     """Write an IPOPT input while preserving the source optimization policy."""
     _, MissionOptions = _load_pyemtg(pyemtg_root)
     source_options = Path(source_options)
@@ -1018,39 +1373,19 @@ def prepare_case(source_options, case_directory, pyemtg_root=PYEMTG_ROOT):
     options.forced_mission_subfolder = "."
     options.short_output_file_names = 1
     options.background_mode = 1
-    options.universe_folder = str(TESTATRON_ROOT / "universe")
-    compatibility_mappings = []
-    options.HardwarePath = str(TESTATRON_ROOT / "HardwareModels")
-    if options.LaunchVehicleLibraryFile in LEGACY_NLSII_LIBRARIES:
-        legacy_library = options.LaunchVehicleLibraryFile
-        options.HardwarePath = str(PUBLIC_HARDWARE_ROOT)
-        options.LaunchVehicleLibraryFile = PUBLIC_NLSII_LIBRARY
-        compatibility_mappings.append(
-            {
-                "option": "LaunchVehicleLibraryFile",
-                "source": legacy_library,
-                "replacement": PUBLIC_NLSII_LIBRARY,
-                "reason": "public replacement library; LaunchVehicleKey preserved",
-            }
-        )
-    if (
-        options.SpacecraftModelInput == 2
-        and options.engine_type in TABLE_INDEPENDENT_ENGINE_TYPES
-        and options.ThrottleTableFile == LEGACY_UNUSED_THROTTLE_TABLE
-    ):
-        options.ThrottleTableFile = INERT_THROTTLE_TABLE
-        compatibility_mappings.append(
-            {
-                "option": "ThrottleTableFile",
-                "source": LEGACY_UNUSED_THROTTLE_TABLE,
-                "replacement": INERT_THROTTLE_TABLE,
-                "reason": (
-                    f"engine_type {options.engine_type} does not use throttle-table "
-                    "performance data"
-                ),
-            }
-        )
-    gravity_root = TESTATRON_ROOT / "universe" / "gravity_files"
+    options.universe_folder = _execution_path(
+        TESTATRON_ROOT / "universe", execution_repository_root
+    )
+    hardware_root, compatibility_mappings, hardware_overrides = _hardware_root_and_mappings(options)
+    if hardware_overrides:
+        staged_hardware_root = case_directory / "hardware_models"
+        shutil.copytree(hardware_root, staged_hardware_root, dirs_exist_ok=True)
+        for source in hardware_overrides.values():
+            shutil.copy2(source, staged_hardware_root / source.name)
+        options.HardwarePath = str(staged_hardware_root)
+    else:
+        options.HardwarePath = _execution_path(hardware_root, execution_repository_root)
+    gravity_root = Path(options.universe_folder) / "gravity_files"
     for journey in options.Journeys:
         gravity_name = Path(
             journey.central_body_gravity_file.replace("\\", "/")
@@ -1583,12 +1918,29 @@ def build_parser():
     )
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--report-only", action="store_true")
+    parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="validate operator-provided kernels without downloading or running EMTG",
+    )
     return parser
 
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
     output_root = Path(args.output_root).resolve()
+    if args.preflight:
+        report = write_preflight_report(
+            output_root,
+            tests_root=TESTS_ROOT,
+            filters=args.filter,
+            pyemtg_root=args.pyemtg,
+        )
+        print(
+            f"Dependency preflight {'passed' if report['acceptable'] else 'failed'}: "
+            f"{len(report['cases'])} case record(s)"
+        )
+        return 0 if report["acceptable"] else 1
     if args.report_only:
         results = _load_case_results(output_root)
         write_manifests(output_root, results)

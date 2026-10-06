@@ -349,6 +349,62 @@ After layout stability is established:
    hardware or use placeholders. The gate is zero `dependency_blocked` cases
    for the approved portable corpus.
 
+### 5.1: Initial Dependency Preflight (Complete 2026-10-06)
+
+Versioned kernel manifest, no-network kernel and per-case preflight, and
+portable preflight evidence were implemented for all 137 Testatron cases. The
+approved compatibility policy maps only the Testatron default library's
+`Falcon_9_FT_(RTLS)` request to the tracked public
+`HardwareModels/default.emtg_launchvehicleopt` definition while retaining the
+requested key. Prepared general-case options serialize repository paths through
+Docker's `/repo` mount, avoiding host-path and whitespace dependencies.
+
+Validation completed with `pytest tests/test_ipopt_characterization.py -q`
+(`64 passed`) and `python testatron/ipopt_characterization.py --preflight`,
+which reported 137 acceptable cases and zero blocked cases.
+
+| Classification       |                    Stage 0 | Recent run |   Change |
+| -------------------- | -------------------------: | ---------: | -------: |
+| `reviewable`         |                         69 |         81 |      +12 |
+| `infeasible`         |                          5 |         25 |      +20 |
+| `parse_failed`       |                          8 |         10 |       +2 |
+| `dependency_blocked` |                         54 |         15 |      -39 |
+| `topology_changed`   |                 not listed |          6 |       +6 |
+| `timed_out`          | present, count unspecified |          0 | improved |
+### 5.2: Runtime Dependency Closure (Open)
+
+The 2026-10-06 Docker characterization smoke run completed all 137 cases but
+exposed a gap in the original preflight scope. Its manifest contained 15
+`dependency_blocked` results despite preflight reporting 137 acceptable cases:
+
+- `Earth_MAGIC.emtg_universe`: 2 cases.
+- `Sun_SaturnOrientation.emtg_universe`: 6 cases.
+- `snapier_multistage.emtg_spacecraftopt`: 2 cases.
+- `default.emtg_powersystemsopt`: 2 cases.
+- `spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt`: 2 cases.
+- `spacecraft_LT_spacecraftFile.emtg_spacecraftopt`: 1 case.
+
+Extend the no-network preflight and staged preparation path to validate every
+journey's `<journey_central_body>.emtg_universe` resource and every nested
+spacecraft, power-system, propulsion-system, and throttle dependency actually
+loaded by EMTG. Preserve immutable source options and SNOPT baselines. Do not
+invent placeholders or silently substitute hardware: add tracked resources or
+explicit, reviewed compatibility mappings with provenance.
+
+Rerun the Docker-backed 137-case characterization after each change. Stage 5
+is complete only when preflight and runtime agree: all approved cases have
+their runtime dependencies resolved and the characterization manifest reports
+zero `dependency_blocked` cases.
+
+| Classification       |                    Stage 0 | Recent run |
+| -------------------- | -------------------------: | ---------: |
+| `reviewable`         |                         69 |         82 |
+| `infeasible`         |                          5 |         25 |
+| `parse_failed`       |                          8 |         11 |
+| `dependency_blocked` |                         54 |         13 |
+| `topology_changed`   |                 not listed |          6 |
+| `timed_out`          | present, count unspecified |          0 |
+
 ## Stage 6: Enforce IPOPT-to-SNOPT Agreement
 
 Implement and enforce the two stages defined in
