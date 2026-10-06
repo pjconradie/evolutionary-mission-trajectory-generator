@@ -1460,7 +1460,15 @@ def prepare_case(
     ]
     if replacement_universes:
         staged_universe_root = case_directory / "universe"
-        shutil.copytree(TESTATRON_ROOT / "universe", staged_universe_root)
+        staged_universe_root.mkdir()
+        replacement_universe_names = {
+            f"{dependency['central_body']}.emtg_universe"
+            for dependency in replacement_universes
+        }
+        for source in (TESTATRON_ROOT / "universe").iterdir():
+            destination = staged_universe_root / source.name
+            if source.name not in replacement_universe_names:
+                destination.symlink_to(source, target_is_directory=source.is_dir())
         for dependency in replacement_universes:
             shutil.copy2(
                 REPOSITORY_ROOT / dependency["resolved_path"],

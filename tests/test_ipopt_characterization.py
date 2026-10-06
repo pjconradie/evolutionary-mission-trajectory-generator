@@ -411,6 +411,7 @@ def test_prepare_case_records_earth_magic_candidate(repository_root, tmp_path):
     prepared = MissionOptions.MissionOptions(str(tmp_path / source.name))
     assert Path(prepared.universe_folder) == tmp_path / "universe"
     assert (tmp_path / "universe" / "Earth_MAGIC.emtg_universe").is_file()
+    assert (tmp_path / "universe" / "ephemeris_files").is_symlink()
 
 
 def test_case_preflight_resolves_gateway_earth_magic_universe(repository_root):

@@ -562,6 +562,40 @@ classification manifest with `/tmp/emtg-ipopt-137-stage52-rerun`. Stage 6 then
 determines whether every provisional replacement agrees with immutable SNOPT
 baselines.
 
+#### Recovery Note: Docker Restart Required (2026-10-06)
+
+The no-network preflight completed successfully with 137 case records. The
+first unfiltered Docker characterization reached case 126 before failing with
+`[Errno 28] No space left on device`: copying the 661 MB `sat441.bsp` into
+every staged replacement-universe directory consumed the host disk. This was
+disk exhaustion, not a mission or IPOPT failure. The resulting Docker
+`overlay2` cleanup error left the Docker daemon unresponsive; restart Docker
+Desktop before continuing.
+
+`prepare_case()` now creates a case-local universe directory containing
+symlinks to the shared read-only `testatron/universe` resources and copies only
+the case-specific replacement universe file. The focused staging contract
+passed. After restart, first verify `docker ps` returns promptly, remove the
+incomplete `baseline-artifacts/stage57-final-137` directory, and rerun the
+unfiltered characterization with unbuffered output:
+
+```bash
+rm -rf baseline-artifacts/stage57-final-137
+mkdir -p baseline-artifacts/stage57-final-137
+docker run --rm --platform linux/amd64 \
+   -v "$PWD":/repo:ro \
+   -v emtg-pytest-ipopt-2179aeb75eeb13d3:/build \
+   -v "$PWD/baseline-artifacts/stage57-final-137":/artifacts \
+   emtg-pytest-toolchain:2179aeb75eeb13d3 \
+   python -u /repo/testatron/ipopt_characterization.py \
+   --ipopt-characterization --emtg /build/src/EMTGv9 \
+   --output-root /artifacts --timeout 300
+```
+
+Do not use `--filter` or omit the Park case. Once all 137 cases finish, record
+the manifest totals and compare them with `/tmp/emtg-ipopt-137-stage52-rerun`
+before beginning Stage 6.
+
 ## Stage 6: Enforce IPOPT-to-SNOPT Agreement
 
 Implement and enforce the two stages defined in
