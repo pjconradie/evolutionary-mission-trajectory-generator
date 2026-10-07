@@ -17,6 +17,28 @@ from testatron import ipopt_characterization
 pytestmark = pytest.mark.unit
 
 
+def test_baselining_policy_is_versioned_and_deterministic(repository_root):
+    policy = ipopt_characterization.load_baselining_policy()
+
+    assert policy["version"] == 1
+    assert policy["accepted_native_exits"] == ["Optimal Solution Found."]
+    assert policy["seeded_refinement"] == {
+        "seed_MBH": 0,
+        "MBH_RNG_seed": 12345,
+    }
+    assert policy["execution_environment"] == {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+    }
+    assert len(policy["calibration_cases"]) == 6
+    assert ipopt_characterization.BASELINING_POLICY == (
+        repository_root / "testatron/ipopt/tests/baselining_policy.json"
+    )
+
+
 def test_tutorial_registry_is_complete_unique_and_pinned(repository_root):
     cases = ipopt_characterization.TUTORIAL_CASES
 
@@ -269,7 +291,7 @@ def test_kernel_preflight_reports_missing_and_mismatched_dependencies(tmp_path):
     )
 
 
-def test_main_preflight_reports_unresolved_journey_universes_without_executable(
+def test_main_preflight_reports_resolved_dependencies_without_executable(
     repository_root, tmp_path
 ):
     output_root = tmp_path / "preflight"
@@ -278,16 +300,14 @@ def test_main_preflight_reports_unresolved_journey_universes_without_executable(
         ["--preflight", "--output-root", str(output_root)]
     )
 
-    assert exit_code == 1
+    assert exit_code == 0
     report = json.loads((output_root / "preflight.json").read_text())
-    assert not report["acceptable"]
+    assert report["acceptable"]
     assert report["kernels"]["acceptable"]
     assert len(report["cases"]) == 137
-    assert any(
-        dependency["type"] == "journey_universe"
-        and dependency["status"] == "missing"
+    assert all(
+        case["acceptable"]
         for case in report["cases"]
-        for dependency in case["dependencies"]
     )
 
 
@@ -834,6 +854,308 @@ def test_prepare_track_acs_replay_injects_aligned_truth_seed(
     assert json.loads((tmp_path / "compatibility.json").read_text())[
         "status"
     ] == "unreviewed"
+
+
+def test_baselining_replay_mismatch_blocks_refinement_for_checklist_case_one(
+    repository_root, tmp_path, monkeypatch
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    baseline = source.with_suffix(".emtg")
+    refinement_called = False
+
+    def prepare_replay(source_options, baseline_mission, directory, pyemtg_root):
+        prepared = directory / "replay.emtgopt"
+        prepared.write_text("run_inner_loop 0\n")
+        return prepared
+
+    def prepare_refinement(source_options, baseline_mission, directory, pyemtg_root):
+        nonlocal refinement_called
+        refinement_called = True
+        raise AssertionError("refinement must not run after a replay mismatch")
+
+    def execute(prepared_options, directory, executable, timeout):
+        generated = directory / "generated.emtg"
+        generated.write_bytes(baseline.read_bytes())
+        return {"classification": "completed", "output_file": str(generated)}
+
+    monkeypatch.setattr(ipopt_characterization, "prepare_replay", prepare_replay)
+    monkeypatch.setattr(
+        ipopt_characterization, "prepare_refinement", prepare_refinement
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "_execute_baselining_prepared",
+        execute,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "compare_replay",
+        lambda baseline, generated: {
+            "acceptable": False,
+            "checks": {"objective": False},
+        },
+    )
+
+    result = ipopt_characterization.run_baselining_case(
+        source, baseline, "EMTGv9", tmp_path, 1.0
+    )
+
+    assert result.classification == "mismatch_snopt"
+    assert result.replay["comparison"]["acceptable"] is False
+    assert result.refinement is None
+    assert not refinement_called
+
+
+@pytest.mark.parametrize(
+    ("comparison", "expected"),
+    [
+        ({"checks": {"event_topology": False}}, "topology_changed"),
+        ({"checks": {"journey_names": False}}, "topology_changed"),
+        ({"checks": {"feasible": False}}, "infeasible"),
+        ({"checks": {"objective_agreement": False}}, "mismatch_snopt"),
+    ],
+)
+def test_baselining_comparison_classification_is_specific(comparison, expected):
+    assert ipopt_characterization._baselining_comparison_classification(
+        comparison
+    ) == expected
+
+
+def test_baselining_repeatability_requires_equal_classifications_and_comparisons():
+    matching = ipopt_characterization.BaseliningCaseResult(
+        case_id="transcription_tests/SundmanCoastPhase_EMintercept",
+        source_options="source.emtgopt",
+        baseline_mission="baseline.emtg",
+        source_sha256="source",
+        baseline_sha256="baseline",
+        classification="matched_snopt",
+        replay={"comparison": {"acceptable": True, "checks": {"objective": True}}},
+        refinement={
+            "comparison": {"acceptable": True, "checks": {"objective": True}},
+            "ipopt": {"native_exit": "Optimal Solution Found.", "iterations": 8},
+        },
+    )
+
+    comparison = ipopt_characterization.compare_baselining_runs(matching, matching)
+
+    assert comparison["stable"]
+    changed = replace(matching, classification="mismatch_snopt")
+    comparison = ipopt_characterization.compare_baselining_runs(matching, changed)
+
+    assert not comparison["stable"]
+    assert comparison["differences"]["classification"] == [
+        "matched_snopt",
+        "mismatch_snopt",
+    ]
+
+
+def test_repeatable_baselining_downgrades_an_unstable_match(tmp_path, monkeypatch):
+    def result(directory, classification):
+        directory.mkdir()
+        return ipopt_characterization.BaseliningCaseResult(
+            case_id="transcription_tests/SundmanCoastPhase_EMintercept",
+            source_options="source.emtgopt",
+            baseline_mission="baseline.emtg",
+            source_sha256="source",
+            baseline_sha256="baseline",
+            classification=classification,
+            evidence_directory=str(directory),
+            replay={"comparison": {"acceptable": True}},
+            refinement={"comparison": {"acceptable": True}},
+        )
+
+    results = iter(
+        (
+            result(tmp_path / "first", "matched_snopt"),
+            result(tmp_path / "second", "mismatch_snopt"),
+        )
+    )
+    monkeypatch.setattr(
+        ipopt_characterization, "run_baselining_case", lambda: next(results)
+    )
+
+    first, second, comparison = ipopt_characterization.run_repeatable_baselining_case()
+
+    assert not comparison["stable"]
+    assert first.classification == "mismatch_snopt"
+    assert second.classification == "mismatch_snopt"
+    assert (tmp_path / "first" / "repeatability.json").is_file()
+    assert (tmp_path / "second" / "repeatability.json").is_file()
+
+
+def test_baselining_matching_replay_refines_from_the_same_seed(
+    repository_root, tmp_path, monkeypatch
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    baseline = source.with_suffix(".emtg")
+    prepared_baselines = []
+
+    def prepare(source_options, baseline_mission, directory, pyemtg_root):
+        prepared_baselines.append(Path(baseline_mission))
+        prepared = directory / "prepared.emtgopt"
+        prepared.write_text("NLP_solver_type 2\n")
+        (directory / "compatibility.json").write_text("{}\n")
+        return prepared
+
+    def execute(prepared_options, directory, executable, timeout):
+        generated = directory / "generated.emtg"
+        generated.write_bytes(baseline.read_bytes())
+        (directory / "run.log").write_text("IPOPT diagnostics\n")
+        return {"classification": "completed", "output_file": str(generated)}
+
+    monkeypatch.setattr(ipopt_characterization, "prepare_replay", prepare)
+    monkeypatch.setattr(ipopt_characterization, "prepare_refinement", prepare)
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "_execute_baselining_prepared",
+        execute,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "compare_replay",
+        lambda baseline, generated: {"acceptable": True, "checks": {}},
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "compare_baselining_refinement",
+        lambda baseline, generated, tolerance, objective_sense: {
+            "acceptable": True,
+            "checks": {},
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "parse_ipopt_log",
+        lambda log_text: {
+            "native_exit": "Optimal Solution Found.",
+            "iterations": 8,
+            "terminal_constraint_violation": 2.0e-7,
+        },
+    )
+
+    result = ipopt_characterization.run_baselining_case(
+        source, baseline, "EMTGv9", tmp_path, 1.0
+    )
+
+    assert result.classification == "matched_snopt"
+    assert prepared_baselines == [baseline, baseline]
+    assert result.refinement["ipopt"]["native_exit"] == "Optimal Solution Found."
+    evidence_root = next(tmp_path.glob("baselining-*")) / result.case_id
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    refined_options = MissionOptions.MissionOptions(
+        str(evidence_root / "refinement" / "prepared.emtgopt")
+    )
+    assert refined_options.seed_MBH == 0
+    assert refined_options.MBH_RNG_seed == 12345
+    provenance = json.loads((evidence_root / "provenance.json").read_text())
+    assert provenance["source_sha256"] == ipopt_characterization._sha256(source)
+    assert provenance["baseline_sha256"] == ipopt_characterization._sha256(baseline)
+    assert provenance["baselining_policy"] == {
+        "path": str(ipopt_characterization.BASELINING_POLICY),
+        "sha256": ipopt_characterization._sha256(
+            ipopt_characterization.BASELINING_POLICY
+        ),
+        "version": 1,
+    }
+    assert (evidence_root / "replay" / "comparison.json").is_file()
+    assert (evidence_root / "refinement" / "comparison.json").is_file()
+    for stage in ("replay", "refinement"):
+        stage_provenance = json.loads(
+            (evidence_root / stage / "provenance.json").read_text()
+        )
+        assert stage_provenance["baselining_policy"] == provenance[
+            "baselining_policy"
+        ]
+        assert stage_provenance["execution"]["command"] == [
+            "EMTGv9",
+            str(evidence_root / stage / "prepared.emtgopt"),
+        ]
+        assert stage_provenance["files"]["prepared_options"]["sha256"] == (
+            ipopt_characterization._sha256(
+                evidence_root / stage / "prepared.emtgopt"
+            )
+        )
+        assert stage_provenance["files"]["compatibility"]["sha256"] == (
+            ipopt_characterization._sha256(
+                evidence_root / stage / "compatibility.json"
+            )
+        )
+        assert stage_provenance["files"]["generated_mission"]["sha256"] == (
+            ipopt_characterization._sha256(
+                evidence_root / stage / "generated.emtg"
+            )
+        )
+        assert stage_provenance["files"]["native_log"]["sha256"] == (
+            ipopt_characterization._sha256(evidence_root / stage / "run.log")
+        )
+
+
+def test_baselining_rejects_chaperone_restored_ipopt_incumbent(
+    repository_root, tmp_path, monkeypatch
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    baseline = source.with_suffix(".emtg")
+
+    def prepare(source_options, baseline_mission, directory, pyemtg_root):
+        prepared = directory / "prepared.emtgopt"
+        prepared.write_text("NLP_solver_type 2\n")
+        return prepared
+
+    def execute(prepared_options, directory, executable, timeout):
+        generated = directory / "generated.emtg"
+        generated.write_bytes(baseline.read_bytes())
+        (directory / "run.log").write_text("IPOPT diagnostics\n")
+        return {"classification": "completed", "output_file": str(generated)}
+
+    monkeypatch.setattr(ipopt_characterization, "prepare_replay", prepare)
+    monkeypatch.setattr(ipopt_characterization, "prepare_refinement", prepare)
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "_execute_baselining_prepared",
+        execute,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "compare_replay",
+        lambda baseline, generated: {"acceptable": True, "checks": {}},
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "compare_baselining_refinement",
+        lambda baseline, generated, tolerance, objective_sense: {
+            "acceptable": True,
+            "checks": {},
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "parse_ipopt_log",
+        lambda log_text: {
+            "native_exit": "Maximum Number of Iterations Exceeded.",
+            "iterations": 8000,
+            "terminal_constraint_violation": 1.0e-7,
+        },
+    )
+
+    result = ipopt_characterization.run_baselining_case(
+        source, baseline, "EMTGv9", tmp_path, 1.0
+    )
+
+    assert result.classification == "mismatch_snopt"
 
 
 def test_track_acs_replay_comparison_is_pandas_independent(repository_root):

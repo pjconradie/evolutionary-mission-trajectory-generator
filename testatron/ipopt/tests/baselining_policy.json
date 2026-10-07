@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "accepted_native_exits": [
+    "Optimal Solution Found."
+  ],
+  "seeded_refinement": {
+    "seed_MBH": 0,
+    "MBH_RNG_seed": 12345
+  },
+  "execution_environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "calibration_cases": [
+    "spacecraft_options/spacecraftoptions_Chem_TrackACSProp",
+    "spacecraft_options/spacecraftoptions_LT_TrackACSProp",
+    "transcription_tests/CoastPhase_EMintercept",
+    "journey_options/EarthMarsVenus_FlybyDeparture",
+    "physics_options/physicsoptions_addSRP",
+    "state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron"
+  ]
+}

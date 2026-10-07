@@ -7,6 +7,7 @@ import hashlib
 import importlib
 import json
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -22,6 +23,7 @@ TESTATRON_ROOT = REPOSITORY_ROOT / "testatron"
 TESTS_ROOT = TESTATRON_ROOT / "tests"
 PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
 DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
+BASELINING_POLICY = TESTATRON_ROOT / "ipopt" / "tests" / "baselining_policy.json"
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 STAGED_EARLIEST_POSSIBLE_EPOCHS = {
@@ -66,6 +68,8 @@ OSIRIS_2024_PACKAGE = (
 )
 CLASSIFICATIONS = (
     "reviewable",
+    "matched_snopt",
+    "mismatch_snopt",
     "infeasible",
     "topology_changed",
     "process_failed",
@@ -94,6 +98,7 @@ class ObjectivePolicy:
 AUTHORITATIVE_REFINEMENT_POLICY = ObjectivePolicy(1.0e-6, 1.0e-10)
 DEMONSTRATION_REFINEMENT_POLICY = ObjectivePolicy(1.0e-3, 1.0e-8)
 LEGACY_REFINEMENT_POLICY = ObjectivePolicy(1.0e-10, 1.0e-12)
+BASELINING_REFINEMENT_POLICY = ObjectivePolicy(1.0e-6, 1.0e-10)
 
 
 @dataclass(frozen=True)
@@ -301,6 +306,45 @@ def _sha256(path):
         for chunk in iter(lambda: handle.read(65536), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def load_baselining_policy(policy_path=BASELINING_POLICY):
+    """Load the versioned, deterministic Stage 6 baselining policy."""
+    payload = json.loads(Path(policy_path).read_text(encoding="utf-8"))
+    required = {
+        "version",
+        "accepted_native_exits",
+        "seeded_refinement",
+        "execution_environment",
+        "calibration_cases",
+    }
+    if set(payload) != required or payload["version"] != 1:
+        raise ValueError("Stage 6 policy must declare version 1 and all required fields")
+    if payload["accepted_native_exits"] != ["Optimal Solution Found."]:
+        raise ValueError("Stage 6 policy must declare the accepted native IPOPT exit")
+    if payload["seeded_refinement"] != {
+        "seed_MBH": 0,
+        "MBH_RNG_seed": 12345,
+    }:
+        raise ValueError("Stage 6 policy must declare deterministic seeded refinement")
+    expected_environment = {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+    }
+    if payload["execution_environment"] != expected_environment:
+        raise ValueError("Stage 6 policy must declare the deterministic environment")
+    calibration_cases = payload["calibration_cases"]
+    if (
+        not isinstance(calibration_cases, list)
+        or len(calibration_cases) != 6
+        or len(set(calibration_cases)) != len(calibration_cases)
+        or not all(isinstance(case, str) and case for case in calibration_cases)
+    ):
+        raise ValueError("Stage 6 policy must declare six unique calibration cases")
+    return payload
 
 
 def load_kernel_manifest(manifest_path=KERNEL_MANIFEST):
@@ -787,6 +831,21 @@ class CaseResult:
     objective_value: float | None = None
     worst_violation: float | None = None
     worst_constraint: str = ""
+    detail: str = ""
+
+
+@dataclass
+class BaseliningCaseResult:
+    case_id: str
+    source_options: str
+    baseline_mission: str
+    source_sha256: str
+    baseline_sha256: str
+    classification: str
+    evidence_directory: str = ""
+    status: str = "unreviewed"
+    replay: dict | None = None
+    refinement: dict | None = None
     detail: str = ""
 
 
@@ -1753,6 +1812,26 @@ def compare_refinement(
     }
 
 
+def compare_baselining_refinement(
+    baseline, generated, feasibility_tolerance, *, objective_sense="minimize"
+):
+    """Require two-sided objective agreement for an immutable baseline pair."""
+    comparison = compare_refinement(
+        baseline,
+        generated,
+        feasibility_tolerance,
+        objective_policy=BASELINING_REFINEMENT_POLICY,
+        objective_sense=objective_sense,
+    )
+    objective_agreement = (
+        comparison["objective_absolute_delta"]
+        <= comparison["objective_comparison_band"]
+    )
+    comparison["checks"]["objective_agreement"] = objective_agreement
+    comparison["acceptable"] = all(comparison["checks"].values())
+    return comparison
+
+
 def compare_deliberate_infeasible(baseline, generated, feasibility_tolerance):
     """Accept a tutorial replay only when it reproduces the intended failure."""
     finite_decision_vector = bool(generated.DecisionVector) and all(
@@ -2015,6 +2094,365 @@ def run_case(source_options, executable, output_root, timeout, pyemtg_root=PYEMT
         result.classification = "parse_failed"
         result.detail = f"Unable to parse or compare result: {error}"
     _write_case_result(case_directory, result)
+    return result
+
+
+def _execute_baselining_prepared(prepared_options, case_directory, executable, timeout):
+    """Execute an already staged Stage 6 options file."""
+    case_directory = Path(case_directory)
+    log_file = case_directory / "run.log"
+    environment = os.environ.copy()
+    environment.update(load_baselining_policy()["execution_environment"])
+    started = time.monotonic()
+    try:
+        with log_file.open("w") as output:
+            completed = subprocess.run(
+                [str(executable), str(prepared_options)],
+                cwd=case_directory,
+                stdout=output,
+                stderr=subprocess.STDOUT,
+                env=environment,
+                timeout=timeout,
+                check=False,
+            )
+    except subprocess.TimeoutExpired:
+        return {
+            "classification": "timed_out",
+            "log_file": str(log_file),
+            "detail": f"Exceeded {timeout:g} second process timeout",
+        }
+    except OSError as error:
+        return {
+            "classification": "dependency_blocked",
+            "log_file": str(log_file),
+            "detail": f"Unable to execute EMTG: {error}",
+        }
+    if completed.returncode != 0:
+        return {
+            "classification": "process_failed",
+            "log_file": str(log_file),
+            "return_code": completed.returncode,
+            "duration_seconds": time.monotonic() - started,
+            "detail": f"EMTG exited with status {completed.returncode}",
+        }
+    outputs = sorted(case_directory.glob("*.emtg"))
+    if not outputs:
+        return {
+            "classification": "parse_failed",
+            "log_file": str(log_file),
+            "duration_seconds": time.monotonic() - started,
+            "detail": "EMTG produced no .emtg result",
+        }
+    return {
+        "classification": "completed",
+        "log_file": str(log_file),
+        "return_code": completed.returncode,
+        "duration_seconds": time.monotonic() - started,
+        "output_file": str(max(outputs, key=lambda candidate: candidate.stat().st_mtime)),
+    }
+
+
+def _baselining_comparison_classification(comparison):
+    """Return the most specific Stage 6 non-pass classification."""
+    checks = comparison.get("checks", {})
+    if not checks.get("journey_names", True) or not checks.get(
+        "event_topology", True
+    ):
+        return "topology_changed"
+    if not checks.get("feasible", True):
+        return "infeasible"
+    return "mismatch_snopt"
+
+
+def _apply_baselining_refinement_policy(prepared_options, policy, pyemtg_root):
+    """Pin MBH behavior in the staged refinement options copy."""
+    _, MissionOptions = _load_pyemtg(pyemtg_root)
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    options.seed_MBH = policy["seeded_refinement"]["seed_MBH"]
+    options.MBH_RNG_seed = policy["seeded_refinement"]["MBH_RNG_seed"]
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+
+
+def _baselining_file_provenance(path):
+    path = Path(path)
+    return {
+        "path": str(path),
+        "sha256": _sha256(path) if path.is_file() else None,
+    }
+
+
+def _baselining_policy_provenance(policy):
+    return {
+        "path": str(BASELINING_POLICY),
+        "sha256": _sha256(BASELINING_POLICY),
+        "version": policy["version"],
+    }
+
+
+def _write_baselining_stage_provenance(
+    directory,
+    stage,
+    result,
+    prepared_options,
+    source_options,
+    baseline_mission,
+    executable,
+    timeout,
+    policy,
+):
+    """Persist the inputs, generated files, and execution details for one stage."""
+    directory = Path(directory)
+    payload = {
+        "status": "unreviewed",
+        "stage": stage,
+        "source_options": _baselining_file_provenance(source_options),
+        "baseline_mission": _baselining_file_provenance(baseline_mission),
+        "baselining_policy": _baselining_policy_provenance(policy),
+        "execution": {
+            "command": [str(executable), str(prepared_options)],
+            "working_directory": str(directory),
+            "timeout_seconds": timeout,
+            "return_code": result.get("return_code"),
+            "duration_seconds": result.get("duration_seconds"),
+            "classification": result["classification"],
+            "comparison_classification": result.get("comparison_classification"),
+        },
+        "files": {
+            "prepared_options": _baselining_file_provenance(prepared_options),
+            "compatibility": _baselining_file_provenance(
+                directory / "compatibility.json"
+            ),
+            "generated_mission": _baselining_file_provenance(
+                result.get("output_file", "")
+            ),
+            "native_log": _baselining_file_provenance(directory / "run.log"),
+            "comparison": _baselining_file_provenance(directory / "comparison.json"),
+        },
+    }
+    (directory / "provenance.json").write_text(json.dumps(payload, indent=2) + "\n")
+    return payload
+
+
+def compare_baselining_runs(first, second):
+    """Compare stable result data while intentionally ignoring artifact paths."""
+    snapshots = (
+        {
+            "classification": first.classification,
+            "replay_comparison": (first.replay or {}).get("comparison"),
+            "refinement_comparison": (first.refinement or {}).get("comparison"),
+            "ipopt": (first.refinement or {}).get("ipopt"),
+        },
+        {
+            "classification": second.classification,
+            "replay_comparison": (second.replay or {}).get("comparison"),
+            "refinement_comparison": (second.refinement or {}).get("comparison"),
+            "ipopt": (second.refinement or {}).get("ipopt"),
+        },
+    )
+    differences = {
+        name: [snapshots[0][name], snapshots[1][name]]
+        for name in snapshots[0]
+        if snapshots[0][name] != snapshots[1][name]
+    }
+    return {"stable": not differences, "differences": differences}
+
+
+def run_repeatable_baselining_case(*args, **kwargs):
+    """Run a case twice and disqualify matching classifications that are unstable."""
+    first = run_baselining_case(*args, **kwargs)
+    second = run_baselining_case(*args, **kwargs)
+    comparison = compare_baselining_runs(first, second)
+    for result in (first, second):
+        if not comparison["stable"] and result.classification == "matched_snopt":
+            result.classification = "mismatch_snopt"
+            result.detail = "Repeated baselining run produced materially different evidence"
+        if result.evidence_directory:
+            evidence_directory = Path(result.evidence_directory)
+            (evidence_directory / "repeatability.json").write_text(
+                json.dumps(comparison, indent=2) + "\n"
+            )
+            (evidence_directory / "result.json").write_text(
+                json.dumps(asdict(result), indent=2) + "\n"
+            )
+    return first, second, comparison
+
+
+def run_baselining_case(
+    source_options,
+    baseline_mission,
+    executable,
+    output_root,
+    timeout,
+    pyemtg_root=PYEMTG_ROOT,
+):
+    """Replay an immutable SNOPT seed and stop if replay does not agree."""
+    source_options = Path(source_options)
+    baseline_mission = Path(baseline_mission)
+    policy = load_baselining_policy()
+    timestamp = datetime.now(timezone.utc).strftime("baselining-%Y%m%dT%H%M%S%fZ")
+    case_directory = Path(output_root) / timestamp / case_id(source_options) / "replay"
+    case_directory.mkdir(parents=True, exist_ok=True)
+    result = BaseliningCaseResult(
+        case_id=case_id(source_options),
+        source_options=str(source_options),
+        baseline_mission=str(baseline_mission),
+        source_sha256=_sha256(source_options),
+        baseline_sha256=_sha256(baseline_mission),
+        classification="dependency_blocked",
+        evidence_directory=str(case_directory.parent),
+    )
+    (case_directory.parent / "provenance.json").write_text(
+        json.dumps(
+            {
+                "status": "unreviewed",
+                "case_id": result.case_id,
+                "source_options": result.source_options,
+                "source_sha256": result.source_sha256,
+                "baseline_mission": result.baseline_mission,
+                "baseline_sha256": result.baseline_sha256,
+                "baselining_policy": _baselining_policy_provenance(policy),
+            },
+            indent=2,
+        )
+        + "\n"
+    )
+    try:
+        Mission, MissionOptions = _load_pyemtg(pyemtg_root)
+        prepared_options = prepare_replay(
+            source_options, baseline_mission, case_directory, pyemtg_root
+        )
+        result.replay = _execute_baselining_prepared(
+            prepared_options, case_directory, executable, timeout
+        )
+        if result.replay["classification"] != "completed":
+            _write_baselining_stage_provenance(
+                case_directory,
+                "replay",
+                result.replay,
+                prepared_options,
+                source_options,
+                baseline_mission,
+                executable,
+                timeout,
+                policy,
+            )
+            result.classification = result.replay["classification"]
+            result.detail = result.replay.get("detail", "Replay did not complete")
+        else:
+            comparison = compare_replay(
+                Mission.Mission(str(baseline_mission)),
+                Mission.Mission(result.replay["output_file"]),
+            )
+            result.replay["comparison"] = comparison
+            (case_directory / "comparison.json").write_text(
+                json.dumps(comparison, indent=2) + "\n"
+            )
+            if not comparison["acceptable"]:
+                result.classification = _baselining_comparison_classification(comparison)
+                result.replay["comparison_classification"] = result.classification
+                result.detail = "SNOPT replay did not reproduce the immutable baseline"
+            else:
+                result.replay["comparison_classification"] = "matched_snopt"
+            _write_baselining_stage_provenance(
+                case_directory,
+                "replay",
+                result.replay,
+                prepared_options,
+                source_options,
+                baseline_mission,
+                executable,
+                timeout,
+                policy,
+            )
+            if comparison["acceptable"]:
+                refinement_directory = case_directory.parent / "refinement"
+                refinement_directory.mkdir()
+                refinement_options = prepare_refinement(
+                    source_options,
+                    baseline_mission,
+                    refinement_directory,
+                    pyemtg_root,
+                )
+                _apply_baselining_refinement_policy(
+                    refinement_options, policy, pyemtg_root
+                )
+                result.refinement = _execute_baselining_prepared(
+                    refinement_options,
+                    refinement_directory,
+                    executable,
+                    timeout,
+                )
+                if result.refinement["classification"] != "completed":
+                    _write_baselining_stage_provenance(
+                        refinement_directory,
+                        "refinement",
+                        result.refinement,
+                        refinement_options,
+                        source_options,
+                        baseline_mission,
+                        executable,
+                        timeout,
+                        policy,
+                    )
+                    result.classification = result.refinement["classification"]
+                    result.detail = result.refinement.get(
+                        "detail", "Refinement did not complete"
+                    )
+                else:
+                    refinement_comparison = compare_baselining_refinement(
+                        Mission.Mission(str(baseline_mission)),
+                        Mission.Mission(result.refinement["output_file"]),
+                        MissionOptions.MissionOptions(
+                            str(source_options)
+                        ).snopt_feasibility_tolerance,
+                        objective_sense=objective_sense(
+                            MissionOptions.MissionOptions(
+                                str(source_options)
+                            ).objective_type
+                        ),
+                    )
+                    result.refinement["comparison"] = refinement_comparison
+                    result.refinement["ipopt"] = parse_ipopt_log(
+                        (refinement_directory / "run.log").read_text(
+                            errors="replace"
+                        )
+                    )
+                    (refinement_directory / "comparison.json").write_text(
+                        json.dumps(refinement_comparison, indent=2) + "\n"
+                    )
+                    if (
+                        refinement_comparison["acceptable"]
+                        and result.refinement["ipopt"]["native_exit"]
+                        in policy["accepted_native_exits"]
+                    ):
+                        result.classification = "matched_snopt"
+                    else:
+                        result.classification = _baselining_comparison_classification(
+                            refinement_comparison
+                        )
+                        result.detail = "IPOPT refinement did not match the immutable baseline"
+                    result.refinement["comparison_classification"] = (
+                        result.classification
+                    )
+                    _write_baselining_stage_provenance(
+                        refinement_directory,
+                        "refinement",
+                        result.refinement,
+                        refinement_options,
+                        source_options,
+                        baseline_mission,
+                        executable,
+                        timeout,
+                        policy,
+                    )
+    except Exception as error:
+        result.classification = "parse_failed"
+        result.detail = f"Unable to prepare or compare replay: {error}"
+    (case_directory.parent / "result.json").write_text(
+        json.dumps(asdict(result), indent=2) + "\n"
+    )
     return result
 
 

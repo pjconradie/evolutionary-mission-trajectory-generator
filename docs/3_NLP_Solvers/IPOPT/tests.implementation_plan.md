@@ -815,3 +815,77 @@ Warm single Docker probes can take several minutes. Cold runs also provision an
 image and native build and can take tens of minutes. Establish actual full-suite
 duration in Stage 0, use `--resume` only for retained case outputs, and set CI
 limits only after the measured baseline is available.
+
+# Appendix A.6.3 Extended
+
+```
+- Complete the evidence/classification contract: preserve specific `infeasible` and `topology_changed` outcomes, add input/generated-file hashes and full execution provenance.
+- Add the versioned tolerance/reproducibility policy, then enforce deterministic solver-state settings.
+- Add repeat-run contracts for a representative case and `SundmanCoastPhase_EMintercept`.
+- Run the Docker-backed checklist-`#1` pilot: `globalmissionoptions_MGALT_DLAbounds`.
+```
+
+**Evidence and classifications**
+
+The runner currently records the broad result, but should make failure causes actionable.
+
+For each stage, it should retain:
+- SHA-256 for immutable source `.emtgopt`, SNOPT `.emtg`, staged options, compatibility file, generated mission, and native log.
+- Command/executable identity, UTC timestamps, duration, timeout, return code, environment variables, and toolchain/policy identity.
+- Replay/refinement comparison JSON plus the generated mission path.
+
+Classification should be specific:
+- `topology_changed` when journey/event structure differs.
+- `infeasible` when generated `worst_violation` exceeds source feasibility tolerance.
+- `mismatch_snopt` when the run is parseable and feasible but misses objective/totals/endpoints/schema agreement.
+- Operational failures retain `dependency_blocked`, `timed_out`, `process_failed`, or `parse_failed`.
+- `matched_snopt` remains reserved for accepted native IPOPT success and every approved comparison check.
+
+That distinction prevents a topology or feasibility regression from being hidden as a generic numerical mismatch.
+
+**Versioned tolerance and reproducibility policy**
+
+Create a tracked policy file, such as `testatron/stage6_policy.json`, containing:
+- A policy version.
+- Replay tolerances and Stage 6 refinement objective/totals/endpoint tolerances.
+- Accepted native IPOPT exits, initially only `Optimal Solution Found.`.
+- Fixed calibration-case IDs and policy rationale.
+- Deterministic environment variables and solver-state rules.
+
+The runner loads and records the policy version/hash in every evidence root. No test case supplies a local tolerance override.
+
+For deterministic seeded refinement:
+- Disable MBH seed reuse: `seed_MBH = 0`.
+- Set a fixed non-negative `MBH_RNG_seed`.
+- Record source iteration and time-limit options.
+- Run with one thread through `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1`, `VECLIB_MAXIMUM_THREADS=1`, and `NUMEXPR_NUM_THREADS=1`.
+- Treat timeout, iteration-limit exits, and chaperone-restored incumbents as non-pass results.
+
+**Repeat-run contracts**
+
+Use fresh artifact roots for two independent executions of each required case:
+1. One representative seeded Testatron case.
+2. `transcription_tests/SundmanCoastPhase_EMintercept`.
+
+The contracts compare:
+- Final classification.
+- Native IPOPT exit and diagnostics.
+- Approved comparison values/checks.
+- Relevant objective, totals, endpoint deltas, and feasibility values within the policy bands.
+
+If identical staged inputs produce materially different outcomes, both roots stay as evidence and neither can be classified `matched_snopt`. This proves the runner is reproducible under the pinned Docker toolchain rather than merely lucky once.
+
+**Docker checklist-#1 pilot**
+
+After unit and repeatability contracts are ready, execute only:
+
+`global_mission_options/globalmissionoptions_MGALT_DLAbounds`
+
+The Docker run should mount the repository read-only, write only to a new timestamped artifact root, and use the pinned IPOPT image/executable. Review the resulting replay and refinement directories manually:
+
+- Confirm immutable source/SNOPT hashes before and after.
+- Confirm replay agreement before refinement exists.
+- Inspect IPOPT native exit, iteration count, terminal constraint violation, comparison checks, and provenance.
+- Confirm no generated result is copied into the immutable Testatron pair or promoted automatically.
+
+Only after that pilot is understood should the same runner be used for broader corpus execution.

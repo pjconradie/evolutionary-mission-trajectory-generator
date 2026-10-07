@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "stage6_checklist"
+              "title": "docker_deployment.readme"
             }
           }
         ],
@@ -215,8 +215,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "e7220eb48456a1ab",
+  "active": "7220b65faffa0c40",
   "lastOpenFiles": [
+    "tests/integration/__pycache__/test_baselining.cpython-313-pytest-9.1.1.pyc",
+    "testatron/ipopt/tests/readme.md",
+    "tests/integration/test_baselining.py",
+    "testatron/ipopt/tests/baselining_policy.json",
+    "testatron/ipopt/tests/stage6_policy.json",
+    "testatron/stage6_policy.json",
     "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md",
@@ -227,10 +233,6 @@
     "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/receding_horiz_3189_1burnApo_DiffCorr_15yr.bsp",
     "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/de430.bsp",
     "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/gravity_files/LP150Q.grv",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/gravity_files/JGM3.grv",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/pck00010.tpc",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/naif0012.tls",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/go_get_these_files.txt",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "testatron/ipopt/tests/benchmarks/how_to_interpret_results.readme.md",
@@ -250,8 +252,6 @@
     "docs/2_Missions/osiris-rex/docs/osiris_rex_mgandsm_pipeline.md",
     "docs/2_Missions/osiris-rex/plans/osiris_rex_mgandsm_pipeline.md",
     "docs/2_Missions/osiris-rex/plans/osiris-rex-mgandsm-pipeline.md",
-    "docs/2_Missions/osiris-rex/plans/osiris-rexx-mgandsm-pipeline.md",
-    "daily/2026-09-16.md",
-    "testatron/ipopt/manual_testron_execution.README.md"
+    "docs/2_Missions/osiris-rex/plans/osiris-rexx-mgandsm-pipeline.md"
   ]
 }
