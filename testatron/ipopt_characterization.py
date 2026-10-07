@@ -2321,14 +2321,14 @@ def run_baselining_batch(
     timeout=300.0,
     pyemtg_root=PYEMTG_ROOT,
 ):
-    """Replace the fixed baselining root with repeatable evidence for each case."""
+    """Replace selected case evidence under the fixed baselining root."""
     batch_root = Path(output_root) / "baselining"
-    shutil.rmtree(batch_root, ignore_errors=True)
-    batch_root.mkdir(parents=True)
+    batch_root.mkdir(parents=True, exist_ok=True)
     results = []
     for source in source_options:
         source = Path(source)
         case_root = batch_root / case_id(source)
+        shutil.rmtree(case_root, ignore_errors=True)
         first, second, comparison = run_repeatable_baselining_case(
             source,
             source.with_suffix(".emtg"),

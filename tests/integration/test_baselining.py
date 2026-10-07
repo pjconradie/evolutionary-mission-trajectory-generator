@@ -1,6 +1,7 @@
 """Verify reproducible Testatron IPOPT baselining in the pinned toolchain."""
 
 import json
+import shlex
 
 import pytest
 
@@ -81,17 +82,22 @@ printf 'EMTG_CHECK baselining_repeatability=passed\\n'
 
 
 def test_baselining_cli_writes_fixed_mirrored_layout(
-    toolchain_image, repository_root, tmp_path_factory
+    request, toolchain_image, repository_root, tmp_path_factory
 ):
-    """Exercise the fixed batch root through the pinned Docker CLI workflow."""
-    case_id = "global_mission_options/globalmissionoptions_MGALT_DLAbounds"
+    """Exercise selected CLI batches through the pinned Docker workflow."""
+    filters = request.config.getoption("baselining_filter") or [
+        "global_mission_options/globalmissionoptions_MGALT_DLAbounds"
+    ]
+    filter_arguments = " ".join(
+        f"--filter {shlex.quote(case_filter)}" for case_filter in filters
+    )
     artifacts = artifact_directory(tmp_path_factory)
     script = _backend_source_script("IPOPT") + f'''
 cmake --build /build --target EMTGv9 -j2 >/tmp/baselining-build.log 2>&1 \\
     || {{ tail -n 150 /tmp/baselining-build.log; exit 20; }}
 PYTHONPATH=/repo:/repo/PyEMTG python /repo/testatron/ipopt_characterization.py \\
     --baselining \\
-    --filter {case_id!r} \\
+    {filter_arguments} \\
     --emtg /build/src/EMTGv9 \\
     --output-root /artifacts \\
     --timeout 180.0
@@ -99,28 +105,31 @@ PYTHONPATH=/repo:/repo/PyEMTG python - <<'PY'
 import json
 from pathlib import Path
 
-case_id = "global_mission_options/globalmissionoptions_MGALT_DLAbounds"
-case_root = Path("/artifacts/baselining") / case_id
-required_paths = (
-    case_root / "attempt-1" / "result.json",
-    case_root / "attempt-2" / "result.json",
-    case_root / "repeatability.json",
-    case_root / "result.json",
-)
-if not all(path.is_file() for path in required_paths):
+batch_root = Path("/artifacts/baselining")
+case_roots = sorted(path.parent for path in batch_root.glob("*/*/result.json"))
+if not case_roots:
     raise SystemExit("fixed baselining batch layout is incomplete")
+for case_root in case_roots:
+    required_paths = (
+        case_root / "attempt-1" / "result.json",
+        case_root / "attempt-2" / "result.json",
+        case_root / "repeatability.json",
+        case_root / "result.json",
+    )
+    if not all(path.is_file() for path in required_paths):
+        raise SystemExit(f"fixed baselining batch layout is incomplete: {{case_root}}")
+    if not json.loads((case_root / "repeatability.json").read_text())["stable"]:
+        raise SystemExit(f"fixed baselining batch produced unstable evidence: {{case_root}}")
 Path("/artifacts/batch-summary.json").write_text(
     json.dumps(
         {{
-            "case_id": case_id,
-            "stable": json.loads((case_root / "repeatability.json").read_text())["stable"],
+            "case_ids": [str(case_root.relative_to(batch_root)) for case_root in case_roots],
+            "stable": True,
         }},
         indent=2,
     )
     + "\\n"
 )
-if not json.loads((case_root / "repeatability.json").read_text())["stable"]:
-    raise SystemExit("fixed baselining batch produced unstable evidence")
 PY
 test -s /artifacts/batch-summary.json
 printf 'EMTG_CHECK baselining_batch_layout=passed\\n'
@@ -137,10 +146,12 @@ printf 'EMTG_CHECK baselining_batch_layout=passed\\n'
     )
 
     summary = json.loads((artifacts / "batch-summary.json").read_text())
-    case_root = artifacts / "baselining" / summary["case_id"]
     assert checks["baselining_batch_layout"] == "passed"
     assert summary["stable"]
-    assert (case_root / "attempt-1" / "result.json").is_file()
-    assert (case_root / "attempt-2" / "result.json").is_file()
-    assert (case_root / "repeatability.json").is_file()
-    assert (case_root / "result.json").is_file()
+    assert summary["case_ids"]
+    for case_id in summary["case_ids"]:
+        case_root = artifacts / "baselining" / case_id
+        assert (case_root / "attempt-1" / "result.json").is_file()
+        assert (case_root / "attempt-2" / "result.json").is_file()
+        assert (case_root / "repeatability.json").is_file()
+        assert (case_root / "result.json").is_file()

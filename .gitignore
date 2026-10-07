@@ -138,3 +138,4 @@ docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/de430.
 *.bsp
 docs/2_Missions/osiris-rex/universe/ephemeris_files/naif0012.tls
 docs/2_Missions/osiris-rex/universe/ephemeris_files/pck00010.tpc
+/testatron/ipopt/tests/tests/baselining

@@ -51,6 +51,12 @@ def pytest_addoption(parser):
     group.addoption(
         "--tutorials", action="store_true", help="run only tutorial verification tests"
     )
+    group.addoption(
+        "--baselining-filter",
+        action="append",
+        default=[],
+        help="glob passed to the Docker-backed Testatron baselining CLI",
+    )
 
 
 def pytest_collection_modifyitems(config, items):

@@ -1008,16 +1008,25 @@ def test_repeatable_baselining_downgrades_an_unstable_match(tmp_path, monkeypatc
     assert (tmp_path / "second" / "repeatability.json").is_file()
 
 
-def test_baselining_batch_replaces_fixed_mirrored_root(
+def test_baselining_batch_replaces_selected_case_and_preserves_others(
     repository_root, tmp_path, monkeypatch
 ):
     source = (
         repository_root / "testatron/tests/global_mission_options/"
         "globalmissionoptions_MGALT_DLAbounds.emtgopt"
     )
-    stale = tmp_path / "baselining" / "stale.txt"
-    stale.parent.mkdir()
+    stale = (
+        tmp_path / "baselining/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds/stale.txt"
+    )
+    preserved = (
+        tmp_path / "baselining/global_mission_options/"
+        "globalmissionoptions_MGALT_RLAbounds/preserved.txt"
+    )
+    stale.parent.mkdir(parents=True)
     stale.write_text("obsolete\n")
+    preserved.parent.mkdir(parents=True)
+    preserved.write_text("retain\n")
 
     def run_case(*args, evidence_directory=None, **kwargs):
         Path(evidence_directory).mkdir(parents=True)
@@ -1043,6 +1052,7 @@ def test_baselining_batch_replaces_fixed_mirrored_root(
     )
     assert len(results) == 1
     assert not stale.exists()
+    assert preserved.read_text() == "retain\n"
     assert (case_root / "attempt-1" / "result.json").is_file()
     assert (case_root / "attempt-2" / "result.json").is_file()
     assert (case_root / "repeatability.json").is_file()
