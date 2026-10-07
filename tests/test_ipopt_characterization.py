@@ -241,6 +241,27 @@ def test_discovery_matches_legacy_testatron_inventory(repository_root):
     assert len(discovered) == 137
 
 
+def test_baselining_order_matches_reviewed_group_sequence(repository_root):
+    tests_root = repository_root / "testatron" / "tests"
+    ordered_cases = ipopt_characterization.order_baselining_cases(
+        ipopt_characterization.discover_cases(tests_root), tests_root
+    )
+    encountered_groups = []
+    for source in ordered_cases:
+        group = source.relative_to(tests_root).parts[0]
+        if not encountered_groups or encountered_groups[-1] != group:
+            encountered_groups.append(group)
+
+    assert encountered_groups == [
+        group
+        for group in ipopt_characterization.BASELINING_GROUP_ORDER
+        if any(
+            source.relative_to(tests_root).parts[0] == group
+            for source in ordered_cases
+        )
+    ]
+
+
 def test_kernel_preflight_reports_missing_and_mismatched_dependencies(tmp_path):
     root = tmp_path / "repository"
     manifest_path = root / "testatron" / "kernel_dependencies.json"
@@ -985,6 +1006,82 @@ def test_repeatable_baselining_downgrades_an_unstable_match(tmp_path, monkeypatc
     assert second.classification == "mismatch_snopt"
     assert (tmp_path / "first" / "repeatability.json").is_file()
     assert (tmp_path / "second" / "repeatability.json").is_file()
+
+
+def test_baselining_batch_replaces_fixed_mirrored_root(
+    repository_root, tmp_path, monkeypatch
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    stale = tmp_path / "baselining" / "stale.txt"
+    stale.parent.mkdir()
+    stale.write_text("obsolete\n")
+
+    def run_case(*args, evidence_directory=None, **kwargs):
+        Path(evidence_directory).mkdir(parents=True)
+        return ipopt_characterization.BaseliningCaseResult(
+            case_id=ipopt_characterization.case_id(source),
+            source_options=str(source),
+            baseline_mission=str(source.with_suffix(".emtg")),
+            source_sha256="source",
+            baseline_sha256="baseline",
+            classification="mismatch_snopt",
+            evidence_directory=str(evidence_directory),
+        )
+
+    monkeypatch.setattr(ipopt_characterization, "run_baselining_case", run_case)
+
+    results = ipopt_characterization.run_baselining_batch(
+        [source], "EMTGv9", tmp_path, 1.0
+    )
+
+    case_root = (
+        tmp_path / "baselining/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds"
+    )
+    assert len(results) == 1
+    assert not stale.exists()
+    assert (case_root / "attempt-1" / "result.json").is_file()
+    assert (case_root / "attempt-2" / "result.json").is_file()
+    assert (case_root / "repeatability.json").is_file()
+
+
+def test_main_dispatches_baselining_to_fixed_batch_root(
+    repository_root, tmp_path, monkeypatch
+):
+    selected = []
+
+    def run_batch(cases, executable, output_root, timeout, pyemtg_root):
+        selected.extend(cases)
+        assert executable == "EMTGv9"
+        assert output_root == tmp_path
+        assert timeout == 12.0
+        return [{"case_id": "global_mission_options/globalmissionoptions_MGALT_DLAbounds"}]
+
+    monkeypatch.setattr(ipopt_characterization, "run_baselining_batch", run_batch)
+
+    exit_code = ipopt_characterization.main(
+        [
+            "--baselining",
+            "--emtg",
+            "EMTGv9",
+            "--output-root",
+            str(tmp_path),
+            "--timeout",
+            "12",
+            "--filter",
+            "global_mission_options/globalmissionoptions_MGALT_DLAbounds.emtgopt",
+        ]
+    )
+
+    assert exit_code == 0
+    assert selected == [
+        repository_root
+        / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    ]
 
 
 def test_baselining_matching_replay_refines_from_the_same_seed(

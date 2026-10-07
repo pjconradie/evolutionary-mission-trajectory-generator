@@ -77,6 +77,18 @@ CLASSIFICATIONS = (
     "parse_failed",
     "dependency_blocked",
 )
+BASELINING_GROUP_ORDER = (
+    "global_mission_options",
+    "journey_options",
+    "mission_tests",
+    "output_options",
+    "physics_options",
+    "script_constraint_tests",
+    "solver_options",
+    "spacecraft_options",
+    "state_representation_tests",
+    "transcription_tests",
+)
 
 TUTORIAL_ROOT = "docs/0_Users/tutorial/Tutorial_EMTG_Files"
 TUTORIAL_EPHEMERIS_ROOT = "testatron/universe/ephemeris_files"
@@ -873,6 +885,21 @@ def discover_cases(tests_root=TESTS_ROOT, filters=None):
             )
         ]
     return cases
+
+
+def order_baselining_cases(source_options, tests_root=TESTS_ROOT):
+    """Order baselining cases by the reviewed Testatron group sequence."""
+    tests_root = Path(tests_root)
+    group_index = {group: index for index, group in enumerate(BASELINING_GROUP_ORDER)}
+
+    def ordering_key(source):
+        relative = Path(source).relative_to(tests_root)
+        group = relative.parts[0] if len(relative.parts) > 1 else ""
+        if group not in group_index:
+            raise ValueError(f"Baselining case is outside the reviewed groups: {relative}")
+        return group_index[group], relative.as_posix()
+
+    return sorted(source_options, key=ordering_key)
 
 
 def case_id(source_options, tests_root=TESTS_ROOT):
@@ -2259,10 +2286,18 @@ def compare_baselining_runs(first, second):
     return {"stable": not differences, "differences": differences}
 
 
-def run_repeatable_baselining_case(*args, **kwargs):
+def run_repeatable_baselining_case(*args, attempt_directories=None, **kwargs):
     """Run a case twice and disqualify matching classifications that are unstable."""
-    first = run_baselining_case(*args, **kwargs)
-    second = run_baselining_case(*args, **kwargs)
+    if attempt_directories is None:
+        first = run_baselining_case(*args, **kwargs)
+        second = run_baselining_case(*args, **kwargs)
+    else:
+        first = run_baselining_case(
+            *args, evidence_directory=attempt_directories[0], **kwargs
+        )
+        second = run_baselining_case(
+            *args, evidence_directory=attempt_directories[1], **kwargs
+        )
     comparison = compare_baselining_runs(first, second)
     for result in (first, second):
         if not comparison["stable"] and result.classification == "matched_snopt":
@@ -2279,6 +2314,44 @@ def run_repeatable_baselining_case(*args, **kwargs):
     return first, second, comparison
 
 
+def run_baselining_batch(
+    source_options,
+    executable,
+    output_root=DEFAULT_OUTPUT_ROOT,
+    timeout=300.0,
+    pyemtg_root=PYEMTG_ROOT,
+):
+    """Replace the fixed baselining root with repeatable evidence for each case."""
+    batch_root = Path(output_root) / "baselining"
+    shutil.rmtree(batch_root, ignore_errors=True)
+    batch_root.mkdir(parents=True)
+    results = []
+    for source in source_options:
+        source = Path(source)
+        case_root = batch_root / case_id(source)
+        first, second, comparison = run_repeatable_baselining_case(
+            source,
+            source.with_suffix(".emtg"),
+            executable,
+            batch_root,
+            timeout,
+            pyemtg_root,
+            attempt_directories=(case_root / "attempt-1", case_root / "attempt-2"),
+        )
+        summary = {
+            "case_id": first.case_id,
+            "first": asdict(first),
+            "second": asdict(second),
+            "repeatability": comparison,
+        }
+        (case_root / "repeatability.json").write_text(
+            json.dumps(comparison, indent=2) + "\n"
+        )
+        (case_root / "result.json").write_text(json.dumps(summary, indent=2) + "\n")
+        results.append(summary)
+    return results
+
+
 def run_baselining_case(
     source_options,
     baseline_mission,
@@ -2286,13 +2359,18 @@ def run_baselining_case(
     output_root,
     timeout,
     pyemtg_root=PYEMTG_ROOT,
+    evidence_directory=None,
 ):
     """Replay an immutable SNOPT seed and stop if replay does not agree."""
     source_options = Path(source_options)
     baseline_mission = Path(baseline_mission)
     policy = load_baselining_policy()
-    timestamp = datetime.now(timezone.utc).strftime("baselining-%Y%m%dT%H%M%S%fZ")
-    case_directory = Path(output_root) / timestamp / case_id(source_options) / "replay"
+    if evidence_directory is None:
+        timestamp = datetime.now(timezone.utc).strftime("baselining-%Y%m%dT%H%M%S%fZ")
+        evidence_directory = Path(output_root) / timestamp / case_id(source_options)
+    else:
+        evidence_directory = Path(evidence_directory)
+    case_directory = evidence_directory / "replay"
     case_directory.mkdir(parents=True, exist_ok=True)
     result = BaseliningCaseResult(
         case_id=case_id(source_options),
@@ -2301,7 +2379,7 @@ def run_baselining_case(
         source_sha256=_sha256(source_options),
         baseline_sha256=_sha256(baseline_mission),
         classification="dependency_blocked",
-        evidence_directory=str(case_directory.parent),
+        evidence_directory=str(evidence_directory),
     )
     (case_directory.parent / "provenance.json").write_text(
         json.dumps(
@@ -2461,6 +2539,11 @@ def build_parser():
         description="Run unreviewed Testatron characterization with IPOPT"
     )
     parser.add_argument("--ipopt-characterization", action="store_true")
+    parser.add_argument(
+        "--baselining",
+        action="store_true",
+        help="replace the fixed baselining evidence root for selected Testatron cases",
+    )
     parser.add_argument("-e", "--emtg", help="path to the IPOPT-enabled EMTG executable")
     parser.add_argument("--pyemtg", default=str(PYEMTG_ROOT))
     parser.add_argument("--output-root", default=str(DEFAULT_OUTPUT_ROOT))
@@ -2504,6 +2587,16 @@ def main(argv=None):
         raise SystemExit("--emtg is required unless --report-only is used")
     if args.timeout <= 0:
         raise SystemExit("--timeout must be positive")
+
+    if args.baselining:
+        cases = order_baselining_cases(
+            discover_cases(TESTS_ROOT, filters=args.filter)
+        )
+        results = run_baselining_batch(
+            cases, args.emtg, output_root, args.timeout, args.pyemtg
+        )
+        print(f"Wrote baselining evidence for {len(results)} case(s)")
+        return 0
 
     cases = discover_cases(TESTS_ROOT, filters=args.filter)
     previous = {

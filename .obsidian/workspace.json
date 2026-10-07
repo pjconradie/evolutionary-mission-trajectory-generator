@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "docker_deployment.readme"
+              "title": "stage6_checklist"
             }
           }
         ],
@@ -215,24 +215,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "7220b65faffa0c40",
+  "active": "e7220eb48456a1ab",
   "lastOpenFiles": [
-    "tests/integration/__pycache__/test_baselining.cpython-313-pytest-9.1.1.pyc",
     "testatron/ipopt/tests/readme.md",
-    "tests/integration/test_baselining.py",
-    "testatron/ipopt/tests/baselining_policy.json",
-    "testatron/ipopt/tests/stage6_policy.json",
-    "testatron/stage6_policy.json",
+    "docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/baselining-repeat-globalmissionoptions_mgalt_dlabounds.log",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/repeatability-summary.json",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104949630454Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/repeatability.json",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104950978997Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/replay/globalmissionoptions_MGALT_DLAbounds.emtgopt",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104950978997Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/replay/run.log",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104950978997Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/replay/provenance.json",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104950978997Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/replay/globalmissionoptions_MGALT_DLAbounds.emtg_spacecraftopt",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104950978997Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/replay/FAILURE_globalmissionoptions_MGALT_DLAbounds.emtg",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104950978997Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/replay/compatibility.json",
+    "testatron/ipopt/tests/tests/baselining-pilot-20261007T104943Z/global_mission_options-globalmissionoptions_MGALT_DLAbounds/baselining-20261007T104950978997Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds/replay/comparison.json",
     "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md",
     "baseline-artifacts/how_to_generate_results.readme.md",
-    "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/sat441.bsp",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/mar097.bsp",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/receding_horiz_3189_1burnApo_DiffCorr_15yr.bsp",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/ephemeris_files/de430.bsp",
-    "baseline-artifacts/stage57-final-137/cases/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/universe/gravity_files/LP150Q.grv",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "testatron/ipopt/tests/benchmarks/how_to_interpret_results.readme.md",
@@ -244,7 +244,6 @@
     "testatron/ipopt/benchmarks/how_to_generate_results.readme.md",
     "baseline-artifacts/results.readme.md",
     "testatron/ipopt/benchmarks/how_to_interpret_results.readme.md",
-    "docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme..md",
     "daily/2026-09-30.md",
     "docs/2_Missions/osiris-rex/docs/mbh_global_optimisation_issue.md",
