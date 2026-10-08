@@ -9,7 +9,7 @@
   },
   "decision_bounds_absolute_tolerance": 1e-11,
   "refinement_max_cpu_time_seconds": 1200,
-  "refinement_max_major_iterations": 1600,
+  "refinement_max_major_iterations": 32000,
   "execution_environment": {
     "OMP_NUM_THREADS": "1",
     "OPENBLAS_NUM_THREADS": "1",

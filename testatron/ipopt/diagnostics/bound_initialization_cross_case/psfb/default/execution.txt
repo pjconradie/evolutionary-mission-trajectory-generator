@@ -1,5 +1,0 @@
-status=unreviewed
-case=psfb
-mode=default
-exit_code=0
-duration_seconds=28

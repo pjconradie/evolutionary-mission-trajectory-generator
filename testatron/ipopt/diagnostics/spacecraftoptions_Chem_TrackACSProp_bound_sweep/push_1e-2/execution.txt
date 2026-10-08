@@ -1,4 +1,0 @@
-status=unreviewed
-value=1e-2
-exit_code=0
-duration_seconds=1

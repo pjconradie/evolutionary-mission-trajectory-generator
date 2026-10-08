@@ -1,0 +1,17 @@
+{
+  "status": "approved",
+  "case_id": "journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector",
+  "source_options": {
+    "path": "testatron/tests/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtgopt",
+    "sha256": "bd6b4d6957c7677937db8103e60883058c0fb498d6a42440255be2f7a2e384f8"
+  },
+  "baseline_mission": {
+    "path": "testatron/tests/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtg",
+    "sha256": "07abeec4ce60c72269ccc6c54d609bbd146fa8c2e9695a3158fed251e0bd995f"
+  },
+  "baselining_policy": {
+    "path": "testatron/ipopt/tests/baselining_policy.json",
+    "sha256": "9c972c549be699312ac99f0bf58e6bf2ab023504f9dfed297b5b3e7bcdeef18d",
+    "version": 2
+  }
+}

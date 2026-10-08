@@ -1,0 +1,7 @@
+{
+  "initialization_policy": "near-feasible-primal-seed",
+  "initial_infeasibility": 1.48e-07,
+  "iterations": 18706,
+  "terminal_constraint_violation": 1.8528545940521863e-08,
+  "native_exit": "Optimal Solution Found."
+}

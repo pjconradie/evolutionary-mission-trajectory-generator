@@ -1,0 +1,95 @@
+{
+  "case_id": "journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector",
+  "source_options": "/repo/testatron/tests/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtgopt",
+  "baseline_mission": "/repo/testatron/tests/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtg",
+  "source_sha256": "bd6b4d6957c7677937db8103e60883058c0fb498d6a42440255be2f7a2e384f8",
+  "baseline_sha256": "07abeec4ce60c72269ccc6c54d609bbd146fa8c2e9695a3158fed251e0bd995f",
+  "classification": "matched_snopt",
+  "evidence_directory": "/artifacts/baselining/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/attempt-1",
+  "status": "unreviewed",
+  "replay": {
+    "classification": "completed",
+    "log_file": "/artifacts/baselining/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/attempt-1/replay/run.log",
+    "return_code": 0,
+    "duration_seconds": 3.1806148759999995,
+    "output_file": "/artifacts/baselining/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/attempt-1/replay/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtg",
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-10,
+      "checks": {
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "decision_vector_length": true,
+        "objective": true,
+        "total_deterministic_deltav": true,
+        "total_flight_time_years": true,
+        "final_mass": true,
+        "journey_endpoints": true
+      },
+      "baseline_objective": 3.2035359307266638,
+      "generated_objective": 3.2035359307266638,
+      "generated_feasibility_metric": 1.4772488573744e-07,
+      "endpoint_tolerances": {
+        "epoch_days": 1e-08,
+        "position_km": 1.0,
+        "velocity_km_s": 1e-07,
+        "mass_kg": 1e-06
+      },
+      "endpoint_deltas": {
+        "max_epoch_days": 0.0,
+        "max_position_km": 0.0,
+        "max_velocity_km_s": 0.0,
+        "max_mass_kg": 0.0
+      }
+    },
+    "comparison_classification": "matched_snopt"
+  },
+  "refinement": {
+    "classification": "completed",
+    "log_file": "/artifacts/baselining/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/attempt-1/refinement/run.log",
+    "return_code": 0,
+    "duration_seconds": 44.447225479,
+    "output_file": "/artifacts/baselining/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector/attempt-1/refinement/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtg",
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "checks": {
+        "finite_objective": true,
+        "finite_feasibility": true,
+        "decision_bounds_complete": true,
+        "finite_decision_vector": true,
+        "decision_vector_in_bounds": true,
+        "finite_constraint_vector": true,
+        "feasible": true,
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "objective_non_regression": true,
+        "objective_agreement": true
+      },
+      "baseline_objective": 3.2035359307266638,
+      "generated_objective": 3.2035359307266638,
+      "objective_sense": "minimize",
+      "objective_relative_tolerance": 1e-06,
+      "objective_absolute_tolerance": 1e-10,
+      "objective_comparison_band": 3.2036359307266634e-06,
+      "objective_delta": 0.0,
+      "objective_absolute_delta": 0.0,
+      "generated_feasibility_metric": 1.4772488573744e-07,
+      "feasibility_tolerance": 1e-05,
+      "decision_bounds_absolute_tolerance": 1e-11
+    },
+    "ipopt": {
+      "initialization_policy": "near-feasible-primal-seed",
+      "initial_infeasibility": 1.48e-07,
+      "iterations": 18706,
+      "terminal_constraint_violation": 1.8528545940521863e-08,
+      "native_exit": "Optimal Solution Found."
+    },
+    "comparison_classification": "matched_snopt"
+  },
+  "detail": ""
+}
