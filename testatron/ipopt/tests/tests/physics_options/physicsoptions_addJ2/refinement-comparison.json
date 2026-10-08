@@ -1,0 +1,29 @@
+{
+  "status": "unreviewed",
+  "acceptable": true,
+  "checks": {
+    "finite_objective": true,
+    "finite_feasibility": true,
+    "decision_bounds_complete": true,
+    "finite_decision_vector": true,
+    "decision_vector_in_bounds": true,
+    "finite_constraint_vector": true,
+    "feasible": true,
+    "journey_names": true,
+    "event_topology": true,
+    "decision_descriptions": true,
+    "objective_non_regression": true,
+    "objective_agreement": true
+  },
+  "baseline_objective": 3.988489606694454,
+  "generated_objective": 3.9884895927266357,
+  "objective_sense": "minimize",
+  "objective_relative_tolerance": 1e-06,
+  "objective_absolute_tolerance": 1e-10,
+  "objective_comparison_band": 3.988589606694454e-06,
+  "objective_delta": -1.396781845741657e-08,
+  "objective_absolute_delta": 1.396781845741657e-08,
+  "generated_feasibility_metric": 8.14052316334551e-06,
+  "feasibility_tolerance": 1e-05,
+  "decision_bounds_absolute_tolerance": 1e-11
+}

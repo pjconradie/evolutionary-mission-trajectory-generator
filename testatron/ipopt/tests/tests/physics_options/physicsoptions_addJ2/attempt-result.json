@@ -1,0 +1,95 @@
+{
+  "case_id": "physics_options/physicsoptions_addJ2",
+  "source_options": "/repo/testatron/tests/physics_options/physicsoptions_addJ2.emtgopt",
+  "baseline_mission": "/repo/testatron/tests/physics_options/physicsoptions_addJ2.emtg",
+  "source_sha256": "47aef72cdf7f781458f0c97bfb33ed37592c37df36c45a5e579baee18dca6943",
+  "baseline_sha256": "29b497ed34857e3ecdbcc9cb59ee141668dffb50748c70794cb48676d7399e13",
+  "classification": "matched_snopt",
+  "evidence_directory": "/artifacts/baselining/physics_options/physicsoptions_addJ2/attempt-1",
+  "status": "unreviewed",
+  "replay": {
+    "classification": "completed",
+    "log_file": "/artifacts/baselining/physics_options/physicsoptions_addJ2/attempt-1/replay/run.log",
+    "return_code": 0,
+    "duration_seconds": 3.7625066270000502,
+    "output_file": "/artifacts/baselining/physics_options/physicsoptions_addJ2/attempt-1/replay/physicsoptions_addJ2.emtg",
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-10,
+      "checks": {
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "decision_vector_length": true,
+        "objective": true,
+        "total_deterministic_deltav": true,
+        "total_flight_time_years": true,
+        "final_mass": true,
+        "journey_endpoints": true
+      },
+      "baseline_objective": 3.988489606694454,
+      "generated_objective": 3.988489606694454,
+      "generated_feasibility_metric": 8.14158164535097e-06,
+      "endpoint_tolerances": {
+        "epoch_days": 1e-08,
+        "position_km": 1.0,
+        "velocity_km_s": 1e-07,
+        "mass_kg": 1e-06
+      },
+      "endpoint_deltas": {
+        "max_epoch_days": 0.0,
+        "max_position_km": 0.0,
+        "max_velocity_km_s": 0.0,
+        "max_mass_kg": 0.0
+      }
+    },
+    "comparison_classification": "matched_snopt"
+  },
+  "refinement": {
+    "classification": "completed",
+    "log_file": "/artifacts/baselining/physics_options/physicsoptions_addJ2/attempt-1/refinement/run.log",
+    "return_code": 0,
+    "duration_seconds": 3.2926279600000044,
+    "output_file": "/artifacts/baselining/physics_options/physicsoptions_addJ2/attempt-1/refinement/physicsoptions_addJ2.emtg",
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "checks": {
+        "finite_objective": true,
+        "finite_feasibility": true,
+        "decision_bounds_complete": true,
+        "finite_decision_vector": true,
+        "decision_vector_in_bounds": true,
+        "finite_constraint_vector": true,
+        "feasible": true,
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "objective_non_regression": true,
+        "objective_agreement": true
+      },
+      "baseline_objective": 3.988489606694454,
+      "generated_objective": 3.9884895927266357,
+      "objective_sense": "minimize",
+      "objective_relative_tolerance": 1e-06,
+      "objective_absolute_tolerance": 1e-10,
+      "objective_comparison_band": 3.988589606694454e-06,
+      "objective_delta": -1.396781845741657e-08,
+      "objective_absolute_delta": 1.396781845741657e-08,
+      "generated_feasibility_metric": 8.14052316334551e-06,
+      "feasibility_tolerance": 1e-05,
+      "decision_bounds_absolute_tolerance": 1e-11
+    },
+    "ipopt": {
+      "initialization_policy": "near-feasible-primal-seed",
+      "initial_infeasibility": 8.14e-06,
+      "iterations": 5,
+      "terminal_constraint_violation": 1.1213770904793433e-07,
+      "native_exit": "Optimal Solution Found."
+    },
+    "comparison_classification": "matched_snopt"
+  },
+  "detail": ""
+}
