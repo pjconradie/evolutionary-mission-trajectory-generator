@@ -2466,7 +2466,8 @@ def run_baselining_batch(
     for source in source_options:
         source = Path(source)
         case_root = batch_root / case_id(source)
-        shutil.rmtree(case_root, ignore_errors=True)
+        if case_root.exists():
+            shutil.rmtree(case_root)
         first, second, comparison = run_repeatable_baselining_case(
             source,
             source.with_suffix(".emtg"),

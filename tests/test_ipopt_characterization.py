@@ -1066,16 +1066,25 @@ def test_baselining_batch_replaces_selected_case_and_preserves_others(
         repository_root / "testatron/tests/global_mission_options/"
         "globalmissionoptions_MGALT_DLAbounds.emtgopt"
     )
-    stale = (
+    case_root = (
         tmp_path / "baselining/global_mission_options/"
-        "globalmissionoptions_MGALT_DLAbounds/stale.txt"
+        "globalmissionoptions_MGALT_DLAbounds"
     )
+    stale_files = (
+        case_root / "result 2.json",
+        case_root / "repeatability 2.json",
+    )
+    stale_directory = case_root / "attempt-1 2"
+    stale_nested_file = stale_directory / "stale.txt"
     preserved = (
         tmp_path / "baselining/global_mission_options/"
         "globalmissionoptions_MGALT_RLAbounds/preserved.txt"
     )
-    stale.parent.mkdir(parents=True)
-    stale.write_text("obsolete\n")
+    for stale_file in stale_files:
+        stale_file.parent.mkdir(parents=True, exist_ok=True)
+        stale_file.write_text("obsolete\n")
+    stale_nested_file.parent.mkdir(parents=True)
+    stale_nested_file.write_text("obsolete\n")
     preserved.parent.mkdir(parents=True)
     preserved.write_text("retain\n")
 
@@ -1097,12 +1106,9 @@ def test_baselining_batch_replaces_selected_case_and_preserves_others(
         [source], "EMTGv9", tmp_path, 1.0
     )
 
-    case_root = (
-        tmp_path / "baselining/global_mission_options/"
-        "globalmissionoptions_MGALT_DLAbounds"
-    )
     assert len(results) == 1
-    assert not stale.exists()
+    assert all(not stale_file.exists() for stale_file in stale_files)
+    assert not stale_directory.exists()
     assert preserved.read_text() == "retain\n"
     assert (case_root / "attempt-1" / "result.json").is_file()
     assert (case_root / "attempt-2" / "result.json").is_file()
