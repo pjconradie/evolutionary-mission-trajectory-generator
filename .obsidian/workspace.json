@@ -36,7 +36,7 @@
             }
           },
           {
-            "id": "e7220eb48456a1ab",
+            "id": "8be8d04d979262a8",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -47,6 +47,34 @@
               },
               "icon": "lucide-file",
               "title": "stage6_checklist"
+            }
+          },
+          {
+            "id": "1248c444cdae4c80",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "baselining_commands"
+            }
+          },
+          {
+            "id": "7952d4e437e8a90a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "baselining_decision_log"
             }
           },
           {
@@ -64,7 +92,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -229,22 +257,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "e7220eb48456a1ab",
+  "active": "7952d4e437e8a90a",
   "lastOpenFiles": [
+    "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "testatron/ipopt/tests/readme.md",
-    "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
+    "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
     "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/result.json",
     "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/repeatability.json",
-    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/result.json",
-    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/repeatability.json",
     "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-1/repeatability.json",
-    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/provenance.json",
-    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/comparison.json",
+    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/summary.json",
     "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/XFfile.csv",
-    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/FAILURE_globalmissionoptions_MGALT_RLAbounds.emtg",
+    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/run.log",
+    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/provenance.json",
+    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/globalmissionoptions_MGALT_RLAbounds.emtgopt",
     "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/globalmissionoptions_MGALT_RLAbounds.emtg_spacecraftopt",
-    "docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md",
+    "testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/attempt-2/replay/compatibility.json",
+    "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
+    "docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md",
     "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md",
     "baseline-artifacts/how_to_generate_results.readme.md",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
@@ -264,7 +294,6 @@
     "docs/2_Missions/osiris-rex/docs/osiris_rex.readme.md",
     "docs/2_Missions/osiris-rex/docs/osiris_rex_mgandsm_pipeline.md",
     "docs/2_Missions/osiris-rex/plans/osiris_rex_mgandsm_pipeline.md",
-    "docs/2_Missions/osiris-rex/plans/osiris-rex-mgandsm-pipeline.md",
-    "docs/2_Missions/osiris-rex/plans/osiris-rexx-mgandsm-pipeline.md"
+    "docs/2_Missions/osiris-rex/plans/osiris-rex-mgandsm-pipeline.md"
   ]
 }

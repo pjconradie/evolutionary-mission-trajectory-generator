@@ -29,6 +29,9 @@ REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 STAGED_EARLIEST_POSSIBLE_EPOCHS = {
     "journey_options/park_to_SOI_FBLT": 58860.0,
 }
+BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES = {
+    "global_mission_options/globalmissionoptions_MGALT_DLAbounds": "Atlas_V_401",
+}
 PUBLIC_HARDWARE_ROOT = (
     REPOSITORY_ROOT
     / "docs"
@@ -1566,6 +1569,28 @@ def prepare_case(
             TESTATRON_ROOT / "universe", execution_repository_root
         )
     hardware_root, compatibility_mappings, hardware_overrides = _hardware_root_and_mappings(options)
+    launch_vehicle_override = BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES.get(identifier)
+    if launch_vehicle_override is not None:
+        launch_library = hardware_root / options.LaunchVehicleLibraryFile
+        if launch_vehicle_override not in _launch_vehicle_keys(launch_library):
+            raise ValueError(
+                f"Launch vehicle override {launch_vehicle_override} is unavailable "
+                f"in {launch_library}"
+            )
+        original_key = options.LaunchVehicleKey
+        options.LaunchVehicleKey = launch_vehicle_override
+        compatibility_mappings.append(
+            {
+                "option": "LaunchVehicleKey",
+                "source": original_key,
+                "replacement": launch_vehicle_override,
+                "reason": (
+                    "case-scoped public launch vehicle override: the implicit "
+                    "Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the "
+                    "immutable SNOPT seed requires C3 48.5809"
+                ),
+            }
+        )
     replacement_spacecraft = [
         dependency
         for dependency in preflight["dependencies"]
@@ -1857,6 +1882,91 @@ def compare_baselining_refinement(
     comparison["checks"]["objective_agreement"] = objective_agreement
     comparison["acceptable"] = all(comparison["checks"].values())
     return comparison
+
+
+def _baselining_endpoint_summary(mission):
+    """Return initial and final journey states in a portable comparison form."""
+    journeys = []
+    for index, journey in enumerate(mission.Journeys):
+        if not journey.missionevents:
+            journeys.append({"journey_index": index, "endpoints": None})
+            continue
+
+        def event_state(event):
+            return {
+                "epoch_julian_date": event.JulianDate,
+                "position_km": list(event.SpacecraftState[:3]),
+                "velocity_km_s": list(event.SpacecraftState[3:]),
+                "mass_kg": event.Mass,
+            }
+
+        journeys.append(
+            {
+                "journey_index": index,
+                "start": event_state(journey.missionevents[0]),
+                "end": event_state(journey.missionevents[-1]),
+            }
+        )
+    return journeys
+
+
+def baselining_comparison_summary(stage, baseline, generated, comparison):
+    """Summarize SNOPT and generated mission values used in one stage comparison."""
+    baseline_descriptions = [
+        _normalized_description(description) for description in baseline.Xdescriptions
+    ]
+    generated_descriptions = [
+        _normalized_description(description) for description in generated.Xdescriptions
+    ]
+    baseline_topology = _event_topology(baseline)
+    generated_topology = _event_topology(generated)
+    return {
+        "status": "unreviewed",
+        "stage": stage,
+        "ipopt_role": "evaluation_only" if stage == "replay" else "seeded_refinement",
+        "snopt": {
+            "objective": baseline.objective_value,
+            "schema": {
+                "decision_vector_length": len(baseline.DecisionVector),
+                "decision_descriptions": baseline_descriptions,
+            },
+            "topology": baseline_topology,
+            "flight_time_years": baseline.total_flight_time_years,
+            "final_mass_kg": baseline.final_mass_including_propellant_margin,
+            "deterministic_deltav_km_s": baseline.total_deterministic_deltav,
+            "endpoints": _baselining_endpoint_summary(baseline),
+        },
+        "ipopt": {
+            "objective": generated.objective_value,
+            "schema": {
+                "decision_vector_length": len(generated.DecisionVector),
+                "decision_descriptions": generated_descriptions,
+            },
+            "topology": generated_topology,
+            "flight_time_years": generated.total_flight_time_years,
+            "final_mass_kg": generated.final_mass_including_propellant_margin,
+            "deterministic_deltav_km_s": generated.total_deterministic_deltav,
+            "endpoints": _baselining_endpoint_summary(generated),
+        },
+        "differences": {
+            "objective": generated.objective_value - baseline.objective_value,
+            "schema": {
+                "decision_vector_length": len(generated.DecisionVector)
+                - len(baseline.DecisionVector),
+                "decision_descriptions_match": generated_descriptions
+                == baseline_descriptions,
+            },
+            "topology_matches": generated_topology == baseline_topology,
+            "flight_time_years": generated.total_flight_time_years
+            - baseline.total_flight_time_years,
+            "final_mass_kg": generated.final_mass_including_propellant_margin
+            - baseline.final_mass_including_propellant_margin,
+            "deterministic_deltav_km_s": generated.total_deterministic_deltav
+            - baseline.total_deterministic_deltav,
+            "endpoint_maximums": comparison.get("endpoint_deltas", {}),
+        },
+        "checks": comparison.get("checks", {}),
+    }
 
 
 def compare_deliberate_infeasible(baseline, generated, feasibility_tolerance):
@@ -2352,6 +2462,165 @@ def run_baselining_batch(
     return results
 
 
+def _promotion_case_paths(case_identifier, output_root, tests_root=TESTS_ROOT):
+    """Resolve immutable inputs and evidence roots for one reviewed case."""
+    relative_case = Path(case_identifier)
+    if (
+        relative_case.is_absolute()
+        or ".." in relative_case.parts
+        or len(relative_case.parts) != 2
+    ):
+        raise ValueError(f"Invalid Testatron case identifier: {case_identifier}")
+    source_options = Path(tests_root) / relative_case.with_suffix(".emtgopt")
+    baseline_mission = source_options.with_suffix(".emtg")
+    if not source_options.is_file() or not baseline_mission.is_file():
+        raise ValueError(f"Immutable Testatron pair not found: {relative_case}")
+    output_root = Path(output_root)
+    return (
+        relative_case.as_posix(),
+        source_options,
+        baseline_mission,
+        output_root / "baselining" / relative_case,
+        output_root / relative_case,
+    )
+
+
+def _load_promotion_json(path, description):
+    """Load one required JSON evidence file with a precise promotion error."""
+    try:
+        return json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"Cannot read {description}: {path}") from error
+
+
+def _validated_promoted_attempt(case_root, result, source_sha256, baseline_sha256, policy):
+    """Validate one matching attempt and return its local refined mission."""
+    if result.get("classification") != "matched_snopt":
+        raise ValueError("Promotion requires both attempts to be matched_snopt")
+    if (
+        result.get("source_sha256") != source_sha256
+        or result.get("baseline_sha256") != baseline_sha256
+    ):
+        raise ValueError("Promotion evidence does not match immutable input hashes")
+    replay = result.get("replay") or {}
+    refinement = result.get("refinement") or {}
+    if not (replay.get("comparison") or {}).get("acceptable"):
+        raise ValueError("Promotion requires an acceptable replay comparison")
+    if not (refinement.get("comparison") or {}).get("acceptable"):
+        raise ValueError("Promotion requires an acceptable refinement comparison")
+    ipopt = refinement.get("ipopt") or {}
+    if ipopt.get("native_exit") not in policy["accepted_native_exits"]:
+        raise ValueError("Promotion requires an accepted native IPOPT exit")
+    output_file = refinement.get("output_file")
+    if not output_file:
+        raise ValueError("Promotion evidence does not identify a refined mission")
+    evidence_directory = Path(result.get("evidence_directory", ""))
+    attempt_name = evidence_directory.name
+    if attempt_name not in {"attempt-1", "attempt-2"}:
+        raise ValueError("Promotion evidence has an invalid attempt directory")
+    generated_mission = case_root / attempt_name / "refinement" / Path(output_file).name
+    if not generated_mission.is_file():
+        raise ValueError(f"Refined mission is missing: {generated_mission}")
+    return attempt_name, generated_mission, replay, refinement
+
+
+def promote_baselining_case(
+    case_identifier,
+    output_root=DEFAULT_OUTPUT_ROOT,
+    replace=False,
+    tests_root=TESTS_ROOT,
+):
+    """Promote one manually approved, fully matched baselining case.
+
+    This copies a canonical IPOPT mission and compact verification evidence from
+    replaceable baselining output into the curated Testatron IPOPT tree.
+    """
+    (
+        case_identifier,
+        source_options,
+        baseline_mission,
+        case_root,
+        curated_root,
+    ) = _promotion_case_paths(case_identifier, output_root, tests_root)
+    summary = _load_promotion_json(case_root / "result.json", "batch result")
+    repeatability = _load_promotion_json(
+        case_root / "repeatability.json", "repeatability evidence"
+    )
+    if summary.get("case_id") != case_identifier:
+        raise ValueError("Promotion result does not match the requested case")
+    if not repeatability.get("stable") or not (summary.get("repeatability") or {}).get(
+        "stable"
+    ):
+        raise ValueError("Promotion requires stable repeatability evidence")
+
+    source_sha256 = _sha256(source_options)
+    baseline_sha256 = _sha256(baseline_mission)
+    policy = load_baselining_policy()
+    first = summary.get("first") or {}
+    second = summary.get("second") or {}
+    selected_attempt, generated_mission, replay, refinement = _validated_promoted_attempt(
+        case_root, first, source_sha256, baseline_sha256, policy
+    )
+    _validated_promoted_attempt(case_root, second, source_sha256, baseline_sha256, policy)
+
+    if curated_root.exists():
+        if not replace:
+            raise ValueError(
+                f"Curated baseline already exists: {curated_root}; use --replace-promoted"
+            )
+        shutil.rmtree(curated_root)
+    curated_root.mkdir(parents=True)
+    canonical_mission = curated_root / f"{curated_root.name}.emtg"
+    shutil.copy2(generated_mission, canonical_mission)
+    shutil.copy2(case_root / "repeatability.json", curated_root / "repeatability.json")
+    shutil.copy2(
+        case_root / selected_attempt / "replay" / "comparison.json",
+        curated_root / "replay-comparison.json",
+    )
+    shutil.copy2(
+        case_root / selected_attempt / "refinement" / "comparison.json",
+        curated_root / "refinement-comparison.json",
+    )
+    (curated_root / "ipopt-diagnostics.json").write_text(
+        json.dumps(refinement["ipopt"], indent=2) + "\n"
+    )
+    provenance = {
+        "status": "approved",
+        "case_id": case_identifier,
+        "source_options": {
+            "path": source_options.relative_to(REPOSITORY_ROOT).as_posix(),
+            "sha256": source_sha256,
+        },
+        "baseline_mission": {
+            "path": baseline_mission.relative_to(REPOSITORY_ROOT).as_posix(),
+            "sha256": baseline_sha256,
+        },
+        "baselining_policy": {
+            "path": BASELINING_POLICY.relative_to(REPOSITORY_ROOT).as_posix(),
+            "sha256": _sha256(BASELINING_POLICY),
+            "version": policy["version"],
+        },
+    }
+    (curated_root / "provenance.json").write_text(
+        json.dumps(provenance, indent=2) + "\n"
+    )
+    promotion = {
+        "status": "approved",
+        "case_id": case_identifier,
+        "source_evidence": (Path("baselining") / case_identifier).as_posix(),
+        "selected_attempt": selected_attempt,
+        "canonical_mission": canonical_mission.name,
+        "canonical_mission_sha256": _sha256(canonical_mission),
+        "replay_acceptable": replay["comparison"]["acceptable"],
+        "refinement_acceptable": refinement["comparison"]["acceptable"],
+        "native_exit": refinement["ipopt"]["native_exit"],
+    }
+    (curated_root / "promotion.json").write_text(
+        json.dumps(promotion, indent=2) + "\n"
+    )
+    return promotion
+
+
 def run_baselining_case(
     source_options,
     baseline_mission,
@@ -2419,13 +2688,21 @@ def run_baselining_case(
             result.classification = result.replay["classification"]
             result.detail = result.replay.get("detail", "Replay did not complete")
         else:
-            comparison = compare_replay(
-                Mission.Mission(str(baseline_mission)),
-                Mission.Mission(result.replay["output_file"]),
-            )
+            baseline = Mission.Mission(str(baseline_mission))
+            generated = Mission.Mission(result.replay["output_file"])
+            comparison = compare_replay(baseline, generated)
             result.replay["comparison"] = comparison
             (case_directory / "comparison.json").write_text(
                 json.dumps(comparison, indent=2) + "\n"
+            )
+            (case_directory / "summary.json").write_text(
+                json.dumps(
+                    baselining_comparison_summary(
+                        "replay", baseline, generated, comparison
+                    ),
+                    indent=2,
+                )
+                + "\n"
             )
             if not comparison["acceptable"]:
                 result.classification = _baselining_comparison_classification(comparison)
@@ -2479,9 +2756,11 @@ def run_baselining_case(
                         "detail", "Refinement did not complete"
                     )
                 else:
+                    baseline = Mission.Mission(str(baseline_mission))
+                    generated = Mission.Mission(result.refinement["output_file"])
                     refinement_comparison = compare_baselining_refinement(
-                        Mission.Mission(str(baseline_mission)),
-                        Mission.Mission(result.refinement["output_file"]),
+                        baseline,
+                        generated,
                         MissionOptions.MissionOptions(
                             str(source_options)
                         ).snopt_feasibility_tolerance,
@@ -2499,6 +2778,18 @@ def run_baselining_case(
                     )
                     (refinement_directory / "comparison.json").write_text(
                         json.dumps(refinement_comparison, indent=2) + "\n"
+                    )
+                    (refinement_directory / "summary.json").write_text(
+                        json.dumps(
+                            baselining_comparison_summary(
+                                "refinement",
+                                baseline,
+                                generated,
+                                refinement_comparison,
+                            ),
+                            indent=2,
+                        )
+                        + "\n"
                     )
                     if (
                         refinement_comparison["acceptable"]
@@ -2544,6 +2835,21 @@ def build_parser():
         action="store_true",
         help="replace the fixed baselining evidence root for selected Testatron cases",
     )
+    parser.add_argument(
+        "--promote-baseline",
+        metavar="CASE_ID",
+        help="copy one approved matched baselining case into the curated results tree",
+    )
+    parser.add_argument(
+        "--approve-baseline",
+        action="store_true",
+        help="acknowledge manual approval before promoting a curated baseline",
+    )
+    parser.add_argument(
+        "--replace-promoted",
+        action="store_true",
+        help="replace an existing curated baseline after promotion validation",
+    )
     parser.add_argument("-e", "--emtg", help="path to the IPOPT-enabled EMTG executable")
     parser.add_argument("--pyemtg", default=str(PYEMTG_ROOT))
     parser.add_argument("--output-root", default=str(DEFAULT_OUTPUT_ROOT))
@@ -2582,6 +2888,16 @@ def main(argv=None):
         results = _load_case_results(output_root)
         write_manifests(output_root, results)
         print(f"Wrote unreviewed report for {len(results)} existing case result(s)")
+        return 0
+    if args.promote_baseline:
+        if not args.approve_baseline:
+            raise SystemExit("--approve-baseline is required with --promote-baseline")
+        promotion = promote_baselining_case(
+            args.promote_baseline,
+            output_root,
+            replace=args.replace_promoted,
+        )
+        print(f"Promoted {promotion['case_id']} from {promotion['selected_attempt']}")
         return 0
     if not args.emtg:
         raise SystemExit("--emtg is required unless --report-only is used")

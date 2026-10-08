@@ -199,6 +199,50 @@ Before considering any manual decision, inspect both attempts' `run.log`,
 baseline hashes are unchanged. Do not modify the policy or a case tolerance to
 make one result pass.
 
+## Promote a Reviewed Baseline
+
+Baselining evidence is replaceable and remains under `baselining/`. Promotion
+is a separate, explicit action that creates a curated result below
+`testatron/ipopt/tests/tests/<group>/<case>/`. It never runs automatically as
+part of a pytest baselining command.
+
+Before promotion, a reviewer must record approval in
+[`docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md`](../../../docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md).
+The promotion command then verifies that both attempts are stable and
+`matched_snopt`, replay and refinement comparisons are acceptable, the native
+IPOPT exit is policy-accepted, and the immutable input hashes still match.
+
+```zsh
+python testatron/ipopt_characterization.py \
+  --promote-baseline global_mission_options/globalmissionoptions_MGALT_DLAbounds \
+  --approve-baseline \
+  --output-root "$PWD/testatron/ipopt/tests/tests"
+```
+
+The command creates a compact curated package:
+
+```text
+testatron/ipopt/tests/tests/
+  global_mission_options/
+    globalmissionoptions_MGALT_DLAbounds/
+      globalmissionoptions_MGALT_DLAbounds.emtg
+      promotion.json
+      provenance.json
+      replay-comparison.json
+      refinement-comparison.json
+      repeatability.json
+      ipopt-diagnostics.json
+```
+
+The two complete working attempts remain under `baselining/`; promotion copies
+one canonical IPOPT mission and the evidence required to verify it. Promotion
+refuses to overwrite an existing curated directory. After a separate review,
+use `--replace-promoted` only when replacing that specific curated result is
+intentional.
+
+Case #1 cannot be promoted while it remains `mismatch_snopt`. A failed
+promotion leaves both curated output and immutable Testatron inputs untouched.
+
 ## Troubleshooting
 
 - **`/repo/...` not found on macOS:** it is a container path. Use the pytest

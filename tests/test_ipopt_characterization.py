@@ -799,6 +799,32 @@ def test_prepare_case_preserves_optimization_policy(
     assert len(prepared.Journeys) == len(original.Journeys)
 
 
+def test_prepare_case_records_case_scoped_launch_vehicle_override(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert prepared.LaunchVehicleKey == "Atlas_V_401"
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert {
+        "option": "LaunchVehicleKey",
+        "source": "Falcon_9_FT_(RTLS)",
+        "replacement": "Atlas_V_401",
+        "reason": (
+            "case-scoped public launch vehicle override: the implicit "
+            "Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the "
+            "immutable SNOPT seed requires C3 48.5809"
+        ),
+    } in compatibility["mappings"]
+
+
 def test_prepare_case_maps_august_nlsii_library(repository_root, tmp_path):
     source = (
         repository_root
@@ -974,6 +1000,28 @@ def test_baselining_repeatability_requires_equal_classifications_and_comparisons
     ]
 
 
+def test_baselining_comparison_summary_reports_snopt_generated_and_deltas(
+    repository_root
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtg"
+    )
+    Mission, _ = ipopt_characterization._load_pyemtg()
+    baseline = Mission.Mission(str(source))
+    comparison = ipopt_characterization.compare_replay(baseline, baseline)
+
+    summary = ipopt_characterization.baselining_comparison_summary(
+        "replay", baseline, baseline, comparison
+    )
+
+    assert summary["ipopt_role"] == "evaluation_only"
+    assert summary["snopt"]["objective"] == summary["ipopt"]["objective"]
+    assert summary["differences"]["deterministic_deltav_km_s"] == 0.0
+    assert summary["differences"]["schema"]["decision_descriptions_match"]
+    assert summary["differences"]["topology_matches"]
+
+
 def test_repeatable_baselining_downgrades_an_unstable_match(tmp_path, monkeypatch):
     def result(directory, classification):
         directory.mkdir()
@@ -1056,6 +1104,142 @@ def test_baselining_batch_replaces_selected_case_and_preserves_others(
     assert (case_root / "attempt-1" / "result.json").is_file()
     assert (case_root / "attempt-2" / "result.json").is_file()
     assert (case_root / "repeatability.json").is_file()
+
+
+def _write_promotable_baselining_evidence(output_root, source):
+    case_identifier = ipopt_characterization.case_id(source)
+    case_root = output_root / "baselining" / case_identifier
+    baseline = source.with_suffix(".emtg")
+    attempts = []
+    for attempt_name in ("attempt-1", "attempt-2"):
+        replay = case_root / attempt_name / "replay"
+        refinement = case_root / attempt_name / "refinement"
+        replay.mkdir(parents=True)
+        refinement.mkdir()
+        generated = refinement / "generated.emtg"
+        generated.write_bytes(baseline.read_bytes())
+        replay_comparison = {"acceptable": True, "checks": {"objective": True}}
+        refinement_comparison = {
+            "acceptable": True,
+            "checks": {"objective_agreement": True},
+        }
+        (replay / "comparison.json").write_text(json.dumps(replay_comparison))
+        (refinement / "comparison.json").write_text(
+            json.dumps(refinement_comparison)
+        )
+        attempts.append(
+            {
+                "case_id": case_identifier,
+                "source_sha256": ipopt_characterization._sha256(source),
+                "baseline_sha256": ipopt_characterization._sha256(baseline),
+                "classification": "matched_snopt",
+                "evidence_directory": str(case_root / attempt_name),
+                "replay": {"comparison": replay_comparison},
+                "refinement": {
+                    "comparison": refinement_comparison,
+                    "ipopt": {"native_exit": "Optimal Solution Found."},
+                    "output_file": f"/artifacts/{attempt_name}/refinement/generated.emtg",
+                },
+            }
+        )
+    repeatability = {"stable": True, "differences": {}}
+    (case_root / "repeatability.json").write_text(json.dumps(repeatability))
+    (case_root / "result.json").write_text(
+        json.dumps(
+            {
+                "case_id": case_identifier,
+                "first": attempts[0],
+                "second": attempts[1],
+                "repeatability": repeatability,
+            }
+        )
+    )
+    return case_root
+
+
+def test_promote_baselining_case_copies_verified_canonical_evidence(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    _write_promotable_baselining_evidence(tmp_path, source)
+
+    promotion = ipopt_characterization.promote_baselining_case(
+        ipopt_characterization.case_id(source), tmp_path
+    )
+
+    curated_root = tmp_path / ipopt_characterization.case_id(source)
+    assert promotion["selected_attempt"] == "attempt-1"
+    assert (curated_root / f"{source.stem}.emtg").is_file()
+    assert (curated_root / "promotion.json").is_file()
+    assert (curated_root / "provenance.json").is_file()
+    assert (curated_root / "replay-comparison.json").is_file()
+    assert (curated_root / "refinement-comparison.json").is_file()
+    assert (curated_root / "repeatability.json").is_file()
+    assert (curated_root / "ipopt-diagnostics.json").is_file()
+
+
+def test_promote_baselining_case_rejects_nonmatching_evidence_without_overwrite(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    case_root = _write_promotable_baselining_evidence(tmp_path, source)
+    summary_path = case_root / "result.json"
+    summary = json.loads(summary_path.read_text())
+    summary["first"]["classification"] = "mismatch_snopt"
+    summary_path.write_text(json.dumps(summary))
+    curated_root = tmp_path / ipopt_characterization.case_id(source)
+    curated_root.mkdir(parents=True)
+    sentinel = curated_root / "keep.txt"
+    sentinel.write_text("preserve\n")
+
+    with pytest.raises(ValueError, match="matched_snopt"):
+        ipopt_characterization.promote_baselining_case(
+            ipopt_characterization.case_id(source), tmp_path
+        )
+
+    assert sentinel.read_text() == "preserve\n"
+
+
+def test_promote_baselining_case_requires_explicit_curated_replacement(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root / "testatron/tests/global_mission_options/"
+        "globalmissionoptions_MGALT_DLAbounds.emtgopt"
+    )
+    _write_promotable_baselining_evidence(tmp_path, source)
+    case_identifier = ipopt_characterization.case_id(source)
+    ipopt_characterization.promote_baselining_case(case_identifier, tmp_path)
+    curated_root = tmp_path / case_identifier
+    sentinel = curated_root / "keep.txt"
+    sentinel.write_text("preserve\n")
+
+    with pytest.raises(ValueError, match="replace-promoted"):
+        ipopt_characterization.promote_baselining_case(case_identifier, tmp_path)
+
+    assert sentinel.read_text() == "preserve\n"
+    ipopt_characterization.promote_baselining_case(
+        case_identifier, tmp_path, replace=True
+    )
+    assert not sentinel.exists()
+
+
+def test_main_requires_manual_approval_for_promotion(tmp_path):
+    with pytest.raises(SystemExit, match="approve-baseline"):
+        ipopt_characterization.main(
+            [
+                "--promote-baseline",
+                "global_mission_options/globalmissionoptions_MGALT_DLAbounds",
+                "--output-root",
+                str(tmp_path),
+            ]
+        )
 
 
 def test_main_dispatches_baselining_to_fixed_batch_root(
