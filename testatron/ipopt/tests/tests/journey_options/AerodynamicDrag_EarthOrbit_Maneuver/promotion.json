@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "journey_options/AerodynamicDrag_EarthOrbit_Maneuver",
+  "source_evidence": "baselining/journey_options/AerodynamicDrag_EarthOrbit_Maneuver",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "AerodynamicDrag_EarthOrbit_Maneuver.emtg",
+  "canonical_mission_sha256": "af355874847d50a185459c0afcceb210a58045bd770ff5e9ec5124f89d467261",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}

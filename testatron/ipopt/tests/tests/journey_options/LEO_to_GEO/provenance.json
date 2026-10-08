@@ -1,0 +1,17 @@
+{
+  "status": "approved",
+  "case_id": "journey_options/LEO_to_GEO",
+  "source_options": {
+    "path": "testatron/tests/journey_options/LEO_to_GEO.emtgopt",
+    "sha256": "188a4bf405d15cc74f8e02297c2f7135e7785aabbe9af70902b64d6c41063245"
+  },
+  "baseline_mission": {
+    "path": "testatron/tests/journey_options/LEO_to_GEO.emtg",
+    "sha256": "e764387a71cb9851611823e729bf5b7fad105fe2f824ff01a7874823af502989"
+  },
+  "baselining_policy": {
+    "path": "testatron/ipopt/tests/baselining_policy.json",
+    "sha256": "ded1df9184d6a6a3a054c38d322fa2295dcd76a17f26058fe963f2903143e234",
+    "version": 2
+  }
+}

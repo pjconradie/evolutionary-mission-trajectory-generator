@@ -330,11 +330,14 @@ def load_baselining_policy(policy_path=BASELINING_POLICY):
         "version",
         "accepted_native_exits",
         "seeded_refinement",
+        "decision_bounds_absolute_tolerance",
+        "refinement_max_cpu_time_seconds",
+        "refinement_max_major_iterations",
         "execution_environment",
         "calibration_cases",
     }
-    if set(payload) != required or payload["version"] != 1:
-        raise ValueError("Stage 6 policy must declare version 1 and all required fields")
+    if set(payload) != required or payload["version"] != 2:
+        raise ValueError("Stage 6 policy must declare version 2 and all required fields")
     if payload["accepted_native_exits"] != ["Optimal Solution Found."]:
         raise ValueError("Stage 6 policy must declare the accepted native IPOPT exit")
     if payload["seeded_refinement"] != {
@@ -342,6 +345,22 @@ def load_baselining_policy(policy_path=BASELINING_POLICY):
         "MBH_RNG_seed": 12345,
     }:
         raise ValueError("Stage 6 policy must declare deterministic seeded refinement")
+    if (
+        not isinstance(payload["decision_bounds_absolute_tolerance"], (int, float))
+        or isinstance(payload["decision_bounds_absolute_tolerance"], bool)
+        or payload["decision_bounds_absolute_tolerance"] <= 0
+    ):
+        raise ValueError("Stage 6 policy must declare a positive decision-bound tolerance")
+    for field in (
+        "refinement_max_cpu_time_seconds",
+        "refinement_max_major_iterations",
+    ):
+        if (
+            not isinstance(payload[field], int)
+            or isinstance(payload[field], bool)
+            or payload[field] <= 0
+        ):
+            raise ValueError(f"Stage 6 policy must declare a positive {field}")
     expected_environment = {
         "OMP_NUM_THREADS": "1",
         "OPENBLAS_NUM_THREADS": "1",
@@ -1784,9 +1803,9 @@ def compare_refinement(
     *,
     objective_policy=None,
     objective_sense="minimize",
+    decision_bounds_absolute_tolerance=1.0e-12,
 ):
     """Check feasibility, topology, and objective non-regression after refinement."""
-    bound_absolute_tolerance = 1.0e-12
     bound_relative_tolerance = 1.0e-10
     objective_policy = objective_policy or LEGACY_REFINEMENT_POLICY
     if objective_sense not in {"minimize", "maximize"}:
@@ -1799,7 +1818,7 @@ def compare_refinement(
     )
 
     def decision_value_in_bounds(value, lower_bound, upper_bound):
-        tolerance = bound_absolute_tolerance + bound_relative_tolerance * max(
+        tolerance = decision_bounds_absolute_tolerance + bound_relative_tolerance * max(
             abs(value), abs(lower_bound), abs(upper_bound)
         )
         return lower_bound - tolerance <= value <= upper_bound + tolerance
@@ -1861,11 +1880,17 @@ def compare_refinement(
         "objective_absolute_delta": abs(objective_delta),
         "generated_feasibility_metric": abs(generated.worst_violation),
         "feasibility_tolerance": feasibility_tolerance,
+        "decision_bounds_absolute_tolerance": decision_bounds_absolute_tolerance,
     }
 
 
 def compare_baselining_refinement(
-    baseline, generated, feasibility_tolerance, *, objective_sense="minimize"
+    baseline,
+    generated,
+    feasibility_tolerance,
+    *,
+    objective_sense="minimize",
+    decision_bounds_absolute_tolerance=1.0e-12,
 ):
     """Require two-sided objective agreement for an immutable baseline pair."""
     comparison = compare_refinement(
@@ -1874,6 +1899,7 @@ def compare_baselining_refinement(
         feasibility_tolerance,
         objective_policy=BASELINING_REFINEMENT_POLICY,
         objective_sense=objective_sense,
+        decision_bounds_absolute_tolerance=decision_bounds_absolute_tolerance,
     )
     objective_agreement = (
         comparison["objective_absolute_delta"]
@@ -2302,11 +2328,13 @@ def _baselining_comparison_classification(comparison):
 
 
 def _apply_baselining_refinement_policy(prepared_options, policy, pyemtg_root):
-    """Pin MBH behavior in the staged refinement options copy."""
+    """Pin deterministic baselining settings in the staged refinement copy."""
     _, MissionOptions = _load_pyemtg(pyemtg_root)
     options = MissionOptions.MissionOptions(str(prepared_options))
     options.seed_MBH = policy["seeded_refinement"]["seed_MBH"]
     options.MBH_RNG_seed = policy["seeded_refinement"]["MBH_RNG_seed"]
+    options.snopt_max_run_time = policy["refinement_max_cpu_time_seconds"]
+    options.snopt_major_iterations = policy["refinement_max_major_iterations"]
     options.write_options_file(
         str(prepared_options), not options.print_only_non_default_options
     )
@@ -2462,6 +2490,48 @@ def run_baselining_batch(
     return results
 
 
+def write_baselining_summary(output_root):
+    """Write a compact report from all case-level baselining result files."""
+    batch_root = Path(output_root) / "baselining"
+    cases = []
+    for result_path in sorted(batch_root.glob("*/*/result.json")):
+        try:
+            result = json.loads(result_path.read_text())
+        except (OSError, json.JSONDecodeError) as error:
+            raise ValueError(f"Cannot read baselining result: {result_path}") from error
+        first = result.get("first", {})
+        second = result.get("second", {})
+        cases.append(
+            {
+                "case_id": result.get("case_id"),
+                "classification": first.get("classification"),
+                "detail": {"first": first.get("detail", ""), "second": second.get("detail", "")},
+                "comparison_classification": {
+                    "first": {
+                        "replay": (first.get("replay") or {}).get(
+                            "comparison_classification"
+                        ),
+                        "refinement": (first.get("refinement") or {}).get(
+                            "comparison_classification"
+                        ),
+                    },
+                    "second": {
+                        "replay": (second.get("replay") or {}).get(
+                            "comparison_classification"
+                        ),
+                        "refinement": (second.get("refinement") or {}).get(
+                            "comparison_classification"
+                        ),
+                    },
+                },
+            }
+        )
+    summary = {"case_count": len(cases), "cases": cases}
+    summary_path = batch_root / "baselining-summary.json"
+    summary_path.write_text(json.dumps(summary, indent=2) + "\n")
+    return summary_path, summary
+
+
 def _promotion_case_paths(case_identifier, output_root, tests_root=TESTS_ROOT):
     """Resolve immutable inputs and evidence roots for one reviewed case."""
     relative_case = Path(case_identifier)
@@ -2580,6 +2650,10 @@ def promote_baselining_case(
     shutil.copy2(
         case_root / selected_attempt / "refinement" / "comparison.json",
         curated_root / "refinement-comparison.json",
+    )
+    shutil.copy2(
+        case_root / selected_attempt / "result.json",
+        curated_root / "attempt-result.json",
     )
     (curated_root / "ipopt-diagnostics.json").write_text(
         json.dumps(refinement["ipopt"], indent=2) + "\n"
@@ -2769,6 +2843,9 @@ def run_baselining_case(
                                 str(source_options)
                             ).objective_type
                         ),
+                        decision_bounds_absolute_tolerance=policy[
+                            "decision_bounds_absolute_tolerance"
+                        ],
                     )
                     result.refinement["comparison"] = refinement_comparison
                     result.refinement["ipopt"] = parse_ipopt_log(
@@ -2836,6 +2913,11 @@ def build_parser():
         help="replace the fixed baselining evidence root for selected Testatron cases",
     )
     parser.add_argument(
+        "--summarize-baselining",
+        action="store_true",
+        help="write a compact summary of existing fixed baselining evidence",
+    )
+    parser.add_argument(
         "--promote-baseline",
         metavar="CASE_ID",
         help="copy one approved matched baselining case into the curated results tree",
@@ -2888,6 +2970,10 @@ def main(argv=None):
         results = _load_case_results(output_root)
         write_manifests(output_root, results)
         print(f"Wrote unreviewed report for {len(results)} existing case result(s)")
+        return 0
+    if args.summarize_baselining:
+        summary_path, summary = write_baselining_summary(output_root)
+        print(f"Wrote baselining summary for {summary['case_count']} case(s): {summary_path}")
         return 0
     if args.promote_baseline:
         if not args.approve_baseline:

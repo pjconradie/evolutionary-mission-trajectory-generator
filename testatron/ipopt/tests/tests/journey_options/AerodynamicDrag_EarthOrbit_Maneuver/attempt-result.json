@@ -1,0 +1,95 @@
+{
+  "case_id": "journey_options/AerodynamicDrag_EarthOrbit_Maneuver",
+  "source_options": "/repo/testatron/tests/journey_options/AerodynamicDrag_EarthOrbit_Maneuver.emtgopt",
+  "baseline_mission": "/repo/testatron/tests/journey_options/AerodynamicDrag_EarthOrbit_Maneuver.emtg",
+  "source_sha256": "4b63eb3fc29c10a42fe468a57c5ea956cd72ae56c191a3e631cc09aeb930d1ce",
+  "baseline_sha256": "e7104eea8a5ebe11eb017bc569f9c70306de62c2249b932e42943bf403ddab6f",
+  "classification": "matched_snopt",
+  "evidence_directory": "/artifacts/baselining/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/attempt-1",
+  "status": "unreviewed",
+  "replay": {
+    "classification": "completed",
+    "log_file": "/artifacts/baselining/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/attempt-1/replay/run.log",
+    "return_code": 0,
+    "duration_seconds": 2.5097550429999993,
+    "output_file": "/artifacts/baselining/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/attempt-1/replay/AerodynamicDrag_EarthOrbit_Maneuver.emtg",
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-10,
+      "checks": {
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "decision_vector_length": true,
+        "objective": true,
+        "total_deterministic_deltav": true,
+        "total_flight_time_years": true,
+        "final_mass": true,
+        "journey_endpoints": true
+      },
+      "baseline_objective": -0.8899908267994568,
+      "generated_objective": -0.8899908267994568,
+      "generated_feasibility_metric": 2.51160491099421e-06,
+      "endpoint_tolerances": {
+        "epoch_days": 1e-08,
+        "position_km": 1.0,
+        "velocity_km_s": 1e-07,
+        "mass_kg": 1e-06
+      },
+      "endpoint_deltas": {
+        "max_epoch_days": 0.0,
+        "max_position_km": 0.0,
+        "max_velocity_km_s": 0.0,
+        "max_mass_kg": 0.0
+      }
+    },
+    "comparison_classification": "matched_snopt"
+  },
+  "refinement": {
+    "classification": "completed",
+    "log_file": "/artifacts/baselining/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/attempt-1/refinement/run.log",
+    "return_code": 0,
+    "duration_seconds": 249.56984036300003,
+    "output_file": "/artifacts/baselining/journey_options/AerodynamicDrag_EarthOrbit_Maneuver/attempt-1/refinement/AerodynamicDrag_EarthOrbit_Maneuver.emtg",
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "checks": {
+        "finite_objective": true,
+        "finite_feasibility": true,
+        "decision_bounds_complete": true,
+        "finite_decision_vector": true,
+        "decision_vector_in_bounds": true,
+        "finite_constraint_vector": true,
+        "feasible": true,
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "objective_non_regression": true,
+        "objective_agreement": true
+      },
+      "baseline_objective": -0.8899908267994568,
+      "generated_objective": -0.889990827124096,
+      "objective_sense": "maximize",
+      "objective_relative_tolerance": 1e-06,
+      "objective_absolute_tolerance": 1e-10,
+      "objective_comparison_band": 8.90090827124096e-07,
+      "objective_delta": -3.246392044076174e-10,
+      "objective_absolute_delta": 3.246392044076174e-10,
+      "generated_feasibility_metric": 2.51678207360626e-06,
+      "feasibility_tolerance": 1e-05,
+      "decision_bounds_absolute_tolerance": 1e-11
+    },
+    "ipopt": {
+      "initialization_policy": "near-feasible-primal-seed",
+      "initial_infeasibility": 2.52e-06,
+      "iterations": 842,
+      "terminal_constraint_violation": 2.952470841881193e-07,
+      "native_exit": "Optimal Solution Found."
+    },
+    "comparison_classification": "matched_snopt"
+  },
+  "detail": ""
+}

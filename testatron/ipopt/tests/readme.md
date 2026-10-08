@@ -266,3 +266,57 @@ promotion leaves both curated output and immutable Testatron inputs untouched.
   deterministic controls and accepted native IPOPT exits.
 - [`docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md`](../../../docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md): Docker deployment contract.
 - [`docs/3_NLP_Solvers/IPOPT/stage6_checklist.md`](../../../docs/3_NLP_Solvers/IPOPT/stage6_checklist.md): manual-only review checklist.
+
+
+---
+
+## Plan: IPOPT Baselining Verification Matrix
+
+Run this from the repository root after activating the venv:
+
+```zsh
+source .venv/bin/activate
+```
+
+**Complete unit suite**: all 77 contracts in `test_ipopt_characterization.py`.
+
+```zsh
+pytest tests/test_ipopt_characterization.py --unit -q
+```
+
+This covers policy validation, replay/refinement comparison, repeatability classification, immutable input handling, promotion eligibility, replacement protection, and curated `attempt-result.json` packaging.
+
+**Complete Docker integration suite**: both tests in `test_baselining.py`.
+
+```zsh
+pytest tests/integration/test_baselining.py --integration -q
+```
+
+This runs:
+- Two-case pinned-toolchain repeatability validation.
+- Docker CLI batch/layout validation.
+
+**Focused policy contracts**:
+
+```zsh
+pytest tests/test_ipopt_characterization.py --unit -q \
+  -k 'baselining_refinement_policy_overrides_native_limits or baselining_refinement_allows_serialized_bound_noise'
+```
+
+**Focused promotion contracts**:
+
+```zsh
+pytest tests/test_ipopt_characterization.py --unit -q \
+  -k 'promote_baselining_case_copies_verified_canonical_evidence or promote_baselining_case_rejects_nonmatching_evidence_without_overwrite or promote_baselining_case_requires_explicit_curated_replacement or main_requires_manual_approval_for_promotion'
+```
+
+**End-to-end matched-case check** for Aerodynamic Drag, retaining evidence in the durable artifact tree:
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/tests" \
+pytest tests/integration/test_baselining.py --integration -q \
+  -k test_baselining_cli_writes_fixed_mirrored_layout \
+  --baselining-filter 'journey_options/AerodynamicDrag_EarthOrbit_Maneuver'
+```
+
+One caveat: the integration runner invokes EMTG with a `660s` stage timeout, while policy v2 permits `1200s` native CPU time. The suite validates the framework and known case behavior, but a full-policy-duration run requires raising that integration timeout first. I recorded this matrix in the session plan.

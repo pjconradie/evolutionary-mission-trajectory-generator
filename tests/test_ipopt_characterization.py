@@ -20,12 +20,15 @@ pytestmark = pytest.mark.unit
 def test_baselining_policy_is_versioned_and_deterministic(repository_root):
     policy = ipopt_characterization.load_baselining_policy()
 
-    assert policy["version"] == 1
+    assert policy["version"] == 2
     assert policy["accepted_native_exits"] == ["Optimal Solution Found."]
     assert policy["seeded_refinement"] == {
         "seed_MBH": 0,
         "MBH_RNG_seed": 12345,
     }
+    assert policy["decision_bounds_absolute_tolerance"] > 0
+    assert policy["refinement_max_cpu_time_seconds"] == 600
+    assert policy["refinement_max_major_iterations"] == 800
     assert policy["execution_environment"] == {
         "OMP_NUM_THREADS": "1",
         "OPENBLAS_NUM_THREADS": "1",
@@ -1106,6 +1109,55 @@ def test_baselining_batch_replaces_selected_case_and_preserves_others(
     assert (case_root / "repeatability.json").is_file()
 
 
+def test_write_baselining_summary_extracts_case_attempts_only(tmp_path):
+    case_root = tmp_path / "baselining/journey_options/LEO_to_GEO"
+    case_root.mkdir(parents=True)
+    result = {
+        "case_id": "journey_options/LEO_to_GEO",
+        "first": {
+            "classification": "matched_snopt",
+            "detail": "",
+            "replay": {"comparison_classification": "matched_snopt"},
+            "refinement": {"comparison_classification": "matched_snopt"},
+        },
+        "second": {
+            "classification": "matched_snopt",
+            "detail": "",
+            "replay": {"comparison_classification": "matched_snopt"},
+            "refinement": {"comparison_classification": "matched_snopt"},
+        },
+    }
+    (case_root / "result.json").write_text(json.dumps(result))
+    nested_result = case_root / "attempt-1/result.json"
+    nested_result.parent.mkdir()
+    nested_result.write_text("{}")
+
+    summary_path, summary = ipopt_characterization.write_baselining_summary(tmp_path)
+
+    assert summary_path == tmp_path / "baselining/baselining-summary.json"
+    assert summary == {
+        "case_count": 1,
+        "cases": [
+            {
+                "case_id": "journey_options/LEO_to_GEO",
+                "classification": "matched_snopt",
+                "detail": {"first": "", "second": ""},
+                "comparison_classification": {
+                    "first": {
+                        "replay": "matched_snopt",
+                        "refinement": "matched_snopt",
+                    },
+                    "second": {
+                        "replay": "matched_snopt",
+                        "refinement": "matched_snopt",
+                    },
+                },
+            }
+        ],
+    }
+    assert json.loads(summary_path.read_text()) == summary
+
+
 def _write_promotable_baselining_evidence(output_root, source):
     case_identifier = ipopt_characterization.case_id(source)
     case_root = output_root / "baselining" / case_identifier
@@ -1141,6 +1193,9 @@ def _write_promotable_baselining_evidence(output_root, source):
                     "output_file": f"/artifacts/{attempt_name}/refinement/generated.emtg",
                 },
             }
+        )
+        (case_root / attempt_name / "result.json").write_text(
+            json.dumps(attempts[-1])
         )
     repeatability = {"stable": True, "differences": {}}
     (case_root / "repeatability.json").write_text(json.dumps(repeatability))
@@ -1179,6 +1234,7 @@ def test_promote_baselining_case_copies_verified_canonical_evidence(
     assert (curated_root / "refinement-comparison.json").is_file()
     assert (curated_root / "repeatability.json").is_file()
     assert (curated_root / "ipopt-diagnostics.json").is_file()
+    assert (curated_root / "attempt-result.json").is_file()
 
 
 def test_promote_baselining_case_rejects_nonmatching_evidence_without_overwrite(
@@ -1848,6 +1904,71 @@ def test_prepare_and_compare_track_acs_refinement(repository_root, tmp_path):
         baseline, out_of_bounds, 1.0e-5
     )
     assert not comparison["acceptable"]
+    assert not comparison["checks"]["decision_vector_in_bounds"]
+
+
+def test_baselining_refinement_policy_overrides_native_limits(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    baseline_path = source.with_suffix(".emtg")
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    prepared_path = ipopt_characterization.prepare_refinement(
+        source, baseline_path, tmp_path
+    )
+
+    ipopt_characterization._apply_baselining_refinement_policy(
+        prepared_path,
+        ipopt_characterization.load_baselining_policy(),
+        ipopt_characterization.PYEMTG_ROOT,
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert prepared.snopt_max_run_time == 600
+    assert prepared.snopt_major_iterations == 800
+
+
+def test_baselining_refinement_allows_serialized_bound_noise(
+    repository_root,
+):
+    source = (
+        repository_root
+        / "testatron/tests/spacecraft_options/"
+        "spacecraftoptions_Chem_TrackACSProp.emtgopt"
+    )
+    Mission, _ = ipopt_characterization._load_pyemtg()
+    baseline = Mission.Mission(str(source.with_suffix(".emtg")))
+    generated = copy.deepcopy(baseline)
+    generated.Xlowerbounds[0] = -1.0e-13
+    generated.Xupperbounds[0] = 1.0e-13
+    generated.DecisionVector[0] = 1.9e-12
+
+    comparison = ipopt_characterization.compare_refinement(
+        baseline, generated, 1.0e-5
+    )
+    assert not comparison["checks"]["decision_vector_in_bounds"]
+    assert comparison["decision_bounds_absolute_tolerance"] == 1.0e-12
+
+    comparison = ipopt_characterization.compare_baselining_refinement(
+        baseline,
+        generated,
+        1.0e-5,
+        decision_bounds_absolute_tolerance=1.0e-11,
+    )
+    assert comparison["checks"]["decision_vector_in_bounds"]
+    assert comparison["decision_bounds_absolute_tolerance"] == 1.0e-11
+
+    generated.DecisionVector[0] = 1.1e-11
+    comparison = ipopt_characterization.compare_baselining_refinement(
+        baseline,
+        generated,
+        1.0e-5,
+        decision_bounds_absolute_tolerance=1.0e-11,
+    )
     assert not comparison["checks"]["decision_vector_in_bounds"]
 
 

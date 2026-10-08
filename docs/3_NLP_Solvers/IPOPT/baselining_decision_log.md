@@ -1,9 +1,39 @@
 
----
-# 1 `global_mission_options/globalmissionoptions_MGALT_DLAbounds`
+# IPOPT Baselining Decision Log
 
-| 1   | `global_mission_options/globalmissionoptions_MGALT_DLAbounds` | `878e84e922ef6d9d61a73105ce8ff2828189b5e6262a74e17952d6bc73f0a050` | `8770d6cbe186dcabdbb1d7b6a9ca1ff2d6938fcf53460e6ce12cee7eb8b75a13` | pending | pending | pending | pending | pending | pending | not created |
-| --- | ------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | ------- | ------- | ------- | ------- | ------- | ------- | ----------- |
+This is a manual review record. Baselining evidence is replaceable; immutable SNOPT source pairs remain under `testatron/tests`. Promotion requires stable `matched_snopt` evidence, acceptable replay and refinement, and a reviewer approval recorded here.
+
+## Review Template
+
+| Field | Record |
+| --- | --- |
+| Case number and ID | |
+| Immutable options SHA-256 | |
+| Immutable SNOPT mission SHA-256 | |
+| Evidence directory | |
+| Attempt classifications | |
+| Repeatability | |
+| Replay result | |
+| Refinement result | |
+| Manual decision | `approve`, `reject`, or `defer` |
+| Rationale / next action | |
+| Promotion | Not attempted / command and curated path |
+
+## 1. `global_mission_options/globalmissionoptions_MGALT_DLAbounds`
+
+| Field                           | Record                                                                                                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Case number and ID              | 1; `global_mission_options/globalmissionoptions_MGALT_DLAbounds`                                                                                                                            |
+| Immutable options SHA-256       | `878e84e922ef6d9d61a73105ce8ff2828189b5e6262a74e17952d6bc73f0a050`                                                                                                                          |
+| Immutable SNOPT mission SHA-256 | `8770d6cbe186dcabdbb1d7b6a9ca1ff2d6938fcf53460e6ce12cee7eb8b75a13`                                                                                                                          |
+| Evidence directory              | `testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_DLAbounds/`                                                                                       |
+| Attempt classifications         | Attempt 1: `mismatch_snopt`; attempt 2: `mismatch_snopt`                                                                                                                                    |
+| Repeatability                   | Stable; no reported differences                                                                                                                                                             |
+| Replay result                   | Unacceptable: deterministic delta-v and journey endpoints differ; objective, topology, schema, flight time, and final mass agree. Maximum endpoint position delta: `107.25168052315712 km`. |
+| Refinement result               | Not run; replay gate blocked refinement.                                                                                                                                                    |
+| Manual decision                 | `defer`                                                                                                                                                                                     |
+| Rationale / next action         | Investigate the shared replay discrepancy without changing immutable inputs, tolerances, or promotion state.                                                                                |
+| Promotion                       | Not attempted; ineligible while classified `mismatch_snopt`.                                                                                                                                |
 
 Yes. The current staged replay selects this non-v2 library:
 
@@ -157,19 +187,55 @@ So Falcon is not entering through a visible source-code handoff. The remaining p
 
 The immediate no-edit diagnostic is to compare the exact staged-option hash and the exact library hash **inside the same container** that runs EMTG, then record which paths it opens. Do not change Atlas, v2, or any hardware coefficients until that confirms the executable’s actual inputs.
 
+---
 
-| 1   | `global_mission_options/globalmissionoptions_MGALT_DLAbounds` | `878e84e922ef6d9d61a73105ce8ff2828189b5e6262a74e17952d6bc73f0a050` | `8770d6cbe186dcabdbb1d7b6a9ca1ff2d6938fcf53460e6ce12cee7eb8b75a13` | pending | pending | pending | pending | pending | pending | not created |
-| --- | ------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | ------- | ------- | ------- | ------- | ------- | ------- | ----------- |
+## 2. `global_mission_options/globalmissionoptions_MGALT_RLAbounds`
+
+| Field                           | Record                                                                                                                                                                                                                           |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Case number and ID              | 2; `global_mission_options/globalmissionoptions_MGALT_RLAbounds`                                                                                                                                                                 |
+| Immutable options SHA-256       | `cd16f3e4927c1f876162ab88c4c99135a1df73b0d2fa51cf69ffe94adb762f5e`                                                                                                                                                               |
+| Immutable SNOPT mission SHA-256 | `789da17e75652573ccde60e67fcb8e22171b8ba40abdf2d8c639ef3d6fbe5149`                                                                                                                                                               |
+| Evidence directory              | `testatron/ipopt/tests/tests/baselining/global_mission_options/globalmissionoptions_MGALT_RLAbounds/`                                                                                                                            |
+| Attempt classifications         | Attempt 1: `mismatch_snopt`; attempt 2: `mismatch_snopt`                                                                                                                                                                         |
+| Repeatability                   | Stable; no reported differences                                                                                                                                                                                                  |
+| Replay result                   | Unacceptable: identical failure pattern to case 1. Deterministic delta-v and journey endpoints differ; objective, topology, schema, flight time, and final mass agree. Maximum endpoint position delta: `107.25168052315712 km`. |
+| Refinement result               | Not run; replay gate blocked refinement.                                                                                                                                                                                         |
+| Manual decision                 | `defer`                                                                                                                                                                                                                          |
+| Rationale / next action         | Treat as corroborating evidence of a shared replay discrepancy; continue ordered cases before changing staging or resources.                                                                                                     |
+| Promotion                       | Not attempted; ineligible while classified `mismatch_snopt`.                                                                                                                                                                     |
+
+## Case 1 through 5 and most likely 1 through 28
+
+I’ll verify the five case-level results and compare their replay signatures. If they are identical, that strongly points to a shared staging/runtime condition rather than any individual global-option variation.
+
+All five are stable `mismatch_snopt` results with the same two failed replay checks: `total_deterministic_deltav` and `journey_endpoints`. The option-specific objectives vary as expected, but the endpoint displacement remains effectively constant at about 107.25165 km, so this is shared behavior.
+
+Confirmed. All five have the same structural replay failure:
+
+- Both attempts are stable `mismatch_snopt`.
+- `journey_names`, topology, decision schema/vector length, objective, flight time, and final mass pass.
+- Only `total_deterministic_deltav` and `journey_endpoints` fail.
+- Refinement is correctly blocked for all five.
+
+The maximum endpoint position delta is effectively constant:
+
+- Cases 1-2: `107.251680523 km`
+- Cases 3-4: `107.251669198 km`
+- Case 5: `107.251643538 km`
+
+That variation is negligible relative to the 1 km threshold and strongly indicates one shared replay/staging/runtime cause, not a defect in individual DLA, RLA, dry-mass, final-mass, or initial-impulse options. No promotion is eligible.
 
 ---
 
-# 2 `global_mission_options/globalmissionoptions_MGALT_RLAbounds`
+# 29. `journey_options/AerodynamicDrag_EarthOrbit_Maneuver`
 
-| 2   | `global_mission_options/globalmissionoptions_MGALT_RLAbounds` | `cd16f3e4927c1f876162ab88c4c99135a1df73b0d2fa51cf69ffe94adb762f5e` | `789da17e75652573ccde60e67fcb8e22171b8ba40abdf2d8c639ef3d6fbe5149` | pending | pending | pending | pending | pending | pending | not created |
-| --- | ------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | ------- | ------- | ------- | ------- | ------- | ------- | ----------- |
-Same case 1 issue.
+passed. 
+Had to run 850 ish iterations.
 
-| 2   | `global_mission_options/globalmissionoptions_MGALT_RLAbounds` | `cd16f3e4927c1f876162ab88c4c99135a1df73b0d2fa51cf69ffe94adb762f5e` | `789da17e75652573ccde60e67fcb8e22171b8ba40abdf2d8c639ef3d6fbe5149` | pending | pending | pending | pending | pending | pending | not created |
-| --- | ------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | ------- | ------- | ------- | ------- | ------- | ------- | ----------- |
+# 30. 'journey_options/EME_stageAfterArrival'
+
+Same position 107 or km error as the `global_mission_options` + weight
 
 ---
+

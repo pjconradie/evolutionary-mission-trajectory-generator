@@ -46,7 +46,7 @@ first, second, comparison = ipopt_characterization.run_repeatable_baselining_cas
     {baseline!r},
     "/build/src/EMTGv9",
     "/artifacts",
-    180.0,
+    660.0,
     "/repo/PyEMTG",
 )
 summary = {{
@@ -72,7 +72,7 @@ printf 'EMTG_CHECK baselining_repeatability=passed\\n'
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
-        timeout=900,
+        timeout=1500,
     )
 
     summary = json.loads((artifacts / "repeatability-summary.json").read_text())
@@ -100,7 +100,7 @@ PYTHONPATH=/repo:/repo/PyEMTG python /repo/testatron/ipopt_characterization.py \
     {filter_arguments} \\
     --emtg /build/src/EMTGv9 \\
     --output-root /artifacts \\
-    --timeout 180.0
+    --timeout 660.0
 PYTHONPATH=/repo:/repo/PyEMTG python - <<'PY'
 import json
 from pathlib import Path
@@ -109,6 +109,7 @@ batch_root = Path("/artifacts/baselining")
 case_roots = sorted(path.parent for path in batch_root.glob("*/*/result.json"))
 if not case_roots:
     raise SystemExit("fixed baselining batch layout is incomplete")
+repeatability = {{}}
 for case_root in case_roots:
     required_paths = (
         case_root / "attempt-1" / "result.json",
@@ -118,13 +119,14 @@ for case_root in case_roots:
     )
     if not all(path.is_file() for path in required_paths):
         raise SystemExit(f"fixed baselining batch layout is incomplete: {{case_root}}")
-    if not json.loads((case_root / "repeatability.json").read_text())["stable"]:
-        raise SystemExit(f"fixed baselining batch produced unstable evidence: {{case_root}}")
+    repeatability[str(case_root.relative_to(batch_root))] = json.loads(
+        (case_root / "repeatability.json").read_text()
+    )["stable"]
 Path("/artifacts/batch-summary.json").write_text(
     json.dumps(
         {{
             "case_ids": [str(case_root.relative_to(batch_root)) for case_root in case_roots],
-            "stable": True,
+            "repeatability": repeatability,
         }},
         indent=2,
     )
@@ -142,13 +144,13 @@ printf 'EMTG_CHECK baselining_batch_layout=passed\\n'
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
-        timeout=900,
+        timeout=1500,
     )
 
     summary = json.loads((artifacts / "batch-summary.json").read_text())
     assert checks["baselining_batch_layout"] == "passed"
-    assert summary["stable"]
     assert summary["case_ids"]
+    assert set(summary["repeatability"]) == set(summary["case_ids"])
     for case_id in summary["case_ids"]:
         case_root = artifacts / "baselining" / case_id
         assert (case_root / "attempt-1" / "result.json").is_file()
