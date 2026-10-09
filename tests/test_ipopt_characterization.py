@@ -828,6 +828,40 @@ def test_prepare_case_records_case_scoped_launch_vehicle_override(
     } in compatibility["mappings"]
 
 
+@pytest.mark.parametrize(
+    "case_name",
+    ["Earth_to_SmallBody_SAM_RTG", "Earth_to_SmallBody_SAM_solar_power"],
+)
+def test_prepare_case_records_case_scoped_lacadiera_frame_kernel_override(
+    repository_root, tmp_path, case_name
+):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "spacecraft_options"
+        / f"{case_name}.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    original = MissionOptions.MissionOptions(str(source))
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert original.SPICE_reference_frame_kernel == "pck00010.tpc"
+    assert prepared.SPICE_reference_frame_kernel == "codes_300ast_20100725.tf"
+    assert MissionOptions.MissionOptions(str(source)).SPICE_reference_frame_kernel == (
+        "pck00010.tpc"
+    )
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert {
+        "option": "SPICE_reference_frame_kernel",
+        "source": "pck00010.tpc",
+        "replacement": "codes_300ast_20100725.tf",
+        "reason": "case-scoped CODES frame kernel required for the Lacadiera ephemeris frame",
+    } in compatibility["mappings"]
+
+
 def test_prepare_case_maps_august_nlsii_library(repository_root, tmp_path):
     source = (
         repository_root

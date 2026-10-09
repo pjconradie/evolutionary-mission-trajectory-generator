@@ -29,6 +29,10 @@ REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 STAGED_EARLIEST_POSSIBLE_EPOCHS = {
     "journey_options/park_to_SOI_FBLT": 58860.0,
 }
+BASELINING_REFERENCE_FRAME_KERNEL_OVERRIDES = {
+    "spacecraft_options/Earth_to_SmallBody_SAM_RTG": "codes_300ast_20100725.tf",
+    "spacecraft_options/Earth_to_SmallBody_SAM_solar_power": "codes_300ast_20100725.tf",
+}
 BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES = {
     "global_mission_options/globalmissionoptions_MGALT_DLAbounds": "Atlas_V_401",
 }
@@ -1599,6 +1603,25 @@ def prepare_case(
             TESTATRON_ROOT / "universe", execution_repository_root
         )
     hardware_root, compatibility_mappings, hardware_overrides = _hardware_root_and_mappings(options)
+    reference_frame_kernel_override = (
+        BASELINING_REFERENCE_FRAME_KERNEL_OVERRIDES.get(identifier)
+        if identifier is not None
+        else None
+    )
+    if reference_frame_kernel_override is not None:
+        original_kernel = options.SPICE_reference_frame_kernel
+        options.SPICE_reference_frame_kernel = reference_frame_kernel_override
+        compatibility_mappings.append(
+            {
+                "option": "SPICE_reference_frame_kernel",
+                "source": original_kernel,
+                "replacement": reference_frame_kernel_override,
+                "reason": (
+                    "case-scoped CODES frame kernel required for the Lacadiera "
+                    "ephemeris frame"
+                ),
+            }
+        )
     launch_vehicle_override = BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES.get(identifier)
     if launch_vehicle_override is not None:
         launch_library = hardware_root / options.LaunchVehicleLibraryFile
