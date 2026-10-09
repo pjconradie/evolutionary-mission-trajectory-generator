@@ -1096,6 +1096,7 @@ def inject_aligned_mission_seed(options, mission, expected_descriptions=None):
         option_descriptions = list(expected_descriptions)
     validate_decision_alignment(option_descriptions, descriptions)
 
+    bound_violations = []
     for index, (value, lower_bound, upper_bound) in enumerate(
         zip(values, lower_bounds, upper_bounds)
     ):
@@ -1105,10 +1106,19 @@ def inject_aligned_mission_seed(options, mission, expected_descriptions=None):
             abs(value), abs(lower_bound), abs(upper_bound)
         )
         if value < lower_bound - bound_tolerance or value > upper_bound + bound_tolerance:
-            raise ValueError(f"Decision variable at index {index} is outside its bounds")
+            bound_violations.append(
+                {
+                    "index": index,
+                    "description": descriptions[index],
+                    "value": value,
+                    "lower_bound": lower_bound,
+                    "upper_bound": upper_bound,
+                }
+            )
 
     options.trialX = list(zip(descriptions, values))
     options.DisassembleMasterDecisionVector()
+    return bound_violations
 
 
 def _prepare_seeded_case(
@@ -1129,7 +1139,7 @@ def _prepare_seeded_case(
     prepared_options = prepare_case(source_options, case_directory, pyemtg_root)
     options = MissionOptions.MissionOptions(str(prepared_options))
     baseline = Mission.Mission(str(baseline_mission))
-    inject_aligned_mission_seed(
+    seed_bound_violations = inject_aligned_mission_seed(
         options, baseline, expected_descriptions=expected_descriptions
     )
     options.run_inner_loop = run_inner_loop
@@ -1162,6 +1172,7 @@ def _prepare_seeded_case(
     compatibility_path = case_directory / "compatibility.json"
     compatibility = json.loads(compatibility_path.read_text())
     compatibility["source_options"] = repo_relative(compatibility["source_options"])
+    compatibility["seed_bound_violations"] = seed_bound_violations
     compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n")
     return prepared_options
 

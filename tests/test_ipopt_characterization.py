@@ -28,7 +28,7 @@ def test_baselining_policy_is_versioned_and_deterministic(repository_root):
     }
     assert policy["decision_bounds_absolute_tolerance"] > 0
     assert policy["refinement_max_cpu_time_seconds"] == 600
-    assert policy["refinement_max_major_iterations"] == 800
+    assert policy["refinement_max_major_iterations"] == 32000
     assert policy["execution_environment"] == {
         "OMP_NUM_THREADS": "1",
         "OPENBLAS_NUM_THREADS": "1",
@@ -905,6 +905,33 @@ def test_prepare_track_acs_replay_injects_aligned_truth_seed(
         "status"
     ] == "unreviewed"
 
+def test_prepare_replay_preserves_out_of_bounds_historical_seed(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root
+        / "testatron/tests/journey_options/"
+        "default_PSBI_fixed_inertial_control.emtgopt"
+    )
+    baseline = source.with_suffix(".emtg")
+    Mission, MissionOptions = ipopt_characterization._load_pyemtg()
+    truth = Mission.Mission(str(baseline))
+
+    prepared_path = ipopt_characterization.prepare_replay(source, baseline, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    prepared.AssembleMasterDecisionVector()
+
+    assert [float(entry[1]) for entry in prepared.trialX] == truth.DecisionVector
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert compatibility["seed_bound_violations"]
+    assert compatibility["seed_bound_violations"][0] == {
+        "index": 30,
+        "description": truth.Xdescriptions[30],
+        "value": truth.DecisionVector[30],
+        "lower_bound": truth.Xlowerbounds[30],
+        "upper_bound": truth.Xupperbounds[30],
+    }
+
 
 def test_baselining_replay_mismatch_blocks_refinement_for_checklist_case_one(
     repository_root, tmp_path, monkeypatch
@@ -1379,7 +1406,7 @@ def test_baselining_matching_replay_refines_from_the_same_seed(
     monkeypatch.setattr(
         ipopt_characterization,
         "compare_baselining_refinement",
-        lambda baseline, generated, tolerance, objective_sense: {
+        lambda baseline, generated, tolerance, objective_sense, **kwargs: {
             "acceptable": True,
             "checks": {},
         },
@@ -1417,7 +1444,7 @@ def test_baselining_matching_replay_refines_from_the_same_seed(
         "sha256": ipopt_characterization._sha256(
             ipopt_characterization.BASELINING_POLICY
         ),
-        "version": 1,
+        "version": 2,
     }
     assert (evidence_root / "replay" / "comparison.json").is_file()
     assert (evidence_root / "refinement" / "comparison.json").is_file()
@@ -1488,7 +1515,7 @@ def test_baselining_rejects_chaperone_restored_ipopt_incumbent(
     monkeypatch.setattr(
         ipopt_characterization,
         "compare_baselining_refinement",
-        lambda baseline, generated, tolerance, objective_sense: {
+        lambda baseline, generated, tolerance, objective_sense, **kwargs: {
             "acceptable": True,
             "checks": {},
         },
@@ -1935,7 +1962,7 @@ def test_baselining_refinement_policy_overrides_native_limits(
     prepared = MissionOptions.MissionOptions(str(prepared_path))
 
     assert prepared.snopt_max_run_time == 600
-    assert prepared.snopt_major_iterations == 800
+    assert prepared.snopt_major_iterations == 32000
 
 
 def test_baselining_refinement_allows_serialized_bound_noise(
