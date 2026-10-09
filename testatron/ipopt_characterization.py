@@ -34,6 +34,9 @@ BASELINING_REFERENCE_FRAME_KERNEL_OVERRIDES = {
     "spacecraft_options/Earth_to_SmallBody_SAM_RTG": "codes_300ast_20100725.tf",
     "spacecraft_options/Earth_to_SmallBody_SAM_solar_power": "codes_300ast_20100725.tf",
 }
+BASELINING_ENGINE_TYPE_OVERRIDES = {
+    "journey_options/EarthMars_Depart2-2_Arrive2-2": (15, "AEPS.ThrottleTable"),
+}
 BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES = {
     "global_mission_options/globalmissionoptions_MGALT_DLAbounds": "Atlas_V_401",
 }
@@ -1603,7 +1606,41 @@ def prepare_case(
         options.universe_folder = _execution_path(
             TESTATRON_ROOT / "universe", execution_repository_root
         )
-    hardware_root, compatibility_mappings, hardware_overrides = _hardware_root_and_mappings(options)
+    engine_type_override = (
+        BASELINING_ENGINE_TYPE_OVERRIDES.get(identifier)
+        if identifier is not None
+        else None
+    )
+    if engine_type_override is not None:
+        replacement_engine_type, replacement_throttle_table = engine_type_override
+        original_engine_type = options.engine_type
+        original_throttle_table = options.ThrottleTableFile
+        options.engine_type = replacement_engine_type
+        options.ThrottleTableFile = replacement_throttle_table
+        compatibility_mappings = [
+            {
+                "option": "engine_type",
+                "source": original_engine_type,
+                "replacement": replacement_engine_type,
+                "reason": (
+                    "case-scoped runnable approximation: legacy NEXT TT11 "
+                    "high-thrust engine type is unsupported by the current schema"
+                ),
+            },
+            {
+                "option": "ThrottleTableFile",
+                "source": original_throttle_table,
+                "replacement": replacement_throttle_table,
+                "reason": (
+                    "case-scoped runnable approximation paired with engine_type 15; "
+                    "AEPS performance is not equivalent to NEXT TT11"
+                ),
+            },
+        ]
+    else:
+        compatibility_mappings = []
+    hardware_root, hardware_mappings, hardware_overrides = _hardware_root_and_mappings(options)
+    compatibility_mappings.extend(hardware_mappings)
     reference_frame_kernel_override = (
         BASELINING_REFERENCE_FRAME_KERNEL_OVERRIDES.get(identifier)
         if identifier is not None

@@ -828,6 +828,48 @@ def test_prepare_case_records_case_scoped_launch_vehicle_override(
     } in compatibility["mappings"]
 
 
+def test_prepare_case_records_case_scoped_engine_approximation(
+    repository_root, tmp_path
+):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "journey_options"
+        / "EarthMars_Depart2-2_Arrive2-2.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    original = MissionOptions.MissionOptions(str(source))
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert original.engine_type == 23
+    assert original.ThrottleTableFile == "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable"
+    assert prepared.engine_type == 15
+    assert prepared.ThrottleTableFile == "AEPS.ThrottleTable"
+    assert MissionOptions.MissionOptions(str(source)).engine_type == 23
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert {
+        "option": "engine_type",
+        "source": 23,
+        "replacement": 15,
+        "reason": (
+            "case-scoped runnable approximation: legacy NEXT TT11 "
+            "high-thrust engine type is unsupported by the current schema"
+        ),
+    } in compatibility["mappings"]
+    assert {
+        "option": "ThrottleTableFile",
+        "source": "NEXT_TT11_NewFrontiers_EOL_1_3_2017.ThrottleTable",
+        "replacement": "AEPS.ThrottleTable",
+        "reason": (
+            "case-scoped runnable approximation paired with engine_type 15; "
+            "AEPS performance is not equivalent to NEXT TT11"
+        ),
+    } in compatibility["mappings"]
+
+
 @pytest.mark.parametrize(
     ("group", "case_name"),
     [
