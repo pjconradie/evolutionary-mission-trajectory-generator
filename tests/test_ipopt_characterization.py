@@ -828,6 +828,49 @@ def test_prepare_case_records_case_scoped_launch_vehicle_override(
     } in compatibility["mappings"]
 
 
+def test_prepare_case_records_forced_initial_coast_launch_vehicle_override(
+    repository_root, tmp_path
+):
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+    case_identifiers = (
+        "journey_options/EarthToMars_ForcedInitialCoast",
+        "journey_options/EarthToMars_ForcedTerminalCoast",
+        "script_constraint_tests/EVM_pEndRRP_arrival",
+        "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction",
+        "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction",
+        "script_constraint_tests/EarthMars_RPRangle_force_conjunction",
+    )
+
+    for case_identifier in case_identifiers:
+        source = repository_root / "testatron" / "tests" / f"{case_identifier}.emtgopt"
+        prepared_path = ipopt_characterization.prepare_case(
+            source, tmp_path / case_identifier.replace("/", "_")
+        )
+        prepared = MissionOptions.MissionOptions(str(prepared_path))
+        launch_vehicle_key = (
+            ipopt_characterization.BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES[
+                case_identifier
+            ]
+        )
+        assert prepared.LaunchVehicleLibraryFile == (
+            ipopt_characterization.PUBLIC_DEFAULT_LIBRARY
+        )
+        assert prepared.LaunchVehicleKey == launch_vehicle_key
+        compatibility = json.loads(
+            (prepared_path.parent / "compatibility.json").read_text()
+        )
+        assert {
+            "option": "LaunchVehicleKey",
+            "source": "Falcon_9_FT_(RTLS)",
+            "replacement": launch_vehicle_key,
+            "reason": (
+                "case-scoped public launch vehicle override: the implicit "
+                "Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the "
+                f"{launch_vehicle_key} model supports the immutable SNOPT seed C3"
+            ),
+        } in compatibility["mappings"]
+
+
 def test_prepare_case_records_case_scoped_engine_approximation(
     repository_root, tmp_path
 ):

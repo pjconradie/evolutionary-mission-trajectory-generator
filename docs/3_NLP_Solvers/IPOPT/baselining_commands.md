@@ -360,6 +360,8 @@ baselining_case 'transcription_tests/MGAnDSMs_EMintercept'
 baselining_case 'transcription_tests/PSBI_EMintercept'
 baselining_case 'transcription_tests/PSFB_EMintercept'
 baselining_case 'transcription_tests/SundmanCoastPhase_EMintercept'
+python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
+python -c 'import json; from collections import Counter; summary=json.load(open("testatron/ipopt/tests/tests/baselining/baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(Counter(case["classification"] for case in summary["cases"]).items())))'
 ```
 
 
@@ -375,7 +377,7 @@ promote_if_matched 'group/case'
 # Summarise baselining directory
 
 ```zsh
-python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests" 
+python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
 ```
 
 output:

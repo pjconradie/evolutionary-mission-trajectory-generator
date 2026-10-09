@@ -39,6 +39,12 @@ BASELINING_ENGINE_TYPE_OVERRIDES = {
 }
 BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES = {
     "global_mission_options/globalmissionoptions_MGALT_DLAbounds": "Atlas_V_401",
+    "journey_options/EarthToMars_ForcedInitialCoast": "Falcon_Heavy_(Expendable)",
+    "journey_options/EarthToMars_ForcedTerminalCoast": "Falcon_Heavy_(Expendable)",
+    "script_constraint_tests/EVM_pEndRRP_arrival": "Falcon_Heavy_(Expendable)",
+    "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction": "Falcon_Heavy_(Expendable)",
+    "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction": "Falcon_Heavy_(Expendable)",
+    "script_constraint_tests/EarthMars_RPRangle_force_conjunction": "Falcon_Heavy_(Expendable)",
 }
 PUBLIC_HARDWARE_ROOT = (
     REPOSITORY_ROOT
@@ -1670,16 +1676,25 @@ def prepare_case(
             )
         original_key = options.LaunchVehicleKey
         options.LaunchVehicleKey = launch_vehicle_override
+        if identifier == "global_mission_options/globalmissionoptions_MGALT_DLAbounds":
+            override_reason = (
+                "case-scoped public launch vehicle override: the implicit "
+                "Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the "
+                "immutable SNOPT seed requires C3 48.5809"
+            )
+        else:
+            override_reason = (
+                "case-scoped public launch vehicle override: the implicit "
+                "Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the "
+                f"{launch_vehicle_override} model supports the immutable SNOPT "
+                "seed C3"
+            )
         compatibility_mappings.append(
             {
                 "option": "LaunchVehicleKey",
                 "source": original_key,
                 "replacement": launch_vehicle_override,
-                "reason": (
-                    "case-scoped public launch vehicle override: the implicit "
-                    "Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the "
-                    "immutable SNOPT seed requires C3 48.5809"
-                ),
+                "reason": override_reason,
             }
         )
     replacement_spacecraft = [
