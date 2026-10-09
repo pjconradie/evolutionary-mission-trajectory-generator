@@ -829,17 +829,21 @@ def test_prepare_case_records_case_scoped_launch_vehicle_override(
 
 
 @pytest.mark.parametrize(
-    "case_name",
-    ["Earth_to_SmallBody_SAM_RTG", "Earth_to_SmallBody_SAM_solar_power"],
+    ("group", "case_name"),
+    [
+        ("physics_options", "Earth_to_SmallBody_SAM"),
+        ("spacecraft_options", "Earth_to_SmallBody_SAM_RTG"),
+        ("spacecraft_options", "Earth_to_SmallBody_SAM_solar_power"),
+    ],
 )
 def test_prepare_case_records_case_scoped_lacadiera_frame_kernel_override(
-    repository_root, tmp_path, case_name
+    repository_root, tmp_path, group, case_name
 ):
     source = (
         repository_root
         / "testatron"
         / "tests"
-        / "spacecraft_options"
+        / group
         / f"{case_name}.emtgopt"
     )
     _, MissionOptions = ipopt_characterization._load_pyemtg()

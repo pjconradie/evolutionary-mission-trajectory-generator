@@ -30,6 +30,7 @@ STAGED_EARLIEST_POSSIBLE_EPOCHS = {
     "journey_options/park_to_SOI_FBLT": 58860.0,
 }
 BASELINING_REFERENCE_FRAME_KERNEL_OVERRIDES = {
+    "physics_options/Earth_to_SmallBody_SAM": "codes_300ast_20100725.tf",
     "spacecraft_options/Earth_to_SmallBody_SAM_RTG": "codes_300ast_20100725.tf",
     "spacecraft_options/Earth_to_SmallBody_SAM_solar_power": "codes_300ast_20100725.tf",
 }
