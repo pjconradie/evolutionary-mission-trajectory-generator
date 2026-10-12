@@ -690,6 +690,53 @@ def test_prepare_case_stages_low_power_propulsion_probe(
     }["ElectricPropulsionSystemKey"] == "NEXTC_PolyFit_HT"
 
 
+def test_prepare_case_stages_multistage_launch_mass_curve(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "spacecraft_options"
+        / "spacecraft_LT_multiStage_spacecraftFile.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert prepared.LaunchVehicleKey == "Atlas_V_401"
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert {
+        mapping["option"]: mapping["replacement"]
+        for mapping in compatibility["mappings"]
+    }["LaunchVehicleKey"] == "Atlas_V_401"
+
+
+def test_prepare_case_stages_multistage_power_profile(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "spacecraft_options"
+        / "spacecraft_LT_multiStage_spacecraftFile.emtgopt"
+    )
+
+    ipopt_characterization.prepare_case(source, tmp_path)
+
+    staged_model = (
+        tmp_path
+        / "hardware_models"
+        / "spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt"
+    )
+    assert "PowerFromMissionOptions 1 0 0 7 0 0 1 0 0 0 0 0 0 0.8 0 0" in (
+        staged_model.read_text()
+    )
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert {
+        mapping["option"]: mapping["replacement"]
+        for mapping in compatibility["mappings"]
+    }["SpacecraftOptionsFile stage-one power profile"] == "7kWarray_800Wbus"
+
+
 def test_default_output_root_targets_relocated_case_artifacts(repository_root):
     assert ipopt_characterization.DEFAULT_OUTPUT_ROOT == (
         repository_root / "testatron" / "ipopt" / "tests" / "tests"

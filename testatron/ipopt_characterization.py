@@ -46,8 +46,26 @@ BASELINING_ELECTRIC_PROPULSION_KEY_OVERRIDES = {
     "spacecraft_options/spacecraft_LT_powerFile": "NEXTC_PolyFit_HT",
     "spacecraft_options/spacecraft_LT_propFile": "NEXTC_PolyFit_HT",
 }
+BASELINING_STAGED_SPACECRAFT_TEXT_REPLACEMENTS = {
+    "spacecraft_options/spacecraft_LT_multiStage_spacecraftFile": {
+        "filename": "spacecraft_LT_multiStage_spacecraftFile.emtg_spacecraftopt",
+        "source": (
+            "PowerFromMissionOptions 1 0 0 5 10 0 "
+            "1.3207699999999999996 -0.1084799999999999931 "
+            "-0.11665000000000000369 0.10842999999999999861 "
+            "-0.012789999999999999286 0 0 0 0 0"
+        ),
+        "replacement": "PowerFromMissionOptions 1 0 0 7 0 0 1 0 0 0 0 0 0 0.8 0 0",
+        "reason": (
+            "case-scoped power-profile replacement: the immutable baseline's "
+            "stage-one available-power schedule matches the tracked "
+            "7kWarray_800Wbus solar array and bus-load model"
+        ),
+    },
+}
 BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES = {
     "global_mission_options/globalmissionoptions_MGALT_DLAbounds": "Atlas_V_401",
+    "spacecraft_options/spacecraft_LT_multiStage_spacecraftFile": "Atlas_V_401",
     "journey_options/EarthToMars_ForcedInitialCoast": "Falcon_Heavy_(Expendable)",
     "journey_options/EarthToMars_ForcedTerminalCoast": "Falcon_Heavy_(Expendable)",
     "script_constraint_tests/EVM_pEndRRP_arrival": "Falcon_Heavy_(Expendable)",
@@ -1731,6 +1749,12 @@ def prepare_case(
                 "Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the "
                 "immutable SNOPT seed requires C3 48.5809"
             )
+        elif identifier == "spacecraft_options/spacecraft_LT_multiStage_spacecraftFile":
+            override_reason = (
+                "case-scoped public launch vehicle override: at the immutable "
+                "SNOPT seed C3 25, the Atlas_V_401 curve provides the baseline "
+                "pre-multiplier launch mass of approximately 1632.015 kg"
+            )
         else:
             override_reason = (
                 "case-scoped public launch vehicle override: the implicit "
@@ -1761,6 +1785,33 @@ def prepare_case(
             shutil.copy2(
                 REPOSITORY_ROOT / dependency["resolved_path"],
                 staged_hardware_root / Path(dependency["path"]).name,
+            )
+        spacecraft_text_replacement = (
+            BASELINING_STAGED_SPACECRAFT_TEXT_REPLACEMENTS.get(identifier)
+            if identifier is not None
+            else None
+        )
+        if spacecraft_text_replacement is not None:
+            staged_model = staged_hardware_root / spacecraft_text_replacement["filename"]
+            source_text = spacecraft_text_replacement["source"]
+            replacement_text = spacecraft_text_replacement["replacement"]
+            contents = staged_model.read_text(encoding="utf-8")
+            replacement_count = contents.count(source_text)
+            if replacement_count != 1:
+                raise ValueError(
+                    f"Expected one stage-one power profile in {staged_model}, "
+                    f"found {replacement_count}"
+                )
+            staged_model.write_text(
+                contents.replace(source_text, replacement_text), encoding="utf-8"
+            )
+            compatibility_mappings.append(
+                {
+                    "option": "SpacecraftOptionsFile stage-one power profile",
+                    "source": "5 kW polynomial power model",
+                    "replacement": "7kWarray_800Wbus",
+                    "reason": spacecraft_text_replacement["reason"],
+                }
             )
         options.HardwarePath = str(staged_hardware_root)
     else:
