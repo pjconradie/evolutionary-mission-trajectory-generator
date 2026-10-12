@@ -37,6 +37,15 @@ BASELINING_REFERENCE_FRAME_KERNEL_OVERRIDES = {
 BASELINING_ENGINE_TYPE_OVERRIDES = {
     "journey_options/EarthMars_Depart2-2_Arrive2-2": (15, "AEPS.ThrottleTable"),
 }
+BASELINING_LOW_POWER_ENGINE_TYPE_OVERRIDES = {
+    "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction": 10,
+    "script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction": 10,
+    "script_constraint_tests/EarthMars_RPRangle_force_conjunction": 10,
+}
+BASELINING_ELECTRIC_PROPULSION_KEY_OVERRIDES = {
+    "spacecraft_options/spacecraft_LT_powerFile": "NEXTC_PolyFit_HT",
+    "spacecraft_options/spacecraft_LT_propFile": "NEXTC_PolyFit_HT",
+}
 BASELINING_LAUNCH_VEHICLE_KEY_OVERRIDES = {
     "global_mission_options/globalmissionoptions_MGALT_DLAbounds": "Atlas_V_401",
     "journey_options/EarthToMars_ForcedInitialCoast": "Falcon_Heavy_(Expendable)",
@@ -1645,6 +1654,46 @@ def prepare_case(
         ]
     else:
         compatibility_mappings = []
+    low_power_engine_type_override = (
+        BASELINING_LOW_POWER_ENGINE_TYPE_OVERRIDES.get(identifier)
+        if identifier is not None
+        else None
+    )
+    if low_power_engine_type_override is not None:
+        original_engine_type = options.engine_type
+        options.engine_type = low_power_engine_type_override
+        compatibility_mappings.append(
+            {
+                "option": "engine_type",
+                "source": original_engine_type,
+                "replacement": low_power_engine_type_override,
+                "reason": (
+                    "case-scoped runnable approximation: engine_type 6 has a "
+                    "2.7 kW minimum, while the immutable SNOPT seed requires "
+                    "thrust at lower available power; engine_type 10 supports "
+                    "the seeded power range"
+                ),
+            }
+        )
+    electric_propulsion_key_override = (
+        BASELINING_ELECTRIC_PROPULSION_KEY_OVERRIDES.get(identifier)
+        if identifier is not None
+        else None
+    )
+    if electric_propulsion_key_override is not None:
+        original_key = options.ElectricPropulsionSystemKey
+        options.ElectricPropulsionSystemKey = electric_propulsion_key_override
+        compatibility_mappings.append(
+            {
+                "option": "ElectricPropulsionSystemKey",
+                "source": original_key,
+                "replacement": electric_propulsion_key_override,
+                "reason": (
+                    "case-scoped runnable probe: NEXTC_PolyFit_HT supports lower "
+                    "power than the staged AEPS polynomial model"
+                ),
+            }
+        )
     hardware_root, hardware_mappings, hardware_overrides = _hardware_root_and_mappings(options)
     compatibility_mappings.extend(hardware_mappings)
     reference_frame_kernel_override = (

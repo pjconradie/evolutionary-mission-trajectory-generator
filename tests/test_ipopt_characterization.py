@@ -666,6 +666,30 @@ def test_prepare_case_stages_top_level_default_libraries(repository_root, tmp_pa
     } >= {"PowerSystemsLibraryFile", "PropulsionSystemsLibraryFile"}
 
 
+@pytest.mark.parametrize("case_name", ("spacecraft_LT_powerFile", "spacecraft_LT_propFile"))
+def test_prepare_case_stages_low_power_propulsion_probe(
+    repository_root, tmp_path, case_name
+):
+    source = (
+        repository_root
+        / "testatron"
+        / "tests"
+        / "spacecraft_options"
+        / f"{case_name}.emtgopt"
+    )
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+
+    prepared_path = ipopt_characterization.prepare_case(source, tmp_path)
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+
+    assert prepared.ElectricPropulsionSystemKey == "NEXTC_PolyFit_HT"
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert {
+        mapping["option"]: mapping["replacement"]
+        for mapping in compatibility["mappings"]
+    }["ElectricPropulsionSystemKey"] == "NEXTC_PolyFit_HT"
+
+
 def test_default_output_root_targets_relocated_case_artifacts(repository_root):
     assert ipopt_characterization.DEFAULT_OUTPUT_ROOT == (
         repository_root / "testatron" / "ipopt" / "tests" / "tests"

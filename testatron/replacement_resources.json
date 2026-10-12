@@ -51,10 +51,10 @@
         "state_representation_tests/PeriapseArrival_IncomingBplaneRpTA_testatron",
         "state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron"
       ],
-      "replacement_path": "testatron/replacement_resources/Sun_SaturnOrientation_StateRepresentation.emtg_universe",
+      "replacement_path": "testatron/replacement_resources/Sun_SaturnOrientation_StateRepresentation_Arrival.emtg_universe",
       "source": "Reconstructed from tracked Sun and Sun_barycenters menus, with immutable baseline Sun constants and the required Venus=2, Earth=3, Mars=4, Saturn=13 body-code layout.",
-      "sha256": "f7c1f02df983500fbe2839662eb6e951e7a9a4b3093661974ef34fdf9f9f8473",
-      "rationale": "Historical universe file is unavailable in the repository and reachable Git history. The separate Saturn-centered journey requires pinned sat441.bsp for physical Saturn and satellite ephemerides.",
+      "sha256": "ebdf74eaada8ff305808fcd9995ff0c3ccb09de8d872fa741935f3e60fc22199",
+      "rationale": "Historical universe file is unavailable in the repository and reachable Git history. Body 13 retains the reconstructed Saturn ephemeris and constants but is named Saturn so the current boundary-event writer emits the immutable baseline identity Saturn_BE rather than Saturn_BE_BE. The separate Saturn-centered journey requires pinned sat441.bsp for physical Saturn and satellite ephemerides.",
       "review_status": "provisional"
     },
     {

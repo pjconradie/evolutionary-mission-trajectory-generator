@@ -115,3 +115,22 @@ We resolve each case by finding **why its trip changed**:
 5. If neither is true, treat it as an EMTG regression and fix the mission-construction code.
 
 We should not change tolerances or promote these cases just to remove the label; that would be comparing two different trips as though they were the same one.
+`
+
+```zsh
+baselining_case 'journey_options/EarthToMars_ForcedInitialCoast'
+baselining_case 'journey_options/EarthToMars_ForcedTerminalCoast'
+baselining_case 'script_constraint_tests/EVM_pEndRRP_arrival'
+baselining_case 'script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction'
+baselining_case 'script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction'
+baselining_case 'script_constraint_tests/EarthMars_RPRangle_force_conjunction'
+baselining_case 'spacecraft_options/spacecraft_LT_multiStage_spacecraftFile'
+baselining_case 'spacecraft_options/spacecraft_LT_powerFile'
+baselining_case 'spacecraft_options/spacecraft_LT_propFile'
+baselining_case 'state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron'
+baselining_case 'state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron'
+baselining_case 'state_representation_tests/PeriapseArrival_IncomingBplaneRpTA_testatron'
+baselining_case 'state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron'
+python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
+python -c 'import json; from collections import Counter; summary=json.load(open("testatron/ipopt/tests/tests/baselining/baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(Counter(case["classification"] for case in summary["cases"]).items())))'
+```
