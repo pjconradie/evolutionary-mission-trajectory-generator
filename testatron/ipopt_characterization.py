@@ -26,6 +26,9 @@ DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
 BASELINING_POLICY = TESTATRON_ROOT / "ipopt" / "tests" / "baselining_policy.json"
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
+DEFAULT_BASELINING_DECISION_LOG = (
+    REPOSITORY_ROOT / "docs" / "3_NLP_Solvers" / "IPOPT" / "baselining_decision_log.md"
+)
 STAGED_EARLIEST_POSSIBLE_EPOCHS = {
     "journey_options/park_to_SOI_FBLT": 58860.0,
 }
@@ -2720,6 +2723,221 @@ def write_baselining_summary(output_root):
     return summary_path, summary
 
 
+def _read_baselining_json(path, description):
+    """Read one required baselining evidence JSON file."""
+    try:
+        return json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"Cannot read {description}: {path}") from error
+
+
+def _markdown_value(value):
+    """Render JSON scalar values consistently in the decision log."""
+    if value is None:
+        return "N/A"
+    if isinstance(value, float):
+        return format(value, ".16g")
+    return str(value)
+
+
+def _render_mappings(mappings):
+    if not mappings:
+        return ["- No case-specific runtime option changes."]
+    lines = []
+    for mapping in mappings:
+        lines.append(
+            "- `{option}`: `{source}` -> `{replacement}`. {reason}".format(
+                option=mapping["option"],
+                source=_markdown_value(mapping.get("source")),
+                replacement=_markdown_value(mapping.get("replacement")),
+                reason=mapping.get("reason", "No rationale recorded."),
+            )
+        )
+    return lines
+
+
+def _render_replacement_resources(resources):
+    if not resources:
+        return []
+    lines = ["- Replacement resources:"]
+    for resource in resources:
+        lines.append(
+            "  - `{id}`: `{path}` -> `{replacement_path}` "
+            "(review status: `{review_status}`). {rationale}".format(
+                id=resource["id"],
+                path=resource["path"],
+                replacement_path=resource["replacement_path"],
+                review_status=resource["review_status"],
+                rationale=resource["rationale"],
+            )
+        )
+    return lines
+
+
+def _render_replay_mismatches(comparison, summary):
+    checks = comparison["checks"]
+    differences = summary["differences"]
+    mismatch_lines = []
+    scalar_fields = (
+        ("objective", "objective"),
+        ("total_deterministic_deltav", "deterministic_deltav_km_s"),
+        ("total_flight_time_years", "flight_time_years"),
+        ("final_mass", "final_mass_kg"),
+    )
+    for check, difference in scalar_fields:
+        if not checks.get(check, False):
+            mismatch_lines.append(
+                "- `{check}`: IPOPT - SNOPT = `{difference}`.".format(
+                    check=check,
+                    difference=_markdown_value(differences.get(difference)),
+                )
+            )
+    if not checks.get("journey_endpoints", False):
+        endpoint_deltas = comparison["endpoint_deltas"]
+        mismatch_lines.append(
+            "- `journey_endpoints`: maximum absolute deltas: epoch "
+            "`{epoch_days}` days, position `{position_km}` km, velocity "
+            "`{velocity_km_s}` km/s, mass `{mass_kg}` kg.".format(
+                epoch_days=_markdown_value(endpoint_deltas["max_epoch_days"]),
+                position_km=_markdown_value(endpoint_deltas["max_position_km"]),
+                velocity_km_s=_markdown_value(endpoint_deltas["max_velocity_km_s"]),
+                mass_kg=_markdown_value(endpoint_deltas["max_mass_kg"]),
+            )
+        )
+    for check, matched in checks.items():
+        if not matched and check not in {
+            "objective",
+            "total_deterministic_deltav",
+            "total_flight_time_years",
+            "final_mass",
+            "journey_endpoints",
+        }:
+            mismatch_lines.append(f"- `{check}`: mismatch; no scalar delta is defined.")
+    return mismatch_lines or ["- None; all replay checks passed."]
+
+
+def _render_refinement(case_result, case_root):
+    refinement = case_result.get("refinement")
+    if not refinement:
+        return ["- Not run because the replay comparison was not acceptable."]
+    refinement_root = case_root / "attempt-1" / "refinement"
+    comparison = _read_baselining_json(
+        refinement_root / "comparison.json", "refinement comparison"
+    )
+    lines = [
+        "- Classification: `{}`.".format(
+            refinement.get("comparison_classification", refinement.get("classification"))
+        ),
+        "- Acceptable: `{}`.".format(comparison.get("acceptable")),
+    ]
+    ipopt = refinement.get("ipopt")
+    if ipopt:
+        lines.append(
+            "- IPOPT: exit `{}`, iterations `{}`, terminal constraint violation `{}`.".format(
+                ipopt.get("native_exit", "N/A"),
+                _markdown_value(ipopt.get("iterations")),
+                _markdown_value(ipopt.get("terminal_constraint_violation")),
+            )
+        )
+    return lines
+
+
+def render_baselining_decision_log(output_root):
+    """Render one complete Markdown audit record for every baselining case."""
+    batch_root = Path(output_root) / "baselining"
+    results = {}
+    for result_path in batch_root.glob("*/*/result.json"):
+        result = _read_baselining_json(result_path, "baselining result")
+        identifier = result.get("case_id")
+        if not identifier:
+            raise ValueError(f"Baselining result has no case_id: {result_path}")
+        if identifier in results:
+            raise ValueError(f"Duplicate baselining result for {identifier}")
+        results[identifier] = (result_path.parent, result)
+
+    ordered_case_ids = sorted(
+        results,
+        key=lambda identifier: (
+            BASELINING_GROUP_ORDER.index(identifier.split("/", 1)[0]),
+            identifier,
+        ),
+    )
+    lines = [
+        "# IPOPT Baselining Decision Log",
+        "",
+        "This generated log documents the final, two-attempt IPOPT replay evidence "
+        "for every immutable Testatron SNOPT case. It is generated from the fixed "
+        "baselining evidence root; source `.emtgopt` files and SNOPT `.emtg` "
+        "baselines are not modified.",
+        "",
+        "## Universal Runtime Staging",
+        "",
+        "Every replay selects IPOPT, writes a staged options file and working "
+        "directory, aligns the immutable SNOPT decision vector, and evaluates it "
+        "with `run_inner_loop=0`. A refinement, when present, runs only after an "
+        "acceptable replay and uses `run_inner_loop=3`. The case-specific changes "
+        "below are additional staged compatibility actions, each recorded in the "
+        "corresponding `compatibility.json`.",
+        "",
+        "## Case Records",
+        "",
+    ]
+    current_group = None
+    for identifier in ordered_case_ids:
+        case_root, result = results[identifier]
+        group = identifier.split("/", 1)[0]
+        if group != current_group:
+            lines.extend((f"## {group}", ""))
+            current_group = group
+        first = result.get("first", {})
+        repeatability = result.get("repeatability", {})
+        replay_root = case_root / "attempt-1" / "replay"
+        compatibility = _read_baselining_json(
+            replay_root / "compatibility.json", "replay compatibility"
+        )
+        comparison = _read_baselining_json(
+            replay_root / "comparison.json", "replay comparison"
+        )
+        summary = _read_baselining_json(
+            replay_root / "summary.json", "replay comparison summary"
+        )
+        lines.extend(
+            (
+                f"### {identifier}",
+                "",
+                "- Classification: `{}`.".format(first.get("classification", "unknown")),
+                "- Repeatability: `{}`.".format(
+                    "stable" if repeatability.get("stable") else "unstable"
+                ),
+                "- Replay: `{}`; acceptable: `{}`.".format(
+                    (first.get("replay") or {}).get("comparison_classification"),
+                    comparison["acceptable"],
+                ),
+                "",
+                "#### Case-Specific Runtime Changes",
+            )
+        )
+        lines.extend(_render_mappings(compatibility.get("mappings", [])))
+        lines.extend(_render_replacement_resources(compatibility.get("replacement_resources", [])))
+        for violation in compatibility.get("seed_bound_violations", []):
+            lines.append(f"- Seed-bound violation retained: `{violation}`.")
+        lines.extend(("", "#### Replay Mismatches"))
+        lines.extend(_render_replay_mismatches(comparison, summary))
+        lines.extend(("", "#### Refinement"))
+        lines.extend(_render_refinement(first, case_root))
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n", len(ordered_case_ids)
+
+
+def write_baselining_decision_log(output_root, document_path=DEFAULT_BASELINING_DECISION_LOG):
+    """Write the complete generated Markdown baselining decision log."""
+    document_path = Path(document_path)
+    document, case_count = render_baselining_decision_log(output_root)
+    document_path.parent.mkdir(parents=True, exist_ok=True)
+    document_path.write_text(document, encoding="utf-8")
+    return document_path, case_count
+
+
 def _promotion_case_paths(case_identifier, output_root, tests_root=TESTS_ROOT):
     """Resolve immutable inputs and evidence roots for one reviewed case."""
     relative_case = Path(case_identifier)
@@ -3106,6 +3324,16 @@ def build_parser():
         help="write a compact summary of existing fixed baselining evidence",
     )
     parser.add_argument(
+        "--write-baselining-decision-log",
+        action="store_true",
+        help="write a complete Markdown decision log from existing baselining evidence",
+    )
+    parser.add_argument(
+        "--decision-log-output",
+        default=str(DEFAULT_BASELINING_DECISION_LOG),
+        help="output path for --write-baselining-decision-log",
+    )
+    parser.add_argument(
         "--promote-baseline",
         metavar="CASE_ID",
         help="copy one approved matched baselining case into the curated results tree",
@@ -3162,6 +3390,12 @@ def main(argv=None):
     if args.summarize_baselining:
         summary_path, summary = write_baselining_summary(output_root)
         print(f"Wrote baselining summary for {summary['case_count']} case(s): {summary_path}")
+        return 0
+    if args.write_baselining_decision_log:
+        document_path, case_count = write_baselining_decision_log(
+            output_root, args.decision_log_output
+        )
+        print(f"Wrote baselining decision log for {case_count} case(s): {document_path}")
         return 0
     if args.promote_baseline:
         if not args.approve_baseline:

@@ -1385,6 +1385,165 @@ def test_write_baselining_summary_extracts_case_attempts_only(tmp_path):
     assert json.loads(summary_path.read_text()) == summary
 
 
+def _write_decision_log_case_evidence(
+    output_root,
+    case_id,
+    *,
+    classification,
+    mappings=None,
+    resources=None,
+    seed_bound_violations=None,
+    acceptable=False,
+    refinement=False,
+):
+    case_root = output_root / "baselining" / case_id
+    replay_root = case_root / "attempt-1" / "replay"
+    replay_root.mkdir(parents=True)
+    checks = {
+        "journey_names": True,
+        "event_topology": True,
+        "decision_descriptions": True,
+        "decision_vector_length": True,
+        "objective": True,
+        "total_deterministic_deltav": acceptable,
+        "total_flight_time_years": True,
+        "final_mass": True,
+        "journey_endpoints": acceptable,
+    }
+    comparison = {
+        "acceptable": acceptable,
+        "checks": checks,
+        "endpoint_deltas": {
+            "max_epoch_days": 0.0,
+            "max_position_km": 0.0 if acceptable else 107.25,
+            "max_velocity_km_s": 0.0 if acceptable else 3.0e-8,
+            "max_mass_kg": 0.0,
+        },
+    }
+    summary = {
+        "differences": {
+            "objective": 0.0,
+            "deterministic_deltav_km_s": 0.0 if acceptable else 0.25,
+            "flight_time_years": 0.0,
+            "final_mass_kg": 0.0,
+        }
+    }
+    compatibility = {
+        "mappings": mappings or [],
+        "replacement_resources": resources or [],
+        "seed_bound_violations": seed_bound_violations or [],
+    }
+    (replay_root / "comparison.json").write_text(json.dumps(comparison))
+    (replay_root / "summary.json").write_text(json.dumps(summary))
+    (replay_root / "compatibility.json").write_text(json.dumps(compatibility))
+    first = {
+        "classification": classification,
+        "replay": {
+            "comparison_classification": "matched_snopt"
+            if acceptable
+            else "mismatch_snopt"
+        },
+    }
+    if refinement:
+        refinement_root = case_root / "attempt-1" / "refinement"
+        refinement_root.mkdir()
+        (refinement_root / "comparison.json").write_text(
+            json.dumps({"acceptable": True})
+        )
+        first["refinement"] = {
+            "classification": "matched_snopt",
+            "comparison_classification": "matched_snopt",
+            "ipopt": {
+                "native_exit": "Optimal Solution Found.",
+                "iterations": 12,
+                "terminal_constraint_violation": 1.0e-9,
+            },
+        }
+    result = {
+        "case_id": case_id,
+        "first": first,
+        "second": first,
+        "repeatability": {"stable": True, "differences": {}},
+    }
+    (case_root / "result.json").write_text(json.dumps(result))
+
+
+def test_write_baselining_decision_log_renders_all_case_evidence(tmp_path):
+    _write_decision_log_case_evidence(
+        tmp_path,
+        "journey_options/sample_mismatch",
+        classification="mismatch_snopt",
+        mappings=[
+            {
+                "option": "LaunchVehicleKey",
+                "source": "Falcon_9_FT_(RTLS)",
+                "replacement": "Atlas_V_401",
+                "reason": "reproduces the immutable launch mass",
+            }
+        ],
+        resources=[
+            {
+                "id": "sample_resource",
+                "path": "missing.emtg_universe",
+                "replacement_path": "replacement.emtg_universe",
+                "review_status": "provisional",
+                "rationale": "required historical resource is unavailable",
+            }
+        ],
+        seed_bound_violations=["x[4] below lower bound"],
+    )
+    _write_decision_log_case_evidence(
+        tmp_path,
+        "physics_options/sample_match",
+        classification="matched_snopt",
+        acceptable=True,
+        refinement=True,
+    )
+
+    document_path = tmp_path / "decision-log.md"
+    written_path, case_count = ipopt_characterization.write_baselining_decision_log(
+        tmp_path, document_path
+    )
+    document = document_path.read_text()
+
+    assert written_path == document_path
+    assert case_count == 2
+    assert document.index("### journey_options/sample_mismatch") < document.index(
+        "### physics_options/sample_match"
+    )
+    assert "`LaunchVehicleKey`: `Falcon_9_FT_(RTLS)` -> `Atlas_V_401`" in document
+    assert "`sample_resource`: `missing.emtg_universe` -> `replacement.emtg_universe`" in document
+    assert "Seed-bound violation retained: `x[4] below lower bound`" in document
+    assert "`total_deterministic_deltav`: IPOPT - SNOPT = `0.25`" in document
+    assert "position `107.25` km" in document
+    assert "None; all replay checks passed." in document
+    assert "Optimal Solution Found." in document
+
+
+def test_main_writes_baselining_decision_log_without_emtg(tmp_path, capsys):
+    _write_decision_log_case_evidence(
+        tmp_path,
+        "journey_options/sample_match",
+        classification="matched_snopt",
+        acceptable=True,
+    )
+    document_path = tmp_path / "decision-log.md"
+
+    exit_code = ipopt_characterization.main(
+        [
+            "--write-baselining-decision-log",
+            "--output-root",
+            str(tmp_path),
+            "--decision-log-output",
+            str(document_path),
+        ]
+    )
+
+    assert exit_code == 0
+    assert document_path.is_file()
+    assert "for 1 case(s)" in capsys.readouterr().out
+
+
 def _write_promotable_baselining_evidence(output_root, source):
     case_identifier = ipopt_characterization.case_id(source)
     case_root = output_root / "baselining" / case_identifier
