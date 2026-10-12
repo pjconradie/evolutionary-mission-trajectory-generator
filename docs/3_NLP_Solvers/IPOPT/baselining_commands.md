@@ -395,6 +395,26 @@ output:
 137
 {'matched_snopt': 5, 'mismatch_snopt': 118, 'parse_failed': 1, 'topology_changed': 13}
 ```
+
+## Generate Case Decision Log
+
+Generate the per-case companion report from the existing baselining evidence after the full batch has completed:
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--write-baselining-decision-log \
+	--output-root "$PWD/testatron/ipopt/tests/tests" \
+	--decision-log-output "$PWD/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md"
+```
+
+This command does not run EMTG or modify immutable Testatron inputs. It reads the existing case artifacts and writes one record for each case, including staged runtime changes, replay mismatch values, and refinement status. It preserves the narrative decision log at `docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md`; the generated companion report is `docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md`.
+
+Expected output for the completed corpus:
+
+```zsh
+Wrote baselining decision log for 137 case(s): .../docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md
+```
+
 # What it does
 
 This defines two `zsh` functions in the current terminal. Defining them does not run EMTG or promote anything.

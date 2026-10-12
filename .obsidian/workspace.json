@@ -83,12 +83,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "baselining_decision_log"
+              "title": "baselining_commands"
             }
           },
           {
@@ -106,7 +106,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -271,12 +271,12 @@
       "bases:Create new base": false
     }
   },
-  "active": "1248c444cdae4c80",
+  "active": "2bb7e13f04755740",
   "lastOpenFiles": [
-    "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log_test.md",
-    "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
+    "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
+    "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
     "testatron/ipopt/tests/tests/baselining/state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron/attempt-2 2",
     "testatron/ipopt/tests/tests/baselining/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/attempt-1 2",
     "testatron/ipopt/tests/tests/baselining/state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron/attempt-2 2",
