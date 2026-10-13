@@ -1,3 +1,161 @@
+# IPOPT Testatron Verification
+
+## Purpose
+
+The IPOPT Testatron workflow executes the immutable `testatron/tests` corpus
+with the open-source IPOPT backend while preserving each adjacent
+SNOPT-generated `.emtg` file as immutable historical evidence. The workflow
+answers two separate questions:
+
+1. **Immutable-SNOPT comparison:** does a staged replay and, when eligible,
+	IPOPT refinement agree with the historical SNOPT result?
+2. **Current-state regression verification:** does fresh evidence reproduce the
+	reviewed behavior of the current EMTG/IPOPT environment?
+
+The first is a diagnostic comparison to historical truth. The second is the
+regression gate for the currently supported Docker toolchain. A stable
+`mismatch_snopt` can be expected current-state behavior; it is not a solver
+pass against SNOPT, nor a regression by itself.
+
+Run the commands in this document from the repository root. The operator
+commands are collected in [`baselining_commands.md`](baselining_commands.md).
+
+## Immutable Inputs and Evidence Layout
+
+| Root | Contents |
+| --- | --- |
+| `testatron/tests/<group>/<case>.emtgopt` | Immutable Testatron mission-options source. |
+| `testatron/tests/<group>/<case>.emtg` | Immutable historical SNOPT baseline. |
+| `testatron/ipopt/tests/tests/baselining/<group>/<case>/` | Replaceable staged runtime evidence, attempts, logs, comparisons, and summaries. |
+| `testatron/ipopt/tests/tests/<group>/<case>/` | Curated promoted output for an explicitly approved stable `matched_snopt` case. |
+| `testatron/ipopt/tests/baselining_verification.json` | Reviewed current-state reference for all 137 cases. |
+| `testatron/ipopt/tests/baselining_verification_policy.json` | Versioned numeric policy used only for current-state verification. |
+
+The nested `tests/tests` path is artifact data, not Python test source. Python
+tests remain below the repository-level `tests/` directory.
+
+## Runtime Staging
+
+The Docker runner mounts the repository read-only and writes only staged,
+case-scoped artifacts. `prepare_case()` copies and adapts runtime options and
+dependencies below the evidence root; it never alters the immutable source
+pair.
+
+Legacy resources may need public runtime mappings. Every mapping, replacement
+resource, and seed-bound exception is recorded in the case
+`compatibility.json`, including source, replacement, reason, and provenance.
+The completed corpus has no final dependency-blocked cases, but that does not
+mean staged public resources are declared numerically equivalent to historical
+SNOPT resources. Their observable effect remains part of the recorded replay
+comparison.
+
+## Replay and Refinement
+
+Each case has two fresh attempts. `repeatability.json` compares them and a case
+is accepted as stable only when its recorded classification and approved values
+agree.
+
+### SNOPT-seed replay
+
+The runner extracts the immutable SNOPT decision vector, aligns it to the
+current schema, injects it into staged options, and uses `run_inner_loop=0`.
+Neither SNOPT nor IPOPT executes in this stage. Replay tests the current EMTG
+transcription, staged resources, decision schema, topology, and numerical
+state against the immutable SNOPT result.
+
+Replay records objective, deterministic delta-v, flight time, final mass,
+journey endpoints, topology, and schema checks. A replay mismatch is evidence
+that current runtime behavior differs from the historical baseline; refinement
+is not run for that case.
+
+### IPOPT refinement
+
+Only an acceptable replay proceeds to IPOPT refinement with
+`run_inner_loop=3`, using the same aligned decision seed. Refinement records
+the native IPOPT exit, iterations, feasibility, objective, totals, endpoint
+states, topology, and decision schema.
+
+`matched_snopt` requires stable accepted replay, accepted native IPOPT
+refinement, and all approved immutable-SNOPT comparisons. `mismatch_snopt`
+means the staged case completed but does not meet that historical agreement;
+it remains retained diagnostic evidence rather than a promoted result.
+
+## Tolerance Boundaries
+
+Immutable-SNOPT replay and refinement use their own reviewed comparison
+policies. The replay contract compares scalar mission metrics, topology,
+schema, and endpoint states. Refinement additionally requires native IPOPT
+success and objective agreement using a relative $10^{-6}$ and absolute
+$10^{-10}$ band.
+
+The refinement decision vector has a separate $10^{-11}$ absolute in-bound
+check. It is not a universal equality tolerance for objectives, totals, or
+endpoint states.
+
+Current-state verification does not reuse or relax any immutable-SNOPT policy.
+It uses the independent, versioned numeric tolerances in
+`testatron/ipopt/tests/baselining_verification_policy.json` to compare fresh
+evidence with the reviewed current-state reference.
+
+## Completed Corpus State
+
+The reviewed corpus contains 137 immutable source/SNOPT pairs. The two-attempt
+baselining run is stable for every case:
+
+| Classification | Count | Meaning |
+| --- | ---: | --- |
+| `matched_snopt` | 5 | Replay and IPOPT refinement meet the immutable-SNOPT agreement policy. |
+| `mismatch_snopt` | 132 | Replay differs from the immutable SNOPT baseline; refinement is not run. |
+| `topology_changed`, `parse_failed`, `dependency_blocked`, `process_failed`, `timed_out` | 0 | No final classifications in the completed corpus. |
+
+The recurring long Earth-Mars endpoint difference remains an unresolved
+historical-environment diagnostic, most likely involving ephemeris, kernel, or
+toolchain provenance. Do not change SPICE, propagation, or numerical
+tolerances to force immutable-SNOPT agreement.
+
+The generated per-case record is
+[`baselining_case_decision_log.md`](baselining_case_decision_log.md). The
+manual review ledger is [`baselined_checklist.md`](baselined_checklist.md).
+
+## Current-State Verification
+
+The reference records the expected present EMTG/IPOPT result for every case,
+including expected `mismatch_snopt` outcomes. It contains immutable input
+hashes, repeatability, runtime compatibility records, replay state, and,
+where refinement ran, native IPOPT exit and numerical snapshots.
+
+Ordinary baselining must never overwrite the reference. Writing or refreshing
+`baselining_verification.json` is an explicit review and acceptance action.
+Verification is artifact-only: it does not run EMTG and exits nonzero for
+numeric drift, changed topology, changed execution state, missing evidence, or
+unstable attempts.
+
+See [`baselining_commands.md`](baselining_commands.md) for the reference-write
+and verification commands, and
+[`ipopt.readme.md`](ipopt.readme.md) for the Docker toolchain.
+
+## Promotion and Review
+
+Promotion is a separate manual operation. It may copy only reviewed, stable
+`matched_snopt` evidence into the curated case root; it never replaces the
+immutable SNOPT pair. A completed or current-state-matched `mismatch_snopt`
+case is not eligible for promotion.
+
+The baselining summary is a compact generated index. The decision log and
+verification reference are the authoritative detailed records. Do not infer
+promotion or README approval merely from an evidence directory existing.
+
+## Python Test Coverage
+
+`ipopt_benchmarks` covers benchmark artifact behavior. The runner contracts
+are ordinary unit tests and validate staging, comparison, serialization,
+promotion eligibility, and current-state verification behavior.
+
+`ipopt_tests` remains reserved for a future Docker-backed per-case pytest
+suite. Its absence does not weaken the completed artifact-based current-state
+verification workflow. Any future runtime suite must verify against the
+reviewed current-state reference and retain immutable-SNOPT comparison as a
+separate diagnostic.
 # IPOPT Testatron Verification Plan
 
 ## Purpose

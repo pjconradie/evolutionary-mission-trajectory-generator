@@ -218,3 +218,31 @@ and the pinned package list is
 [`tests/docker/Dockerfile.toolchain`](../../../tests/docker/Dockerfile.toolchain).
 For Testatron acceptance policy, tutorial coverage, and evidence handling, see
 [`testatron/ipopt/README.md`](../../../testatron/ipopt/README.md).
+
+## Testatron Baselining
+
+The full Testatron IPOPT characterization uses this Docker toolchain. It keeps
+the immutable source pairs under `testatron/tests` read-only and stages
+case-scoped runtime copies beneath `testatron/ipopt/tests/tests/baselining`.
+The staging record for each case is `compatibility.json`; it captures every
+public hardware, universe, or kernel mapping used at runtime.
+
+Run the supported full-corpus commands in
+[`baselining_commands.md`](baselining_commands.md). The staged runner first
+replays the immutable SNOPT decision vector with `run_inner_loop=0`, then runs
+IPOPT refinement only when that replay is acceptable. Manual container commands
+in this guide are diagnostic tools, not substitutes for baselining or
+current-state verification.
+
+The immutable-SNOPT comparison and current-state regression checks answer
+different questions:
+
+- [`tests.readme.md`](tests.readme.md) defines the immutable-SNOPT comparison,
+   staging, replay, and refinement contract.
+- [`baselining_case_decision_log.md`](baselining_case_decision_log.md) records
+   the generated per-case evidence for the 137-case corpus.
+- `testatron/ipopt/tests/baselining_verification.json` is the reviewed
+   current-EMTG/IPOPT reference; its independent numeric policy is
+   `testatron/ipopt/tests/baselining_verification_policy.json`.
+- [`tests.implementation_plan.md`](tests.implementation_plan.md) retains the
+   implementation history and its current-state closure.

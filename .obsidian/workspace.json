@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "docker_deployment.implementation_plan"
+              "title": "ipopt.readme"
             }
           },
           {
@@ -287,13 +287,13 @@
   },
   "active": "01e592b1abc3d1ea",
   "lastOpenFiles": [
+    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
-    "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
-    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log_test.md",
     "testatron/ipopt/tests/tests/baselining/baselining_verification_report.json",
