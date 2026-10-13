@@ -888,4 +888,57 @@ The Docker run should mount the repository read-only, write only to a new timest
 - Inspect IPOPT native exit, iteration count, terminal constraint violation, comparison checks, and provenance.
 - Confirm no generated result is copied into the immutable Testatron pair or promoted automatically.
 
+## Current-State Closure (2026-10-13)
+
+Stages 0 through 5.7 above are retained as the implementation record. The
+Stage 6 evidence runner, two-attempt repeatability checks, per-case decision
+log, and promotion controls were subsequently completed against all 137
+immutable Testatron source/SNOPT pairs.
+
+The final corpus is stable across both attempts: 5 cases are
+`matched_snopt`, and 132 are `mismatch_snopt`. There are no final
+`topology_changed`, `parse_failed`, `dependency_blocked`, `process_failed`, or
+`timed_out` classifications. Runtime staging closes the historical
+resource-availability failures through explicit case-scoped mappings recorded
+in `compatibility.json`; it does not modify immutable inputs or claim that the
+mapped resources reproduce the historical SNOPT environment.
+
+The generated companion record is
+[`baselining_case_decision_log.md`](baselining_case_decision_log.md). It must
+not replace or overwrite the narrative
+[`baselining_decision_log.md`](baselining_decision_log.md). The artifact root
+contains replaceable batch evidence; promotion into the curated case root
+remains a separate manual action limited to stable `matched_snopt` cases.
+
+### Current-State Regression Gate
+
+The reviewed current EMTG/IPOPT behavior is recorded in
+`testatron/ipopt/tests/baselining_verification.json`, with independent numeric
+policy in `testatron/ipopt/tests/baselining_verification_policy.json`. The
+artifact-only verifier compares fresh evidence with this reference and reports
+numeric drift, topology changes, execution changes, missing evidence, or
+instability. It deliberately accepts an expected `mismatch_snopt` outcome when
+it matches the reviewed current state.
+
+Reference generation is a manual review and acceptance action, not a normal
+post-batch step. The supported commands are in
+[`baselining_commands.md`](baselining_commands.md).
+
+### Remaining Historical Investigation
+
+The repeated long Earth-Mars endpoint mismatch remains a historical
+reproducibility question. Its evidence is consistent with an ephemeris,
+kernel, or toolchain difference between the historical SNOPT environment and
+the current pinned environment. Do not tune propagation, SPICE, or tolerances
+to force a `matched_snopt` result. Recovering and pinning the historical
+environment is optional investigative work, independent of the current-state
+regression gate.
+
+### Deferred Runtime Pytest Expansion
+
+Stage 7's proposed `ipopt_tests` suite remains optional future coverage. It
+must compare its Docker-produced evidence with the reviewed current-state
+reference and retain immutable-SNOPT comparison as a separate diagnostic. It
+is not a prerequisite for the completed artifact-based verification gate.
+
 Only after that pilot is understood should the same runner be used for broader corpus execution.

@@ -120,7 +120,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 6
       }
     ],
     "direction": "vertical"
@@ -285,12 +285,12 @@
       "bases:Create new base": false
     }
   },
-  "active": "01e592b1abc3d1ea",
+  "active": "994b09a27e592564",
   "lastOpenFiles": [
+    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
-    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",

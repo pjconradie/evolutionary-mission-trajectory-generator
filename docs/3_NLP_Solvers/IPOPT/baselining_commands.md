@@ -393,7 +393,7 @@ python -c 'import json; from collections import Counter; summary=json.load(open(
 output:
 ```zsh
 137
-{'matched_snopt': 5, 'mismatch_snopt': 118, 'parse_failed': 1, 'topology_changed': 13}
+{'matched_snopt': 5, 'mismatch_snopt': 132}
 ```
 
 ## Generate Case Decision Log
