@@ -24,10 +24,16 @@ TESTS_ROOT = TESTATRON_ROOT / "tests"
 PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
 DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
 BASELINING_POLICY = TESTATRON_ROOT / "ipopt" / "tests" / "baselining_policy.json"
+BASELINING_VERIFICATION_POLICY = (
+    TESTATRON_ROOT / "ipopt" / "tests" / "baselining_verification_policy.json"
+)
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 DEFAULT_BASELINING_DECISION_LOG = (
     REPOSITORY_ROOT / "docs" / "3_NLP_Solvers" / "IPOPT" / "baselining_decision_log.md"
+)
+DEFAULT_BASELINING_VERIFICATION = (
+    TESTATRON_ROOT / "ipopt" / "tests" / "baselining_verification.json"
 )
 STAGED_EARLIEST_POSSIBLE_EPOCHS = {
     "journey_options/park_to_SOI_FBLT": 58860.0,
@@ -422,6 +428,43 @@ def load_baselining_policy(policy_path=BASELINING_POLICY):
         or not all(isinstance(case, str) and case for case in calibration_cases)
     ):
         raise ValueError("Stage 6 policy must declare six unique calibration cases")
+    return payload
+
+
+def load_baselining_verification_policy(policy_path=BASELINING_VERIFICATION_POLICY):
+    """Load tolerances for current-state baselining verification."""
+    payload = json.loads(Path(policy_path).read_text(encoding="utf-8"))
+    required = {"version", "numeric_tolerances"}
+    if set(payload) != required or payload["version"] != 1:
+        raise ValueError("verification policy must declare version 1 and all required fields")
+    expected_metrics = {
+        "objective",
+        "deterministic_deltav_km_s",
+        "flight_time_years",
+        "final_mass_kg",
+        "epoch_julian_date",
+        "position_km",
+        "velocity_km_s",
+        "mass_kg",
+    }
+    tolerances = payload["numeric_tolerances"]
+    if set(tolerances) != expected_metrics:
+        raise ValueError("verification policy must declare tolerances for every metric")
+    for metric, tolerance in tolerances.items():
+        if (
+            not isinstance(tolerance, dict)
+            or set(tolerance) != {"absolute", "relative"}
+            or any(
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or value < 0
+                for value in tolerance.values()
+            )
+            or tolerance["absolute"] == 0 and tolerance["relative"] == 0
+        ):
+            raise ValueError(
+                f"verification policy tolerance for {metric} must be positive"
+            )
     return payload
 
 
@@ -2723,6 +2766,249 @@ def write_baselining_summary(output_root):
     return summary_path, summary
 
 
+def _verification_snapshot(summary):
+    """Extract the generated mission state used for current-state verification."""
+    ipopt = summary.get("ipopt")
+    if not isinstance(ipopt, dict):
+        return None
+    required = {
+        "objective",
+        "schema",
+        "topology",
+        "flight_time_years",
+        "final_mass_kg",
+        "deterministic_deltav_km_s",
+        "endpoints",
+    }
+    if not required.issubset(ipopt):
+        return None
+    return {field: ipopt[field] for field in sorted(required)}
+
+
+def _verification_stage_record(stage_result, stage_directory):
+    """Build one replay or refinement verification record from saved evidence."""
+    stage_result = stage_result or {}
+    stage_directory = Path(stage_directory)
+    summary_path = stage_directory / "summary.json"
+    snapshot = None
+    if summary_path.is_file():
+        snapshot = _verification_snapshot(
+            _read_baselining_json(summary_path, f"verification summary: {summary_path}")
+        )
+    comparison = stage_result.get("comparison") or {}
+    return {
+        "execution_classification": stage_result.get("classification"),
+        "comparison_classification": stage_result.get("comparison_classification"),
+        "return_code": stage_result.get("return_code"),
+        "detail": stage_result.get("detail", ""),
+        "has_output": bool(stage_result.get("output_file")),
+        "snopt_checks": comparison.get("checks"),
+        "snapshot": snapshot,
+        "ipopt": stage_result.get("ipopt"),
+    }
+
+
+def _verification_case_record(case_root, result):
+    """Build a stable current-state record for one two-attempt baselining case."""
+    first = result.get("first") or {}
+    second = result.get("second") or {}
+    repeatability = result.get("repeatability") or {}
+    replay_root = Path(case_root) / "attempt-1" / "replay"
+    compatibility_path = replay_root / "compatibility.json"
+    compatibility = (
+        _read_baselining_json(compatibility_path, "replay compatibility")
+        if compatibility_path.is_file()
+        else {}
+    )
+    refinement = first.get("refinement")
+    refinement_record = (
+        _verification_stage_record(
+            refinement, Path(case_root) / "attempt-1" / "refinement"
+        )
+        if refinement
+        else {"state": "not_run", "reason": "replay_not_acceptable"}
+    )
+    return {
+        "case_id": result["case_id"],
+        "source_sha256": first.get("source_sha256"),
+        "baseline_sha256": first.get("baseline_sha256"),
+        "classification": first.get("classification"),
+        "repeatability": {
+            "stable": bool(repeatability.get("stable")),
+            "differences": repeatability.get("differences", {}),
+            "attempt_classifications": {
+                "first": first.get("classification"),
+                "second": second.get("classification"),
+            },
+        },
+        "compatibility": {
+            "mappings": compatibility.get("mappings", []),
+            "replacement_resources": compatibility.get("replacement_resources", []),
+            "seed_bound_violations": compatibility.get("seed_bound_violations", []),
+        },
+        "replay": _verification_stage_record(first.get("replay"), replay_root),
+        "refinement": refinement_record,
+    }
+
+
+def build_baselining_verification(output_root, policy_path=BASELINING_VERIFICATION_POLICY):
+    """Build the complete current-state verification reference from saved evidence."""
+    policy = load_baselining_verification_policy(policy_path)
+    batch_root = Path(output_root) / "baselining"
+    records = []
+    for result_path in batch_root.glob("*/*/result.json"):
+        result = _read_baselining_json(result_path, "baselining result")
+        if not result.get("case_id"):
+            raise ValueError(f"Baselining result has no case_id: {result_path}")
+        records.append(_verification_case_record(result_path.parent, result))
+    records.sort(
+        key=lambda record: (
+            BASELINING_GROUP_ORDER.index(record["case_id"].split("/", 1)[0]),
+            record["case_id"],
+        )
+    )
+    return {
+        "version": 1,
+        "policy": {
+            "version": policy["version"],
+            "sha256": _sha256(policy_path),
+        },
+        "case_count": len(records),
+        "cases": records,
+    }
+
+
+def write_baselining_verification(
+    output_root,
+    verification_path,
+    policy_path=BASELINING_VERIFICATION_POLICY,
+):
+    """Write an explicit reviewed current-state verification candidate."""
+    verification_path = Path(verification_path)
+    verification = build_baselining_verification(output_root, policy_path)
+    verification_path.parent.mkdir(parents=True, exist_ok=True)
+    verification_path.write_text(json.dumps(verification, indent=2) + "\n", encoding="utf-8")
+    return verification_path, verification
+
+
+def _verification_numbers_match(expected, actual, metric, tolerances):
+    tolerance = tolerances[metric]
+    return isinstance(actual, (int, float)) and math.isclose(
+        expected,
+        actual,
+        rel_tol=tolerance["relative"],
+        abs_tol=tolerance["absolute"],
+    )
+
+
+def _verification_snapshot_status(expected, actual, tolerances):
+    if expected is None or actual is None:
+        return "matched" if expected is actual else "execution_changed"
+    if expected["schema"] != actual["schema"] or expected["topology"] != actual["topology"]:
+        return "topology_changed"
+    scalar_metrics = {
+        "objective": "objective",
+        "deterministic_deltav_km_s": "deterministic_deltav_km_s",
+        "flight_time_years": "flight_time_years",
+        "final_mass_kg": "final_mass_kg",
+    }
+    for field, metric in scalar_metrics.items():
+        if not _verification_numbers_match(expected[field], actual[field], metric, tolerances):
+            return "numeric_drift"
+    if len(expected["endpoints"]) != len(actual["endpoints"]):
+        return "topology_changed"
+    for expected_journey, actual_journey in zip(expected["endpoints"], actual["endpoints"]):
+        if expected_journey.get("journey_index") != actual_journey.get("journey_index"):
+            return "topology_changed"
+        for boundary in ("start", "end"):
+            expected_state = expected_journey[boundary]
+            actual_state = actual_journey[boundary]
+            for field, metric in (
+                ("epoch_julian_date", "epoch_julian_date"),
+                ("mass_kg", "mass_kg"),
+            ):
+                if not _verification_numbers_match(
+                    expected_state[field], actual_state[field], metric, tolerances
+                ):
+                    return "numeric_drift"
+            for field, metric in (
+                ("position_km", "position_km"),
+                ("velocity_km_s", "velocity_km_s"),
+            ):
+                if len(expected_state[field]) != len(actual_state[field]):
+                    return "topology_changed"
+                if any(
+                    not _verification_numbers_match(left, right, metric, tolerances)
+                    for left, right in zip(expected_state[field], actual_state[field])
+                ):
+                    return "numeric_drift"
+    return "matched"
+
+
+def _verification_stage_status(expected, actual, tolerances):
+    """Compare execution identity and generated state for one verification stage."""
+    if expected.get("state") or actual.get("state"):
+        return "matched" if expected == actual else "execution_changed"
+    if (
+        expected["execution_classification"] != actual["execution_classification"]
+        or expected["has_output"] != actual["has_output"]
+        or (expected.get("ipopt") or {}).get("native_exit")
+        != (actual.get("ipopt") or {}).get("native_exit")
+    ):
+        return "execution_changed"
+    return _verification_snapshot_status(
+        expected["snapshot"], actual["snapshot"], tolerances
+    )
+
+
+def verify_baselining_verification(
+    output_root,
+    verification_path,
+    policy_path=BASELINING_VERIFICATION_POLICY,
+):
+    """Compare saved evidence with a reviewed current-state verification reference."""
+    reference = _read_baselining_json(verification_path, "verification reference")
+    if reference.get("version") != 1:
+        raise ValueError("verification reference must declare version 1")
+    policy = load_baselining_verification_policy(policy_path)
+    actual = build_baselining_verification(output_root, policy_path)
+    expected_cases = {record["case_id"]: record for record in reference.get("cases", [])}
+    actual_cases = {record["case_id"]: record for record in actual["cases"]}
+    statuses = []
+    for identifier in sorted(set(expected_cases) | set(actual_cases)):
+        expected = expected_cases.get(identifier)
+        observed = actual_cases.get(identifier)
+        if expected is None or observed is None:
+            status = "missing_evidence"
+        elif not observed["repeatability"]["stable"]:
+            status = "unstable"
+        elif (
+            expected["classification"] != observed["classification"]
+            or expected["source_sha256"] != observed["source_sha256"]
+            or expected["baseline_sha256"] != observed["baseline_sha256"]
+            or expected["compatibility"] != observed["compatibility"]
+        ):
+            status = "execution_changed"
+        else:
+            status = _verification_stage_status(
+                expected["replay"], observed["replay"], policy["numeric_tolerances"]
+            )
+            if status == "matched":
+                status = _verification_stage_status(
+                    expected["refinement"],
+                    observed["refinement"],
+                    policy["numeric_tolerances"],
+                )
+        statuses.append({"case_id": identifier, "status": status})
+    return {
+        "version": 1,
+        "reference": str(verification_path),
+        "case_count": len(statuses),
+        "cases": statuses,
+        "acceptable": all(record["status"] == "matched" for record in statuses),
+    }
+
+
 def _read_baselining_json(path, description):
     """Read one required baselining evidence JSON file."""
     try:
@@ -3334,6 +3620,28 @@ def build_parser():
         help="output path for --write-baselining-decision-log",
     )
     parser.add_argument(
+        "--write-baselining-verification",
+        action="store_true",
+        help="write an explicit current-state verification reference from baselining evidence",
+    )
+    parser.add_argument(
+        "--verification-output",
+        help="required output path for --write-baselining-verification",
+    )
+    parser.add_argument(
+        "--verify-baselining",
+        action="store_true",
+        help="compare existing baselining evidence with a current-state reference",
+    )
+    parser.add_argument(
+        "--verification-reference",
+        help="required reference path for --verify-baselining",
+    )
+    parser.add_argument(
+        "--verification-report-output",
+        help="optional report path for --verify-baselining",
+    )
+    parser.add_argument(
         "--promote-baseline",
         metavar="CASE_ID",
         help="copy one approved matched baselining case into the curated results tree",
@@ -3397,6 +3705,33 @@ def main(argv=None):
         )
         print(f"Wrote baselining decision log for {case_count} case(s): {document_path}")
         return 0
+    if args.write_baselining_verification:
+        if not args.verification_output:
+            raise SystemExit("--verification-output is required with --write-baselining-verification")
+        verification_path, verification = write_baselining_verification(
+            output_root, args.verification_output
+        )
+        print(
+            "Wrote baselining verification reference for "
+            f"{verification['case_count']} case(s): {verification_path}"
+        )
+        return 0
+    if args.verify_baselining:
+        if not args.verification_reference:
+            raise SystemExit("--verification-reference is required with --verify-baselining")
+        report = verify_baselining_verification(output_root, args.verification_reference)
+        report_path = Path(
+            args.verification_report_output
+            or output_root / "baselining" / "baselining-verification-report.json"
+        )
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        print(
+            "Baselining verification "
+            f"{'passed' if report['acceptable'] else 'failed'} for "
+            f"{report['case_count']} case(s): {report_path}"
+        )
+        return 0 if report["acceptable"] else 1
     if args.promote_baseline:
         if not args.approve_baseline:
             raise SystemExit("--approve-baseline is required with --promote-baseline")

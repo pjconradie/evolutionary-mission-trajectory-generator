@@ -805,7 +805,7 @@ This plan is complete only when:
 5. Immutable SNOPT sources and baselines retain their original hashes.
 
 Only after these conditions hold may work begin on
-[docker_deployment.readme.md](docker_deployment.readme.md). Do not
+[docker_deployment.readme.md](docker_deployment.implementation_plan.md). Do not
 combine Docker lifecycle refactoring with this verification work.
 
 ## Runtime Expectations

@@ -415,6 +415,33 @@ Expected output for the completed corpus:
 Wrote baselining decision log for 137 case(s): .../docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md
 ```
 
+## Verify Current EMTG/IPOPT State
+
+The immutable-SNOPT comparison diagnoses historical differences. The current-state verification reference instead records the reviewed behavior of the current EMTG/IPOPT build for all 137 cases, including expected topology, parsing, dependency, and process outcomes.
+
+Create or deliberately refresh the reviewed reference from completed baselining evidence:
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--write-baselining-verification \
+	--output-root "$PWD/testatron/ipopt/tests/tests" \
+	--verification-output "$PWD/testatron/ipopt/tests/baselining_verification.json"
+```
+
+Do not run this command automatically after a baselining batch. Updating `baselining_verification.json` accepts the current evidence as the new reviewed regression contract.
+
+Verify a fresh completed baselining artifact root against the reviewed reference without running EMTG again:
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--verify-baselining \
+	--output-root "$PWD/testatron/ipopt/tests/tests" \
+	--verification-reference "$PWD/testatron/ipopt/tests/baselining_verification.json" \
+	--verification-report-output "$PWD/testatron/ipopt/tests/tests/baselining/baselining_verification_report.json"
+```
+
+The command writes a machine-readable report and exits nonzero for numeric drift, changed topology, changed execution outcome, missing evidence, or unstable attempts. Numeric checks use the independent versioned policy at `testatron/ipopt/tests/baselining_verification_policy.json`; they do not change SNOPT replay acceptance tolerances.
+
 # What it does
 
 This defines two `zsh` functions in the current terminal. Defining them does not run EMTG or promote anything.

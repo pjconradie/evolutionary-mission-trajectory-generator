@@ -42,6 +42,25 @@ def test_baselining_policy_is_versioned_and_deterministic(repository_root):
     )
 
 
+def test_baselining_verification_policy_is_versioned_and_complete(repository_root):
+    policy = ipopt_characterization.load_baselining_verification_policy()
+
+    assert policy["version"] == 1
+    assert set(policy["numeric_tolerances"]) == {
+        "objective",
+        "deterministic_deltav_km_s",
+        "flight_time_years",
+        "final_mass_kg",
+        "epoch_julian_date",
+        "position_km",
+        "velocity_km_s",
+        "mass_kg",
+    }
+    assert ipopt_characterization.BASELINING_VERIFICATION_POLICY == (
+        repository_root / "testatron/ipopt/tests/baselining_verification_policy.json"
+    )
+
+
 def test_tutorial_registry_is_complete_unique_and_pinned(repository_root):
     cases = ipopt_characterization.TUTORIAL_CASES
 
@@ -1383,6 +1402,169 @@ def test_write_baselining_summary_extracts_case_attempts_only(tmp_path):
         ],
     }
     assert json.loads(summary_path.read_text()) == summary
+
+
+def _write_verification_case(tmp_path, classification="matched_snopt", objective=1.0):
+    case_root = tmp_path / "baselining/journey_options/LEO_to_GEO"
+    replay_root = case_root / "attempt-1/replay"
+    replay_root.mkdir(parents=True, exist_ok=True)
+    stage = {
+        "classification": "completed",
+        "return_code": 0,
+        "output_file": "LEO_to_GEO.emtg",
+        "comparison_classification": classification,
+        "comparison": {"checks": {"event_topology": True}},
+    }
+    result = {
+        "case_id": "journey_options/LEO_to_GEO",
+        "first": {
+            "classification": classification,
+            "source_sha256": "source",
+            "baseline_sha256": "baseline",
+            "replay": stage,
+            "refinement": None,
+        },
+        "second": {"classification": classification},
+        "repeatability": {"stable": True, "differences": {}},
+    }
+    summary = {
+        "ipopt": {
+            "objective": objective,
+            "schema": {"decision_vector_length": 1},
+            "topology": [[["launch", "Earth"], ["rendezvous", "Mars"]]],
+            "flight_time_years": 1.0,
+            "final_mass_kg": 2.0,
+            "deterministic_deltav_km_s": 3.0,
+            "endpoints": [
+                {
+                    "journey_index": 0,
+                    "start": {
+                        "epoch_julian_date": 1.0,
+                        "position_km": [1.0, 2.0, 3.0],
+                        "velocity_km_s": [4.0, 5.0, 6.0],
+                        "mass_kg": 7.0,
+                    },
+                    "end": {
+                        "epoch_julian_date": 8.0,
+                        "position_km": [9.0, 10.0, 11.0],
+                        "velocity_km_s": [12.0, 13.0, 14.0],
+                        "mass_kg": 15.0,
+                    },
+                }
+            ],
+        }
+    }
+    (case_root / "result.json").write_text(json.dumps(result))
+    (replay_root / "compatibility.json").write_text(json.dumps({"mappings": []}))
+    (replay_root / "summary.json").write_text(json.dumps(summary))
+    return case_root
+
+
+def test_baselining_verification_records_current_state_and_numeric_drift(tmp_path):
+    _write_verification_case(tmp_path)
+    reference_path = tmp_path / "reference.json"
+    _, reference = ipopt_characterization.write_baselining_verification(
+        tmp_path, reference_path
+    )
+
+    record = reference["cases"][0]
+    assert record["replay"]["snapshot"]["objective"] == 1.0
+    assert record["refinement"] == {"state": "not_run", "reason": "replay_not_acceptable"}
+    assert ipopt_characterization.verify_baselining_verification(
+        tmp_path, reference_path
+    )["acceptable"]
+
+    _write_verification_case(tmp_path, objective=2.0)
+    report = ipopt_characterization.verify_baselining_verification(tmp_path, reference_path)
+
+    assert report["cases"] == [
+        {"case_id": "journey_options/LEO_to_GEO", "status": "numeric_drift"}
+    ]
+
+
+def test_baselining_verification_records_expected_parse_failure(tmp_path):
+    case_root = tmp_path / "baselining/journey_options/parse_case"
+    case_root.mkdir(parents=True)
+    result = {
+        "case_id": "journey_options/parse_case",
+        "first": {
+            "classification": "parse_failed",
+            "source_sha256": "source",
+            "baseline_sha256": "baseline",
+            "replay": {"classification": "parse_failed", "detail": "no output"},
+        },
+        "second": {"classification": "parse_failed"},
+        "repeatability": {"stable": True, "differences": {}},
+    }
+    (case_root / "result.json").write_text(json.dumps(result))
+    reference_path = tmp_path / "reference.json"
+    ipopt_characterization.write_baselining_verification(tmp_path, reference_path)
+
+    report = ipopt_characterization.verify_baselining_verification(tmp_path, reference_path)
+
+    assert report["acceptable"]
+    assert report["cases"] == [
+        {"case_id": "journey_options/parse_case", "status": "matched"}
+    ]
+
+
+def test_baselining_verification_detects_refinement_exit_change(tmp_path):
+    case_root = _write_verification_case(tmp_path)
+    refinement_root = case_root / "attempt-1/refinement"
+    refinement_root.mkdir()
+    refinement_summary = json.loads((case_root / "attempt-1/replay/summary.json").read_text())
+    (refinement_root / "summary.json").write_text(json.dumps(refinement_summary))
+    result_path = case_root / "result.json"
+    result = json.loads(result_path.read_text())
+    result["first"]["refinement"] = {
+        "classification": "completed",
+        "return_code": 0,
+        "output_file": "LEO_to_GEO.emtg",
+        "comparison_classification": "matched_snopt",
+        "ipopt": {"native_exit": "Optimal Solution Found."},
+    }
+    result_path.write_text(json.dumps(result))
+    reference_path = tmp_path / "reference.json"
+    ipopt_characterization.write_baselining_verification(tmp_path, reference_path)
+
+    result["first"]["refinement"]["ipopt"]["native_exit"] = "Maximum CPU time exceeded."
+    result_path.write_text(json.dumps(result))
+    report = ipopt_characterization.verify_baselining_verification(tmp_path, reference_path)
+
+    assert report["cases"] == [
+        {"case_id": "journey_options/LEO_to_GEO", "status": "execution_changed"}
+    ]
+
+
+def test_main_writes_and_verifies_baselining_current_state(tmp_path, capsys):
+    _write_verification_case(tmp_path)
+    reference_path = tmp_path / "reference.json"
+
+    assert ipopt_characterization.main(
+        [
+            "--write-baselining-verification",
+            "--output-root",
+            str(tmp_path),
+            "--verification-output",
+            str(reference_path),
+        ]
+    ) == 0
+    assert reference_path.is_file()
+    assert "for 1 case(s)" in capsys.readouterr().out
+
+    report_path = tmp_path / "report.json"
+    assert ipopt_characterization.main(
+        [
+            "--verify-baselining",
+            "--output-root",
+            str(tmp_path),
+            "--verification-reference",
+            str(reference_path),
+            "--verification-report-output",
+            str(report_path),
+        ]
+    ) == 0
+    assert json.loads(report_path.read_text())["acceptable"]
 
 
 def _write_decision_log_case_evidence(
