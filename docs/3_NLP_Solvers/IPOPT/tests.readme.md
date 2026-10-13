@@ -30,6 +30,8 @@ commands are collected in [`baselining_commands.md`](baselining_commands.md).
 | `testatron/ipopt/tests/tests/<group>/<case>/` | Curated promoted output for an explicitly approved stable `matched_snopt` case. |
 | `testatron/ipopt/tests/baselining_verification.json` | Reviewed current-state reference for all 137 cases. |
 | `testatron/ipopt/tests/baselining_verification_policy.json` | Versioned numeric policy used only for current-state verification. |
+| `ç` | Reviewed current-state reference for the 17 executable tutorials. |
+| `testatron/ipopt/tests/tutorial_verification_policy.json` | Versioned numeric policy for tutorial current-state verification. |
 
 The nested `tests/tests` path is artifact data, not Python test source. Python
 tests remain below the repository-level `tests/` directory.
@@ -130,6 +132,32 @@ Verification is artifact-only: it does not run EMTG and exits nonzero for
 numeric drift, changed topology, changed execution state, missing evidence, or
 unstable attempts.
 
+## Tutorial Current-State Verification
+
+The immutable tutorial result packages remain historical diagnostics. A separate
+reviewed reference records current Docker/IPOPT replay and refinement behavior,
+including objective, totals, topology, decision schema, and every journey
+endpoint. Schema drift remains an explicit expected state where recorded; it is
+not coerced into a decision-vector seed.
+
+Collect two fresh attempts and verify them against the reviewed reference with:
+
+```bash
+EMTG_TUTORIAL_BASELINING_OUTPUT="$PWD/test-artifacts/tutorial-baselining" \
+python -m pytest --tutorial-baselining -q
+```
+
+The collector finishes with artifact-only verification against
+`testatron/ipopt/tests/tutorial_verification.json`. To propose a replacement,
+write a candidate outside the repository, review it, then explicitly promote it:
+
+```bash
+python testatron/ipopt_characterization.py \
+	--write-tutorial-verification \
+	--output-root "$PWD/test-artifacts/tutorial-baselining" \
+	--tutorial-verification-output /tmp/tutorial_verification.candidate.json
+```
+
 See [`baselining_commands.md`](baselining_commands.md) for the reference-write
 and verification commands, and
 [`ipopt.readme.md`](ipopt.readme.md) for the Docker toolchain.
@@ -156,7 +184,50 @@ suite. Its absence does not weaken the completed artifact-based current-state
 verification workflow. Any future runtime suite must verify against the
 reviewed current-state reference and retain immutable-SNOPT comparison as a
 separate diagnostic.
-# IPOPT Testatron Verification Plan
+
+## IPOPT Source Verification
+
+Run the Docker-backed source/deployment verification gate with:
+
+```bash
+python -m pytest --ipopt-verification -q
+```
+
+This selection verifies the IPOPT backend build and runtime probes, the Track
+ACS and OSIRIS benchmark replay/refinement evidence, and every executable
+tutorial input beneath `docs/0_Users/tutorial/Tutorial_EMTG_Files`. The
+tutorial registry currently contains 17 source `.emtgopt` files, each replayed
+from its immutable reference package; 16 also run IPOPT refinement. The one
+deliberately infeasible tutorial has replay-only coverage.
+
+Tutorial result-package option copies beneath `results/` are immutable
+references, not additional execution inputs. The registry test fails whenever
+a source tutorial option is added without a pinned case and reference package.
+
+The deployment gate compares every observed tutorial outcome with its reviewed
+case policy. Most sources must reproduce their immutable reference. Three
+historical packages have declared decision-schema length drift, and five
+refinements have declared failed immutable checks; these remain visible in the
+comparison artifacts and pass only when the exact reviewed outcome recurs. A
+new failed check, changed schema length, execution failure, timeout, or missing
+artifact fails the gate.
+
+Track ACS replay has one analogous reviewed benchmark diagnostic: its historical
+endpoint comparison differs by approximately 107 km while objective, totals,
+topology, decision schema, and feasibility match. The deployment gate requires
+that exact `journey_endpoints` outcome; it does not relax endpoint tolerances or
+claim immutable-reference agreement.
+
+`python -m pytest --integration -q` also includes this tutorial coverage.
+Use `--tutorials` when only the tutorial cases are required. Both workflows
+write staged artifacts outside the immutable tutorial root.
+
+# Historical IPOPT Testatron Verification Plan
+
+> This forward-looking plan predates the completed current-state verification
+> workflow above. It remains for historical context; use the operational
+> sections above and [`baselining_commands.md`](baselining_commands.md) for
+> current commands and policies.
 
 ## Purpose
 

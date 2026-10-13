@@ -61,16 +61,88 @@ def test_baselining_verification_policy_is_versioned_and_complete(repository_roo
     )
 
 
+def test_tutorial_verification_policy_is_versioned_and_complete(repository_root):
+    policy = ipopt_characterization.load_tutorial_verification_policy()
+
+    assert policy["version"] == 1
+    assert set(policy["numeric_tolerances"]) == {
+        "objective",
+        "deterministic_deltav_km_s",
+        "flight_time_years",
+        "final_mass_kg",
+        "epoch_julian_date",
+        "position_km",
+        "velocity_km_s",
+        "mass_kg",
+    }
+    assert ipopt_characterization.TUTORIAL_VERIFICATION_POLICY == (
+        repository_root / "testatron/ipopt/tests/tutorial_verification_policy.json"
+    )
+
+
+def test_tutorial_verification_reference_covers_current_registry(repository_root):
+    reference_path = ipopt_characterization.DEFAULT_TUTORIAL_VERIFICATION
+    reference = json.loads(reference_path.read_text())
+    case_ids = {case.case_id for case in ipopt_characterization.TUTORIAL_CASES}
+
+    assert reference_path == (
+        repository_root / "testatron/ipopt/tests/tutorial_verification.json"
+    )
+    assert reference["version"] == 1
+    assert reference["case_count"] == len(case_ids)
+    assert {case["case_id"] for case in reference["cases"]} == case_ids
+    for case in reference["cases"]:
+        for stage in (case["replay"], case["refinement"]):
+            if stage["state"] == "executed":
+                assert stage["snapshot"]["endpoints"]
+
+
+@pytest.mark.ipopt_verification
 def test_tutorial_registry_is_complete_unique_and_pinned(repository_root):
     cases = ipopt_characterization.TUTORIAL_CASES
+    tutorial_root = repository_root / ipopt_characterization.TUTORIAL_ROOT
+    tutorial_sources = {
+        path.relative_to(repository_root).as_posix()
+        for path in tutorial_root.rglob("*.emtgopt")
+        if "results" not in path.relative_to(tutorial_root).parts
+    }
 
     assert len(cases) == 17
     assert len(ipopt_characterization.TUTORIAL_CASES_BY_ID) == 17
     assert len({case.source_options for case in cases}) == 17
+    assert {case.source_options for case in cases} == tutorial_sources
     assert sum(case.taxonomy == "authoritative" for case in cases) == 2
     assert sum(case.taxonomy == "deliberate_infeasible" for case in cases) == 1
     assert sum(case.schema_probe for case in cases) == 3
     assert sum("refinement" in case.stages for case in cases) == 16
+    assert {
+        case.case_id: case.expected_schema_lengths
+        for case in cases
+        if case.expected_schema_lengths is not None
+    } == {
+        "Journey_Boundaries/EVM_freepoint": (33, 48),
+        "LowSIRIS-REx/LowSIRIS-REx_FBLT": (138, 258),
+        "Flybys/HighFidelity": (77, 65),
+    }
+    assert {
+        case.case_id: case.expected_refinement_failed_checks
+        for case in cases
+        if case.expected_refinement_failed_checks
+    } == {
+        "Journey_Boundaries/EVM": ("ipopt_native_success",),
+        "Constraint_Scripting/EVM_freepoint_boundary_constraint": (
+            "ipopt_native_success",
+        ),
+        "Constraint_Scripting/EVM_freepoint": (
+            "decision_vector_in_bounds",
+            "ipopt_native_success",
+        ),
+        "Constraint_Scripting/EVM_freepoint_maneuver_constraint": (
+            "decision_vector_in_bounds",
+            "ipopt_native_success",
+        ),
+        "Flybys/EVM_singlePhase": ("ipopt_native_success",),
+    }
     for case in cases:
         assert (repository_root / case.source_options).is_file()
         assert (repository_root / case.reference_package).is_dir()
@@ -1508,6 +1580,160 @@ def test_baselining_verification_records_expected_parse_failure(tmp_path):
     ]
 
 
+def _write_tutorial_verification_case(tmp_path, objective=1.0, state="executed"):
+    case = ipopt_characterization.TUTORIAL_CASES[0]
+    case_root = tmp_path / "tutorial-baselining" / case.case_id
+    stage_root = case_root / "attempt-1" / "replay"
+    stage_root.mkdir(parents=True, exist_ok=True)
+    snapshot = {
+        "ipopt": {
+            "objective": objective,
+            "schema": {"decision_vector_length": 1},
+            "topology": [[['launch', 'Earth'], ['rendezvous', 'Mars']]],
+            "flight_time_years": 1.0,
+            "final_mass_kg": 2.0,
+            "deterministic_deltav_km_s": 3.0,
+            "endpoints": [
+                {
+                    "journey_index": 0,
+                    "start": {
+                        "epoch_julian_date": 1.0,
+                        "position_km": [1.0, 2.0, 3.0],
+                        "velocity_km_s": [4.0, 5.0, 6.0],
+                        "mass_kg": 7.0,
+                    },
+                    "end": {
+                        "epoch_julian_date": 8.0,
+                        "position_km": [9.0, 10.0, 11.0],
+                        "velocity_km_s": [12.0, 13.0, 14.0],
+                        "mass_kg": 15.0,
+                    },
+                }
+            ],
+        }
+    }
+    (stage_root / "summary.json").write_text(json.dumps(snapshot))
+    replay = {
+        "state": state,
+        "classification": "completed" if state == "executed" else None,
+        "return_code": 0 if state == "executed" else None,
+        "output_file": "generated.emtg" if state == "executed" else "",
+        "immutable_comparison": "matched" if state == "executed" else "schema_drift",
+        "comparison": {"checks": {"journey_endpoints": True}},
+    }
+    stages = {
+        "replay": replay,
+        "refinement": {"state": "not_run", "reason": "stage_disabled"},
+    }
+    ipopt_characterization.write_tutorial_baselining_case(
+        case, case_root, stages, copy.deepcopy(stages)
+    )
+    return case_root
+
+
+def test_tutorial_verification_records_endpoint_state_and_numeric_drift(tmp_path):
+    _write_tutorial_verification_case(tmp_path)
+    reference_path = tmp_path / "tutorial-reference.json"
+    _, reference = ipopt_characterization.write_tutorial_verification(
+        tmp_path, reference_path
+    )
+
+    assert reference["cases"][0]["replay"]["snapshot"]["objective"] == 1.0
+    assert ipopt_characterization.verify_tutorial_verification(
+        tmp_path, reference_path
+    )["acceptable"]
+
+    _write_tutorial_verification_case(tmp_path, objective=2.0)
+    report = ipopt_characterization.verify_tutorial_verification(tmp_path, reference_path)
+
+    assert report["cases"] == [
+        {"case_id": ipopt_characterization.TUTORIAL_CASES[0].case_id, "status": "numeric_drift"}
+    ]
+
+
+def test_tutorial_verification_retains_schema_drift_as_current_state(tmp_path):
+    _write_tutorial_verification_case(tmp_path, state="schema_drift")
+    reference_path = tmp_path / "tutorial-reference.json"
+    ipopt_characterization.write_tutorial_verification(tmp_path, reference_path)
+
+    report = ipopt_characterization.verify_tutorial_verification(tmp_path, reference_path)
+
+    assert report["acceptable"]
+    assert report["cases"] == [
+        {"case_id": ipopt_characterization.TUTORIAL_CASES[0].case_id, "status": "matched"}
+    ]
+
+
+def test_tutorial_repeatability_ignores_variable_ipopt_effort(tmp_path):
+    case_root = _write_tutorial_verification_case(tmp_path)
+    case = ipopt_characterization.TUTORIAL_CASES[0]
+    stages = {
+        "replay": {
+            "state": "executed",
+            "classification": "completed",
+            "return_code": 0,
+            "output_file": "generated.emtg",
+            "immutable_comparison": "matched",
+            "comparison": {"checks": {"journey_endpoints": True}},
+        },
+        "refinement": {"state": "not_run", "reason": "stage_disabled"},
+    }
+    ipopt_characterization.write_tutorial_baselining_case(
+        case, case_root, stages, copy.deepcopy(stages)
+    )
+    second_summary = case_root / "attempt-2" / "replay" / "summary.json"
+    second_summary.parent.mkdir(parents=True)
+    second_summary.write_text(
+        (case_root / "attempt-1" / "replay" / "summary.json").read_text()
+    )
+    result = json.loads((case_root / "result.json").read_text())
+    result["second"]["replay"]["ipopt"] = {
+        "iterations": 99,
+        "terminal_constraint_violation": 1.0,
+        "native_exit": "Optimal Solution Found.",
+    }
+    result["first"]["replay"]["ipopt"] = {
+        "iterations": 1,
+        "terminal_constraint_violation": 1.0e-9,
+        "native_exit": "Optimal Solution Found.",
+    }
+    repeatability = ipopt_characterization._tutorial_repeatability(
+        result["first"], result["second"], case_root
+    )
+
+    assert repeatability["stable"]
+
+
+def test_main_writes_and_verifies_tutorial_current_state(tmp_path, capsys):
+    _write_tutorial_verification_case(tmp_path)
+    reference_path = tmp_path / "tutorial-reference.json"
+
+    assert ipopt_characterization.main(
+        [
+            "--write-tutorial-verification",
+            "--output-root",
+            str(tmp_path),
+            "--tutorial-verification-output",
+            str(reference_path),
+        ]
+    ) == 0
+    assert "for 1 case(s)" in capsys.readouterr().out
+
+    report_path = tmp_path / "tutorial-report.json"
+    assert ipopt_characterization.main(
+        [
+            "--verify-tutorial-verification",
+            "--output-root",
+            str(tmp_path),
+            "--tutorial-verification-reference",
+            str(reference_path),
+            "--tutorial-verification-report-output",
+            str(report_path),
+        ]
+    ) == 0
+    assert json.loads(report_path.read_text())["acceptable"]
+
+
 def test_baselining_verification_detects_refinement_exit_change(tmp_path):
     case_root = _write_verification_case(tmp_path)
     refinement_root = case_root / "attempt-1/refinement"
@@ -2832,6 +3058,9 @@ def test_benchmark_registry_has_unique_ids_and_outputs():
         benchmark.benchmark_id for benchmark in benchmarks.values()
     ]
     assert len(output_roots) == len(set(output_roots))
+    assert benchmarks["track-acs-prop"].expected_replay_failed_checks == (
+        "journey_endpoints",
+    )
 
 
 @pytest.mark.ipopt_benchmarks

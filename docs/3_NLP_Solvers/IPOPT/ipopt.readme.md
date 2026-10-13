@@ -234,6 +234,18 @@ IPOPT refinement only when that replay is acceptable. Manual container commands
 in this guide are diagnostic tools, not substitutes for baselining or
 current-state verification.
 
+For the Docker-backed source/deployment gate, run:
+
+```bash
+python -m pytest --ipopt-verification -q
+```
+
+It includes the IPOPT backend probes, the benchmark suite, and every executable
+immutable tutorial source. The tutorial root is mounted read-only; generated
+evidence is staged beneath the test artifact directory. It also runs the
+two-attempt tutorial collector and verifies the resulting current-state evidence
+against `testatron/ipopt/tests/tutorial_verification.json`.
+
 The immutable-SNOPT comparison and current-state regression checks answer
 different questions:
 

@@ -27,6 +27,9 @@ BASELINING_POLICY = TESTATRON_ROOT / "ipopt" / "tests" / "baselining_policy.json
 BASELINING_VERIFICATION_POLICY = (
     TESTATRON_ROOT / "ipopt" / "tests" / "baselining_verification_policy.json"
 )
+TUTORIAL_VERIFICATION_POLICY = (
+    TESTATRON_ROOT / "ipopt" / "tests" / "tutorial_verification_policy.json"
+)
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 DEFAULT_BASELINING_DECISION_LOG = (
@@ -34,6 +37,9 @@ DEFAULT_BASELINING_DECISION_LOG = (
 )
 DEFAULT_BASELINING_VERIFICATION = (
     TESTATRON_ROOT / "ipopt" / "tests" / "baselining_verification.json"
+)
+DEFAULT_TUTORIAL_VERIFICATION = (
+    TESTATRON_ROOT / "ipopt" / "tests" / "tutorial_verification.json"
 )
 STAGED_EARLIEST_POSSIBLE_EPOCHS = {
     "journey_options/park_to_SOI_FBLT": 58860.0,
@@ -185,6 +191,8 @@ class TutorialCase:
     stages: tuple[str, ...] = ("replay", "refinement")
     expected_output: str = "success"
     schema_probe: bool = False
+    expected_schema_lengths: tuple[int, int] | None = None
+    expected_refinement_failed_checks: tuple[str, ...] = ()
     timeout_seconds: int = 600
 
 
@@ -231,11 +239,11 @@ TUTORIAL_CASES = (
     ),
     _tutorial_case(
         "Journey_Boundaries", "EVM", "EVM_11252022_163915", "EVM.emtg",
-        "EVM_universe",
+        "EVM_universe", expected_refinement_failed_checks=("ipopt_native_success",),
     ),
     _tutorial_case(
         "Journey_Boundaries", "EVM_freepoint", "EVM_freepoint_11252022_17141",
-        "EVM_freepoint.emtg", "EVM_universe",
+        "EVM_freepoint.emtg", "EVM_universe", expected_schema_lengths=(33, 48),
     ),
     _tutorial_case(
         "OSIRIS-REx", "OSIRIS-REx", "OSIRIS-REx_412024_11530",
@@ -268,6 +276,7 @@ TUTORIAL_CASES = (
     _tutorial_case(
         "LowSIRIS-REx", "LowSIRIS-REx_FBLT", "LowSIRIS-REx_FBLT_11252022_15404",
         "LowSIRIS-REx_FBLT_Sun(EB)_Sun(BE).emtg", "OSIRIS_universe",
+        expected_schema_lengths=(138, 258),
     ),
     _tutorial_case(
         "LowSIRIS-REx", "LowSIRIS-REx", "LowSIRIS-REx_412024_11158",
@@ -279,27 +288,37 @@ TUTORIAL_CASES = (
         "EVM_freepoint_boundary_constraint_6222023_161139",
         "EVM_freepoint_boundary_constraint.emtg", "EVM_universe",
         hardware_group="Journey_Boundaries",
+        expected_refinement_failed_checks=("ipopt_native_success",),
     ),
     _tutorial_case(
         "Constraint_Scripting", "EVM_freepoint", "EVM_freepoint_6222023_16327",
         "EVM_freepoint.emtg", "EVM_universe", hardware_group="Journey_Boundaries",
+        expected_refinement_failed_checks=(
+            "decision_vector_in_bounds",
+            "ipopt_native_success",
+        ),
     ),
     _tutorial_case(
         "Constraint_Scripting", "EVM_freepoint_maneuver_constraint",
         "EVM_freepoint_maneuver_constraint_6252023_145734",
         "EVM_freepoint_maneuver_constraint.emtg", "EVM_universe",
         hardware_group="Journey_Boundaries",
+        expected_refinement_failed_checks=(
+            "decision_vector_in_bounds",
+            "ipopt_native_success",
+        ),
     ),
     _tutorial_case(
         "Flybys", "EVM", "EVM_11292022_112047", "EVM.emtg", "EVM_universe",
     ),
     _tutorial_case(
         "Flybys", "HighFidelity", "HighFidelity_11292022_124422",
-        "HighFidelity.emtg", "EVM_universe",
+        "HighFidelity.emtg", "EVM_universe", expected_schema_lengths=(77, 65),
     ),
     _tutorial_case(
         "Flybys", "EVM_singlePhase", "EVM_singlePhase_11292022_115245",
         "EVM_singlePhase.emtg", "EVM_universe",
+        expected_refinement_failed_checks=("ipopt_native_success",),
     ),
 )
 TUTORIAL_CASES_BY_ID = {case.case_id: case for case in TUTORIAL_CASES}
@@ -331,6 +350,7 @@ class Benchmark:
     output_root: str
     seed_alignment_source: str | None = None
     stages: tuple[str, ...] = ("replay", "ipopt")
+    expected_replay_failed_checks: tuple[str, ...] = ()
 
 
 def _osiris_benchmark(benchmark_id, package_directory, year):
@@ -360,6 +380,7 @@ BENCHMARKS = {
                 "spacecraftoptions_Chem_TrackACSProp.emtg"
             ),
             output_root="testatron/ipopt/tests/benchmarks/track-acs-prop",
+            expected_replay_failed_checks=("journey_endpoints",),
         ),
     )
 }
@@ -465,6 +486,24 @@ def load_baselining_verification_policy(policy_path=BASELINING_VERIFICATION_POLI
             raise ValueError(
                 f"verification policy tolerance for {metric} must be positive"
             )
+    return payload
+
+
+def load_tutorial_verification_policy(policy_path=TUTORIAL_VERIFICATION_POLICY):
+    """Load current-state tolerances for reviewed tutorial evidence."""
+    payload = json.loads(Path(policy_path).read_text(encoding="utf-8"))
+    required = {
+        "objective",
+        "deterministic_deltav_km_s",
+        "flight_time_years",
+        "final_mass_kg",
+        "epoch_julian_date",
+        "position_km",
+        "velocity_km_s",
+        "mass_kg",
+    }
+    if payload.get("version") != 1 or set(payload.get("numeric_tolerances", {})) != required:
+        raise ValueError("tutorial verification policy must declare version 1 and all tolerances")
     return payload
 
 
@@ -3009,6 +3048,235 @@ def verify_baselining_verification(
     }
 
 
+def _tutorial_verification_stage_record(stage_result, stage_directory):
+    """Extract a portable current-state record from one tutorial stage."""
+    stage_result = stage_result or {}
+    stage_directory = Path(stage_directory)
+    snapshot = None
+    summary_path = stage_directory / "summary.json"
+    if summary_path.is_file():
+        snapshot = _verification_snapshot(
+            _read_baselining_json(summary_path, f"tutorial summary: {summary_path}")
+        )
+    return {
+        "state": stage_result.get("state", "executed"),
+        "execution_classification": stage_result.get("classification"),
+        "return_code": stage_result.get("return_code"),
+        "has_output": bool(stage_result.get("output_file")),
+        "immutable_comparison": stage_result.get("immutable_comparison"),
+        "immutable_checks": stage_result.get("comparison", {}).get("checks"),
+        "ipopt": stage_result.get("ipopt"),
+        "snapshot": snapshot,
+    }
+
+
+def _tutorial_verification_case_record(case_root, result):
+    """Build one reviewed tutorial record from a repeatable evidence pair."""
+    first = result.get("first") or {}
+    return {
+        "case_id": result["case_id"],
+        "source_sha256": first.get("source_sha256"),
+        "reference_sha256": first.get("reference_sha256"),
+        "taxonomy": first.get("taxonomy"),
+        "repeatability": result.get("repeatability", {}),
+        "replay": _tutorial_verification_stage_record(
+            first.get("replay"), Path(case_root) / "attempt-1" / "replay"
+        ),
+        "refinement": _tutorial_verification_stage_record(
+            first.get("refinement"), Path(case_root) / "attempt-1" / "refinement"
+        ),
+    }
+
+
+def build_tutorial_verification(output_root, policy_path=TUTORIAL_VERIFICATION_POLICY):
+    """Build a review candidate from durable two-attempt tutorial evidence."""
+    policy = load_tutorial_verification_policy(policy_path)
+    batch_root = Path(output_root) / "tutorial-baselining"
+    records = []
+    for result_path in batch_root.glob("*/*/result.json"):
+        result = _read_baselining_json(result_path, "tutorial baselining result")
+        if not result.get("case_id"):
+            raise ValueError(f"Tutorial result has no case_id: {result_path}")
+        records.append(_tutorial_verification_case_record(result_path.parent, result))
+    records.sort(key=lambda record: record["case_id"])
+    return {
+        "version": 1,
+        "policy": {"version": policy["version"], "sha256": _sha256(policy_path)},
+        "case_count": len(records),
+        "cases": records,
+    }
+
+
+def write_tutorial_verification(
+    output_root,
+    verification_path,
+    policy_path=TUTORIAL_VERIFICATION_POLICY,
+):
+    """Write an explicit reviewed tutorial verification candidate."""
+    verification = build_tutorial_verification(output_root, policy_path)
+    verification_path = Path(verification_path)
+    verification_path.parent.mkdir(parents=True, exist_ok=True)
+    verification_path.write_text(json.dumps(verification, indent=2) + "\n", encoding="utf-8")
+    return verification_path, verification
+
+
+def _tutorial_attempt_record(case, stages):
+    """Normalize one tutorial attempt while preserving immutable diagnostics."""
+    return {
+        "case_id": case.case_id,
+        "source_sha256": _sha256(REPOSITORY_ROOT / case.source_options),
+        "reference_sha256": _sha256(REPOSITORY_ROOT / case.reference_mission),
+        "taxonomy": case.taxonomy,
+        "replay": stages["replay"],
+        "refinement": stages.get(
+            "refinement", {"state": "not_run", "reason": "stage_disabled"}
+        ),
+    }
+
+
+def _tutorial_repeatability(first, second, case_root):
+    """Compare two tutorial attempts without treating IPOPT effort as output drift."""
+    policy = load_tutorial_verification_policy()
+    differences = {}
+    for stage in ("replay", "refinement"):
+        first_stage = first[stage]
+        second_stage = second[stage]
+        fields = (
+            "state",
+            "classification",
+            "return_code",
+            "output_file",
+            "immutable_comparison",
+            "comparison",
+        )
+        changed_fields = [
+            field for field in fields if first_stage.get(field) != second_stage.get(field)
+        ]
+        first_exit = (first_stage.get("ipopt") or {}).get("native_exit")
+        second_exit = (second_stage.get("ipopt") or {}).get("native_exit")
+        if first_exit != second_exit:
+            changed_fields.append("ipopt.native_exit")
+        first_summary = (
+            Path(case_root) / "attempt-1" / stage / "summary.json"
+        )
+        second_summary = (
+            Path(case_root) / "attempt-2" / stage / "summary.json"
+        )
+        first_snapshot = (
+            _verification_snapshot(_read_baselining_json(first_summary, "tutorial summary"))
+            if first_summary.is_file()
+            else None
+        )
+        second_snapshot = (
+            _verification_snapshot(_read_baselining_json(second_summary, "tutorial summary"))
+            if second_summary.is_file()
+            else None
+        )
+        snapshot_status = _verification_snapshot_status(
+            first_snapshot, second_snapshot, policy["numeric_tolerances"]
+        )
+        if changed_fields or snapshot_status != "matched":
+            differences[stage] = {
+                "changed_fields": changed_fields,
+                "snapshot_status": snapshot_status,
+            }
+    return {"stable": not differences, "differences": differences}
+
+
+def write_tutorial_baselining_case(case, case_root, first_stages, second_stages):
+    """Persist one two-attempt tutorial record for later review and verification."""
+    case_root = Path(case_root)
+    first = _tutorial_attempt_record(case, first_stages)
+    second = _tutorial_attempt_record(case, second_stages)
+    for attempt, record in (("attempt-1", first), ("attempt-2", second)):
+        attempt_path = case_root / attempt
+        attempt_path.mkdir(parents=True, exist_ok=True)
+        (attempt_path / "result.json").write_text(
+            json.dumps(record, indent=2) + "\n", encoding="utf-8"
+        )
+    repeatability = _tutorial_repeatability(first, second, case_root)
+    result = {
+        "case_id": case.case_id,
+        "first": first,
+        "second": second,
+        "repeatability": repeatability,
+    }
+    (case_root / "repeatability.json").write_text(
+        json.dumps(repeatability, indent=2) + "\n", encoding="utf-8"
+    )
+    (case_root / "result.json").write_text(
+        json.dumps(result, indent=2) + "\n", encoding="utf-8"
+    )
+    return result
+
+
+def _tutorial_verification_stage_status(expected, actual, tolerances):
+    if expected.get("state") != actual.get("state"):
+        return "execution_changed"
+    execution_fields = (
+        "execution_classification",
+        "return_code",
+        "has_output",
+        "immutable_comparison",
+        "immutable_checks",
+    )
+    if any(expected.get(field) != actual.get(field) for field in execution_fields):
+        return "execution_changed"
+    if (expected.get("ipopt") or {}).get("native_exit") != (
+        actual.get("ipopt") or {}
+    ).get("native_exit"):
+        return "execution_changed"
+    return _verification_snapshot_status(
+        expected.get("snapshot"), actual.get("snapshot"), tolerances
+    )
+
+
+def verify_tutorial_verification(
+    output_root,
+    verification_path,
+    policy_path=TUTORIAL_VERIFICATION_POLICY,
+):
+    """Compare tutorial evidence with its reviewed current-state reference."""
+    reference = _read_baselining_json(verification_path, "tutorial verification reference")
+    if reference.get("version") != 1:
+        raise ValueError("tutorial verification reference must declare version 1")
+    policy = load_tutorial_verification_policy(policy_path)
+    actual = build_tutorial_verification(output_root, policy_path)
+    expected_cases = {record["case_id"]: record for record in reference.get("cases", [])}
+    actual_cases = {record["case_id"]: record for record in actual["cases"]}
+    statuses = []
+    for identifier in sorted(set(expected_cases) | set(actual_cases)):
+        expected = expected_cases.get(identifier)
+        observed = actual_cases.get(identifier)
+        if expected is None or observed is None:
+            status = "missing_evidence"
+        elif not observed["repeatability"].get("stable"):
+            status = "unstable"
+        elif any(
+            expected.get(field) != observed.get(field)
+            for field in ("source_sha256", "reference_sha256", "taxonomy")
+        ):
+            status = "execution_changed"
+        else:
+            status = _tutorial_verification_stage_status(
+                expected["replay"], observed["replay"], policy["numeric_tolerances"]
+            )
+            if status == "matched":
+                status = _tutorial_verification_stage_status(
+                    expected["refinement"],
+                    observed["refinement"],
+                    policy["numeric_tolerances"],
+                )
+        statuses.append({"case_id": identifier, "status": status})
+    return {
+        "version": 1,
+        "reference": str(verification_path),
+        "case_count": len(statuses),
+        "cases": statuses,
+        "acceptable": all(record["status"] == "matched" for record in statuses),
+    }
+
+
 def _read_baselining_json(path, description):
     """Read one required baselining evidence JSON file."""
     try:
@@ -3642,6 +3910,28 @@ def build_parser():
         help="optional report path for --verify-baselining",
     )
     parser.add_argument(
+        "--write-tutorial-verification",
+        action="store_true",
+        help="write an explicit current-state tutorial verification reference",
+    )
+    parser.add_argument(
+        "--tutorial-verification-output",
+        help="required output path for --write-tutorial-verification",
+    )
+    parser.add_argument(
+        "--verify-tutorial-verification",
+        action="store_true",
+        help="compare tutorial baselining evidence with a reviewed reference",
+    )
+    parser.add_argument(
+        "--tutorial-verification-reference",
+        help="required reference path for --verify-tutorial-verification",
+    )
+    parser.add_argument(
+        "--tutorial-verification-report-output",
+        help="optional report path for --verify-tutorial-verification",
+    )
+    parser.add_argument(
         "--promote-baseline",
         metavar="CASE_ID",
         help="copy one approved matched baselining case into the curated results tree",
@@ -3728,6 +4018,41 @@ def main(argv=None):
         report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         print(
             "Baselining verification "
+            f"{'passed' if report['acceptable'] else 'failed'} for "
+            f"{report['case_count']} case(s): {report_path}"
+        )
+        return 0 if report["acceptable"] else 1
+    if args.write_tutorial_verification:
+        if not args.tutorial_verification_output:
+            raise SystemExit(
+                "--tutorial-verification-output is required with "
+                "--write-tutorial-verification"
+            )
+        verification_path, verification = write_tutorial_verification(
+            output_root, args.tutorial_verification_output
+        )
+        print(
+            "Wrote tutorial verification reference for "
+            f"{verification['case_count']} case(s): {verification_path}"
+        )
+        return 0
+    if args.verify_tutorial_verification:
+        if not args.tutorial_verification_reference:
+            raise SystemExit(
+                "--tutorial-verification-reference is required with "
+                "--verify-tutorial-verification"
+            )
+        report = verify_tutorial_verification(
+            output_root, args.tutorial_verification_reference
+        )
+        report_path = Path(
+            args.tutorial_verification_report_output
+            or output_root / "tutorial-baselining" / "tutorial-verification-report.json"
+        )
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        print(
+            "Tutorial verification "
             f"{'passed' if report['acceptable'] else 'failed'} for "
             f"{report['case_count']} case(s): {report_path}"
         )

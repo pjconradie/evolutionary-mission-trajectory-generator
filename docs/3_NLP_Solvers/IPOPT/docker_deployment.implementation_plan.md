@@ -1,203 +1,225 @@
-# Debian IPOPT Docker Deployment Plan
+# EMTG Docker Deployment and Artifact Packaging Plan
 
 ## Purpose
 
-Separate Docker image and container lifecycle implementation from EMTG while
-retaining the Debian IPOPT verification recipe inside this repository. EMTG is
-the single canonical source of truth for the Dockerfile, its pinned dependency
-contract, and the inputs required to reproduce the IPOPT verification
-environment.
+Define the upstream EMTG build and packaging work required to deploy EMTG in
+ADSGNC. EMTG owns the source build, IPOPT integration, verification suites,
+Docker compilation recipe, and a reproducible binary artifact. ADSGNC consumes
+that artifact and owns its service image, container lifecycle, and mission
+workflow integration.
 
-A secondary toolchain repository owns reusable local Docker build and run
-tooling. It consumes a caller-provided EMTG checkout, builds a local image from
-the recipe found there, and runs EMTG commands in disposable containers. No
-container registry, image publishing workflow, Docker submodule, or mirrored
-Dockerfile is required.
-
-Run commands in this document from the EMTG repository root unless stated
-otherwise.
+This plan follows the artifact contract in
+[`docker_deployment.implementation_plan.adsgnc_specifications.md`](./docker_deployment.implementation_plan.adsgnc_specifications.md).
+Where an earlier plan described a separate toolchain repository owning Docker
+build/run lifecycle, that ownership model is superseded: it is not a
+prerequisite for this upstream-to-downstream artifact handoff.
 
 ## Ownership Boundary
 
-| Responsibility | EMTG repository | Secondary toolchain repository |
+| Responsibility | Upstream EMTG | Downstream ADSGNC |
 | --- | --- | --- |
-| Dockerfile and image build context | Canonical owner | Reads from supplied EMTG checkout |
-| Dependency and version pins | Canonical owner | Validates and uses them |
-| CSPICE archive and checksum contract | Canonical owner | Validates before build |
-| Local image build | Declares required image identity | Owns Docker invocation and cache behavior |
-| Container execution | Declares test and mission requirements | Owns mount construction, names, locks, and cleanup |
-| IPOPT test assertions | Canonical owner | Does not define assertions |
-| Image registry and publishing | Not used | Not used |
+| EMTG source, IPOPT integration, and verification suites | Owns | Consumes tested artifact |
+| Debian Docker compilation recipe and build environment | Owns | Does not build EMTG from source |
+| Binary artifact packaging and build metadata | Owns | Ingests the archive |
+| Service image, container lifecycle, and mission workflows | Provides runtime contract | Owns |
+| Runtime configuration and mounted mission kernels | Supports configurable paths | Supplies configuration and mounts |
 
-The secondary repository must not carry a copied Dockerfile or dependency
-manifest. The EMTG checkout passed to it determines the exact image recipe.
+The upstream `emtg-toolchain` CLI provides `build`, `run`, and `shell` for
+upstream development and verification, plus an explicit `package` operation
+for artifact export. These commands do not transfer downstream service
+container lifecycle ownership to EMTG. ADSGNC must not need EMTG's C++ build
+environment to consume the archive.
 
-## Target Layout
+## Target Build and Runtime Contract
 
-Move the current test-only recipe surface into an EMTG top-level toolchain
-surface. The final names may vary, but the boundary must be explicit:
+Build and package for:
 
-```text
-evolutionary-mission-trajectory-generator/
-  toolchain/
-	 Dockerfile.ipopt-debian
-	 recipe.toml
-	 README.md
-  depend/
-	 cspice-c_pc_linux_gcc_64bit/
-		cspice.tar.Z
-  tests/
-	 integration/
-		_docker_support.py
-```
+- `linux/amd64`.
+- Debian 12 (Bookworm), using a compatible base such as
+  `python:3.12-slim-bookworm`.
+- Python 3.12-compatible PyEMTG modules.
 
-`toolchain/recipe.toml` is the machine-readable contract for all image-affecting
-inputs. It records at least:
+The compiled `EMTGv9` executable must resolve its shared libraries from
+standard Debian 12 locations. Its runtime contract is:
 
-- Docker platform: `linux/amd64`.
-- Debian base-image reference by digest.
-- IPOPT package and required version.
-- CSPICE archive path and SHA-256.
-- The Dockerfile path.
-- The expected dependency prefixes used by CMake inside the container.
+- IPOPT: `coinor-libipopt1v5` (or the compatible runtime ABI from
+  `coinor-libipopt-dev`).
+- GSL: `libgsl27`.
+- Boost: `libboost-filesystem1.74.0`, `libboost-system1.74.0`, and
+  `libboost-serialization1.74.0`.
+- Fortran and OpenMP runtimes: `libgfortran5` and `libgomp1`.
+- CSPICE: compile the bundled `libcspice.a` statically into `EMTGv9`, or
+  include it in the archive so deployment does not require a CSPICE compiler
+  setup.
 
-The Dockerfile remains available in an EMTG checkout, which preserves the
-ability to inspect and reproduce the image used by IPOPT verification.
+Verify `ldd bin/EMTGv9` in a clean Debian 12 container. All dependencies must
+resolve, with no local development paths or SNOPT references.
 
-## Secondary Runner Contract
+## Archive and Metadata
 
-The secondary repository provides a command-line interface with no copied EMTG
-recipe. Its minimal interface is:
+Add an `emtg-toolchain package` (or equivalent) operation that builds in the
+verified Debian Docker environment and exports a `.tar.gz` archive, by default
+named `emtg_debian_902.tar.gz`. The archive must contain this top-level layout:
 
 ```bash
-emtg-toolchain build --emtg-repo /path/to/evolutionary-mission-trajectory-generator
-emtg-toolchain run --emtg-repo /path/to/evolutionary-mission-trajectory-generator -- <command> [arguments...]
-emtg-toolchain shell --emtg-repo /path/to/evolutionary-mission-trajectory-generator
+emtg-toolchain package \
+  --emtg-repo /path/to/evolutionary-mission-trajectory-generator \
+  --output emtg_debian_902.tar.gz
 ```
 
-`build` must:
+```text
+emtg_debian_902/
+├── bin/
+│   └── EMTGv9
+├── PyEMTG/
+│   ├── __init__.py
+│   ├── MissionOptions.py
+│   ├── Mission.py
+│   ├── EMTGRunner.py
+│   └── ... supporting PyEMTG modules
+├── universe/
+│   ├── ephemeris_data/
+│   └── ... standard baseline universe assets
+├── hardware/
+│   ├── LaunchVehicles/
+│   ├── PowerSystems/
+│   └── Propulsion/
+├── docs/
+│   └── tutorial/
+│       └── ... reference mission configurations
+└── metadata.json
+```
 
-1. Locate the canonical Dockerfile and recipe manifest in the supplied EMTG
-	checkout.
-2. Verify every required input exists, including the CSPICE archive.
-3. Verify the pinned CSPICE SHA-256 before Docker begins.
-4. Compute a deterministic local image identity from the recipe manifest,
-	Dockerfile bytes, and declared content hashes.
-5. Build only when that image identity is absent locally.
+Preserve the executable permission on `bin/EMTGv9`. Include all supporting
+PyEMTG modules and required baseline universe and hardware data; do not package
+only the example files shown above.
 
-`run` and `shell` must use the image produced by `build` and retain these
-container rules:
+`metadata.json` records build provenance and the runtime contract. It must
+include the EMTG version, build timestamp, source commit SHA, target platform,
+base OS, solver name/package/version, and runtime dependency package names.
+For example:
 
-| Container path | Mount | Access |
-| --- | --- | --- |
-| `/repo` | Supplied EMTG repository | Read-only |
-| `/build` | Backend- and recipe-identity-specific named volume | Read-write |
-| `/artifacts` or `/mission` | Caller-selected host directory | Read-write |
+```json
+{
+  "emtg_version": "9.0.2",
+  "build_date": "2026-10-13T10:00:00Z",
+  "commit_sha": "<git-sha>",
+  "target_platform": "linux/amd64",
+  "base_os": "debian:12-bookworm",
+  "solver": {
+    "name": "ipopt",
+    "package": "coinor-libipopt-dev",
+    "version": "3.14.x"
+  },
+  "runtime_dependencies": [
+    "coinor-libipopt1v5",
+    "libgsl27",
+    "libboost-filesystem1.74.0",
+    "libboost-system1.74.0",
+    "libboost-serialization1.74.0",
+    "libgfortran5",
+    "libgomp1"
+  ]
+}
+```
 
-All runs use `--platform linux/amd64` and disposable `--rm` containers. The
-runner owns container names, volume locks, targeted cleanup, and host-platform
-handling. It must report structured errors when the recipe is missing, invalid,
-or checksum-mismatched.
+Generate the build timestamp and commit SHA from the actual package build;
+the example values above are illustrative, not values to hardcode.
 
-## EMTG Integration Changes
+## Headless PyEMTG Interface
 
-### Recipe relocation
+ADSGNC invokes EMTG programmatically, so the packaged interface must work in a
+headless Python 3.12 environment:
 
-1. Move `tests/docker/Dockerfile.toolchain` to the canonical `toolchain/`
-	location without changing its dependency contents initially.
-2. Add `toolchain/recipe.toml` and `toolchain/README.md`.
-3. Preserve the CSPICE archive in `depend/`; record its exact path and SHA-256
-	in the recipe manifest.
-4. Update all repository documentation and tests to use the canonical path.
+1. `from PyEMTG import MissionOptions, Mission, EMTGRunner` must succeed
+   without `wxPython`, `matplotlib`, or an active X11 display. The core
+   `MissionOptions.py`, `Mission.py`, and `EMTGRunner.py` modules must have no
+   hard dependencies on graphical libraries.
+2. `MissionOptions.py` and `EMTGRunner.py` must allow callers to override
+   `universe_folder`, `HardwarePath`, SPICE kernel paths, and output/working
+   directories. Path handling must support standard Linux forward-slash paths,
+   including paths such as `/opt/kernels/...`.
+3. `EMTGRunner.py` must provide a Python function or CLI that accepts an
+   options file or object, executes `EMTGv9` with managed subprocess handling,
+   supports timeouts, and parses the generated `.emtg` solution into a
+   `PyEMTG.Mission` object. On optimizer errors or constraint violations,
+   provide structured return codes and captured stdout/stderr.
 
-### Test client adapter
+## SPICE Kernel Configuration
 
-Replace direct Docker lifecycle implementation in
-`tests/integration/_docker_support.py` with a thin secondary-runner client.
-The adapter retains EMTG-specific behavior:
+Do not hardcode host-specific CSPICE kernel paths in packaged files.
+`PyEMTG` and `EMTGv9` must allow the kernel directory to be supplied at runtime
+through an environment variable such as `SPICE_KERNEL_DIR` or
+`EMTG_UNIVERSE_DIR`, or through option parameters such as `universe_folder`.
+This allows ADSGNC to mount shared mission kernels at `/opt/kernels`.
 
-- Docker availability diagnostics exposed to pytest.
-- `EMTG_TEST_ARTIFACT_DIR` support.
-- Probe scripts and `EMTG_CHECK` output parsing.
-- Test timeouts and artifact collection.
-- Backend-specific cache selection.
+## Implementation Sequence
 
-The adapter must no longer construct `docker build` or `docker run` commands,
-copy Docker build contexts, calculate Docker tags independently, or delete
-toolchain-owned resources directly.
-
-Keep existing pytest fixture names where practical so
-`tests/integration/conftest.py` and focused test modules remain behaviorally
-stable during migration.
-
-### Mission-runner adoption
-
-Refactor `docs/2_Missions/osiris-rex/src/run_mission.py` to use the same
-secondary-runner interface. Preserve its mission-specific writable `/mission`
-mount, result paths, and CMake configuration, but remove its independent image
-selection, Docker Desktop startup, and volume-lifecycle implementation.
-
-### CMake boundary
-
-Do not couple CMake to the secondary repository. EMTG CMake continues to
-discover IPOPT through `pkg-config`; the local container merely provides the
-pinned Debian dependency environment. EMTG source must not require the path of
-the secondary repository.
-
-## Migration Sequence
-
-1. Capture the current integration probe results, image identity, volume names,
-	and cold/warm runtimes as migration evidence.
-2. Add the canonical `toolchain/` recipe surface in EMTG and make the current
-	direct-Docker implementation consume it without changing behavior.
-3. Implement the secondary runner against a real EMTG checkout. Verify it
-	rejects missing Dockerfile, missing CSPICE archive, invalid manifest, and
-	checksum mismatch before calling Docker.
-4. Add a runner client to `_docker_support.py` behind a temporary migration
-	switch. Compare its output to the current direct-Docker path.
-5. Migrate platform, dependency, CMake-policy, IPOPT-adapter, and direct-NLP
-	probes in that order.
-6. Migrate OSIRIS and a representative Testatron execution.
-7. Remove the temporary direct-Docker implementation only after parity checks
-	pass. Do not retain two long-lived lifecycle implementations.
+1. Keep the Debian Docker compilation recipe and EMTG IPOPT verification
+   environment under upstream EMTG ownership. Pin and document the target
+   platform, Debian base, IPOPT/runtime dependencies, and CSPICE handling.
+2. Add `emtg-toolchain package` (or an equivalent explicit export target) to
+   build in that verified environment, assemble the required archive layout,
+   generate `metadata.json`, and write the requested `.tar.gz` output.
+3. Audit the packaged PyEMTG core modules for GUI imports and hard
+   dependencies. Add the path overrides, headless execution helper, timeout
+   handling, solution parsing, and structured failure output required by the
+   interface contract.
+4. Ensure universe and kernel resolution is configurable at runtime and does
+   not depend on paths from the build host.
+5. Deliver the tested `emtg_debian_902.tar.gz` to ADSGNC for placement in
+   `toolkits/emtg/emtg_debian_902/app/`. ADSGNC then builds its service image
+   and manages container lifecycle independently.
 
 ## Verification
 
-The migration is complete only when all of the following hold:
+Do not produce a release archive unless upstream unit and integration tests
+pass, including IPOPT verification, CMake policy probes, and baseline mission
+regression tests. Retain the existing IPOPT source-verification coverage:
+backend probes, benchmark replay/refinement stages, and every executable
+immutable tutorial source must pass under
+`python -m pytest --ipopt-verification -q`.
 
-1. The secondary runner and EMTG test adapter compute the same image identity
-	from the same EMTG checkout.
-2. An incomplete or checksum-mismatched canonical recipe fails before Docker
-	execution with a precise error.
-3. Cold and warm runs pass the current Debian platform, dependency, CMake
-	policy, IPOPT adapter, and direct-NLP integration probes.
-4. Containers retain a read-only `/repo` mount, scoped writable artifacts or
-	mission mount, `linux/amd64` platform pinning, and persistent backend-scoped
-	build volumes.
-5. OSIRIS and representative Testatron workflows retain their pre-migration
-	behavior when launched by the secondary runner.
-6. EMTG contains the canonical recipe and tests, but not duplicated Docker
-	image/container lifecycle implementation. The secondary repository contains
-	lifecycle implementation but no copied EMTG recipe.
+This gate preserves immutable tutorial and benchmark references while accepting
+only their reviewed current outcomes. Known schema or refinement differences
+remain explicit comparison diagnostics; an execution failure or any changed
+reviewed outcome blocks release verification.
+
+The artifact is ready for ADSGNC only when all of the following are verified:
+
+1. The package command uses the verified `linux/amd64` Debian 12 build
+   environment and refuses to export after required tests fail.
+2. The archive has the specified top-level directory structure, complete
+   runtime assets, executable `bin/EMTGv9`, and valid build metadata.
+3. `ldd bin/EMTGv9` resolves all dependencies in a clean Debian 12 container,
+   without local development paths or SNOPT.
+4. The packaged PyEMTG core imports and runs in headless
+   `python:3.12-slim-bookworm`, without GUI dependencies or display access.
+5. A smoke mission verifies configurable universe, hardware, SPICE kernel,
+   working, and output paths, successful result parsing, timeout behavior,
+   and structured optimizer failure output.
+6. ADSGNC can consume the archive without compiling EMTG or requiring a
+   separate CSPICE compiler setup.
 
 ## Documentation Updates
 
-Update these documents as the migration lands:
+Update the directly related documentation as the implementation lands:
 
-- `docs/3_NLP_Solvers/IPOPT/ipopt.readme.md`: recipe contents and local
-  toolchain usage.
-- `docs/3_NLP_Solvers/IPOPT/tests.readme.md`: test execution through the
-  runner, without changing SNOPT/IPOPT comparison policy.
-- `testatron/ipopt/README.md`: Testatron runner invocation and artifact mounts.
-- `docs/2_Missions/osiris-rex/docs/osiris_rex.readme.md`: OSIRIS toolchain
-  invocation.
-- Top-level setup documentation: two-checkout prerequisite and secondary
-  runner installation.
+- `docs/3_NLP_Solvers/IPOPT/ipopt.readme.md`: Debian build recipe, runtime
+  dependencies, packaging command, and artifact contract.
+- `docs/3_NLP_Solvers/IPOPT/tests.readme.md`: verification gates required
+  before packaging.
+- `docs/2_Missions/osiris-rex/docs/osiris_rex.readme.md`: any affected
+  upstream mission invocation or packaging usage.
+- `emtg-toolchain` documentation: `package` options, archive layout, metadata,
+  and headless runtime contract.
+- ADSGNC-facing integration documentation: archive handoff location and
+  configurable runtime/kernel mounts.
 
 ## Non-Goals
 
-- Publishing the image to a registry.
-- Copying or mirroring the EMTG Docker recipe into the secondary repository.
-- Replacing Docker with a native host dependency manager.
-- Changing the IPOPT solver contract, SNOPT baseline policy, or Testatron
-  acceptance criteria.
+- Moving ADSGNC's service container lifecycle into the EMTG repository.
+- Requiring ADSGNC to build EMTG from source or carry EMTG's Docker recipe.
+- Hardcoding host-specific mission kernel paths in the artifact.
+- Changing the IPOPT solver contract, SNOPT baseline policy, or existing
+  verification acceptance criteria.

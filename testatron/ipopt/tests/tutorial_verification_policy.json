@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "numeric_tolerances": {
+    "objective": {"absolute": 1e-12, "relative": 1e-10},
+    "deterministic_deltav_km_s": {"absolute": 1e-12, "relative": 1e-10},
+    "flight_time_years": {"absolute": 1e-12, "relative": 1e-10},
+    "final_mass_kg": {"absolute": 1e-06, "relative": 1e-10},
+    "epoch_julian_date": {"absolute": 1e-08, "relative": 1e-12},
+    "position_km": {"absolute": 1e-06, "relative": 1e-12},
+    "velocity_km_s": {"absolute": 1e-09, "relative": 1e-12},
+    "mass_kg": {"absolute": 1e-06, "relative": 1e-10}
+  }
+}

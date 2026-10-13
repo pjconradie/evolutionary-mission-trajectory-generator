@@ -445,10 +445,18 @@ def direct_nlp_mission_probe(toolchain_image, repository_root, tmp_path_factory)
     )
 
 
+def _benchmark_artifacts(tmp_path_factory, benchmark, stage):
+    root = artifact_directory(tmp_path_factory) / "benchmarks" / benchmark / stage
+    if root.exists():
+        shutil.rmtree(root)
+    root.mkdir(parents=True)
+    return root
+
+
 @pytest.fixture(scope="session")
 def track_acs_replay_probe(toolchain_image, repository_root, tmp_path_factory):
     """Replay the committed TrackACSProp solution without optimization."""
-    artifacts = artifact_directory(tmp_path_factory)
+    artifacts = _benchmark_artifacts(tmp_path_factory, "track-acs-prop", "replay")
     source = (
         repository_root
         / "testatron/tests/spacecraft_options/"
@@ -535,7 +543,9 @@ def _osiris_replay_probe(
     prepare_replay,
 ):
     """Replay one immutable NASA OSIRIS-REx solution without optimization."""
-    artifacts = artifact_directory(tmp_path_factory)
+    artifacts = _benchmark_artifacts(
+        tmp_path_factory, f"osiris-rex-{year}", "replay"
+    )
     baseline_path = (
         repository_root
         / "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/"
@@ -623,7 +633,9 @@ def _osiris_refinement_probe(
     prepare_refinement,
 ):
     """Refine one aligned NASA OSIRIS-REx seed with direct IPOPT."""
-    artifacts = artifact_directory(tmp_path_factory)
+    artifacts = _benchmark_artifacts(
+        tmp_path_factory, f"osiris-rex-{year}", "refinement"
+    )
     baseline_path = (
         repository_root
         / "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/"
@@ -682,6 +694,10 @@ check {check_prefix}_refinement_run passed
     (artifacts / "comparison.json").write_text(
         json.dumps(comparison, indent=2) + "\n"
     )
+    summary = ipopt_characterization.baselining_comparison_summary(
+        stage, baseline, generated, comparison
+    )
+    (artifacts / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     result = {
         "status": "unreviewed",
         "stage": "ipopt_refinement",
@@ -696,6 +712,7 @@ check {check_prefix}_refinement_run passed
         "prepared_options": options_path.name,
         "generated_mission": generated_path.name,
         "comparison": "comparison.json",
+        "summary": "summary.json",
         "log": "run.log",
         "duration_seconds": duration_seconds,
         "provenance": "provenance.json",
@@ -764,7 +781,9 @@ def osiris_2024_refinement_probe(toolchain_image, repository_root, tmp_path_fact
 @pytest.fixture(scope="session")
 def track_acs_refinement_probe(toolchain_image, repository_root, tmp_path_factory):
     """Refine the committed TrackACSProp solution with direct IPOPT."""
-    artifacts = artifact_directory(tmp_path_factory)
+    artifacts = _benchmark_artifacts(
+        tmp_path_factory, "track-acs-prop", "refinement"
+    )
     source = (
         repository_root
         / "testatron/tests/spacecraft_options/"
@@ -824,6 +843,10 @@ check track_acs_refinement_run passed
     (artifacts / "comparison.json").write_text(
         json.dumps(comparison, indent=2) + "\n"
     )
+    summary = ipopt_characterization.baselining_comparison_summary(
+        stage, baseline, generated, comparison
+    )
+    (artifacts / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     result = {
         "status": "unreviewed",
         "stage": "ipopt_refinement",
@@ -837,6 +860,7 @@ check track_acs_refinement_run passed
         "prepared_options": options_path.name,
         "generated_mission": generated_path.name,
         "comparison": "comparison.json",
+        "summary": "summary.json",
         "log": "run.log",
         "duration_seconds": duration_seconds,
         "provenance": "provenance.json",
@@ -856,9 +880,16 @@ def tutorial_schema_cache():
     return {}
 
 
-def _tutorial_artifacts(tmp_path_factory, case, stage):
-    root = artifact_directory(tmp_path_factory) / "tutorials"
-    directory = root / case.case_id.replace("/", "-") / stage
+def _tutorial_artifacts(tmp_path_factory, case, stage, artifact_root=None, attempt=None):
+    root = (
+        Path(artifact_root)
+        if artifact_root is not None
+        else artifact_directory(tmp_path_factory) / "tutorials"
+    )
+    directory = root / case.case_id
+    if attempt is not None:
+        directory /= attempt
+    directory /= stage
     if directory.exists():
         shutil.rmtree(directory)
     directory.mkdir(parents=True)
@@ -925,6 +956,8 @@ def _run_tutorial_stage(
     repository_root,
     tmp_path_factory,
     schema_cache,
+    artifact_root=None,
+    attempt=None,
 ):
     schema_descriptions = None
     if case.schema_probe:
@@ -937,7 +970,9 @@ def _run_tutorial_stage(
             )
         schema_descriptions = schema_cache[case.case_id]
 
-    artifacts = _tutorial_artifacts(tmp_path_factory, case, stage)
+    artifacts = _tutorial_artifacts(
+        tmp_path_factory, case, stage, artifact_root=artifact_root, attempt=attempt
+    )
     options_path = ipopt_characterization.prepare_tutorial_case(
         case,
         stage,
@@ -1045,6 +1080,10 @@ check tutorial_{stage}_run passed
     (artifacts / "comparison.json").write_text(
         json.dumps(comparison, indent=2) + "\n"
     )
+    summary = ipopt_characterization.baselining_comparison_summary(
+        stage, baseline, generated, comparison
+    )
+    (artifacts / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     result = {
         "status": "unreviewed",
         "tutorial": case.case_id,
@@ -1056,6 +1095,7 @@ check tutorial_{stage}_run passed
         "prepared_options": options_path.name,
         "generated_mission": generated_path.name,
         "comparison": "comparison.json",
+        "summary": "summary.json",
         "log": "run.log",
         "duration_seconds": duration_seconds,
         "provenance": "provenance.json",
@@ -1079,7 +1119,7 @@ def tutorial_stage_runner(
 ):
     """Run one independently reported tutorial replay or refinement stage."""
 
-    def run(case, stage):
+    def run(case, stage, *, artifact_root=None, attempt=None):
         return _run_tutorial_stage(
             case=case,
             stage=stage,
@@ -1087,6 +1127,8 @@ def tutorial_stage_runner(
             repository_root=repository_root,
             tmp_path_factory=tmp_path_factory,
             schema_cache=tutorial_schema_cache,
+            artifact_root=artifact_root,
+            attempt=attempt,
         )
 
     return run

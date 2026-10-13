@@ -52,6 +52,16 @@ def pytest_addoption(parser):
         "--tutorials", action="store_true", help="run only tutorial verification tests"
     )
     group.addoption(
+        "--ipopt-verification",
+        action="store_true",
+        help="run IPOPT backend benchmarks and immutable tutorial verification",
+    )
+    group.addoption(
+        "--tutorial-baselining",
+        action="store_true",
+        help="run two-attempt Docker tutorial baselining evidence collection",
+    )
+    group.addoption(
         "--baselining-filter",
         action="append",
         default=[],
@@ -69,13 +79,15 @@ def pytest_collection_modifyitems(config, items):
             ("regression", config.getoption("--regression")),
             ("clean_bootstrap", config.getoption("--clean-bootstrap")),
             ("tutorials", config.getoption("--tutorials")),
+            ("ipopt_verification", config.getoption("--ipopt-verification")),
+            ("tutorial_baselining", config.getoption("--tutorial-baselining")),
         )
         if selected
     ]
     if len(selected_categories) > 1:
         raise pytest.UsageError(
-            "--unit, --integration, --regression, --clean-bootstrap, and --tutorials "
-            "are mutually exclusive"
+            "--unit, --integration, --regression, --clean-bootstrap, --tutorials, "
+            "--ipopt-verification, and --tutorial-baselining are mutually exclusive"
         )
 
     category = selected_categories[0] if selected_categories else None
@@ -83,7 +95,12 @@ def pytest_collection_modifyitems(config, items):
         category == "clean_bootstrap"
         or "clean_bootstrap" in config.option.markexpr
     )
-    tutorials_requested = category == "tutorials" or "tutorials" in config.option.markexpr
+    tutorials_requested = category in {
+        "integration",
+        "tutorials",
+        "ipopt_verification",
+        "tutorial_baselining",
+    } or "tutorials" in config.option.markexpr
     selected = []
     deselected = []
     for item in items:

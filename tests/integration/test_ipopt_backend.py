@@ -4,11 +4,14 @@ import math
 
 import pytest
 
+from testatron import ipopt_characterization
+
 
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.docker,
     pytest.mark.ipopt_backend,
+    pytest.mark.ipopt_verification,
 ]
 
 
@@ -46,11 +49,18 @@ def test_track_acs_replay_matches_committed_truth(track_acs_replay_probe):
     assert track_acs_replay_probe["track_acs_replay_no_ipopt"] == "passed"
     comparison = track_acs_replay_probe["comparison"]
     assert comparison["status"] == "unreviewed"
-    assert comparison["acceptable"]
     assert comparison["feasible"]
-    assert all(comparison["checks"].values())
+    failed_checks = {
+        name for name, passed in comparison["checks"].items() if not passed
+    }
+    assert failed_checks == set(
+        ipopt_characterization.BENCHMARKS[
+            "track-acs-prop"
+        ].expected_replay_failed_checks
+    )
+    assert comparison["acceptable"] is not bool(failed_checks)
     assert track_acs_replay_probe["result"]["status"] == "unreviewed"
-    assert track_acs_replay_probe["result"]["acceptable"]
+    assert track_acs_replay_probe["result"]["acceptable"] is comparison["acceptable"]
 
 
 @pytest.mark.solver_runtime
