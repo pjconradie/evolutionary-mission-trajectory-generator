@@ -364,6 +364,10 @@ BENCHMARKS = {
     )
 }
 
+REPLAY_GRAVITY_FILE_OVERRIDES = {
+    "spacecraft_options/spacecraftoptions_Chem_TrackACSProp": "Surreal",
+}
+
 
 def _sha256(path):
     digest = hashlib.sha256()
@@ -1232,6 +1236,10 @@ def _prepare_seeded_case(
     options.run_inner_loop = run_inner_loop
     if execution_repository_root is not None:
         execution_repository_root = Path(execution_repository_root)
+        try:
+            identifier = case_id(source_options)
+        except ValueError:
+            identifier = None
         options.universe_folder = str(
             execution_repository_root / (universe_root or "testatron/universe")
         )
@@ -1244,6 +1252,12 @@ def _prepare_seeded_case(
         )
         gravity_root = Path(options.universe_folder) / "gravity_files"
         for journey in options.Journeys:
+            gravity_file_override = REPLAY_GRAVITY_FILE_OVERRIDES.get(identifier)
+            if gravity_file_override is not None:
+                journey.central_body_gravity_file = str(
+                    gravity_root / gravity_file_override
+                )
+                continue
             if journey.central_body_gravity_order == 0:
                 journey.central_body_gravity_file = "DoesNotExist.grv"
             else:

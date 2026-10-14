@@ -37,6 +37,7 @@ promote_if_matched() {
 
 Run each command in order. Run the promotion command only after that case has stable `matched_snopt` evidence and manual approval; it refuses all other classifications.
 
+# Corpus tests
 ## 1-28: `global_mission_options`
 
 ```zsh
@@ -360,11 +361,7 @@ baselining_case 'transcription_tests/MGAnDSMs_EMintercept'
 baselining_case 'transcription_tests/PSBI_EMintercept'
 baselining_case 'transcription_tests/PSFB_EMintercept'
 baselining_case 'transcription_tests/SundmanCoastPhase_EMintercept'
-python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
-python -c 'import json; from collections import Counter; summary=json.load(open("testatron/ipopt/tests/tests/baselining/baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(Counter(case["classification"] for case in summary["cases"]).items())))'
 ```
-
-
 
 ## Promotion
 

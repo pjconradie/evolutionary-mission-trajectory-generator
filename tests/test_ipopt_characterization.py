@@ -1099,7 +1099,7 @@ def test_prepare_track_acs_replay_injects_aligned_truth_seed(
     truth = Mission.Mission(str(baseline))
 
     prepared_path = ipopt_characterization.prepare_replay(
-        source, baseline, tmp_path
+        source, baseline, tmp_path, execution_repository_root="/repo"
     )
     prepared = MissionOptions.MissionOptions(str(prepared_path))
     prepared.AssembleMasterDecisionVector()
@@ -1114,6 +1114,9 @@ def test_prepare_track_acs_replay_injects_aligned_truth_seed(
         for description in truth.Xdescriptions
     ]
     assert [float(entry[1]) for entry in prepared.trialX] == truth.DecisionVector
+    assert prepared.Journeys[0].central_body_gravity_file == (
+        "/repo/testatron/universe/gravity_files/Surreal"
+    )
     assert json.loads((tmp_path / "compatibility.json").read_text())[
         "status"
     ] == "unreviewed"

@@ -1,5 +1,465 @@
-# IPOPT Testatron Verification
 
+How to baseline?
+
+# Purpose
+
+
+1. **Collection sanity**  
+    Confirm pytest sees all expected tests and markers.
+
+2. **Unit tests**  
+    Confirm isolated characterization, staging, comparison, serialization, and verification logic.
+
+3. **Regression tests**  
+    Confirm immutable Testatron and historical mission data can still be parsed and compared correctly.
+
+4. **IPOPT characterization contracts**  
+    Confirm `ipopt_characterization.py` handles dependency mappings, replay/refinement outcomes, evidence layout, promotion, and verification rules correctly.
+
+5. **Docker toolchain and benchmark verification**  
+    Run `ipopt_benchmarks`, then—when preparing a deployment—broader `integration` coverage. This proves that the pinned Docker environment can configure, build, and execute EMTG/IPOPT.
+
+6. **Manual full Testatron baselining**  
+    Run all 137 `baselining_case` commands from `baselining_commands.md`. This produces fresh two-attempt replay/refinement evidence under `testatron/ipopt/tests/tests/baselining/`.
+
+7. **Validate the completed corpus**
+    
+    - Summarize: prove all **137** case records exist and inspect classifications.
+    - Verify: compare those fresh records with the reviewed current-state reference.
+    - This is the acceptance gate you just passed: **137 cases; 5 `matched_snopt`; 132 expected `mismatch_snopt`; current-state verification passed.**
+
+8. **Generate/update review documentation only when intended**  
+    Generate the decision log and checklist evidence if the reviewed corpus is deliberately being refreshed. Do **not** rewrite `baselining_verification.json` unless explicitly accepting a new current-state contract.
+
+9. **Tutorial baselining**  
+    Only after the Testatron corpus and Docker deployment path are verified should the tutorial inputs become the next baselining corpus. Tutorials should have their own immutable-input inventory, evidence root, classification policy, repeatability records, and current-state reference—rather than being mixed into the Testatron 137-case evidence.
+
+10. **Third-party deployment / operations**  
+    A deployer validates Docker/toolchain prerequisites, runs the selected operational verification set, preserves the approved references, and treats future corpus runs as drift detection—not as automatic replacement of accepted evidence.
+
+# Testing workflow
+
+| #   | Test                                              | Command                                                                                                        | Reason                                           |
+| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 1   | Run docker image tests                            |                                                                                                                |                                                  |
+| 2   | Run collection sanity                             | python -m pytest --collect-only -q                                                                             | 285/319 tests collected (34 deselected) in 0.13s |
+| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 114 passed, 205 deselected in 2.82s              |
+| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 174 deselected in 1.49s              |
+| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 113 passed in 1.22s                              |
+| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 307 deselected in 33.78s              |
+| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 316 deselected in 19.22s               |
+| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 293 deselected in 658.13s (0:10:58)   |
+
+1
+
+2,3,4,5
+Docker NOT required. Estimated runtime order of magnitude seconds.
+
+```zsh
+python -m pytest --collect-only -q
+
+python -m pytest -m unit
+
+python -m pytest -m regression
+
+python -m pytest tests/test_ipopt_characterization.py -q
+```
+
+6,7,8
+Docker required. Estimated runtime order of magnitude minutes:
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \ python -m pytest -m ipopt_benchmarks -q
+
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \ python -m pytest -m ipopt_tests -q
+
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \ python -m pytest -m integration -q
+```
+## . Run collection sanity
+
+`--collect-only` executes no tests and does not invoke Docker, EMTG, or IPOPT. It confirms that the expected test modules, markers, and test-discovery configuration are visible to pytest.
+
+Run it at the beginning to detect missing coverage and again at the end to record the final collection state.
+
+Terminal command:
+
+```zsh
+python -m pytest --collect-only -q
+```
+
+Example output:
+```zsh
+% python -m pytest --collect-only -q
+tests/integration/test_baselining.py::test_baselining_repeatability_in_pinned_toolchain[global_mission_options/globalmissionoptions_MGALT_DLAbounds]
+tests/integration/test_baselining.py::test_baselining_repeatability_in_pinned_toolchain[transcription_tests/SundmanCoastPhase_EMintercept]
+tests/integration/test_baselining.py::test_baselining_cli_writes_fixed_mirrored_layout
+.
+.
+.
+tests/test_ipopt_characterization.py::test_benchmark_provenance_hashes_current_sources
+tests/test_ipopt_characterization.py::test_benchmark_provenance_rejects_unknown_stage
+tests/test_ipopt_characterization.py::test_committed_provenance_matches_registry_and_directory
+
+285/319 tests collected (34 deselected) in 0.12s
+```
+
+The **34 deselected tests are exactly:**
+
+| Opt-in group                       |  Count | Why excluded by default                                                                |
+| ---------------------------------- | -----: | -------------------------------------------------------------------------------------- |
+| `clean_bootstrap`                  |      1 | Rebuilds the Docker toolchain with `--no-cache`; intentionally expensive.              |
+| `tutorials` replay tests           |     17 | Docker-backed verification of the current tutorial input/reference packages.           |
+| `tutorials` IPOPT-refinement tests |     16 | Docker-backed IPOPT refinement verification for tutorial cases that permit refinement. |
+| **Total**                          | **34** |                                                                                        |
+|                                    |        |                                                                                        |
+## . Run unit tests
+
+This checks isolated Python/C++ contract behavior without deliberately running the Docker mission corpus.
+
+Terminal command:
+```zsh
+python -m pytest -m unit
+```
+
+Example output:
+```zsh
+% python -m pytest -m unit
+======================================================================================================================== test session starts ========================================================================================================================
+platform darwin -- Python 3.13.1, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator
+configfile: pytest.ini
+testpaths: tests
+collected 319 items / 205 deselected / 114 selected                                                                                                                                                                                                                 
+
+tests/test_cpp_contracts.py .                                                                                                                                                                                                                                 [  0%]
+tests/test_ipopt_characterization.py .................................................................................................................                                                                                                        [100%]
+
+================================================================================================================ 114 passed, 205 deselected in 2.82s ================================================================================================================
+```
+
+## . Run regression tests
+
+This is the important source/baseline integrity suite. It exercises frozen Testatron and mission parsing/comparison behavior, including the immutable corpus.
+
+Terminal command:
+
+```zsh
+python -m pytest -m regression
+```
+
+Example output:
+
+```zsh
+% python -m pytest -m regression
+======================================================================================================================== test session starts ========================================================================================================================
+platform darwin -- Python 3.13.1, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator
+configfile: pytest.ini
+testpaths: tests
+collected 319 items / 174 deselected / 145 selected                                                                                                                                                                                                                 
+
+tests/regression/test_comparatron.py ...                                                                                                                                                                                                                      [  2%]
+tests/regression/test_mission_options.py ..                                                                                                                                                                                                                   [  3%]
+tests/regression/test_mission_parser.py ............................................................................................................................................                                                                          [100%]
+
+================================================================================================================ 145 passed, 174 deselected in 1.49s ================================================================================================================
+
+```
+
+## . Run IPOPT characterisation contracts
+
+This checks staging, compatibility mappings, result serialization, comparison policy, promotion eligibility, and current-state verification logic.
+
+Terminal command:
+
+```zsh
+python -m pytest tests/test_ipopt_characterization.py -q
+```
+
+Example output:
+
+```zsh
+% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \
+
+python -m pytest -m ipopt_benchmarks -q
+............                                                                                                                                                                                                                                                  [100%]
+12 passed, 307 deselected in 33.78s
+```
+
+## . Run focused IPOPT integration checks
+
+### Run `ipopt_benchmarks`
+
+`ipopt_benchmarks` runs the established TrackACS and OSIRIS replay/refinement checks in the pinned Linux IPOPT toolchain. It confirms that known, curated mission packages still execute and preserve their expected solver and mission-comparison behavior. Use a separate artifact root because these are benchmark diagnostics, not Testatron corpus evidence.
+
+Terminal command:
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \
+
+python -m pytest -m ipopt_benchmarks -q
+```
+
+Example output:
+
+```zsh
+% python -m pytest tests/test_ipopt_characterization.py -q
+.................................................................................................................                                                                                                                                             [100%]
+113 passed in 1.22s
+(.venv) jacoconradie@Panda-Mac evolutionary-mission-trajectory-generator % EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \
+
+python -m pytest -m ipopt_benchmarks -q
+............                                                                                                                                                                                                                                                  [100%]
+12 passed, 307 deselected in 33.78s
+```
+
+### Run `ipopt_tests`
+
+The `ipopt_tests` marker includes Docker-backed repeatability and launcher coverage, so it can be slower:
+
+Terminal command:
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \
+
+python -m pytest -m ipopt_tests -q
+```
+
+Example output:
+
+```zsh
+% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \
+
+python -m pytest -m ipopt_tests -q
+...                                                                                                                                                                                                                                                           [100%]
+3 passed, 316 deselected in 19.22s
+```
+
+## . Run full integration suite
+
+### Run `integration`
+
+`integration` exercises the complete Docker/toolchain boundary: image availability, dependency discovery, CMake policy, native compilation, EMTG execution, and selected mission workflows. It provides deployment-level confidence that a third party can build and operate EMTG/IPOPT in the pinned container environment. Run it only after the baselining corpus is complete, and keep its artifacts separate from corpus evidence.
+
+Terminal command:
+
+Only run this after the above pass, and keep artifacts separate:
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \
+
+python -m pytest -m integration -q
+```
+
+Example output:
+
+```zsh
+% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \
+
+python -m pytest -m integration -q
+..........................                                                                                                                                                                                                                                    [100%]
+26 passed, 293 deselected in 658.13s (0:10:58)
+```
+
+
+
+## . Run 137 corpus tests
+
+The 137 corpus tests in [[baselining_commands#Corpus tests|Corpus tests]]. Run the following terminal commands
+### Create the terminal function
+
+```zsh
+baselining_case() {
+	EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/tests" \
+	python -m pytest tests/integration/test_baselining.py -q \
+	-k baselining_cli_writes_fixed_mirrored_layout \
+	--baselining-filter "$1"
+}
+```
+
+### Run the 137 cases under the [[baselining_commands#Complete list of tests| complete list of 137 corpus baselining tests]].
+
+```zsh
+baselining_case 'global_mission_options/globalmissionoptions_MGALT_DLAbounds'
+baselining_case 'global_mission_options/globalmissionoptions_MGALT_RLAbounds'
+...
+baselining_case 'transcription_tests/PSFB_EMintercept'
+baselining_case 'transcription_tests/SundmanCoastPhase_EMintercept'
+```
+
+```zsh
+.                                                                                                                                                                                                                                                             [100%]
+1 passed, 2 deselected in 5.63s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed, 2 deselected in 6.63s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed, 2 deselected in 5.46s
+```
+
+Classification summary.
+```zsh
+python -c 'import json; from collections import Counter; summary=json.load(open("testatron/ipopt/tests/tests/baselining/baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(Counter(case["classification"] for case in summary["cases"]).items())))'
+```
+
+```zsh
+% python -c 'import json; from collections import Counter; summary=json.load(open("testatron/ipopt/tests/tests/baselining/baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(Counter(case["classification"] for case in summary["cases"]).items())))'
+137
+{'matched_snopt': 5, 'mismatch_snopt': 132}
+```
+
+### Generate the corpus summary
+
+```zsh
+python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
+
+Wrote baselining summary for 137 case(s): */evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tests/baselining/baselining-summary.json
+```
+
+### Regenerate the human-readable decision-log report from the new artifacts
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--write-baselining-decision-log \
+	--output-root "$PWD/testatron/ipopt/tests/tests" \
+	--decision-log-output \
+	"$PWD/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py \
+        --write-baselining-decision-log \
+        --output-root "$PWD/testatron/ipopt/tests/tests" \
+        --decision-log-output \
+        "$PWD/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md"
+Wrote baselining decision log for 137 case(s): */evolutionary-mission-trajectory-generator/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md
+```
+
+To inspect the generated decision log
+
+```zsh
+git --no-pager diff -- \
+	docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md
+```
+
+No output means the regenerated report matches the checked-in/generated prior version exactly. A diff shows which case evidence, mappings, mismatch values, or refinement record changed.
+
+The narrative decision record should remain separate: do **not** overwrite `baselining_decision_log.md` merely because the generated companion report was refreshed.
+
+#### If you want an exact before-versus-after summary diff next time
+
+Before rerunning the corpus, snapshot the old generated output somewhere outside the canonical evidence tree:
+
+```zsh
+mkdir -p test-artifacts/baselining-comparisons
+
+cp testatron/ipopt/tests/tests/baselining/baselining-summary.json \
+	test-artifacts/baselining-comparisons/baselining-summary.before.json
+```
+
+After the rerun and summary generation:
+
+```zsh
+diff -u \
+	test-artifacts/baselining-comparisons/baselining-summary.before.json \
+	testatron/ipopt/tests/tests/baselining/baselining-summary.json
+```
+### Verify the fresh 137-case results against the **existing** reviewed current-state reference.
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--verify-baselining \
+	--output-root "$PWD/testatron/ipopt/tests/tests" \
+	--verification-reference \
+	"$PWD/testatron/ipopt/tests/baselining_verification.json" \
+	--verification-report-output \
+	"$PWD/testatron/ipopt/tests/tests/baselining/baselining_verification_report.json"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py \
+        --verify-baselining \
+        --output-root "$PWD/testatron/ipopt/tests/tests" \
+        --verification-reference \
+        "$PWD/testatron/ipopt/tests/baselining_verification.json" \
+        --verification-report-output \
+        "$PWD/testatron/ipopt/tests/tests/baselining/baselining_verification_report.json"
+Baselining verification passed for 137 case(s): */evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tests/baselining/baselining_verification_report.json
+```
+
+To inspect the report explicitly after running verification:
+
+```zsh
+python - <<'PY'
+import json
+from collections import Counter
+from pathlib import Path
+
+path = Path("testatron/ipopt/tests/tests/baselining/baselining_verification_report.json")
+report = json.loads(path.read_text(encoding="utf-8"))
+statuses = Counter(case["status"] for case in report["cases"])
+
+print(f'case_count: {report["case_count"]}')
+print(f'acceptable: {report["acceptable"]}')
+print(f"statuses: {dict(sorted(statuses.items()))}")
+
+for case in report["cases"]:
+	if case["status"] != "matched":
+		print(f'{case["case_id"]}: {case["status"]}')
+PY
+```
+
+```zsh
+% python - <...
+case_count: 137
+acceptable: True
+statuses: {'matched': 137}
+```
+
+## . Run 33 tutorial tests
+
+
+Terminal command:
+
+```zsh
+
+```
+
+Example output:
+
+```zsh
+
+```
+
+# Baselining workflow
+
+See [[baselining_commands]].
+
+
+---
+
+# Docker requirement across the WORKFLOW
+
+Docker is **not** required for every step:
+
+| Verification activity                                   | Docker required?   |
+| ------------------------------------------------------- | ------------------ |
+| Completed-corpus summary and current-state verification | No — artifact-only |
+| Unit tests                                              | No                 |
+| Regression tests                                        | No                 |
+| IPOPT characterization contracts                        | No                 |
+| Collection sanity                                       | No                 |
+| Testatron full baselining                               | Yes                |
+| `ipopt_benchmarks`                                      | Yes                |
+| `integration`                                           | Yes                |
+| `clean_bootstrap`                                       | Yes                |
+| `tutorials`                                             | Yes                |
+
+---
+---
 ## Purpose
 
 The IPOPT Testatron workflow executes the immutable `testatron/tests` corpus

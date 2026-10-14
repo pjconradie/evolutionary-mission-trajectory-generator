@@ -234,6 +234,7 @@ def run_probe(
     tmp_path_factory,
     build_volume: str | None = None,
     writable_artifacts: Path | None = None,
+    read_only_mounts: tuple[tuple[Path, str], ...] = (),
     timeout: int = COMMAND_TIMEOUT_SECONDS,
 ) -> dict[str, str]:
     """Run one probe in a disposable amd64 container and return its checks."""
@@ -250,6 +251,11 @@ def run_probe(
         command.extend([
             "--mount",
             f"type=bind,src={writable_artifacts.resolve()},dst=/artifacts",
+        ])
+    for source, destination in read_only_mounts:
+        command.extend([
+            "--mount",
+            f"type=bind,src={source.resolve()},dst={destination},readonly",
         ])
     if build_volume:
         create = _run(

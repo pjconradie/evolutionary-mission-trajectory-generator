@@ -2,11 +2,14 @@
 
 import json
 import shlex
+import shutil
+from pathlib import Path
 
 import pytest
 
 from conftest import _backend_source_script
 from _docker_support import artifact_directory, build_volume_name, run_probe
+from testatron import ipopt_characterization
 
 
 pytestmark = [
@@ -16,6 +19,23 @@ pytestmark = [
     pytest.mark.ipopt_tests,
     pytest.mark.solver_runtime,
 ]
+
+
+def _stage_baselining_inputs(
+    repository_root: Path, destination: Path, filters: list[str]
+) -> list[Path]:
+    """Copy only the selected immutable source/SNOPT pairs for Docker access."""
+    tests_root = repository_root / "testatron" / "tests"
+    cases = ipopt_characterization.discover_cases(tests_root, filters=filters)
+    if not cases:
+        pytest.fail(f"No Testatron case matches baselining filter(s): {filters}")
+    for source in cases:
+        relative_source = source.relative_to(tests_root)
+        staged_source = destination / relative_source
+        staged_source.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, staged_source)
+        shutil.copy2(source.with_suffix(".emtg"), staged_source.with_suffix(".emtg"))
+    return cases
 
 
 @pytest.mark.parametrize(
@@ -92,6 +112,8 @@ def test_baselining_cli_writes_fixed_mirrored_layout(
         f"--filter {shlex.quote(case_filter)}" for case_filter in filters
     )
     artifacts = artifact_directory(tmp_path_factory)
+    staged_inputs = tmp_path_factory.mktemp("baselining-inputs")
+    cases = _stage_baselining_inputs(repository_root, staged_inputs, filters)
     script = _backend_source_script("IPOPT") + f'''
 cmake --build /build --target EMTGv9 -j2 >/tmp/baselining-build.log 2>&1 \\
     || {{ tail -n 150 /tmp/baselining-build.log; exit 20; }}
@@ -102,14 +124,12 @@ PYTHONPATH=/repo:/repo/PyEMTG python /repo/testatron/ipopt_characterization.py \
     --output-root /artifacts \\
     --timeout 660.0
 PYTHONPATH=/repo:/repo/PyEMTG python - <<'PY'
-import json
 from pathlib import Path
 
 batch_root = Path("/artifacts/baselining")
 case_roots = sorted(path.parent for path in batch_root.glob("*/*/result.json"))
 if not case_roots:
     raise SystemExit("fixed baselining batch layout is incomplete")
-repeatability = {{}}
 for case_root in case_roots:
     required_paths = (
         case_root / "attempt-1" / "result.json",
@@ -119,21 +139,7 @@ for case_root in case_roots:
     )
     if not all(path.is_file() for path in required_paths):
         raise SystemExit(f"fixed baselining batch layout is incomplete: {{case_root}}")
-    repeatability[str(case_root.relative_to(batch_root))] = json.loads(
-        (case_root / "repeatability.json").read_text()
-    )["stable"]
-Path("/artifacts/batch-summary.json").write_text(
-    json.dumps(
-        {{
-            "case_ids": [str(case_root.relative_to(batch_root)) for case_root in case_roots],
-            "repeatability": repeatability,
-        }},
-        indent=2,
-    )
-    + "\\n"
-)
 PY
-test -s /artifacts/batch-summary.json
 printf 'EMTG_CHECK baselining_batch_layout=passed\\n'
 '''
     checks = run_probe(
@@ -144,16 +150,18 @@ printf 'EMTG_CHECK baselining_batch_layout=passed\\n'
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
+        read_only_mounts=((staged_inputs, "/repo/testatron/tests"),),
         timeout=1500,
     )
 
-    summary = json.loads((artifacts / "batch-summary.json").read_text())
     assert checks["baselining_batch_layout"] == "passed"
-    assert summary["case_ids"]
-    assert set(summary["repeatability"]) == set(summary["case_ids"])
-    for case_id in summary["case_ids"]:
+    for source in cases:
+        case_id = source.relative_to(repository_root / "testatron" / "tests")
+        case_id = str(case_id.with_suffix(""))
         case_root = artifacts / "baselining" / case_id
         assert (case_root / "attempt-1" / "result.json").is_file()
         assert (case_root / "attempt-2" / "result.json").is_file()
         assert (case_root / "repeatability.json").is_file()
         assert (case_root / "result.json").is_file()
+        repeatability = json.loads((case_root / "repeatability.json").read_text())
+        assert repeatability["stable"]

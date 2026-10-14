@@ -462,6 +462,10 @@ def track_acs_replay_probe(toolchain_image, repository_root, tmp_path_factory):
         execution_repository_root="/repo",
         execution_directory="/artifacts",
     )
+    kernel_directory = tmp_path_factory.mktemp("track-acs-replay-kernels")
+    ephemeris_directory = repository_root / "testatron/universe/ephemeris_files"
+    for kernel_name in ("de430.bsp", "mar097.bsp"):
+        shutil.copy2(ephemeris_directory / kernel_name, kernel_directory / kernel_name)
     script = _backend_source_script("IPOPT") + rf'''
 cmake --build /build --target EMTGv9 -j2 >/tmp/track-acs-replay-build.log 2>&1 \
     || {{ tail -n 150 /tmp/track-acs-replay-build.log; exit 25; }}
@@ -488,6 +492,9 @@ check track_acs_replay_no_ipopt passed
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
+        read_only_mounts=(
+            (kernel_directory, "/repo/testatron/universe/ephemeris_files"),
+        ),
     )
     generated_path = artifacts / "spacecraftoptions_Chem_TrackACSProp.emtg"
     baseline = Mission.Mission(str(baseline_path))
