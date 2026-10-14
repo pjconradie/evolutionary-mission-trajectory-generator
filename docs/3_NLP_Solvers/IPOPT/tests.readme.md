@@ -3,54 +3,33 @@ How to baseline?
 
 # Purpose
 
+This plan makes the complete `testatron/tests` corpus executable with the open-source IPOPT backend and uses the committed SNOPT-generated `.emtg` files as the immutable numerical baseline.
 
-1. **Collection sanity**  
-    Confirm pytest sees all expected tests and markers.
+IPOPT is not accepted merely because it produces a feasible result. For each comparable case, the IPOPT result must agree with the corresponding SNOPT result within an explicit, reviewed numerical contract. The committed SNOPT options and `.emtg` files are never overwritten, regenerated, or promoted from an IPOPT run.
 
-2. **Unit tests**  
-    Confirm isolated characterization, staging, comparison, serialization, and verification logic.
-
-3. **Regression tests**  
-    Confirm immutable Testatron and historical mission data can still be parsed and compared correctly.
-
-4. **IPOPT characterization contracts**  
-    Confirm `ipopt_characterization.py` handles dependency mappings, replay/refinement outcomes, evidence layout, promotion, and verification rules correctly.
-
-5. **Docker toolchain and benchmark verification**  
-    Run `ipopt_benchmarks`, then—when preparing a deployment—broader `integration` coverage. This proves that the pinned Docker environment can configure, build, and execute EMTG/IPOPT.
-
-6. **Manual full Testatron baselining**  
-    Run all 137 `baselining_case` commands from `baselining_commands.md`. This produces fresh two-attempt replay/refinement evidence under `testatron/ipopt/tests/tests/baselining/`.
-
-7. **Validate the completed corpus**
-    
-    - Summarize: prove all **137** case records exist and inspect classifications.
-    - Verify: compare those fresh records with the reviewed current-state reference.
-    - This is the acceptance gate you just passed: **137 cases; 5 `matched_snopt`; 132 expected `mismatch_snopt`; current-state verification passed.**
-
-8. **Generate/update review documentation only when intended**  
-    Generate the decision log and checklist evidence if the reviewed corpus is deliberately being refreshed. Do **not** rewrite `baselining_verification.json` unless explicitly accepting a new current-state contract.
-
-9. **Tutorial baselining**  
-    Only after the Testatron corpus and Docker deployment path are verified should the tutorial inputs become the next baselining corpus. Tutorials should have their own immutable-input inventory, evidence root, classification policy, repeatability records, and current-state reference—rather than being mixed into the Testatron 137-case evidence.
-
-10. **Third-party deployment / operations**  
-    A deployer validates Docker/toolchain prerequisites, runs the selected operational verification set, preserves the approved references, and treats future corpus runs as drift detection—not as automatic replacement of accepted evidence.
+Run the commands in this document from the repository root.
 
 # Testing workflow
 
-| #   | Test                                              | Command                                                                                                        | Reason                                           |
-| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| 1   | Run docker image tests                            |                                                                                                                |                                                  |
-| 2   | Run collection sanity                             | python -m pytest --collect-only -q                                                                             | 285/319 tests collected (34 deselected) in 0.13s |
-| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 114 passed, 205 deselected in 2.82s              |
-| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 174 deselected in 1.49s              |
-| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 113 passed in 1.22s                              |
-| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 307 deselected in 33.78s              |
-| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 316 deselected in 19.22s               |
-| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 293 deselected in 658.13s (0:10:58)   |
+Tests against a pinned Docker image already available.
+
+| #   | Test                                              | Command                                                                                                        | Runtime information                              | Docker required |
+| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | --------------- |
+| 1   | Run clean bootstrap                               |                                                                                                                |                                                  | Yes             |
+| 2   | Run collection sanity                             | python -m pytest --collect-only -q                                                                             | 285/319 tests collected (34 deselected) in 0.13s | No              |
+| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 114 passed, 205 deselected in 2.82s              | No              |
+| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 174 deselected in 1.49s              | No              |
+| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 113 passed in 1.22s                              | No              |
+|     |                                                   |                                                                                                                | < 10 seconds                                     |                 |
+| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 307 deselected in 33.78s              | Yes             |
+| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 316 deselected in 19.22s               | Yes             |
+| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 293 deselected in 658.13s (0:10:58)   | Yes             |
+|     |                                                   |                                                                                                                | < 15 min                                         | Yes             |
+| 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                         | Yes             |
+| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                         | Yes             |
 
 1
+Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
 
 2,3,4,5
 Docker NOT required. Estimated runtime order of magnitude seconds.
@@ -75,7 +54,11 @@ EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \ python -m pytest -m i
 
 EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \ python -m pytest -m integration -q
 ```
-## . Run collection sanity
+
+9, 10
+Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
+
+## 2. Run collection sanity
 
 `--collect-only` executes no tests and does not invoke Docker, EMTG, or IPOPT. It confirms that the expected test modules, markers, and test-discovery configuration are visible to pytest.
 
@@ -112,7 +95,7 @@ The **34 deselected tests are exactly:**
 | `tutorials` IPOPT-refinement tests |     16 | Docker-backed IPOPT refinement verification for tutorial cases that permit refinement. |
 | **Total**                          | **34** |                                                                                        |
 |                                    |        |                                                                                        |
-## . Run unit tests
+## 3. Run unit tests
 
 This checks isolated Python/C++ contract behavior without deliberately running the Docker mission corpus.
 
@@ -137,7 +120,7 @@ tests/test_ipopt_characterization.py ...........................................
 ================================================================================================================ 114 passed, 205 deselected in 2.82s ================================================================================================================
 ```
 
-## . Run regression tests
+## 4. Run regression tests
 
 This is the important source/baseline integrity suite. It exercises frozen Testatron and mission parsing/comparison behavior, including the immutable corpus.
 
@@ -166,7 +149,7 @@ tests/regression/test_mission_parser.py ........................................
 
 ```
 
-## . Run IPOPT characterisation contracts
+## 5. Run IPOPT characterisation contracts
 
 This checks staging, compatibility mappings, result serialization, comparison policy, promotion eligibility, and current-state verification logic.
 
@@ -186,7 +169,7 @@ python -m pytest -m ipopt_benchmarks -q
 12 passed, 307 deselected in 33.78s
 ```
 
-## . Run focused IPOPT integration checks
+## 6,7. Run focused IPOPT integration checks
 
 ### Run `ipopt_benchmarks`
 
@@ -235,7 +218,7 @@ python -m pytest -m ipopt_tests -q
 3 passed, 316 deselected in 19.22s
 ```
 
-## . Run full integration suite
+## 8. Run full integration suite
 
 ### Run `integration`
 
@@ -263,7 +246,7 @@ python -m pytest -m integration -q
 
 
 
-## . Run 137 corpus tests
+## 9. Run 137 corpus tests
 
 The 137 corpus tests in [[baselining_commands#Corpus tests|Corpus tests]]. Run the following terminal commands
 ### Create the terminal function
@@ -419,7 +402,7 @@ acceptable: True
 statuses: {'matched': 137}
 ```
 
-## . Run 33 tutorial tests
+## 10. Run 33 tutorial tests
 
 
 Terminal command:
@@ -438,48 +421,15 @@ Example output:
 
 See [[baselining_commands]].
 
-
----
-
-# Docker requirement across the WORKFLOW
-
-Docker is **not** required for every step:
-
-| Verification activity                                   | Docker required?   |
-| ------------------------------------------------------- | ------------------ |
-| Completed-corpus summary and current-state verification | No — artifact-only |
-| Unit tests                                              | No                 |
-| Regression tests                                        | No                 |
-| IPOPT characterization contracts                        | No                 |
-| Collection sanity                                       | No                 |
-| Testatron full baselining                               | Yes                |
-| `ipopt_benchmarks`                                      | Yes                |
-| `integration`                                           | Yes                |
-| `clean_bootstrap`                                       | Yes                |
-| `tutorials`                                             | Yes                |
-
----
----
-## Purpose
-
-The IPOPT Testatron workflow executes the immutable `testatron/tests` corpus
-with the open-source IPOPT backend while preserving each adjacent
-SNOPT-generated `.emtg` file as immutable historical evidence. The workflow
-answers two separate questions:
+The IPOPT Testatron Baselining workflow executes the immutable `testatron/tests` corpus with the open-source IPOPT backend while preserving each adjacent SNOPT-generated `.emtg` file as immutable historical evidence. The workflow answers two separate questions:
 
 1. **Immutable-SNOPT comparison:** does a staged replay and, when eligible,
 	IPOPT refinement agree with the historical SNOPT result?
+
 2. **Current-state regression verification:** does fresh evidence reproduce the
 	reviewed behavior of the current EMTG/IPOPT environment?
 
-The first is a diagnostic comparison to historical truth. The second is the
-regression gate for the currently supported Docker toolchain. A stable
-`mismatch_snopt` can be expected current-state behavior; it is not a solver
-pass against SNOPT, nor a regression by itself.
-
-Run the commands in this document from the repository root. The operator
-commands are collected in [`baselining_commands.md`](baselining_commands.md).
-
+The first is a diagnostic comparison to historical truth. The second is the regression gate for the currently supported Docker toolchain. A stable `mismatch_snopt` can be expected current-state behavior; it is not a solver pass against SNOPT, nor a regression by itself.
 ## Immutable Inputs and Evidence Layout
 
 | Root | Contents |
@@ -595,42 +545,15 @@ and verification commands, and
 [`ipopt.readme.md`](ipopt.readme.md) for the Docker toolchain.
 
 ## Promotion and Review
+ Promotion is a separate manual operation. It may copy only reviewed, stable `matched_snopt` evidence into the curated case root; it never replaces the immutable SNOPT pair. A completed or current-state-matched `mismatch_snopt` case is not eligible for promotion.
 
-Promotion is a separate manual operation. It may copy only reviewed, stable
-`matched_snopt` evidence into the curated case root; it never replaces the
-immutable SNOPT pair. A completed or current-state-matched `mismatch_snopt`
-case is not eligible for promotion.
-
-The baselining summary is a compact generated index. The decision log and
-verification reference are the authoritative detailed records. Do not infer
-promotion or README approval merely from an evidence directory existing.
+The baselining summary is a compact generated index. The decision log and verification reference are the authoritative detailed records. Do not infer promotion or README approval merely from an evidence directory existing.
 
 ## Python Test Coverage
+ `ipopt_benchmarks` covers benchmark artifact behavior. The runner contracts are ordinary unit tests and validate staging, comparison, serialization, promotion eligibility, and current-state verification behavior.
 
-`ipopt_benchmarks` covers benchmark artifact behavior. The runner contracts
-are ordinary unit tests and validate staging, comparison, serialization,
-promotion eligibility, and current-state verification behavior.
-
-`ipopt_tests` remains reserved for a future Docker-backed per-case pytest
-suite. Its absence does not weaken the completed artifact-based current-state
-verification workflow. Any future runtime suite must verify against the
-reviewed current-state reference and retain immutable-SNOPT comparison as a
-separate diagnostic.
-# IPOPT Testatron Verification Plan
-
-## Purpose
-
-This plan makes the complete `testatron/tests` corpus executable with the
-open-source IPOPT backend and uses the committed SNOPT-generated `.emtg` files
-as the immutable numerical baseline.
-
-IPOPT is not accepted merely because it produces a feasible result. For each
-comparable case, the IPOPT result must agree with the corresponding SNOPT
-result within an explicit, reviewed numerical contract. The committed SNOPT
-options and `.emtg` files are never overwritten, regenerated, or promoted from
-an IPOPT run.
-
-Run commands in this document from the repository root.
+`ipopt_tests` remains reserved for a future Docker-backed per-case pytest suite. Its absence does not weaken the completed artifact-based current-state verification workflow. Any future runtime suite must verify against the reviewed current-state reference and retain immutable-SNOPT comparison as a separate diagnostic.
+# Readme
 
 ## IPOPT Suite Layout
 
