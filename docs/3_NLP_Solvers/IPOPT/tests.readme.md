@@ -870,5 +870,3 @@ The portable IPOPT Testatron implementation is complete when:
 	by recorded cross-solver evidence.
 6. `pytest -m ipopt_tests` and `pytest -m ipopt_benchmarks` both pass, and
 	plain pytest collection includes both core marker groups.
-
-test
