@@ -1,0 +1,13 @@
+{
+  "status": "unreviewed",
+  "case_id": "transcription_tests/SundmanCoastPhase_EMintercept",
+  "source_options": "/repo/testatron/tests/transcription_tests/SundmanCoastPhase_EMintercept.emtgopt",
+  "source_sha256": "ba38300a0a97f49c02392a032ca855d8c686b4c794994956c3d617dfdb013579",
+  "baseline_mission": "/repo/testatron/tests/transcription_tests/SundmanCoastPhase_EMintercept.emtg",
+  "baseline_sha256": "5eaf56c07daeda784c88ef288d7a6d90eb92b68bd0f39717f05b350f0d96a02a",
+  "baselining_policy": {
+    "path": "/repo/testatron/ipopt/tests/baselining_policy.json",
+    "sha256": "209ce05f2e3e708e4368a1e40175275249ff43587c3e4ef6df00d527e007e1c3",
+    "version": 2
+  }
+}

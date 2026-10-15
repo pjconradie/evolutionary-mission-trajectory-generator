@@ -501,6 +501,14 @@ def test_tutorial_verification_is_stage_qualified_and_detects_drift(
     assert any(record["status"] == "numeric_drift" for record in report["stages"])
 
 
+def test_tutorial_snapshot_topology_is_json_stable():
+    topology = ((("launch", "Earth"), ("arrival", "Mars")),)
+
+    assert ipopt_characterization._serialized_event_topology(topology) == [
+        [["launch", "Earth"], ["arrival", "Mars"]]
+    ]
+
+
 def test_tutorial_verification_detects_dependency_change(tmp_path, monkeypatch):
     _write_tutorial_verification_evidence(tmp_path)
     monkeypatch.setattr(
@@ -2604,6 +2612,179 @@ def test_main_requires_manual_approval_for_promotion(tmp_path):
             [
                 "--promote-baseline",
                 "global_mission_options/globalmissionoptions_MGALT_DLAbounds",
+                "--output-root",
+                str(tmp_path),
+            ]
+        )
+
+
+def _write_promotable_tutorial_evidence(tmp_path, monkeypatch):
+    _write_tutorial_verification_evidence(tmp_path)
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "repo_relative",
+        lambda path, root=None: "test-fixture/tutorial-verification.json",
+    )
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "_tutorial_mission_snapshot",
+        lambda stage_result, stage_directory: _tutorial_snapshot(1.0),
+    )
+    case = ipopt_characterization.TUTORIAL_CASES_BY_ID["Config_Files/LowSIRIS-REx"]
+    case_root = tmp_path / "baselining" / case.case_id
+    source = ipopt_characterization.REPOSITORY_ROOT / case.source_options
+    reference = ipopt_characterization.REPOSITORY_ROOT / case.reference_mission
+    summary_path = case_root / "result.json"
+    summary = json.loads(summary_path.read_text())
+    for attempt_name, attempt in (
+        ("attempt-1", summary["first"]),
+        ("attempt-2", summary["second"]),
+    ):
+        attempt["source_sha256"] = ipopt_characterization._sha256(source)
+        attempt["reference_sha256"] = ipopt_characterization._sha256(reference)
+        attempt["evidence_directory"] = str(
+            case_root / attempt_name / "refinement"
+        )
+        attempt["replay"]["comparison"] = {
+            "acceptable": True,
+            "checks": {"event_topology": True},
+        }
+        refinement = attempt["refinement"]
+        refinement["comparison"] = {
+            "acceptable": True,
+            "checks": {"ipopt_native_success": True},
+            "ipopt": {"native_exit": "Optimal Solution Found."},
+        }
+        refinement["output_file"] = "generated.emtg"
+        replay_directory = case_root / attempt_name / "replay"
+        refinement_directory = case_root / attempt_name / "refinement"
+        replay_directory.mkdir(parents=True)
+        refinement_directory.mkdir()
+        (replay_directory / "comparison.json").write_text(
+            json.dumps(attempt["replay"]["comparison"])
+        )
+        (refinement_directory / "comparison.json").write_text(
+            json.dumps(refinement["comparison"])
+        )
+        (refinement_directory / "generated.emtg").write_bytes(reference.read_bytes())
+        (case_root / attempt_name / "result.json").write_text(json.dumps(attempt))
+    (case_root / "repeatability.json").write_text(
+        json.dumps(summary["repeatability"])
+    )
+    summary_path.write_text(json.dumps(summary))
+    reference_path = tmp_path / "tutorial-verification.json"
+    ipopt_characterization.write_tutorial_baselining_verification(
+        tmp_path, reference_path
+    )
+    return case, case_root, reference_path
+
+
+def test_promote_tutorial_baselining_case_copies_verified_evidence(
+    tmp_path, monkeypatch
+):
+    case, _, reference_path = _write_promotable_tutorial_evidence(tmp_path, monkeypatch)
+    source = ipopt_characterization.REPOSITORY_ROOT / case.source_options
+    reference = ipopt_characterization.REPOSITORY_ROOT / case.reference_mission
+    source_sha256 = ipopt_characterization._sha256(source)
+    reference_sha256 = ipopt_characterization._sha256(reference)
+
+    promotion = ipopt_characterization.promote_tutorial_baselining_case(
+        case.case_id, tmp_path, verification_path=reference_path
+    )
+
+    curated_root = tmp_path / "tutorial-promoted-baselines" / case.case_id
+    assert promotion["selected_attempt"] == "attempt-1"
+    assert (curated_root / f"{Path(case.case_id).name}.emtg").is_file()
+    assert (curated_root / "promotion.json").is_file()
+    assert (curated_root / "provenance.json").is_file()
+    assert (curated_root / "replay-comparison.json").is_file()
+    assert (curated_root / "refinement-comparison.json").is_file()
+    assert (curated_root / "repeatability.json").is_file()
+    assert ipopt_characterization._sha256(source) == source_sha256
+    assert ipopt_characterization._sha256(reference) == reference_sha256
+    document, _ = ipopt_characterization.render_tutorial_baselining_decision_log(
+        tmp_path
+    )
+    assert "## Config_Files/LowSIRIS-REx" in document
+    assert "- Promotion: `approved`." in document
+
+
+def test_promote_tutorial_baselining_rejects_mismatch_without_overwrite(
+    tmp_path, monkeypatch
+):
+    case, case_root, reference_path = _write_promotable_tutorial_evidence(
+        tmp_path, monkeypatch
+    )
+    summary_path = case_root / "result.json"
+    summary = json.loads(summary_path.read_text())
+    summary["classification"] = "mismatch_tutorial_reference"
+    summary["promotion_eligible"] = False
+    summary_path.write_text(json.dumps(summary))
+    curated_root = tmp_path / "tutorial-promoted-baselines" / case.case_id
+    curated_root.mkdir(parents=True)
+    sentinel = curated_root / "keep.txt"
+    sentinel.write_text("preserve\n")
+
+    with pytest.raises(ValueError, match="selected case"):
+        ipopt_characterization.promote_tutorial_baselining_case(
+            case.case_id, tmp_path, verification_path=reference_path
+        )
+
+    assert sentinel.read_text() == "preserve\n"
+
+
+def test_promote_tutorial_baselining_ignores_unrelated_case_drift(
+    tmp_path, monkeypatch
+):
+    case, _, reference_path = _write_promotable_tutorial_evidence(tmp_path, monkeypatch)
+    unrelated_root = tmp_path / "baselining" / "Flybys" / "EVM"
+    unrelated_summary_path = unrelated_root / "result.json"
+    unrelated_summary = json.loads(unrelated_summary_path.read_text())
+    unrelated_summary["classification"] = "mismatch_tutorial_reference"
+    unrelated_summary_path.write_text(json.dumps(unrelated_summary))
+
+    promotion = ipopt_characterization.promote_tutorial_baselining_case(
+        case.case_id, tmp_path, verification_path=reference_path
+    )
+
+    assert promotion["case_id"] == case.case_id
+    assert (
+        tmp_path
+        / "tutorial-promoted-baselines"
+        / case.case_id
+        / "promotion.json"
+    ).is_file()
+
+
+def test_promote_tutorial_baselining_requires_explicit_replacement(
+    tmp_path, monkeypatch
+):
+    case, _, reference_path = _write_promotable_tutorial_evidence(tmp_path, monkeypatch)
+    ipopt_characterization.promote_tutorial_baselining_case(
+        case.case_id, tmp_path, verification_path=reference_path
+    )
+    curated_root = tmp_path / "tutorial-promoted-baselines" / case.case_id
+    sentinel = curated_root / "keep.txt"
+    sentinel.write_text("preserve\n")
+
+    with pytest.raises(ValueError, match="replace-promoted"):
+        ipopt_characterization.promote_tutorial_baselining_case(
+            case.case_id, tmp_path, verification_path=reference_path
+        )
+
+    assert sentinel.read_text() == "preserve\n"
+    ipopt_characterization.promote_tutorial_baselining_case(
+        case.case_id, tmp_path, replace=True, verification_path=reference_path
+    )
+    assert not sentinel.exists()
+
+
+def test_main_requires_manual_approval_for_tutorial_promotion(tmp_path):
+    with pytest.raises(SystemExit, match="approve-baseline"):
+        ipopt_characterization.main(
+            [
+                "--promote-tutorial-baseline",
+                "Config_Files/LowSIRIS-REx",
                 "--output-root",
                 str(tmp_path),
             ]

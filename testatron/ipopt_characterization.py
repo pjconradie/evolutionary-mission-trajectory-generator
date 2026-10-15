@@ -30,6 +30,9 @@ BASELINING_VERIFICATION_POLICY = (
 )
 TUTORIAL_BASELINING_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "benchmarks"
 TUTORIAL_BASELINING_EVIDENCE_ROOT = TUTORIAL_BASELINING_ROOT / "baselining"
+TUTORIAL_PROMOTED_BASELINES_ROOT = (
+    TUTORIAL_BASELINING_ROOT / "tutorial-promoted-baselines"
+)
 TUTORIAL_BASELINING_POLICY = (
     TESTATRON_ROOT / "ipopt" / "tests" / "tutorial_baselining_policy.json"
 )
@@ -3296,6 +3299,11 @@ def _tutorial_expected_stage_keys():
     }
 
 
+def _serialized_event_topology(topology):
+    """Convert the tuple-based mission topology into JSON-stable nested lists."""
+    return [[list(event) for event in journey] for journey in topology]
+
+
 def _tutorial_mission_snapshot(stage_result, stage_directory):
     """Extract portable generated-mission values for tutorial drift checks."""
     output_name = stage_result.get("output_file")
@@ -3315,7 +3323,7 @@ def _tutorial_mission_snapshot(stage_result, stage_directory):
                 for description in mission.Xdescriptions
             ],
         },
-        "topology": _event_topology(mission),
+        "topology": _serialized_event_topology(_event_topology(mission)),
         "flight_time_years": mission.total_flight_time_years,
         "final_mass_kg": mission.final_mass_including_propellant_margin,
         "deterministic_deltav_km_s": mission.total_deterministic_deltav,
@@ -3609,6 +3617,17 @@ def render_tutorial_baselining_decision_log(output_root=TUTORIAL_BASELINING_ROOT
         first = result.get("first") or {}
         inventory = first.get("inventory") or {}
         repeatability = result.get("repeatability") or {}
+        promotion_path = (
+            Path(output_root)
+            / "tutorial-promoted-baselines"
+            / case.case_id
+            / "promotion.json"
+        )
+        promotion = (
+            _read_baselining_json(promotion_path, "tutorial promotion record")
+            if promotion_path.is_file()
+            else None
+        )
         lines.extend(
             (
                 f"- Taxonomy: `{case.taxonomy}`.",
@@ -3620,6 +3639,9 @@ def render_tutorial_baselining_decision_log(output_root=TUTORIAL_BASELINING_ROOT
                 "- Dependencies: `{}`; missing: `{}`.".format(
                     inventory.get("status", "unknown"),
                     len(inventory.get("missing", [])),
+                ),
+                "- Promotion: `{}`.".format(
+                    promotion.get("status", "unknown") if promotion else "not_promoted"
                 ),
                 "",
             )
@@ -4235,6 +4257,173 @@ def write_baselining_decision_log(output_root, document_path=DEFAULT_BASELINING_
     return document_path, case_count
 
 
+def _tutorial_promotion_case_paths(case_identifier, output_root):
+    """Resolve one registered tutorial case and its separate evidence roots."""
+    case = TUTORIAL_CASES_BY_ID.get(case_identifier)
+    if case is None:
+        raise ValueError(f"Unknown tutorial case identifier: {case_identifier}")
+    relative_case = Path(case.case_id)
+    output_root = Path(output_root)
+    return (
+        case,
+        REPOSITORY_ROOT / case.source_options,
+        REPOSITORY_ROOT / case.reference_mission,
+        output_root / "baselining" / relative_case,
+        output_root / "tutorial-promoted-baselines" / relative_case,
+    )
+
+
+def _validated_promoted_tutorial_attempt(
+    case_root, attempt_name, result, source_sha256, reference_sha256
+):
+    """Validate one accepted tutorial refinement and return its mission path."""
+    if result.get("source_sha256") != source_sha256:
+        raise ValueError("Tutorial promotion evidence does not match source input hash")
+    if result.get("reference_sha256") != reference_sha256:
+        raise ValueError("Tutorial promotion evidence does not match reference hash")
+    if (result.get("inventory") or {}).get("status") != "ready":
+        raise ValueError("Tutorial promotion requires ready dependency inventory")
+    replay = result.get("replay") or {}
+    refinement = result.get("refinement") or {}
+    if not (replay.get("comparison") or {}).get("acceptable"):
+        raise ValueError("Tutorial promotion requires an acceptable replay comparison")
+    comparison = refinement.get("comparison") or {}
+    if not comparison.get("acceptable"):
+        raise ValueError("Tutorial promotion requires an acceptable refinement comparison")
+    if not (comparison.get("checks") or {}).get("ipopt_native_success"):
+        raise ValueError("Tutorial promotion requires an accepted native IPOPT exit")
+    output_file = refinement.get("output_file")
+    if not output_file:
+        raise ValueError("Tutorial promotion evidence does not identify a refined mission")
+    if attempt_name not in {"attempt-1", "attempt-2"}:
+        raise ValueError("Tutorial promotion evidence has an invalid attempt directory")
+    generated_mission = case_root / attempt_name / "refinement" / Path(output_file).name
+    if not generated_mission.is_file():
+        raise ValueError(f"Tutorial refined mission is missing: {generated_mission}")
+    return attempt_name, generated_mission, replay, refinement
+
+
+def promote_tutorial_baselining_case(
+    case_identifier,
+    output_root=TUTORIAL_BASELINING_ROOT,
+    replace=False,
+    verification_path=DEFAULT_TUTORIAL_BASELINING_VERIFICATION,
+):
+    """Promote one approved stable tutorial match into its separate curated root."""
+    (
+        case,
+        source_options,
+        reference_mission,
+        case_root,
+        curated_root,
+    ) = _tutorial_promotion_case_paths(case_identifier, output_root)
+    if "refinement" not in case.stages:
+        raise ValueError("Tutorial promotion requires a declared refinement stage")
+    verification = verify_tutorial_baselining_verification(
+        output_root, verification_path
+    )
+    case_verification = [
+        stage
+        for stage in verification["stages"]
+        if stage["case_id"] == case.case_id
+    ]
+    if (
+        len(case_verification) != len(case.stages)
+        or any(stage["status"] != "matched" for stage in case_verification)
+    ):
+        raise ValueError(
+            "Tutorial promotion requires matched verification evidence for every "
+            "declared stage of the selected case"
+        )
+    summary = _load_promotion_json(case_root / "result.json", "tutorial batch result")
+    repeatability = _load_promotion_json(
+        case_root / "repeatability.json", "tutorial repeatability evidence"
+    )
+    if summary.get("case_id") != case.case_id:
+        raise ValueError("Tutorial promotion result does not match the requested case")
+    if summary.get("classification") != "matched_tutorial_reference":
+        raise ValueError("Tutorial promotion requires matched_tutorial_reference")
+    if not summary.get("promotion_eligible"):
+        raise ValueError("Tutorial promotion requires promotion-eligible evidence")
+    if not repeatability.get("stable") or not (summary.get("repeatability") or {}).get(
+        "stable"
+    ):
+        raise ValueError("Tutorial promotion requires stable repeatability evidence")
+
+    source_sha256 = _sha256(source_options)
+    reference_sha256 = _sha256(reference_mission)
+    first = summary.get("first") or {}
+    second = summary.get("second") or {}
+    selected_attempt, generated_mission, replay, refinement = (
+        _validated_promoted_tutorial_attempt(
+            case_root, "attempt-1", first, source_sha256, reference_sha256
+        )
+    )
+    _validated_promoted_tutorial_attempt(
+        case_root, "attempt-2", second, source_sha256, reference_sha256
+    )
+
+    if curated_root.exists():
+        if not replace:
+            raise ValueError(
+                "Curated tutorial baseline already exists: "
+                f"{curated_root}; use --replace-promoted"
+            )
+        shutil.rmtree(curated_root)
+    curated_root.mkdir(parents=True)
+    canonical_mission = curated_root / f"{curated_root.name}.emtg"
+    shutil.copy2(generated_mission, canonical_mission)
+    shutil.copy2(case_root / "repeatability.json", curated_root / "repeatability.json")
+    shutil.copy2(
+        case_root / selected_attempt / "replay" / "comparison.json",
+        curated_root / "replay-comparison.json",
+    )
+    shutil.copy2(
+        case_root / selected_attempt / "refinement" / "comparison.json",
+        curated_root / "refinement-comparison.json",
+    )
+    shutil.copy2(
+        case_root / selected_attempt / "result.json",
+        curated_root / "attempt-result.json",
+    )
+    provenance = {
+        "status": "approved",
+        "case_id": case.case_id,
+        "taxonomy": case.taxonomy,
+        "source_options": {
+            "path": case.source_options,
+            "sha256": source_sha256,
+        },
+        "reference_mission": {
+            "path": case.reference_mission,
+            "sha256": reference_sha256,
+        },
+        "tutorial_verification": {
+            "path": repo_relative(verification_path),
+            "sha256": _sha256(verification_path),
+            "selected_case_stages": case_verification,
+        },
+    }
+    (curated_root / "provenance.json").write_text(
+        json.dumps(provenance, indent=2) + "\n"
+    )
+    promotion = {
+        "status": "approved",
+        "case_id": case.case_id,
+        "source_evidence": (Path("baselining") / case.case_id).as_posix(),
+        "selected_attempt": selected_attempt,
+        "canonical_mission": canonical_mission.name,
+        "canonical_mission_sha256": _sha256(canonical_mission),
+        "replay_acceptable": replay["comparison"]["acceptable"],
+        "refinement_acceptable": refinement["comparison"]["acceptable"],
+        "native_exit": refinement["comparison"]["ipopt"]["native_exit"],
+    }
+    (curated_root / "promotion.json").write_text(
+        json.dumps(promotion, indent=2) + "\n"
+    )
+    return promotion
+
+
 def _promotion_case_paths(case_identifier, output_root, tests_root=TESTS_ROOT):
     """Resolve immutable inputs and evidence roots for one reviewed case."""
     relative_case = Path(case_identifier)
@@ -4697,6 +4886,14 @@ def build_parser():
         help="copy one approved matched baselining case into the curated results tree",
     )
     parser.add_argument(
+        "--promote-tutorial-baseline",
+        metavar="CASE_ID",
+        help=(
+            "copy one approved matched tutorial case into "
+            "tutorial-promoted-baselines"
+        ),
+    )
+    parser.add_argument(
         "--approve-baseline",
         action="store_true",
         help="acknowledge manual approval before promoting a curated baseline",
@@ -4823,14 +5020,24 @@ def main(argv=None):
             f"{report['stage_count']} stage(s): {report_path}"
         )
         return 0 if report["acceptable"] else 1
-    if args.promote_baseline:
+    if args.promote_baseline or args.promote_tutorial_baseline:
         if not args.approve_baseline:
-            raise SystemExit("--approve-baseline is required with --promote-baseline")
-        promotion = promote_baselining_case(
-            args.promote_baseline,
-            output_root,
-            replace=args.replace_promoted,
-        )
+            raise SystemExit(
+                "--approve-baseline is required with a promotion command"
+            )
+        if args.promote_tutorial_baseline:
+            promotion = promote_tutorial_baselining_case(
+                args.promote_tutorial_baseline,
+                output_root,
+                replace=args.replace_promoted,
+                verification_path=args.tutorial_verification_reference,
+            )
+        else:
+            promotion = promote_baselining_case(
+                args.promote_baseline,
+                output_root,
+                replace=args.replace_promoted,
+            )
         print(f"Promoted {promotion['case_id']} from {promotion['selected_attempt']}")
         return 0
     if not args.emtg:

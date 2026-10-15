@@ -32,7 +32,9 @@ The deliberate-infeasible Force Models case is intentionally replay-only.
 Each staged refinement applies the versioned tutorial policy: `seed_MBH=0`,
 `MBH_RNG_seed=12345`, a 600-second IPOPT limit, and 32,000 IPOPT major
 iterations. The staged `compatibility.json` records the policy version, hash,
-and applied settings.
+and applied settings. Each schema, replay, and refinement directory retains
+both its EMTG-native `run.log` and the Docker probe capture
+`docker-probe.log`; no tutorial probe logs are written at the benchmark root.
 
 ## Complete Tutorial Case List
 
@@ -146,3 +148,35 @@ It writes
 and rejects missing or unexpected case-stage evidence, source/reference or
 dependency-inventory changes, repeatability failures, execution/topology
 changes, and numeric drift beyond the tutorial verification policy.
+
+## Reviewed Tutorial Promotion
+
+Promotion is a separate, explicit operation. It never changes tutorial inputs,
+archived tutorial references, or
+`testatron/ipopt/tests/tutorial_baselining_verification.json`. It only accepts
+a stable, promotion-eligible `matched_tutorial_reference` case after each declared stage of that selected
+case matches the accepted tutorial verification reference. Other tutorial
+cases do not block this case's independent promotion. It refuses mismatches,
+topology changes, blocked cases, and the declared replay-only
+deliberate-infeasible case.
+
+After reviewing the case evidence and the current verification report, promote
+one eligible case with:
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--promote-tutorial-baseline 'Config_Files/LowSIRIS-REx' \
+	--approve-baseline \
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+```
+
+The curated package is written below:
+
+```text
+testatron/ipopt/tests/benchmarks/tutorial-promoted-baselines/<group>/<case>/
+```
+
+It contains the canonical generated `.emtg`, selected-attempt result,
+repeatability and comparison evidence, and promotion provenance. A pre-existing
+package is refused; use `--replace-promoted` only after explicitly reviewing
+the replacement evidence.

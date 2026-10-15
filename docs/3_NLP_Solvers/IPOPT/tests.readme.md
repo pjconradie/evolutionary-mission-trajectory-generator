@@ -48,13 +48,13 @@ python -m pytest tests/test_ipopt_characterization.py -q
 Docker required. Estimated runtime order of magnitude minutes:
 
 ```zsh
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \ 
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \
 	python -m pytest -m ipopt_benchmarks -q
 
 EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \
 	python -m pytest -m ipopt_tests -q
 
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \ 
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \
 	python -m pytest -m integration -q
 ```
 
@@ -411,7 +411,64 @@ statuses: {'matched': 137}
 
 ## 10. Run 33 tutorial tests
 
-Not implemented yet.
+### Create the terminal function
+
+```zsh
+tutorial_baselining_case() {
+	EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks" \
+	.venv/bin/python -m pytest tests/integration/test_tutorial_baselining.py -q \
+	--tutorials \
+	--tutorial-baselining-filter "$1"
+}
+```
+
+#### Complete tutorial case list
+
+```zsh
+tutorial_baselining_case 'Config_Files/LowSIRIS-REx'
+tutorial_baselining_case 'Config_Files/LowSIRIS-REx_high_thrust'
+tutorial_baselining_case 'Config_Files/LowSIRIS-REx_high_thrust_low_c3'
+
+tutorial_baselining_case 'Journey_Boundaries/EVM'
+tutorial_baselining_case 'Journey_Boundaries/EVM_freepoint'
+
+tutorial_baselining_case 'OSIRIS-REx/OSIRIS-REx'
+
+tutorial_baselining_case 'Force_Models/LowSIRIS-REx_forcemodel_nlp'
+tutorial_baselining_case 'Force_Models/LowSIRIS-REx'
+tutorial_baselining_case 'Force_Models/LowSIRIS-REx_forcemodel'
+
+tutorial_baselining_case 'LowSIRIS-REx/LowSIRIS-REx_FBLT'
+tutorial_baselining_case 'LowSIRIS-REx/LowSIRIS-REx'
+
+tutorial_baselining_case 'Constraint_Scripting/EVM_freepoint_boundary_constraint'
+tutorial_baselining_case 'Constraint_Scripting/EVM_freepoint'
+tutorial_baselining_case 'Constraint_Scripting/EVM_freepoint_maneuver_constraint'
+
+tutorial_baselining_case 'Flybys/EVM'
+tutorial_baselining_case 'Flybys/HighFidelity'
+tutorial_baselining_case 'Flybys/EVM_singlePhase'
+```
+
+### Verify the fresh 17-case results against the **existing** reviewed current-state reference
+
+```zsh
+python testatron/ipopt_characterization.py \
+  --verify-tutorial-baselining \
+  --output-root "$PWD/testatron/ipopt/tests/benchmarks"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py \
+  --verify-tutorial-baselining \
+  --output-root "$PWD/testatron/ipopt/tests/benchmarks"
+Tutorial baselining verification passed for 33 stage(s): /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-verification-report.json
+```
+### Run the 17 cases under the complete list of 17 corpus baselining tests
+
+### Generate the corpus summary
+
+### Regenerate the human-readable decision-log report from the new artifacts
 
 
 |Excluded test group|Count|What remains unproven|
@@ -432,6 +489,48 @@ Example output:
 
 ```
 
+
+## Promote tutorial if matched
+
+```zsh
+promote_tutorial_if_matched() {
+	local case_id="$1"
+	shift
+	.venv/bin/python testatron/ipopt_characterization.py \
+		--promote-tutorial-baseline "$case_id" \
+		--approve-baseline \
+		--output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+		"$@"
+}
+```
+
+#### Complete tutorial promotion list
+
+```zsh
+promote_tutorial_if_matched 'Config_Files/LowSIRIS-REx'
+promote_tutorial_if_matched 'Config_Files/LowSIRIS-REx_high_thrust'
+promote_tutorial_if_matched 'Config_Files/LowSIRIS-REx_high_thrust_low_c3'
+
+promote_tutorial_if_matched 'Journey_Boundaries/EVM'
+promote_tutorial_if_matched 'Journey_Boundaries/EVM_freepoint'
+
+promote_tutorial_if_matched 'OSIRIS-REx/OSIRIS-REx'
+
+promote_tutorial_if_matched 'Force_Models/LowSIRIS-REx_forcemodel_nlp'
+promote_tutorial_if_matched 'Force_Models/LowSIRIS-REx'
+promote_tutorial_if_matched 'Force_Models/LowSIRIS-REx_forcemodel'
+
+promote_tutorial_if_matched 'LowSIRIS-REx/LowSIRIS-REx_FBLT'
+promote_tutorial_if_matched 'LowSIRIS-REx/LowSIRIS-REx'
+
+promote_tutorial_if_matched 'Constraint_Scripting/EVM_freepoint_boundary_constraint'
+promote_tutorial_if_matched 'Constraint_Scripting/EVM_freepoint'
+promote_tutorial_if_matched 'Constraint_Scripting/EVM_freepoint_maneuver_constraint'
+
+promote_tutorial_if_matched 'Flybys/EVM'
+promote_tutorial_if_matched 'Flybys/HighFidelity'
+promote_tutorial_if_matched 'Flybys/EVM_singlePhase'
+```
 # Baselining workflow
 
 See [[baselining_commands]].
@@ -560,11 +659,24 @@ and verification commands, and
 [`ipopt.readme.md`](ipopt.readme.md) for the Docker toolchain.
 
 ## Promotion and Review
- Promotion is a separate manual operation. It may copy only reviewed, stable `matched_snopt` evidence into the curated case root; it never replaces the immutable SNOPT pair. A completed or current-state-matched `mismatch_snopt` case is not eligible for promotion.
+
+Promotion is a separate manual operation. Corpus promotion may copy only
+reviewed, stable `matched_snopt` evidence into its curated case root; it never
+replaces the immutable SNOPT pair. A completed or current-state-matched
+`mismatch_snopt` case is not eligible for promotion.
+
+Tutorial promotion is separately selected with `--promote-tutorial-baseline`.
+It requires explicit `--approve-baseline`, matching accepted verification
+records for every declared stage of the selected case, and stable
+promotion-eligible `matched_tutorial_reference` evidence. It writes only to
+`testatron/ipopt/tests/benchmarks/tutorial-promoted-baselines/<group>/<case>/`;
+it never modifies immutable tutorial inputs, archived tutorial references, or
+the accepted tutorial verification reference.
 
 The baselining summary is a compact generated index. The decision log and verification reference are the authoritative detailed records. Do not infer promotion or README approval merely from an evidence directory existing.
 
 ## Python Test Coverage
+
  `ipopt_benchmarks` covers benchmark artifact behavior. The runner contracts are ordinary unit tests and validate staging, comparison, serialization, promotion eligibility, and current-state verification behavior.
 
 `ipopt_tests` remains reserved for a future Docker-backed per-case pytest suite. Its absence does not weaken the completed artifact-based current-state verification workflow. Any future runtime suite must verify against the reviewed current-state reference and retain immutable-SNOPT comparison as a separate diagnostic.
@@ -885,4 +997,3 @@ The portable IPOPT Testatron implementation is complete when:
 	by recorded cross-solver evidence.
 6. `pytest -m ipopt_tests` and `pytest -m ipopt_benchmarks` both pass, and
 	plain pytest collection includes both core marker groups.
-

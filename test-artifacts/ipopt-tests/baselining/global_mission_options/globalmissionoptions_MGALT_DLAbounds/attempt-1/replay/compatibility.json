@@ -1,0 +1,20 @@
+{
+  "status": "unreviewed",
+  "source_options": "testatron/tests/global_mission_options/globalmissionoptions_MGALT_DLAbounds.emtgopt",
+  "mappings": [
+    {
+      "option": "LaunchVehicleLibraryFile",
+      "source": "NLSII_April2017.emtg_launchvehicleopt",
+      "replacement": "LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+      "reason": "public replacement library; LaunchVehicleKey preserved"
+    },
+    {
+      "option": "LaunchVehicleKey",
+      "source": "Falcon_9_FT_(RTLS)",
+      "replacement": "Atlas_V_401",
+      "reason": "case-scoped public launch vehicle override: the implicit Falcon_9_FT_(RTLS) default has C3 upper bound 10, while the immutable SNOPT seed requires C3 48.5809"
+    }
+  ],
+  "replacement_resources": [],
+  "staged_earliest_possible_epoch": null
+}

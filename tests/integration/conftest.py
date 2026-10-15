@@ -913,6 +913,7 @@ check tutorial_schema_run passed
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
+        log_path=artifacts / "docker-probe.log",
         timeout=case.timeout_seconds + 300,
     )
     schema_path = artifacts / "schema-XFfile.csv"
@@ -1010,6 +1011,7 @@ check tutorial_{stage}_run passed
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
+        log_path=artifacts / "docker-probe.log",
         timeout=case.timeout_seconds + 300,
     )
     duration_seconds = time.monotonic() - started

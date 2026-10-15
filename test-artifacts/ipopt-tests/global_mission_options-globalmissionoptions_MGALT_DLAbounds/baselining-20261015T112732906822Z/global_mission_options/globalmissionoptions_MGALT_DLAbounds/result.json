@@ -1,0 +1,13 @@
+{
+  "case_id": "global_mission_options/globalmissionoptions_MGALT_DLAbounds",
+  "source_options": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_DLAbounds.emtgopt",
+  "baseline_mission": "/repo/testatron/tests/global_mission_options/globalmissionoptions_MGALT_DLAbounds.emtg",
+  "source_sha256": "878e84e922ef6d9d61a73105ce8ff2828189b5e6262a74e17952d6bc73f0a050",
+  "baseline_sha256": "8770d6cbe186dcabdbb1d7b6a9ca1ff2d6938fcf53460e6ce12cee7eb8b75a13",
+  "classification": "parse_failed",
+  "evidence_directory": "/artifacts/baselining-20261015T112732906822Z/global_mission_options/globalmissionoptions_MGALT_DLAbounds",
+  "status": "unreviewed",
+  "replay": null,
+  "refinement": null,
+  "detail": "Unable to prepare or compare replay: Refusing to persist path outside repository root: /testatron/tests/global_mission_options/globalmissionoptions_MGALT_DLAbounds.emtgopt is not under /repo"
+}

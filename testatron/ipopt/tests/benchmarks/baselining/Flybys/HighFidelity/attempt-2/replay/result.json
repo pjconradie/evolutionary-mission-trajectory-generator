@@ -1,9 +1,0 @@
-{
-  "status": "unreviewed",
-  "tutorial": "Flybys/HighFidelity",
-  "stage": "replay",
-  "taxonomy": "demonstration",
-  "classification": "topology_changed",
-  "acceptable": false,
-  "detail": "Decision variable description lengths differ: 77 != 65"
-}
