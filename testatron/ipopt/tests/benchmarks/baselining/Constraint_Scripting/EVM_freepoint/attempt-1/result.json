@@ -140,7 +140,7 @@
       },
       "feasibility_tolerance": 1e-05,
       "feasible": true,
-      "duration_seconds": 4.703071125004499
+      "duration_seconds": 3.9814924169986625
     },
     "output_file": "EVM_freepoint.emtg",
     "stage": "replay"
@@ -164,7 +164,7 @@
         "decision_descriptions": true,
         "objective_non_regression": true,
         "near_feasible_initialization": true,
-        "ipopt_native_success": false
+        "ipopt_native_success": true
       },
       "baseline_objective": 8.417250643205739,
       "generated_objective": 8.417250643205739,
@@ -180,11 +180,11 @@
       "ipopt": {
         "initialization_policy": "near-feasible-primal-seed",
         "initial_infeasibility": 7.59e-07,
-        "iterations": 3090,
-        "terminal_constraint_violation": 0.03078526935651766,
-        "native_exit": "Maximum CPU time exceeded."
+        "iterations": 5729,
+        "terminal_constraint_violation": 9.145173084306282e-06,
+        "native_exit": "Optimal Solution Found."
       },
-      "duration_seconds": 20.545319915996515
+      "duration_seconds": 36.48744350000197
     },
     "output_file": "EVM_freepoint.emtg",
     "stage": "refinement"

@@ -104,17 +104,17 @@ snopt_optimality_tolerance 1.0000000000000000818e-05
 #NLP max step
 NLP_max_step 1
 #NLP major iterations
-snopt_major_iterations 8000
+snopt_major_iterations 32000
 #NLP minor iterations
 snopt_minor_iterations 500
 #NLP max run time (seconds)
-snopt_max_run_time 15
+snopt_max_run_time 600
 #Enable Scalatron?
 enable_Scalatron 1
 #Enable NLP chaperone?
 enable_NLP_chaperone 1
 #Seed MBH?
-seed_MBH 1
+seed_MBH 0
 #Skip first NLP run in an MBH process?
 skip_first_nlp_run 0
 #Stop NLP on goal attain?
@@ -124,7 +124,7 @@ NLP_objective_goal 0
 #Within an NLP run, how frequently do we check to see if we have found a feasible solution with a better objective function value than we have written out before, and, if true, write it to file? (seconds) ONLY WORKS IF NLP CHAPERONE IS ACTIVE.
 NLP_write_output_check_time 1000000
 #MBH RNG seed (negative number means system clock)
-MBH_RNG_seed -1
+MBH_RNG_seed 12345
 #Print NLP movie frames?
 print_NLP_movie_frames 0
 #Quiet MBH?

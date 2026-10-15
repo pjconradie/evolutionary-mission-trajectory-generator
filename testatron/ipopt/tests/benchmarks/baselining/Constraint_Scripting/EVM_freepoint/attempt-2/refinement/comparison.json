@@ -14,7 +14,7 @@
     "decision_descriptions": true,
     "objective_non_regression": true,
     "near_feasible_initialization": true,
-    "ipopt_native_success": false
+    "ipopt_native_success": true
   },
   "baseline_objective": 8.417250643205739,
   "generated_objective": 8.417250643205739,
@@ -30,9 +30,9 @@
   "ipopt": {
     "initialization_policy": "near-feasible-primal-seed",
     "initial_infeasibility": 7.59e-07,
-    "iterations": 3101,
-    "terminal_constraint_violation": 0.0008550339388065425,
-    "native_exit": "Maximum CPU time exceeded."
+    "iterations": 5729,
+    "terminal_constraint_violation": 9.145173084306282e-06,
+    "native_exit": "Optimal Solution Found."
   },
-  "duration_seconds": 20.127433417001157
+  "duration_seconds": 38.765298000005714
 }

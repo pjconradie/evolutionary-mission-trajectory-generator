@@ -140,7 +140,7 @@
       },
       "feasibility_tolerance": 1e-05,
       "feasible": true,
-      "duration_seconds": 3.5454868340020766
+      "duration_seconds": 4.121411083004205
     },
     "output_file": "EVM_singlePhase.emtg",
     "stage": "replay"
@@ -184,7 +184,7 @@
         "terminal_constraint_violation": 5.902229300982215e-08,
         "native_exit": "Restoration Failed!"
       },
-      "duration_seconds": 9.311291791003896
+      "duration_seconds": 9.252360292004596
     },
     "output_file": "EVM_singlePhase.emtg",
     "stage": "refinement"

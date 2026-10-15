@@ -130,7 +130,7 @@
       },
       "feasibility_tolerance": 1e-05,
       "feasible": true,
-      "duration_seconds": 3.770262417005142
+      "duration_seconds": 3.6031269999948563
     },
     "output_file": "OSIRIS-REx.emtg",
     "stage": "replay"
@@ -174,7 +174,7 @@
         "terminal_constraint_violation": 3.3648373155792442e-06,
         "native_exit": "Optimal Solution Found."
       },
-      "duration_seconds": 5.115888542000903
+      "duration_seconds": 5.024709915996937
     },
     "output_file": "OSIRIS-REx.emtg",
     "stage": "refinement"

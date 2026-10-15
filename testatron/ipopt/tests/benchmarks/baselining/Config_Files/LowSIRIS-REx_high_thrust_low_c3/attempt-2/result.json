@@ -140,7 +140,7 @@
       },
       "feasibility_tolerance": 1e-05,
       "feasible": true,
-      "duration_seconds": 3.4219012500034296
+      "duration_seconds": 3.943792834004853
     },
     "output_file": "LowSIRIS-REx_high_thrust_low_c3.emtg",
     "stage": "replay"
@@ -184,7 +184,7 @@
         "terminal_constraint_violation": 6.559776289747793e-06,
         "native_exit": "Optimal Solution Found."
       },
-      "duration_seconds": 3.4624189579990343
+      "duration_seconds": 3.1914361669987557
     },
     "output_file": "LowSIRIS-REx_high_thrust_low_c3.emtg",
     "stage": "refinement"

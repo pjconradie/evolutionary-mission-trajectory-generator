@@ -140,7 +140,7 @@
       },
       "feasibility_tolerance": 1e-05,
       "feasible": true,
-      "duration_seconds": 3.6754853750026086
+      "duration_seconds": 5.2699213750020135
     },
     "output_file": "EVM.emtg",
     "stage": "replay"
@@ -184,7 +184,7 @@
         "terminal_constraint_violation": 2.063790292457576e-11,
         "native_exit": "Optimal Solution Found."
       },
-      "duration_seconds": 10.586085041999468
+      "duration_seconds": 11.915570917000878
     },
     "output_file": "EVM.emtg",
     "stage": "refinement"

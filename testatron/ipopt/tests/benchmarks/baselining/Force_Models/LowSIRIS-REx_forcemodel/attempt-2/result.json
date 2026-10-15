@@ -108,7 +108,7 @@
       },
       "generated_feasibility_metric": 0.0005993830127909225,
       "feasibility_tolerance": 1e-05,
-      "duration_seconds": 3.1231356659991434
+      "duration_seconds": 3.315030582998588
     },
     "output_file": "FAILURE_LowSIRIS-REx_forcemodel.emtg",
     "stage": "replay"

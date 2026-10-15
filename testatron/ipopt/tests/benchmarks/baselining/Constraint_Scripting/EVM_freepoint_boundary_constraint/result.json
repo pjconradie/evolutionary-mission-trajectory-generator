@@ -148,7 +148,7 @@
         },
         "feasibility_tolerance": 1e-05,
         "feasible": true,
-        "duration_seconds": 4.443123084005492
+        "duration_seconds": 4.617813500000921
       },
       "output_file": "EVM_freepoint_boundary_constraint.emtg",
       "stage": "replay"
@@ -188,11 +188,11 @@
         "ipopt": {
           "initialization_policy": "near-feasible-primal-seed",
           "initial_infeasibility": 2.14e-06,
-          "iterations": 2997,
-          "terminal_constraint_violation": 0.003999906286469745,
-          "native_exit": "Maximum CPU time exceeded."
+          "iterations": 3147,
+          "terminal_constraint_violation": 5.690918466169568e-09,
+          "native_exit": "Restoration Failed!"
         },
-        "duration_seconds": 20.241056209000817
+        "duration_seconds": 20.465109666998615
       },
       "output_file": "EVM_freepoint_boundary_constraint.emtg",
       "stage": "refinement"
@@ -342,7 +342,7 @@
         },
         "feasibility_tolerance": 1e-05,
         "feasible": true,
-        "duration_seconds": 5.432455750000372
+        "duration_seconds": 5.813200083000993
       },
       "output_file": "EVM_freepoint_boundary_constraint.emtg",
       "stage": "replay"
@@ -382,11 +382,11 @@
         "ipopt": {
           "initialization_policy": "near-feasible-primal-seed",
           "initial_infeasibility": 2.14e-06,
-          "iterations": 3032,
-          "terminal_constraint_violation": 9.782360009445595e-06,
-          "native_exit": "Maximum CPU time exceeded."
+          "iterations": 3147,
+          "terminal_constraint_violation": 5.690918466169568e-09,
+          "native_exit": "Restoration Failed!"
         },
-        "duration_seconds": 20.2744881250037
+        "duration_seconds": 20.754766833997564
       },
       "output_file": "EVM_freepoint_boundary_constraint.emtg",
       "stage": "refinement"
@@ -395,98 +395,9 @@
     "promotion_eligible": false
   },
   "repeatability": {
-    "stable": false,
-    "differences": {
-      "refinement": [
-        {
-          "classification": "completed",
-          "acceptable": false,
-          "comparison": {
-            "status": "unreviewed",
-            "acceptable": false,
-            "checks": {
-              "finite_objective": true,
-              "finite_feasibility": true,
-              "decision_bounds_complete": true,
-              "finite_decision_vector": true,
-              "decision_vector_in_bounds": true,
-              "finite_constraint_vector": true,
-              "feasible": true,
-              "journey_names": true,
-              "event_topology": true,
-              "decision_descriptions": true,
-              "objective_non_regression": true,
-              "near_feasible_initialization": true,
-              "ipopt_native_success": false
-            },
-            "baseline_objective": 9.571497207082507,
-            "generated_objective": 9.571497207082507,
-            "objective_sense": "minimize",
-            "objective_relative_tolerance": 0.001,
-            "objective_absolute_tolerance": 1e-08,
-            "objective_comparison_band": 0.009571507207082507,
-            "objective_delta": 0.0,
-            "objective_absolute_delta": 0.0,
-            "generated_feasibility_metric": 2.14322687092939e-06,
-            "feasibility_tolerance": 1e-05,
-            "decision_bounds_absolute_tolerance": 1e-12,
-            "ipopt": {
-              "initialization_policy": "near-feasible-primal-seed",
-              "initial_infeasibility": 2.14e-06,
-              "iterations": 2997,
-              "terminal_constraint_violation": 0.003999906286469745,
-              "native_exit": "Maximum CPU time exceeded."
-            }
-          },
-          "output_file": "EVM_freepoint_boundary_constraint.emtg",
-          "stage": "refinement"
-        },
-        {
-          "classification": "completed",
-          "acceptable": false,
-          "comparison": {
-            "status": "unreviewed",
-            "acceptable": false,
-            "checks": {
-              "finite_objective": true,
-              "finite_feasibility": true,
-              "decision_bounds_complete": true,
-              "finite_decision_vector": true,
-              "decision_vector_in_bounds": true,
-              "finite_constraint_vector": true,
-              "feasible": true,
-              "journey_names": true,
-              "event_topology": true,
-              "decision_descriptions": true,
-              "objective_non_regression": true,
-              "near_feasible_initialization": true,
-              "ipopt_native_success": false
-            },
-            "baseline_objective": 9.571497207082507,
-            "generated_objective": 9.571497207082507,
-            "objective_sense": "minimize",
-            "objective_relative_tolerance": 0.001,
-            "objective_absolute_tolerance": 1e-08,
-            "objective_comparison_band": 0.009571507207082507,
-            "objective_delta": 0.0,
-            "objective_absolute_delta": 0.0,
-            "generated_feasibility_metric": 2.14322687092939e-06,
-            "feasibility_tolerance": 1e-05,
-            "decision_bounds_absolute_tolerance": 1e-12,
-            "ipopt": {
-              "initialization_policy": "near-feasible-primal-seed",
-              "initial_infeasibility": 2.14e-06,
-              "iterations": 3032,
-              "terminal_constraint_violation": 9.782360009445595e-06,
-              "native_exit": "Maximum CPU time exceeded."
-            }
-          },
-          "output_file": "EVM_freepoint_boundary_constraint.emtg",
-          "stage": "refinement"
-        }
-      ]
-    }
+    "stable": true,
+    "differences": {}
   },
-  "classification": "unstable",
+  "classification": "mismatch_tutorial_reference",
   "promotion_eligible": false
 }

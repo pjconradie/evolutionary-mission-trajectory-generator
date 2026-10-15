@@ -120,7 +120,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       },
       {
         "id": "26c25a34786a7317",
@@ -305,23 +305,22 @@
       "bases:Create new base": false
     }
   },
-  "active": "8df92330efd81148",
+  "active": "65db72b700f3bb04",
   "lastOpenFiles": [
-    "testatron/ipopt/tests/benchmarks/baselining/Config_Files/LowSIRIS-REx/attempt-1 2",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/result.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/repeatability.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/result.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/provenance.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/result.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/comparison.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_maneuver_spec",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_target_spec",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.emtg",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase_Sun(EV)_Sun(VM)XFfile.csv",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan_1.md",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/repeatability.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/provenance.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/comparison.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM.mission_maneuver_spec",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM.mission_target_spec",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM.emtg",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM_Sun(EVM)XFfile.csv",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
-    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
     "testatron/ipopt/tests/readme.md",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",

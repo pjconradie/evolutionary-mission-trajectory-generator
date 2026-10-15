@@ -140,7 +140,7 @@
       },
       "feasibility_tolerance": 1e-05,
       "feasible": true,
-      "duration_seconds": 4.497549584004446
+      "duration_seconds": 5.137863666001067
     },
     "output_file": "EVM_freepoint_maneuver_constraint.emtg",
     "stage": "replay"
@@ -184,7 +184,7 @@
         "terminal_constraint_violation": 1.3503864325676056e-08,
         "native_exit": "Restoration Failed!"
       },
-      "duration_seconds": 10.146065708002425
+      "duration_seconds": 10.796735167001316
     },
     "output_file": "EVM_freepoint_maneuver_constraint.emtg",
     "stage": "refinement"

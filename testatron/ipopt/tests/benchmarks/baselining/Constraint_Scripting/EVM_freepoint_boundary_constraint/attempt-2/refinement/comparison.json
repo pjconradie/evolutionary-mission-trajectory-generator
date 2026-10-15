@@ -30,9 +30,9 @@
   "ipopt": {
     "initialization_policy": "near-feasible-primal-seed",
     "initial_infeasibility": 2.14e-06,
-    "iterations": 3032,
-    "terminal_constraint_violation": 9.782360009445595e-06,
-    "native_exit": "Maximum CPU time exceeded."
+    "iterations": 3147,
+    "terminal_constraint_violation": 5.690918466169568e-09,
+    "native_exit": "Restoration Failed!"
   },
-  "duration_seconds": 20.2744881250037
+  "duration_seconds": 20.754766833997564
 }

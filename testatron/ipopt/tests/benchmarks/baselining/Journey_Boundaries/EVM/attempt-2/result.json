@@ -140,7 +140,7 @@
       },
       "feasibility_tolerance": 1e-05,
       "feasible": true,
-      "duration_seconds": 4.939252500000293
+      "duration_seconds": 4.293917417002376
     },
     "output_file": "EVM.emtg",
     "stage": "replay"
@@ -184,7 +184,7 @@
         "terminal_constraint_violation": 2.430368312934763e-09,
         "native_exit": "Restoration Failed!"
       },
-      "duration_seconds": 16.967336250003427
+      "duration_seconds": 16.213816333001887
     },
     "output_file": "EVM.emtg",
     "stage": "refinement"

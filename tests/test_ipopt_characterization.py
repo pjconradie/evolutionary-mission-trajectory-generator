@@ -782,6 +782,52 @@ def test_prepare_force_model_recovery_uses_sibling_seed_and_keeps_model(
     ]
 
 
+@pytest.mark.parametrize(
+    "case_id",
+    (
+        "Constraint_Scripting/EVM_freepoint_boundary_constraint",
+        "Constraint_Scripting/EVM_freepoint",
+        "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+    ),
+)
+def test_prepare_tutorial_refinement_applies_versioned_policy(
+    repository_root, tmp_path, case_id
+):
+    case = ipopt_characterization.TUTORIAL_CASES_BY_ID[case_id]
+    source_path = repository_root / case.source_options
+    source_before = source_path.read_bytes()
+    policy = ipopt_characterization.load_tutorial_baselining_policy()
+    _, MissionOptions = ipopt_characterization._load_pyemtg()
+
+    prepared_path = ipopt_characterization.prepare_tutorial_case(
+        case, "refinement", tmp_path, repository_root=repository_root
+    )
+    prepared = MissionOptions.MissionOptions(str(prepared_path))
+    compatibility = json.loads(
+        (prepared_path.parent / "compatibility.json").read_text()
+    )
+
+    assert source_path.read_bytes() == source_before
+    assert prepared.seed_MBH == policy["seeded_refinement"]["seed_MBH"]
+    assert prepared.MBH_RNG_seed == policy["seeded_refinement"]["MBH_RNG_seed"]
+    assert prepared.snopt_max_run_time == policy["refinement_max_cpu_time_seconds"]
+    assert (
+        prepared.snopt_major_iterations
+        == policy["refinement_max_major_iterations"]
+    )
+    assert compatibility["tutorial_refinement_policy"] == {
+        "path": "testatron/ipopt/tests/tutorial_baselining_policy.json",
+        "sha256": ipopt_characterization._sha256(
+            ipopt_characterization.TUTORIAL_BASELINING_POLICY
+        ),
+        "version": policy["version"],
+        "seed_MBH": policy["seeded_refinement"]["seed_MBH"],
+        "MBH_RNG_seed": policy["seeded_refinement"]["MBH_RNG_seed"],
+        "snopt_max_run_time": policy["refinement_max_cpu_time_seconds"],
+        "snopt_major_iterations": policy["refinement_max_major_iterations"],
+    }
+
+
 def test_discovery_matches_legacy_testatron_inventory(repository_root):
     tests_root = repository_root / "testatron" / "tests"
     legacy_cases = []
@@ -1591,6 +1637,20 @@ def test_prepare_case_maps_august_nlsii_library(repository_root, tmp_path):
     assert prepared.LaunchVehicleKey == original.LaunchVehicleKey
     compatibility = json.loads((tmp_path / "compatibility.json").read_text())
     assert compatibility["mappings"][0]["source"] == "NLSII_August2018.emtg_launchvehicleopt"
+
+
+def test_prepare_case_records_portable_source_options_path(repository_root, tmp_path):
+    source = (
+        repository_root
+        / "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/EVM.emtgopt"
+    )
+
+    ipopt_characterization.prepare_case(source, tmp_path)
+
+    compatibility = json.loads((tmp_path / "compatibility.json").read_text())
+    assert compatibility["source_options"] == (
+        "docs/0_Users/tutorial/Tutorial_EMTG_Files/Journey_Boundaries/EVM.emtgopt"
+    )
 
 
 def test_prepare_case_maps_falcon_rtls_to_public_library(repository_root, tmp_path):

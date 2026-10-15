@@ -138,7 +138,7 @@
         },
         "feasibility_tolerance": 1e-05,
         "feasible": true,
-        "duration_seconds": 3.732456416997593
+        "duration_seconds": 4.0537632499981555
       },
       "output_file": "LowSIRIS-REx.emtg",
       "stage": "replay"
@@ -182,7 +182,7 @@
           "terminal_constraint_violation": 5.734405823109543e-06,
           "native_exit": "Optimal Solution Found."
         },
-        "duration_seconds": 4.085473999999522
+        "duration_seconds": 4.356867875001626
       },
       "output_file": "LowSIRIS-REx.emtg",
       "stage": "refinement"
@@ -322,7 +322,7 @@
         },
         "feasibility_tolerance": 1e-05,
         "feasible": true,
-        "duration_seconds": 3.668680124996172
+        "duration_seconds": 3.983911959003308
       },
       "output_file": "LowSIRIS-REx.emtg",
       "stage": "replay"
@@ -366,7 +366,7 @@
           "terminal_constraint_violation": 5.734405823109543e-06,
           "native_exit": "Optimal Solution Found."
         },
-        "duration_seconds": 4.224527749996923
+        "duration_seconds": 4.041689666999446
       },
       "output_file": "LowSIRIS-REx.emtg",
       "stage": "refinement"

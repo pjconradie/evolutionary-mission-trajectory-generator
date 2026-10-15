@@ -1789,6 +1789,38 @@ def prepare_refinement(
     return prepared_options
 
 
+def _apply_tutorial_refinement_policy(
+    prepared_options,
+    *,
+    pyemtg_root=PYEMTG_ROOT,
+):
+    """Apply the versioned tutorial refinement policy to a staged copy."""
+    policy = load_tutorial_baselining_policy()
+    _, MissionOptions = _load_pyemtg(pyemtg_root)
+    options = MissionOptions.MissionOptions(str(prepared_options))
+    options.seed_MBH = policy["seeded_refinement"]["seed_MBH"]
+    options.MBH_RNG_seed = policy["seeded_refinement"]["MBH_RNG_seed"]
+    options.snopt_max_run_time = policy["refinement_max_cpu_time_seconds"]
+    options.snopt_major_iterations = policy["refinement_max_major_iterations"]
+    options.write_options_file(
+        str(prepared_options), not options.print_only_non_default_options
+    )
+
+    compatibility_path = Path(prepared_options).parent / "compatibility.json"
+    compatibility = json.loads(compatibility_path.read_text())
+    compatibility["tutorial_refinement_policy"] = {
+        "path": repo_relative(TUTORIAL_BASELINING_POLICY),
+        "sha256": _sha256(TUTORIAL_BASELINING_POLICY),
+        "version": policy["version"],
+        "seed_MBH": options.seed_MBH,
+        "MBH_RNG_seed": options.MBH_RNG_seed,
+        "snopt_max_run_time": options.snopt_max_run_time,
+        "snopt_major_iterations": options.snopt_major_iterations,
+    }
+    compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n")
+    return prepared_options
+
+
 def tutorial_objective_policy(case):
     """Return the fixed refinement objective policy for a tutorial case."""
     policy = load_tutorial_baselining_policy()
@@ -1943,7 +1975,7 @@ def prepare_tutorial_case(
 
     if seed_source == "archive":
         prepare = prepare_replay if stage == "replay" else prepare_refinement
-        return prepare(
+        prepared_options = prepare(
             source_options,
             repository_root / case.reference_mission,
             case_directory,
@@ -1953,6 +1985,9 @@ def prepare_tutorial_case(
             hardware_root=str(Path(execution_directory) / "hardware_models"),
             expected_descriptions=schema_descriptions,
         )
+        if stage == "refinement":
+            _apply_tutorial_refinement_policy(prepared_options)
+        return prepared_options
     if seed_source != "current_infeasible_trial":
         raise ValueError(f"Unknown tutorial seed source: {seed_source!r}")
 
@@ -1997,6 +2032,8 @@ def prepare_tutorial_case(
     options.write_options_file(
         str(prepared_options), not options.print_only_non_default_options
     )
+    if stage == "refinement":
+        _apply_tutorial_refinement_policy(prepared_options)
     return prepared_options
 
 
@@ -2273,7 +2310,7 @@ def prepare_case(
         json.dumps(
             {
                 "status": "unreviewed",
-                "source_options": str(source_options),
+                "source_options": repo_relative(source_options),
                 "mappings": compatibility_mappings,
                 "replacement_resources": replacement_resources,
                 "staged_earliest_possible_epoch": staged_earliest_possible_epoch,

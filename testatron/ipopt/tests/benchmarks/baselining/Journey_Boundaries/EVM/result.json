@@ -148,7 +148,7 @@
         },
         "feasibility_tolerance": 1e-05,
         "feasible": true,
-        "duration_seconds": 4.386762957998144
+        "duration_seconds": 3.3564441250055097
       },
       "output_file": "EVM.emtg",
       "stage": "replay"
@@ -192,7 +192,7 @@
           "terminal_constraint_violation": 2.430368312934763e-09,
           "native_exit": "Restoration Failed!"
         },
-        "duration_seconds": 14.905943457997637
+        "duration_seconds": 15.40155070900073
       },
       "output_file": "EVM.emtg",
       "stage": "refinement"
@@ -342,7 +342,7 @@
         },
         "feasibility_tolerance": 1e-05,
         "feasible": true,
-        "duration_seconds": 4.939252500000293
+        "duration_seconds": 4.293917417002376
       },
       "output_file": "EVM.emtg",
       "stage": "replay"
@@ -386,7 +386,7 @@
           "terminal_constraint_violation": 2.430368312934763e-09,
           "native_exit": "Restoration Failed!"
         },
-        "duration_seconds": 16.967336250003427
+        "duration_seconds": 16.213816333001887
       },
       "output_file": "EVM.emtg",
       "stage": "refinement"

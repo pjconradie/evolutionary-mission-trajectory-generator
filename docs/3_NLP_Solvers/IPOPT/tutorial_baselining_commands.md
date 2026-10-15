@@ -29,6 +29,10 @@ tutorial_baselining_case() {
 The command executes each applicable tutorial stage in two fresh attempts. A
 normal tutorial case performs replay followed by refinement in both attempts.
 The deliberate-infeasible Force Models case is intentionally replay-only.
+Each staged refinement applies the versioned tutorial policy: `seed_MBH=0`,
+`MBH_RNG_seed=12345`, a 600-second IPOPT limit, and 32,000 IPOPT major
+iterations. The staged `compatibility.json` records the policy version, hash,
+and applied settings.
 
 ## Complete Tutorial Case List
 
