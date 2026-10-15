@@ -269,6 +269,19 @@ def test_tutorial_registry_conforms_to_taxonomy_policy():
         assert list(case.stages) == taxonomy_policy["eligible_stages"]
 
 
+def test_tutorial_case_discovery_filters_registered_case_ids():
+    selected = ipopt_characterization.discover_tutorial_cases(
+        ["Force_Models/LowSIRIS-REx*"]
+    )
+
+    assert [case.case_id for case in selected] == [
+        "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+        "Force_Models/LowSIRIS-REx",
+        "Force_Models/LowSIRIS-REx_forcemodel",
+    ]
+    assert ipopt_characterization.discover_tutorial_cases(["missing/*"]) == []
+
+
 @pytest.mark.parametrize(
     ("replay", "refinement", "expected"),
     (
@@ -386,6 +399,16 @@ def test_repeatable_tutorial_baselining_writes_two_attempts(tmp_path, repository
     assert (case_root / "repeatability.json").is_file()
     assert (case_root / "result.json").is_file()
 
+    stale_file = case_root / "attempt-1/stale.txt"
+    stale_file.write_text("stale", encoding="ascii")
+    ipopt_characterization.run_repeatable_tutorial_baselining_case(
+        case,
+        stage_runner,
+        output_root=tmp_path,
+        repository_root=repository_root,
+    )
+    assert not stale_file.exists()
+
 
 def test_repeatable_tutorial_baselining_preserves_replay_only_semantics(
     tmp_path, repository_root
@@ -437,6 +460,30 @@ def test_repeatable_tutorial_baselining_marks_different_attempts_unstable(
     assert result["classification"] == "unstable"
     assert result["repeatability"]["stable"] is False
     assert result["promotion_eligible"] is False
+
+
+def test_repeatable_tutorial_baselining_ignores_runtime_duration(
+    tmp_path, repository_root
+):
+    case = ipopt_characterization.TUTORIAL_CASES[0]
+    durations = iter((1.0, 2.0, 3.0, 4.0))
+
+    def stage_runner(selected_case, stage, directory):
+        return {
+            "acceptable": True,
+            "classification": "completed",
+            "comparison": {"duration_seconds": next(durations)},
+        }
+
+    result = ipopt_characterization.run_repeatable_tutorial_baselining_case(
+        case,
+        stage_runner,
+        output_root=tmp_path,
+        repository_root=repository_root,
+    )
+
+    assert result["repeatability"]["stable"]
+    assert result["classification"] == "matched_tutorial_reference"
 
 
 def test_repeatable_tutorial_baselining_records_dependency_blocked(

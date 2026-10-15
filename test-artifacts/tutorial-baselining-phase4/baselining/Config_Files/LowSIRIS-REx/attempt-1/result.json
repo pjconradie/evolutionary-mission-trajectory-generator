@@ -1,0 +1,192 @@
+{
+  "suite": "tutorials",
+  "case_id": "Config_Files/LowSIRIS-REx",
+  "taxonomy": "demonstration",
+  "stages": [
+    "replay",
+    "refinement"
+  ],
+  "source_sha256": "edd91a56d2279ef08d6306f25eb684d7da31dbc7579ef821a8bfc81489f7289a",
+  "reference_sha256": "771d2db8baa58428c6fcedd183d4033bfcd1f832e3a2821cca2498c82aa75826",
+  "inventory": {
+    "status": "ready",
+    "tutorial": "Config_Files/LowSIRIS-REx",
+    "stages": [
+      "replay",
+      "refinement"
+    ],
+    "taxonomy": "demonstration",
+    "expected_output": "success",
+    "timeout_seconds": 600,
+    "files": [
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/LowSIRIS-REx.emtgopt",
+        "role": "source_options",
+        "sha256": "edd91a56d2279ef08d6306f25eb684d7da31dbc7579ef821a8bfc81489f7289a"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/LaunchVehicles_PubliclyDistributable_NLSII.emtg_launchvehicleopt",
+        "role": "hardware",
+        "sha256": "d5813c37cfd78cb16100f5e912689eddda93c659d46636e62a19e7eb94c9ba40"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/LaunchVehicles_PubliclyDistributable_NLSII_v2.emtg_launchvehicleopt",
+        "role": "hardware",
+        "sha256": "81d287674aa86ba678eb6268ce8cb5dc47f3c782263b7e0d0529408335f7a5fe"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/LowSIRIS-REx_high_thrust.emtg_spacecraftopt",
+        "role": "hardware",
+        "sha256": "a33210922eb3fccac6a873984e284fb432d8708d0e084cdb42c1c9f202b63749"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/Thrusters_PubliclyDistributable.emtg_propulsionsystemopt",
+        "role": "hardware",
+        "sha256": "4232fc1ed60a7e16df39feb3d67b2e0a04aa4d5adfdc6b007bd7321155ba6fff"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/default.emtg_launchvehicleopt",
+        "role": "hardware",
+        "sha256": "da5fe3d2da18f4cccae2afbcfe688f442e62bad78dbffa0a929b01ef9251b74f"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/default.emtg_spacecraftopt",
+        "role": "hardware",
+        "sha256": "2b3e61e2f368a0187027b25640db05c189445cc6b0c80febd7b85263ca000023"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/hardware_models/empty.ThrottleTable",
+        "role": "hardware",
+        "sha256": "1739781949b2679f42fa5fc0114eb6ba39d615df32d36bfa5d7a02e26e39bf9e"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/results/LowSIRIS-REx_11292022_132711/LowSIRIS-REx_Sun(EB)_Sun(BE).emtg",
+        "role": "reference_mission",
+        "sha256": "771d2db8baa58428c6fcedd183d4033bfcd1f832e3a2821cca2498c82aa75826"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/results/LowSIRIS-REx_11292022_132711/XFfile.csv",
+        "role": "seed_alignment_source",
+        "sha256": "1dba77388e6485da1f42f0f574c336f7bd7b136246ecb7e4b2587f7cc1c8e4ef"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/Sun_OREx.emtg_universe",
+        "role": "universe",
+        "sha256": "48a68c7023b68956dec8bc97d5989d428a55afc37e6495811ff512d25c4d4304"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/bennu_refdrmc_v1.bsp",
+        "role": "universe",
+        "sha256": "0d7696d9f6623d1aefb9f9fd1eef4a1151bb4c7e03f3e2181ed293a2895cedb2"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/de430.bsp",
+        "role": "universe",
+        "sha256": "6e1b277c5f07135a84950604b83e56b736be696a7f3560bcddb1d4aeb944fca1"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/go_get_these_files.txt",
+        "role": "universe",
+        "sha256": "e41215a3d3384096ae4c0f7de6da0d8b7b3dc74d2eac7cd3eb9fd5a9e1bf7617"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/naif0012.tls",
+        "role": "universe",
+        "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/pck00010.tpc",
+        "role": "universe",
+        "sha256": "59468328349aa730d18bf1f8d7e86efe6e40b75dfb921908f99321b3a7a701d2"
+      }
+    ],
+    "missing": []
+  },
+  "replay": {
+    "classification": "completed",
+    "acceptable": true,
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-10,
+      "checks": {
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "decision_vector_length": true,
+        "objective": true,
+        "total_deterministic_deltav": true,
+        "total_flight_time_years": true,
+        "final_mass": true,
+        "journey_endpoints": true
+      },
+      "baseline_objective": -0.17403239151054145,
+      "generated_objective": -0.17403239151054145,
+      "generated_feasibility_metric": 7.62217643096401e-06,
+      "endpoint_tolerances": {
+        "epoch_days": 1e-08,
+        "position_km": 1.0,
+        "velocity_km_s": 1e-07,
+        "mass_kg": 1e-06
+      },
+      "endpoint_deltas": {
+        "max_epoch_days": 0.0,
+        "max_position_km": 0.0,
+        "max_velocity_km_s": 0.0,
+        "max_mass_kg": 0.0
+      },
+      "feasibility_tolerance": 1e-05,
+      "feasible": true,
+      "duration_seconds": 3.5521343750006054
+    },
+    "output_file": "LowSIRIS-REx.emtg",
+    "stage": "replay"
+  },
+  "refinement": {
+    "classification": "completed",
+    "acceptable": true,
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "checks": {
+        "finite_objective": true,
+        "finite_feasibility": true,
+        "decision_bounds_complete": true,
+        "finite_decision_vector": true,
+        "decision_vector_in_bounds": true,
+        "finite_constraint_vector": true,
+        "feasible": true,
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "objective_non_regression": true,
+        "near_feasible_initialization": true,
+        "ipopt_native_success": true
+      },
+      "baseline_objective": -0.17403239151054145,
+      "generated_objective": -0.17403239151054145,
+      "objective_sense": "maximize",
+      "objective_relative_tolerance": 0.001,
+      "objective_absolute_tolerance": 1e-08,
+      "objective_comparison_band": 0.00017404239151054145,
+      "objective_delta": 0.0,
+      "objective_absolute_delta": 0.0,
+      "generated_feasibility_metric": 7.62217643096401e-06,
+      "feasibility_tolerance": 1e-05,
+      "decision_bounds_absolute_tolerance": 1e-12,
+      "ipopt": {
+        "initialization_policy": "near-feasible-primal-seed",
+        "initial_infeasibility": 7.63e-06,
+        "iterations": 15,
+        "terminal_constraint_violation": 6.8301387161922065e-06,
+        "native_exit": "Optimal Solution Found."
+      },
+      "duration_seconds": 3.355771124995954
+    },
+    "output_file": "LowSIRIS-REx.emtg",
+    "stage": "refinement"
+  },
+  "classification": "matched_tutorial_reference",
+  "promotion_eligible": true
+}

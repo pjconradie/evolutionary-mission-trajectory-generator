@@ -1,6 +1,7 @@
 """Run Testatron cases once with IPOPT and retain unreviewed artifacts."""
 
 import argparse
+import copy
 import csv
 import fnmatch
 import hashlib
@@ -342,6 +343,17 @@ EXCLUDED_TUTORIAL_VINTAGES = (
     "OSIRIS-REx_11272022_144557",
     "LowSIRIS-REx_11252022_153645",
 )
+
+
+def discover_tutorial_cases(filters=None):
+    """Return registered tutorial cases, optionally filtered by case-ID glob."""
+    if not filters:
+        return list(TUTORIAL_CASES)
+    return [
+        case
+        for case in TUTORIAL_CASES
+        if any(fnmatch.fnmatch(case.case_id, pattern) for pattern in filters)
+    ]
 
 
 def repo_relative(path, root=None):
@@ -3127,6 +3139,15 @@ def _run_tutorial_baselining_attempt(
     return result
 
 
+def _tutorial_repeatability_stage_snapshot(stage):
+    """Remove runtime-only values from tutorial stage repeatability checks."""
+    snapshot = copy.deepcopy(stage)
+    comparison = snapshot.get("comparison")
+    if isinstance(comparison, dict):
+        comparison.pop("duration_seconds", None)
+    return snapshot
+
+
 def run_repeatable_tutorial_baselining_case(
     case,
     stage_runner,
@@ -3153,13 +3174,21 @@ def run_repeatable_tutorial_baselining_case(
     snapshots = (
         {
             "classification": first["classification"],
-            "replay": first["replay"],
-            "refinement": first["refinement"],
+            "replay": _tutorial_repeatability_stage_snapshot(first["replay"]),
+            "refinement": (
+                _tutorial_repeatability_stage_snapshot(first["refinement"])
+                if first["refinement"] is not None
+                else None
+            ),
         },
         {
             "classification": second["classification"],
-            "replay": second["replay"],
-            "refinement": second["refinement"],
+            "replay": _tutorial_repeatability_stage_snapshot(second["replay"]),
+            "refinement": (
+                _tutorial_repeatability_stage_snapshot(second["refinement"])
+                if second["refinement"] is not None
+                else None
+            ),
         },
     )
     differences = {

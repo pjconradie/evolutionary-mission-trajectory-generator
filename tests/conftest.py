@@ -57,6 +57,12 @@ def pytest_addoption(parser):
         default=[],
         help="glob passed to the Docker-backed Testatron baselining CLI",
     )
+    group.addoption(
+        "--tutorial-baselining-filter",
+        action="append",
+        default=[],
+        help="tutorial case-ID glob passed to the Docker-backed baselining launcher",
+    )
 
 
 def pytest_collection_modifyitems(config, items):
