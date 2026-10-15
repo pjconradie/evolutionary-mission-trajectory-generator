@@ -61,6 +61,10 @@ EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \
 9, 10
 Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
 
+## 1. Run clean bootstrap
+
+Not implemented yet.
+
 ## 2. Run collection sanity
 
 `--collect-only` executes no tests and does not invoke Docker, EMTG, or IPOPT. It confirms that the expected test modules, markers, and test-discovery configuration are visible to pytest.
@@ -263,7 +267,7 @@ baselining_case() {
 }
 ```
 
-### Run the 137 cases under the [[baselining_commands#Complete list of tests| complete list of 137 corpus baselining tests]].
+### Run the 137 cases under the [[baselining_commands#Complete list of tests| complete list of 137 corpus baselining tests]]
 
 ```zsh
 baselining_case 'global_mission_options/globalmissionoptions_MGALT_DLAbounds'
@@ -353,7 +357,7 @@ diff -u \
 	test-artifacts/baselining-comparisons/baselining-summary.before.json \
 	testatron/ipopt/tests/tests/baselining/baselining-summary.json
 ```
-### Verify the fresh 137-case results against the **existing** reviewed current-state reference.
+### Verify the fresh 137-case results against the **existing** reviewed current-state reference
 
 ```zsh
 python testatron/ipopt_characterization.py \
@@ -406,6 +410,14 @@ statuses: {'matched': 137}
 ```
 
 ## 10. Run 33 tutorial tests
+
+Not implemented yet.
+
+
+|Excluded test group|Count|What remains unproven|
+|---|--:|---|
+|`clean_bootstrap`|1|A completely uncached Docker image build and build-volume creation from the pinned toolchain recipe.|
+|`tutorials`|33|Docker-backed replay/refinement verification of the tutorial corpus under `docs/0_Users/tutorial/Tutorial_EMTG_Files/`.|
 
 
 Terminal command:
