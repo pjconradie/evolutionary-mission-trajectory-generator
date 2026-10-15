@@ -8,20 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "2e125fed430ead7e",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Untitled"
-            }
-          },
-          {
             "id": "be32af688ddd23f2",
             "type": "leaf",
             "state": {
@@ -36,6 +22,34 @@
             }
           },
           {
+            "id": "c760c39360b799b0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "baselining_commands"
+            }
+          },
+          {
+            "id": "2bb7e13f04755740",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "baselined_checklist"
+            }
+          },
+          {
             "id": "1248c444cdae4c80",
             "type": "leaf",
             "state": {
@@ -47,6 +61,20 @@
               },
               "icon": "lucide-file",
               "title": "tutorial_baselining_implementation_plan_1"
+            }
+          },
+          {
+            "id": "8df92330efd81148",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "tutorial_baselining_commands"
             }
           },
           {
@@ -78,20 +106,6 @@
             }
           },
           {
-            "id": "2bb7e13f04755740",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "baselined_checklist"
-            }
-          },
-          {
             "id": "994b09a27e592564",
             "type": "leaf",
             "state": {
@@ -120,7 +134,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 8
       }
     ],
     "direction": "vertical"
@@ -285,12 +299,16 @@
       "bases:Create new base": false
     }
   },
-  "active": "65db72b700f3bb04",
+  "active": "bb4aa4ec35c58e50",
   "lastOpenFiles": [
+    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
+    "testatron/ipopt/tests/readme.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
+    "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+    "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan_1.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan.md",
-    "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "testatron/ipopt/tests/tutorial_baselining_verification.json",
     "testatron/ipopt/tests/tutorial_baselining_verification_policy.json",
     "testatron/ipopt/tests/tutorial_baselining_policy.json",
@@ -302,16 +320,13 @@
     "test-artifacts/ipopt-tests/baselining/global_mission_options/globalmissionoptions_MGALT_DLAbounds/result.json",
     "test-artifacts/ipopt-tests/baselining/global_mission_options/globalmissionoptions_MGALT_DLAbounds/repeatability.json",
     "2026-10-14.md",
-    "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.adsgnc_specifications.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/legacy/open_source_emtg_container_plan.md",
-    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log_test.md",
-    "testatron/ipopt/tests/readme.md",
     "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md",
     "baseline-artifacts/how_to_generate_results.readme.md",
@@ -321,7 +336,6 @@
     "testatron/ipopt/tests/benchmarks/benchmarks/how_to_generate_results.readme.md",
     "baseline-artifacts/results.md",
     "baseline-artifacts/how_to_interpret_results.readme.md",
-    "testatron/ipopt/benchmarks/how_to_generate_results.readme.md",
-    "baseline-artifacts/results.readme.md"
+    "testatron/ipopt/benchmarks/how_to_generate_results.readme.md"
   ]
 }

@@ -3023,6 +3023,178 @@ def compare_baselining_runs(first, second):
     return {"stable": not differences, "differences": differences}
 
 
+def _tutorial_baselining_case_root(case, output_root):
+    relative_case = Path(case.case_id)
+    if relative_case.is_absolute() or ".." in relative_case.parts:
+        raise ValueError(f"Invalid tutorial case identifier: {case.case_id}")
+    return Path(output_root) / "baselining" / relative_case
+
+
+def _tutorial_stage_result(case, stage, stage_runner, attempt_directory):
+    result = dict(stage_runner(case, stage, attempt_directory))
+    classification = result.get("classification")
+    terminal_classifications = {
+        "dependency_blocked",
+        "parse_failed",
+        "process_failed",
+        "timed_out",
+        "unstable",
+    }
+    if classification not in terminal_classifications and "acceptable" not in result:
+        raise ValueError(
+            f"Tutorial stage runner did not report acceptability: "
+            f"{case.case_id} {stage}"
+        )
+    result.setdefault("stage", stage)
+    return result
+
+
+def _run_tutorial_baselining_attempt(
+    case,
+    stage_runner,
+    attempt_directory,
+    repository_root,
+):
+    inventory = tutorial_dependency_inventory(case, repository_root)
+    attempt_directory = Path(attempt_directory)
+    attempt_directory.mkdir(parents=True, exist_ok=True)
+    (attempt_directory / "inventory.json").write_text(
+        json.dumps(inventory, indent=2) + "\n", encoding="utf-8"
+    )
+    if inventory["status"] != "ready":
+        replay = {
+            "stage": "replay",
+            "classification": "dependency_blocked",
+            "acceptable": False,
+            "detail": "Tutorial dependency preflight did not complete",
+        }
+        refinement = None
+    else:
+        replay_directory = attempt_directory / "replay"
+        replay_directory.mkdir()
+        replay = _tutorial_stage_result(case, "replay", stage_runner, replay_directory)
+        refinement = None
+        if (
+            replay.get("classification") not in {
+                "dependency_blocked",
+                "parse_failed",
+                "process_failed",
+                "timed_out",
+                "unstable",
+            }
+            and replay.get("acceptable", False)
+            and "refinement" in case.stages
+        ):
+            refinement_directory = attempt_directory / "refinement"
+            refinement_directory.mkdir()
+            refinement = _tutorial_stage_result(
+                case, "refinement", stage_runner, refinement_directory
+            )
+    classification = classify_tutorial_baselining_case(case, replay, refinement)
+    result = {
+        "suite": "tutorials",
+        "case_id": case.case_id,
+        "taxonomy": case.taxonomy,
+        "stages": list(case.stages),
+        "source_sha256": next(
+            record["sha256"]
+            for record in inventory["files"]
+            if record["role"] == "source_options"
+        )
+        if inventory["status"] == "ready"
+        else None,
+        "reference_sha256": next(
+            record["sha256"]
+            for record in inventory["files"]
+            if record["role"] == "reference_mission"
+        )
+        if inventory["status"] == "ready"
+        else None,
+        "inventory": inventory,
+        "replay": replay,
+        "refinement": refinement,
+        "classification": classification,
+        "promotion_eligible": (
+            classification == "matched_tutorial_reference"
+            and load_tutorial_baselining_policy()["taxonomy_policies"][case.taxonomy][
+                "promotion_eligible"
+            ]
+        ),
+    }
+    (attempt_directory / "result.json").write_text(
+        json.dumps(result, indent=2) + "\n", encoding="utf-8"
+    )
+    return result
+
+
+def run_repeatable_tutorial_baselining_case(
+    case,
+    stage_runner,
+    output_root=TUTORIAL_BASELINING_ROOT,
+    repository_root=REPOSITORY_ROOT,
+):
+    """Run one tutorial case twice and retain stable normalized evidence."""
+    validate_tutorial_baselining_case(case)
+    case_root = _tutorial_baselining_case_root(case, output_root)
+    if case_root.exists():
+        shutil.rmtree(case_root)
+    first = _run_tutorial_baselining_attempt(
+        case,
+        stage_runner,
+        case_root / "attempt-1",
+        repository_root,
+    )
+    second = _run_tutorial_baselining_attempt(
+        case,
+        stage_runner,
+        case_root / "attempt-2",
+        repository_root,
+    )
+    snapshots = (
+        {
+            "classification": first["classification"],
+            "replay": first["replay"],
+            "refinement": first["refinement"],
+        },
+        {
+            "classification": second["classification"],
+            "replay": second["replay"],
+            "refinement": second["refinement"],
+        },
+    )
+    differences = {
+        name: [snapshots[0][name], snapshots[1][name]]
+        for name in snapshots[0]
+        if snapshots[0][name] != snapshots[1][name]
+    }
+    repeatability = {"stable": not differences, "differences": differences}
+    classification = (
+        first["classification"] if repeatability["stable"] else "unstable"
+    )
+    result = {
+        "suite": "tutorials",
+        "case_id": case.case_id,
+        "taxonomy": case.taxonomy,
+        "stages": list(case.stages),
+        "first": first,
+        "second": second,
+        "repeatability": repeatability,
+        "classification": classification,
+        "promotion_eligible": (
+            repeatability["stable"]
+            and first["promotion_eligible"]
+            and second["promotion_eligible"]
+        ),
+    }
+    (case_root / "repeatability.json").write_text(
+        json.dumps(repeatability, indent=2) + "\n", encoding="utf-8"
+    )
+    (case_root / "result.json").write_text(
+        json.dumps(result, indent=2) + "\n", encoding="utf-8"
+    )
+    return result
+
+
 def run_repeatable_baselining_case(*args, attempt_directories=None, **kwargs):
     """Run a case twice and disqualify matching classifications that are unstable."""
     if attempt_directories is None:

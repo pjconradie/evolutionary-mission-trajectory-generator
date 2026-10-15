@@ -353,6 +353,116 @@ def test_tutorial_baselining_accepts_declared_replay_only_case():
         )
 
 
+def test_repeatable_tutorial_baselining_writes_two_attempts(tmp_path, repository_root):
+    case = ipopt_characterization.TUTORIAL_CASES[0]
+    calls = []
+
+    def stage_runner(selected_case, stage, directory):
+        calls.append((selected_case.case_id, stage, directory.name))
+        return {"acceptable": True, "classification": "completed"}
+
+    result = ipopt_characterization.run_repeatable_tutorial_baselining_case(
+        case,
+        stage_runner,
+        output_root=tmp_path,
+        repository_root=repository_root,
+    )
+    case_root = tmp_path / "baselining" / case.case_id
+
+    assert result["classification"] == "matched_tutorial_reference"
+    assert result["repeatability"]["stable"]
+    assert result["promotion_eligible"]
+    assert calls == [
+        (case.case_id, "replay", "replay"),
+        (case.case_id, "refinement", "refinement"),
+        (case.case_id, "replay", "replay"),
+        (case.case_id, "refinement", "refinement"),
+    ]
+    assert (case_root / "attempt-1/inventory.json").is_file()
+    assert (case_root / "attempt-1/replay").is_dir()
+    assert (case_root / "attempt-1/refinement").is_dir()
+    assert (case_root / "attempt-1/result.json").is_file()
+    assert (case_root / "attempt-2/result.json").is_file()
+    assert (case_root / "repeatability.json").is_file()
+    assert (case_root / "result.json").is_file()
+
+
+def test_repeatable_tutorial_baselining_preserves_replay_only_semantics(
+    tmp_path, repository_root
+):
+    case = ipopt_characterization.TUTORIAL_CASES_BY_ID[
+        "Force_Models/LowSIRIS-REx_forcemodel"
+    ]
+    calls = []
+
+    def stage_runner(selected_case, stage, directory):
+        calls.append(stage)
+        return {"acceptable": True, "classification": "completed"}
+
+    result = ipopt_characterization.run_repeatable_tutorial_baselining_case(
+        case,
+        stage_runner,
+        output_root=tmp_path,
+        repository_root=repository_root,
+    )
+
+    assert calls == ["replay", "replay"]
+    assert result["classification"] == "matched_tutorial_reference"
+    assert result["promotion_eligible"] is False
+    assert result["first"]["refinement"] is None
+
+
+def test_repeatable_tutorial_baselining_marks_different_attempts_unstable(
+    tmp_path, repository_root
+):
+    case = ipopt_characterization.TUTORIAL_CASES[0]
+    outcomes = iter(
+        (
+            {"acceptable": True, "classification": "completed"},
+            {"acceptable": True, "classification": "completed"},
+            {"acceptable": False, "classification": "completed"},
+        )
+    )
+
+    def stage_runner(selected_case, stage, directory):
+        return next(outcomes)
+
+    result = ipopt_characterization.run_repeatable_tutorial_baselining_case(
+        case,
+        stage_runner,
+        output_root=tmp_path,
+        repository_root=repository_root,
+    )
+
+    assert result["classification"] == "unstable"
+    assert result["repeatability"]["stable"] is False
+    assert result["promotion_eligible"] is False
+
+
+def test_repeatable_tutorial_baselining_records_dependency_blocked(
+    tmp_path, repository_root
+):
+    case = replace(
+        ipopt_characterization.TUTORIAL_CASES[0],
+        source_options="missing.emtgopt",
+    )
+
+    def stage_runner(selected_case, stage, directory):
+        raise AssertionError("dependency-blocked cases must not execute a stage")
+
+    result = ipopt_characterization.run_repeatable_tutorial_baselining_case(
+        case,
+        stage_runner,
+        output_root=tmp_path,
+        repository_root=repository_root,
+    )
+
+    assert result["classification"] == "dependency_blocked"
+    assert result["repeatability"]["stable"]
+    assert result["first"]["inventory"]["status"] == "dependency_blocked"
+    assert result["first"]["replay"]["classification"] == "dependency_blocked"
+
+
 def test_tutorial_dependency_inventory_is_complete_and_immutable(repository_root):
     inventories = [
         ipopt_characterization.tutorial_dependency_inventory(case, repository_root)

@@ -1,4 +1,4 @@
-# Baselining Commands
+# 137 Corpus Baselining Commands
 
 Run these from the repository root. `baselining_case` uses the supported Docker-backed pytest launcher and replaces only the selected case's evidence root. Replacement removes the complete prior case directory—including stale duplicate-suffixed files and folders—before writing fresh evidence; other case directories are preserved. A cleanup failure stops the run rather than silently mixing old and new evidence. The immutable source pairs under `testatron/tests` are never modified.
 
