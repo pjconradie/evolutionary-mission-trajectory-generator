@@ -61,6 +61,160 @@ def test_baselining_verification_policy_is_versioned_and_complete(repository_roo
     )
 
 
+def test_tutorial_baselining_policy_is_versioned_and_complete(repository_root):
+    policy = ipopt_characterization.load_tutorial_baselining_policy()
+
+    assert policy["version"] == 1
+    assert policy["accepted_native_exits"] == ["Optimal Solution Found."]
+    assert policy["seeded_refinement"] == {
+        "seed_MBH": 0,
+        "MBH_RNG_seed": 12345,
+    }
+    assert policy["decision_bounds_absolute_tolerance"] > 0
+    assert policy["replay_max_cpu_time_seconds"] == 600
+    assert policy["refinement_max_cpu_time_seconds"] == 600
+    assert policy["refinement_max_major_iterations"] == 32000
+    assert set(policy["taxonomy_policies"]) == {
+        "authoritative",
+        "demonstration",
+        "deliberate_infeasible",
+    }
+    assert policy["taxonomy_policies"]["deliberate_infeasible"] == {
+        "eligible_stages": ["replay"],
+        "promotion_eligible": False,
+    }
+    assert ipopt_characterization.TUTORIAL_BASELINING_POLICY == (
+        repository_root / "testatron/ipopt/tests/tutorial_baselining_policy.json"
+    )
+
+
+def test_tutorial_baselining_verification_policy_is_versioned_and_complete(
+    repository_root,
+):
+    policy = ipopt_characterization.load_tutorial_baselining_verification_policy()
+
+    assert policy["version"] == 1
+    assert set(policy["numeric_tolerances"]) == {
+        "objective",
+        "deterministic_deltav_km_s",
+        "flight_time_years",
+        "final_mass_kg",
+        "epoch_julian_date",
+        "position_km",
+        "velocity_km_s",
+        "mass_kg",
+    }
+    assert ipopt_characterization.TUTORIAL_BASELINING_VERIFICATION_POLICY == (
+        repository_root
+        / "testatron/ipopt/tests/tutorial_baselining_verification_policy.json"
+    )
+
+
+@pytest.mark.parametrize(
+    ("loader", "payload"),
+    (
+        (ipopt_characterization.load_tutorial_baselining_policy, ""),
+        (ipopt_characterization.load_tutorial_baselining_verification_policy, ""),
+        (ipopt_characterization.load_tutorial_baselining_policy, "{}"),
+        (
+            ipopt_characterization.load_tutorial_baselining_verification_policy,
+            "{}",
+        ),
+    ),
+)
+def test_tutorial_policy_loaders_reject_empty_or_incomplete_files(
+    tmp_path, loader, payload
+):
+    policy_path = tmp_path / "policy.json"
+    policy_path.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        loader(policy_path)
+
+
+@pytest.mark.parametrize(
+    "loader",
+    (
+        ipopt_characterization.load_tutorial_baselining_policy,
+        ipopt_characterization.load_tutorial_baselining_verification_policy,
+    ),
+)
+def test_tutorial_policy_loaders_reject_unsupported_versions(tmp_path, loader):
+    payload = copy.deepcopy(loader())
+    payload["version"] = 99
+    policy_path = tmp_path / "policy.json"
+    policy_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="version 1"):
+        loader(policy_path)
+
+
+def test_tutorial_policy_does_not_change_corpus_policy_loading(tmp_path):
+    corpus_policy = ipopt_characterization.load_baselining_policy()
+    invalid_tutorial_policy = tmp_path / "tutorial-policy.json"
+    invalid_tutorial_policy.write_text("{}", encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        ipopt_characterization.load_tutorial_baselining_policy(
+            invalid_tutorial_policy
+        )
+
+    assert ipopt_characterization.load_baselining_policy() == corpus_policy
+
+
+def test_tutorial_baselining_paths_are_isolated_from_corpus_and_benchmarks(
+    repository_root,
+):
+    corpus_evidence_root = (
+        repository_root / "testatron/ipopt/tests/tests/baselining"
+    )
+    benchmark_root = repository_root / "testatron/ipopt/tests/benchmarks"
+
+    assert ipopt_characterization.DEFAULT_OUTPUT_ROOT == (
+        repository_root / "testatron/ipopt/tests/tests"
+    )
+    assert ipopt_characterization.TUTORIAL_BASELINING_ROOT == benchmark_root
+    assert ipopt_characterization.TUTORIAL_BASELINING_EVIDENCE_ROOT == (
+        benchmark_root / "baselining"
+    )
+    assert (
+        ipopt_characterization.TUTORIAL_BASELINING_EVIDENCE_ROOT
+        != corpus_evidence_root
+    )
+    assert (
+        ipopt_characterization.TUTORIAL_BASELINING_EVIDENCE_ROOT.parent
+        != ipopt_characterization.DEFAULT_OUTPUT_ROOT
+    )
+
+
+def test_tutorial_baselining_contract_paths_are_separate_from_corpus_contracts(
+    repository_root,
+):
+    tutorial_contract_root = repository_root / "testatron/ipopt/tests"
+
+    assert ipopt_characterization.TUTORIAL_BASELINING_POLICY == (
+        tutorial_contract_root / "tutorial_baselining_policy.json"
+    )
+    assert ipopt_characterization.TUTORIAL_BASELINING_VERIFICATION_POLICY == (
+        tutorial_contract_root / "tutorial_baselining_verification_policy.json"
+    )
+    assert ipopt_characterization.DEFAULT_TUTORIAL_BASELINING_VERIFICATION == (
+        tutorial_contract_root / "tutorial_baselining_verification.json"
+    )
+    assert ipopt_characterization.DEFAULT_TUTORIAL_BASELINING_DECISION_LOG == (
+        tutorial_contract_root / "tutorial_baselining_case_decision_log.md"
+    )
+    assert ipopt_characterization.TUTORIAL_BASELINING_POLICY != (
+        ipopt_characterization.BASELINING_POLICY
+    )
+    assert ipopt_characterization.TUTORIAL_BASELINING_VERIFICATION_POLICY != (
+        ipopt_characterization.BASELINING_VERIFICATION_POLICY
+    )
+    assert ipopt_characterization.DEFAULT_TUTORIAL_BASELINING_VERIFICATION != (
+        ipopt_characterization.DEFAULT_BASELINING_VERIFICATION
+    )
+
+
 def test_tutorial_registry_is_complete_unique_and_pinned(repository_root):
     cases = ipopt_characterization.TUTORIAL_CASES
 
@@ -105,6 +259,199 @@ def test_tutorial_registry_pins_force_models_semantics():
     )
 
 
+def test_tutorial_registry_conforms_to_taxonomy_policy():
+    policy = ipopt_characterization.load_tutorial_baselining_policy()
+
+    for case in ipopt_characterization.TUTORIAL_CASES:
+        taxonomy_policy = ipopt_characterization.validate_tutorial_baselining_case(
+            case, policy
+        )
+        assert list(case.stages) == taxonomy_policy["eligible_stages"]
+
+
+@pytest.mark.parametrize(
+    ("replay", "refinement", "expected"),
+    (
+        (
+            {"acceptable": True},
+            {"acceptable": True},
+            "matched_tutorial_reference",
+        ),
+        (
+            {"acceptable": False, "checks": {"objective": False}},
+            None,
+            "mismatch_tutorial_reference",
+        ),
+        (
+            {"acceptable": False, "checks": {"event_topology": False}},
+            None,
+            "topology_changed",
+        ),
+        (
+            {"acceptable": True},
+            {"classification": "dependency_blocked"},
+            "dependency_blocked",
+        ),
+        (
+            {"classification": "parse_failed"},
+            None,
+            "parse_failed",
+        ),
+        (
+            {"classification": "process_failed"},
+            None,
+            "process_failed",
+        ),
+        (
+            {"classification": "timed_out"},
+            None,
+            "timed_out",
+        ),
+        (
+            {"classification": "unstable"},
+            None,
+            "unstable",
+        ),
+    ),
+)
+def test_tutorial_baselining_classifies_final_outcomes(
+    replay, refinement, expected
+):
+    case = ipopt_characterization.TUTORIAL_CASES[0]
+
+    assert (
+        ipopt_characterization.classify_tutorial_baselining_case(
+            case, replay, refinement
+        )
+        == expected
+    )
+
+
+def test_tutorial_baselining_requires_refinement_when_declared():
+    case = ipopt_characterization.TUTORIAL_CASES[0]
+
+    with pytest.raises(ValueError, match="requires refinement evidence"):
+        ipopt_characterization.classify_tutorial_baselining_case(
+            case, {"acceptable": True}
+        )
+
+
+def test_tutorial_baselining_accepts_declared_replay_only_case():
+    case = ipopt_characterization.TUTORIAL_CASES_BY_ID[
+        "Force_Models/LowSIRIS-REx_forcemodel"
+    ]
+
+    assert (
+        ipopt_characterization.classify_tutorial_baselining_case(
+            case, {"acceptable": True}
+        )
+        == "matched_tutorial_reference"
+    )
+    with pytest.raises(ValueError, match="replay-only"):
+        ipopt_characterization.classify_tutorial_baselining_case(
+            case, {"acceptable": True}, {"acceptable": True}
+        )
+
+
+def test_tutorial_dependency_inventory_is_complete_and_immutable(repository_root):
+    inventories = [
+        ipopt_characterization.tutorial_dependency_inventory(case, repository_root)
+        for case in ipopt_characterization.TUTORIAL_CASES
+    ]
+
+    assert len(inventories) == 17
+    assert sum(len(inventory["stages"]) for inventory in inventories) == 33
+    for inventory in inventories:
+        assert inventory["status"] in {"ready", "dependency_blocked"}
+        assert inventory["files"]
+        if inventory["status"] == "ready":
+            assert inventory["missing"] == []
+        else:
+            assert inventory["missing"]
+        for record in inventory["files"]:
+            assert not Path(record["path"]).is_absolute()
+            assert "\\" not in record["path"]
+            assert record["sha256"] == ipopt_characterization._sha256(
+                repository_root / record["path"]
+            )
+
+
+def _tutorial_inventory_fixture(tmp_path):
+    repository_root = tmp_path / "repository"
+    source_root = repository_root / "sources"
+    universe_root = repository_root / "universe"
+    hardware_root = repository_root / "hardware"
+    ephemeris_root = repository_root / "ephemeris"
+    for directory in (source_root, universe_root, hardware_root, ephemeris_root):
+        directory.mkdir(parents=True)
+    for name in ("case.emtgopt", "reference.emtg", "XFfile.csv", "seed.emtgopt"):
+        (source_root / name).write_text(name, encoding="ascii")
+    for name in ipopt_characterization.TUTORIAL_SHARED_EPHEMERIS_FILES:
+        (ephemeris_root / name).write_text(name, encoding="ascii")
+    case = replace(
+        ipopt_characterization.TUTORIAL_CASES[0],
+        source_options="sources/case.emtgopt",
+        reference_package="sources",
+        reference_mission="sources/reference.emtg",
+        seed_alignment_source="sources/XFfile.csv",
+        refinement_seed_options="sources/seed.emtgopt",
+        universe_root="universe",
+        hardware_root="hardware",
+        ephemeris_root="ephemeris",
+    )
+    return repository_root, case
+
+
+@pytest.mark.parametrize(
+    ("missing_path", "expected_role"),
+    (
+        ("sources/XFfile.csv", "seed_alignment_source"),
+        ("universe", "universe_root"),
+        ("hardware", "hardware_root"),
+        ("ephemeris/de430.bsp", "ephemeris"),
+    ),
+)
+def test_tutorial_dependency_inventory_reports_missing_dependencies(
+    tmp_path, missing_path, expected_role
+):
+    repository_root, case = _tutorial_inventory_fixture(tmp_path)
+    path = repository_root / missing_path
+    if path.is_dir():
+        path.rmdir()
+    else:
+        path.unlink()
+
+    inventory = ipopt_characterization.tutorial_dependency_inventory(
+        case, repository_root
+    )
+
+    assert inventory["status"] == "dependency_blocked"
+    assert any(
+        record["role"] == expected_role for record in inventory["missing"]
+    )
+    with pytest.raises(FileNotFoundError, match=expected_role):
+        ipopt_characterization.validate_tutorial_case_dependencies(
+            case, repository_root
+        )
+
+
+def test_tutorial_dependency_inventory_reports_missing_nested_hardware(tmp_path):
+    repository_root, case = _tutorial_inventory_fixture(tmp_path)
+    (repository_root / "hardware/vehicle.emtg_spacecraftopt").write_text(
+        r"C:\models\missing.ThrottleTable", encoding="ascii"
+    )
+
+    inventory = ipopt_characterization.tutorial_dependency_inventory(
+        case, repository_root
+    )
+
+    assert inventory["status"] == "dependency_blocked"
+    assert {
+        "path": "missing.ThrottleTable",
+        "role": "hardware_dependency",
+    } in inventory["missing"]
+
+
 def test_tutorial_provenance_is_portable_hashed_and_unreviewed(tmp_path):
     repository_root = tmp_path / "repository"
     source_root = repository_root / "sources"
@@ -143,6 +490,8 @@ def test_tutorial_provenance_is_portable_hashed_and_unreviewed(tmp_path):
 
     assert provenance["status"] == "unreviewed"
     assert provenance["generated"] == ["generated.emtg"]
+    assert provenance["inventory"]["status"] == "ready"
+    assert provenance["inventory"]["missing"] == []
     records = list(provenance["sources"].values()) + provenance["dependencies"]
     assert records
     for record in records:

@@ -27,6 +27,26 @@ BASELINING_POLICY = TESTATRON_ROOT / "ipopt" / "tests" / "baselining_policy.json
 BASELINING_VERIFICATION_POLICY = (
     TESTATRON_ROOT / "ipopt" / "tests" / "baselining_verification_policy.json"
 )
+TUTORIAL_BASELINING_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "benchmarks"
+TUTORIAL_BASELINING_EVIDENCE_ROOT = TUTORIAL_BASELINING_ROOT / "baselining"
+TUTORIAL_BASELINING_POLICY = (
+    TESTATRON_ROOT / "ipopt" / "tests" / "tutorial_baselining_policy.json"
+)
+TUTORIAL_BASELINING_VERIFICATION_POLICY = (
+    TESTATRON_ROOT
+    / "ipopt"
+    / "tests"
+    / "tutorial_baselining_verification_policy.json"
+)
+DEFAULT_TUTORIAL_BASELINING_VERIFICATION = (
+    TESTATRON_ROOT / "ipopt" / "tests" / "tutorial_baselining_verification.json"
+)
+DEFAULT_TUTORIAL_BASELINING_DECISION_LOG = (
+    TESTATRON_ROOT
+    / "ipopt"
+    / "tests"
+    / "tutorial_baselining_case_decision_log.md"
+)
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 DEFAULT_BASELINING_DECISION_LOG = (
@@ -129,6 +149,21 @@ CLASSIFICATIONS = (
     "timed_out",
     "parse_failed",
     "dependency_blocked",
+)
+TUTORIAL_BASELINING_CLASSIFICATIONS = (
+    "matched_tutorial_reference",
+    "mismatch_tutorial_reference",
+    "dependency_blocked",
+    "topology_changed",
+    "parse_failed",
+    "process_failed",
+    "timed_out",
+    "unstable",
+)
+TUTORIAL_BASELINING_TAXONOMIES = (
+    "authoritative",
+    "demonstration",
+    "deliberate_infeasible",
 )
 BASELINING_GROUP_ORDER = (
     "global_mission_options",
@@ -468,6 +503,164 @@ def load_baselining_verification_policy(policy_path=BASELINING_VERIFICATION_POLI
         ):
             raise ValueError(
                 f"verification policy tolerance for {metric} must be positive"
+            )
+    return payload
+
+
+def load_tutorial_baselining_policy(policy_path=TUTORIAL_BASELINING_POLICY):
+    """Load the versioned, deterministic tutorial baselining policy."""
+    payload = json.loads(Path(policy_path).read_text(encoding="utf-8"))
+    required = {
+        "version",
+        "accepted_native_exits",
+        "seeded_refinement",
+        "decision_bounds_absolute_tolerance",
+        "replay_max_cpu_time_seconds",
+        "refinement_max_cpu_time_seconds",
+        "refinement_max_major_iterations",
+        "execution_environment",
+        "taxonomy_policies",
+    }
+    if set(payload) != required or payload["version"] != 1:
+        raise ValueError(
+            "tutorial baselining policy must declare version 1 and all required fields"
+        )
+    if payload["accepted_native_exits"] != ["Optimal Solution Found."]:
+        raise ValueError(
+            "tutorial baselining policy must declare the accepted native IPOPT exit"
+        )
+    if payload["seeded_refinement"] != {
+        "seed_MBH": 0,
+        "MBH_RNG_seed": 12345,
+    }:
+        raise ValueError(
+            "tutorial baselining policy must declare deterministic seeded refinement"
+        )
+    if (
+        not isinstance(payload["decision_bounds_absolute_tolerance"], (int, float))
+        or isinstance(payload["decision_bounds_absolute_tolerance"], bool)
+        or payload["decision_bounds_absolute_tolerance"] <= 0
+    ):
+        raise ValueError(
+            "tutorial baselining policy must declare a positive decision-bound tolerance"
+        )
+    for field in (
+        "replay_max_cpu_time_seconds",
+        "refinement_max_cpu_time_seconds",
+        "refinement_max_major_iterations",
+    ):
+        if (
+            not isinstance(payload[field], int)
+            or isinstance(payload[field], bool)
+            or payload[field] <= 0
+        ):
+            raise ValueError(
+                f"tutorial baselining policy must declare a positive {field}"
+            )
+    expected_environment = {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+    }
+    if payload["execution_environment"] != expected_environment:
+        raise ValueError(
+            "tutorial baselining policy must declare the deterministic environment"
+        )
+    taxonomy_policies = payload["taxonomy_policies"]
+    if set(taxonomy_policies) != set(TUTORIAL_BASELINING_TAXONOMIES):
+        raise ValueError(
+            "tutorial baselining policy must declare every tutorial taxonomy"
+        )
+    for taxonomy, taxonomy_policy in taxonomy_policies.items():
+        expected_fields = {"eligible_stages", "promotion_eligible"}
+        if taxonomy != "deliberate_infeasible":
+            expected_fields.add("objective_tolerance")
+        if set(taxonomy_policy) != expected_fields:
+            raise ValueError(
+                f"tutorial baselining policy for {taxonomy} has unsupported fields"
+            )
+        stages = taxonomy_policy["eligible_stages"]
+        if (
+            not isinstance(stages, list)
+            or not stages
+            or any(stage not in {"replay", "refinement"} for stage in stages)
+            or stages != sorted(set(stages), key=("replay", "refinement").index)
+        ):
+            raise ValueError(
+                f"tutorial baselining policy for {taxonomy} has invalid stages"
+            )
+        if not isinstance(taxonomy_policy["promotion_eligible"], bool):
+            raise ValueError(
+                f"tutorial baselining policy for {taxonomy} must declare promotion eligibility"
+            )
+        if taxonomy == "deliberate_infeasible":
+            if stages != ["replay"] or taxonomy_policy["promotion_eligible"]:
+                raise ValueError(
+                    "deliberate-infeasible tutorials must be replay-only and non-promotable"
+                )
+            continue
+        if stages != ["replay", "refinement"]:
+            raise ValueError(
+                f"tutorial baselining policy for {taxonomy} must include refinement"
+            )
+        tolerance = taxonomy_policy["objective_tolerance"]
+        if (
+            not isinstance(tolerance, dict)
+            or set(tolerance) != {"absolute", "relative"}
+            or any(
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or value <= 0
+                for value in tolerance.values()
+            )
+        ):
+            raise ValueError(
+                f"tutorial baselining policy for {taxonomy} has invalid objective tolerance"
+            )
+    return payload
+
+
+def load_tutorial_baselining_verification_policy(
+    policy_path=TUTORIAL_BASELINING_VERIFICATION_POLICY,
+):
+    """Load current-state numeric tolerances for tutorial baselining."""
+    payload = json.loads(Path(policy_path).read_text(encoding="utf-8"))
+    required = {"version", "numeric_tolerances"}
+    if set(payload) != required or payload["version"] != 1:
+        raise ValueError(
+            "tutorial verification policy must declare version 1 and all required fields"
+        )
+    expected_metrics = {
+        "objective",
+        "deterministic_deltav_km_s",
+        "flight_time_years",
+        "final_mass_kg",
+        "epoch_julian_date",
+        "position_km",
+        "velocity_km_s",
+        "mass_kg",
+    }
+    tolerances = payload["numeric_tolerances"]
+    if set(tolerances) != expected_metrics:
+        raise ValueError(
+            "tutorial verification policy must declare tolerances for every metric"
+        )
+    for metric, tolerance in tolerances.items():
+        if (
+            not isinstance(tolerance, dict)
+            or set(tolerance) != {"absolute", "relative"}
+            or any(
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or value < 0
+                for value in tolerance.values()
+            )
+            or tolerance["absolute"] == 0 and tolerance["relative"] == 0
+        ):
+            raise ValueError(
+                f"tutorial verification policy tolerance for {metric} must be positive"
             )
     return payload
 
@@ -890,11 +1083,119 @@ def write_provenance(directory, benchmark_id, stage, generated_missions, root=No
     return provenance
 
 
+def _tutorial_dependency_record(path, role, root):
+    return {
+        "path": repo_relative(path, root),
+        "role": role,
+        "sha256": _sha256(path),
+    }
+
+
+def _tutorial_hardware_missing_dependencies(hardware_root):
+    available = {path.name for path in hardware_root.rglob("*") if path.is_file()}
+    missing = set()
+    for hardware_file in (path for path in hardware_root.rglob("*") if path.is_file()):
+        try:
+            text = hardware_file.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        missing.update(
+            match.group("name")
+            for match in _WINDOWS_HARDWARE_PATH.finditer(text)
+            if match.group("name") not in available
+        )
+    return sorted(missing)
+
+
+def tutorial_dependency_inventory(case, root=None):
+    """Resolve immutable tutorial inputs before staging or executing a case."""
+    root = Path(root) if root is not None else REPOSITORY_ROOT
+    declared_files = {
+        "source_options": case.source_options,
+        "reference_mission": case.reference_mission,
+        "seed_alignment_source": case.seed_alignment_source,
+    }
+    if case.refinement_seed_options:
+        declared_files["refinement_seed_options"] = case.refinement_seed_options
+
+    missing = []
+    files = []
+    for role, relative in declared_files.items():
+        path = root / relative
+        if path.is_file():
+            files.append(_tutorial_dependency_record(path, role, root))
+        else:
+            missing.append({"path": relative, "role": role})
+
+    reference_package = root / case.reference_package
+    if not reference_package.is_dir():
+        missing.append({"path": case.reference_package, "role": "reference_package"})
+
+    universe_root = root / case.universe_root
+    if universe_root.is_dir():
+        files.extend(
+            _tutorial_dependency_record(path, "universe", root)
+            for path in sorted(universe_root.rglob("*"))
+            if path.is_file()
+        )
+    else:
+        missing.append({"path": case.universe_root, "role": "universe_root"})
+
+    hardware_root = root / case.hardware_root
+    if hardware_root.is_dir():
+        files.extend(
+            _tutorial_dependency_record(path, "hardware", root)
+            for path in sorted(hardware_root.rglob("*"))
+            if path.is_file()
+        )
+        for name in _tutorial_hardware_missing_dependencies(hardware_root):
+            missing.append({"path": name, "role": "hardware_dependency"})
+    else:
+        missing.append({"path": case.hardware_root, "role": "hardware_root"})
+
+    shared_ephemeris_root = root / case.ephemeris_root
+    case_ephemeris_root = universe_root / "ephemeris_files"
+    for name in TUTORIAL_SHARED_EPHEMERIS_FILES:
+        if (case_ephemeris_root / name).is_file():
+            continue
+        path = shared_ephemeris_root / name
+        if path.is_file():
+            files.append(_tutorial_dependency_record(path, "shared_ephemeris", root))
+        else:
+            missing.append(
+                {
+                    "path": str(Path(case.ephemeris_root) / name),
+                    "role": "ephemeris",
+                }
+            )
+
+    files.sort(key=lambda record: (record["path"], record["role"]))
+    missing.sort(key=lambda record: (record["path"], record["role"]))
+    return {
+        "status": "ready" if not missing else "dependency_blocked",
+        "tutorial": case.case_id,
+        "stages": list(case.stages),
+        "taxonomy": case.taxonomy,
+        "expected_output": case.expected_output,
+        "timeout_seconds": case.timeout_seconds,
+        "files": files,
+        "missing": missing,
+    }
+
+
 def tutorial_provenance(case, stage, generated_files, root=None):
     """Build portable SHA-256 evidence for one tutorial stage."""
     root = Path(root) if root is not None else REPOSITORY_ROOT
     if stage not in case.stages and stage != "schema":
         raise ValueError(f"Unknown stage {stage!r} for tutorial {case.case_id!r}")
+    inventory = tutorial_dependency_inventory(case, root)
+    if inventory["status"] != "ready":
+        details = ", ".join(
+            f"{record['role']}: {record['path']}" for record in inventory["missing"]
+        )
+        raise FileNotFoundError(
+            f"Missing tutorial dependencies for {case.case_id}: {details}"
+        )
     source_fields = {
         "source_options": case.source_options,
         "reference_mission": case.reference_mission,
@@ -927,6 +1228,7 @@ def tutorial_provenance(case, stage, generated_files, root=None):
         "stage": stage,
         "sources": sources,
         "dependencies": dependency_files,
+        "inventory": inventory,
         "generated": [Path(path).name for path in generated_files],
     }
 
@@ -1067,22 +1369,17 @@ def prepare_tutorial_hardware(case, case_directory, repository_root=REPOSITORY_R
         raise FileNotFoundError(f"Tutorial hardware root does not exist: {source_root}")
     destination = Path(case_directory) / "hardware_models"
     shutil.copytree(source_root, destination, dirs_exist_ok=True)
-    available = {path.name for path in destination.rglob("*") if path.is_file()}
+    missing = _tutorial_hardware_missing_dependencies(destination)
+    if missing:
+        raise FileNotFoundError(
+            f"Missing tutorial hardware dependencies in {case.hardware_root}: "
+            f"{', '.join(missing)}"
+        )
     for hardware_file in (path for path in destination.rglob("*") if path.is_file()):
         try:
             text = hardware_file.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        missing = {
-            match.group("name")
-            for match in _WINDOWS_HARDWARE_PATH.finditer(text)
-            if match.group("name") not in available
-        }
-        if missing:
-            raise FileNotFoundError(
-                f"Missing tutorial hardware dependencies in {case.hardware_root}: "
-                f"{', '.join(sorted(missing))}"
-            )
         rewritten = _WINDOWS_HARDWARE_PATH.sub(
             lambda match: f"/artifacts/hardware_models/{match.group('name')}",
             text,
@@ -1108,32 +1405,27 @@ def prepare_tutorial_universe(case, case_directory, repository_root=REPOSITORY_R
     destination_ephemeris = destination / "ephemeris_files"
     destination_ephemeris.mkdir(parents=True, exist_ok=True)
     for name in TUTORIAL_SHARED_EPHEMERIS_FILES:
+        destination_file = destination_ephemeris / name
+        if destination_file.exists():
+            continue
         source = ephemeris_root / name
         if not source.is_file():
             raise FileNotFoundError(f"Tutorial ephemeris file does not exist: {source}")
-        destination_file = destination_ephemeris / source.name
-        if not destination_file.exists():
-            shutil.copy2(source, destination_file)
+        shutil.copy2(source, destination_file)
     return destination
 
 
 def validate_tutorial_case_dependencies(case, repository_root=REPOSITORY_ROOT):
     """Fail before execution when a registry source or declared root is absent."""
-    repository_root = Path(repository_root)
-    required = (
-        case.source_options,
-        case.reference_package,
-        case.reference_mission,
-        case.seed_alignment_source,
-        case.universe_root,
-        case.hardware_root,
-        case.ephemeris_root,
-    )
-    missing = [relative for relative in required if not (repository_root / relative).exists()]
-    if missing:
-        raise FileNotFoundError(
-            f"Missing tutorial dependencies for {case.case_id}: {', '.join(missing)}"
+    inventory = tutorial_dependency_inventory(case, repository_root)
+    if inventory["status"] != "ready":
+        missing = ", ".join(
+            f"{record['role']}: {record['path']}" for record in inventory["missing"]
         )
+        raise FileNotFoundError(
+            f"Missing tutorial dependencies for {case.case_id}: {missing}"
+        )
+    return inventory
 
 
 def load_xf_descriptions(xf_file):
@@ -1480,11 +1772,71 @@ def prepare_refinement(
 
 def tutorial_objective_policy(case):
     """Return the fixed refinement objective policy for a tutorial case."""
-    if case.taxonomy == "authoritative":
-        return AUTHORITATIVE_REFINEMENT_POLICY
-    if case.taxonomy == "demonstration":
-        return DEMONSTRATION_REFINEMENT_POLICY
-    raise ValueError(f"Tutorial case {case.case_id!r} has no refinement policy")
+    policy = load_tutorial_baselining_policy()
+    taxonomy_policy = policy["taxonomy_policies"].get(case.taxonomy)
+    if taxonomy_policy is None or "objective_tolerance" not in taxonomy_policy:
+        raise ValueError(f"Tutorial case {case.case_id!r} has no refinement policy")
+    tolerance = taxonomy_policy["objective_tolerance"]
+    return ObjectivePolicy(
+        relative_tolerance=tolerance["relative"],
+        absolute_tolerance=tolerance["absolute"],
+    )
+
+
+def _tutorial_reference_classification(comparison):
+    """Return the most specific tutorial-reference mismatch classification."""
+    checks = comparison.get("checks", {})
+    if not checks.get("journey_names", True) or not checks.get(
+        "event_topology", True
+    ):
+        return "topology_changed"
+    return "mismatch_tutorial_reference"
+
+
+def validate_tutorial_baselining_case(case, policy=None):
+    """Require each tutorial case to conform to its taxonomy policy."""
+    policy = policy or load_tutorial_baselining_policy()
+    taxonomy_policy = policy["taxonomy_policies"].get(case.taxonomy)
+    if taxonomy_policy is None:
+        raise ValueError(f"Unknown tutorial taxonomy: {case.taxonomy!r}")
+    if list(case.stages) != taxonomy_policy["eligible_stages"]:
+        raise ValueError(
+            f"Tutorial case {case.case_id!r} stages do not match {case.taxonomy!r} policy"
+        )
+    return taxonomy_policy
+
+
+def classify_tutorial_baselining_case(case, replay, refinement=None):
+    """Classify complete tutorial evidence without accepting missing refinement."""
+    validate_tutorial_baselining_case(case)
+    terminal_classifications = {
+        "dependency_blocked",
+        "parse_failed",
+        "process_failed",
+        "timed_out",
+        "unstable",
+    }
+    replay_classification = replay.get("classification")
+    if replay_classification in terminal_classifications:
+        return replay_classification
+    if not replay.get("acceptable", False):
+        return _tutorial_reference_classification(replay)
+    if "refinement" not in case.stages:
+        if refinement is not None:
+            raise ValueError(
+                f"Tutorial case {case.case_id!r} is replay-only and cannot refine"
+            )
+        return "matched_tutorial_reference"
+    if refinement is None:
+        raise ValueError(
+            f"Tutorial case {case.case_id!r} requires refinement evidence"
+        )
+    refinement_classification = refinement.get("classification")
+    if refinement_classification in terminal_classifications:
+        return refinement_classification
+    if not refinement.get("acceptable", False):
+        return _tutorial_reference_classification(refinement)
+    return "matched_tutorial_reference"
 
 
 def objective_sense(objective_type):
