@@ -24,6 +24,7 @@ TESTATRON_ROOT = REPOSITORY_ROOT / "testatron"
 TESTS_ROOT = TESTATRON_ROOT / "tests"
 PYEMTG_ROOT = REPOSITORY_ROOT / "PyEMTG"
 DEFAULT_OUTPUT_ROOT = TESTATRON_ROOT / "ipopt" / "tests" / "tests"
+BASELINING_PROMOTED_DIRECTORY = "tests-promoted-baselines"
 BASELINING_POLICY = TESTATRON_ROOT / "ipopt" / "tests" / "baselining_policy.json"
 BASELINING_VERIFICATION_POLICY = (
     TESTATRON_ROOT / "ipopt" / "tests" / "baselining_verification_policy.json"
@@ -54,7 +55,7 @@ DEFAULT_TUTORIAL_BASELINING_DECISION_LOG = (
 KERNEL_MANIFEST = TESTATRON_ROOT / "kernel_dependencies.json"
 REPLACEMENT_RESOURCE_MANIFEST = TESTATRON_ROOT / "replacement_resources.json"
 DEFAULT_BASELINING_DECISION_LOG = (
-    REPOSITORY_ROOT / "docs" / "3_NLP_Solvers" / "IPOPT" / "baselining_decision_log.md"
+    TESTATRON_ROOT / "ipopt" / "tests" / "baselining_case_decision_log.md"
 )
 DEFAULT_BASELINING_VERIFICATION = (
     TESTATRON_ROOT / "ipopt" / "tests" / "baselining_verification.json"
@@ -4184,6 +4185,8 @@ def render_baselining_decision_log(output_root):
     lines = [
         "# IPOPT Baselining Decision Log",
         "",
+        "This generated resource is stored with the Testatron IPOPT contracts.",
+        "",
         "This generated log documents the final, two-attempt IPOPT replay evidence "
         "for every immutable Testatron SNOPT case. It is generated from the fixed "
         "baselining evidence root; source `.emtgopt` files and SNOPT `.emtg` "
@@ -4342,9 +4345,12 @@ def promote_tutorial_baselining_case(
     if summary.get("case_id") != case.case_id:
         raise ValueError("Tutorial promotion result does not match the requested case")
     if summary.get("classification") != "matched_tutorial_reference":
-        raise ValueError("Tutorial promotion requires matched_tutorial_reference")
+        raise ValueError(
+            "classification is "
+            f"{summary.get('classification')!r}; requires matched_tutorial_reference"
+        )
     if not summary.get("promotion_eligible"):
-        raise ValueError("Tutorial promotion requires promotion-eligible evidence")
+        raise ValueError("case evidence is not promotion-eligible")
     if not repeatability.get("stable") or not (summary.get("repeatability") or {}).get(
         "stable"
     ):
@@ -4443,7 +4449,7 @@ def _promotion_case_paths(case_identifier, output_root, tests_root=TESTS_ROOT):
         source_options,
         baseline_mission,
         output_root / "baselining" / relative_case,
-        output_root / relative_case,
+        output_root / BASELINING_PROMOTED_DIRECTORY / relative_case,
     )
 
 
@@ -4850,8 +4856,7 @@ def build_parser():
     )
     parser.add_argument(
         "--tutorial-verification-output",
-        default=str(DEFAULT_TUTORIAL_BASELINING_VERIFICATION),
-        help="output path for --write-tutorial-baselining-verification",
+        help="required output path for --write-tutorial-baselining-verification",
     )
     parser.add_argument(
         "--verify-baselining",
@@ -4869,8 +4874,10 @@ def build_parser():
     )
     parser.add_argument(
         "--tutorial-verification-reference",
-        default=str(DEFAULT_TUTORIAL_BASELINING_VERIFICATION),
-        help="accepted reference path for --verify-tutorial-baselining",
+        help=(
+            "required accepted reference path for --verify-tutorial-baselining "
+            "and --promote-tutorial-baseline"
+        ),
     )
     parser.add_argument(
         "--verification-report-output",
@@ -4878,7 +4885,7 @@ def build_parser():
     )
     parser.add_argument(
         "--tutorial-verification-report-output",
-        help="optional report path for --verify-tutorial-baselining",
+        help="required report path for --verify-tutorial-baselining",
     )
     parser.add_argument(
         "--promote-baseline",
@@ -4980,6 +4987,11 @@ def main(argv=None):
         )
         return 0
     if args.write_tutorial_baselining_verification:
+        if not args.tutorial_verification_output:
+            raise SystemExit(
+                "--tutorial-verification-output is required with "
+                "--write-tutorial-baselining-verification"
+            )
         verification_path, verification = write_tutorial_baselining_verification(
             output_root, args.tutorial_verification_output
         )
@@ -5005,13 +5017,20 @@ def main(argv=None):
         )
         return 0 if report["acceptable"] else 1
     if args.verify_tutorial_baselining:
+        if not args.tutorial_verification_reference:
+            raise SystemExit(
+                "--tutorial-verification-reference is required with "
+                "--verify-tutorial-baselining"
+            )
+        if not args.tutorial_verification_report_output:
+            raise SystemExit(
+                "--tutorial-verification-report-output is required with "
+                "--verify-tutorial-baselining"
+            )
         report = verify_tutorial_baselining_verification(
             output_root, args.tutorial_verification_reference
         )
-        report_path = Path(
-            args.tutorial_verification_report_output
-            or output_root / "baselining" / "tutorial-baselining-verification-report.json"
-        )
+        report_path = Path(args.tutorial_verification_report_output)
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         print(
@@ -5025,19 +5044,29 @@ def main(argv=None):
             raise SystemExit(
                 "--approve-baseline is required with a promotion command"
             )
-        if args.promote_tutorial_baseline:
-            promotion = promote_tutorial_baselining_case(
-                args.promote_tutorial_baseline,
-                output_root,
-                replace=args.replace_promoted,
-                verification_path=args.tutorial_verification_reference,
-            )
-        else:
-            promotion = promote_baselining_case(
-                args.promote_baseline,
-                output_root,
-                replace=args.replace_promoted,
-            )
+        case_identifier = args.promote_tutorial_baseline or args.promote_baseline
+        try:
+            if args.promote_tutorial_baseline:
+                if not args.tutorial_verification_reference:
+                    raise SystemExit(
+                        "--tutorial-verification-reference is required with "
+                        "--promote-tutorial-baseline"
+                    )
+                promotion = promote_tutorial_baselining_case(
+                    args.promote_tutorial_baseline,
+                    output_root,
+                    replace=args.replace_promoted,
+                    verification_path=args.tutorial_verification_reference,
+                )
+            else:
+                promotion = promote_baselining_case(
+                    args.promote_baseline,
+                    output_root,
+                    replace=args.replace_promoted,
+                )
+        except ValueError as error:
+            print(f"Not promoted {case_identifier}: {error}", file=sys.stderr)
+            return 1
         print(f"Promoted {promotion['case_id']} from {promotion['selected_attempt']}")
         return 0
     if not args.emtg:

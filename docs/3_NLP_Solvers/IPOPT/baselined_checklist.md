@@ -11,8 +11,8 @@ but are not eligible for promotion. No final case is topology-changed,
 parse-failed, dependency-blocked, process-failed, or timed out.
 
 `recorded` in **Decision Log** means the generated companion
-[`baselining_case_decision_log.md`](baselining_case_decision_log.md) contains
-the case. **Candidate Artifact** distinguishes retained baselining evidence
+[`baselining_case_decision_log.md`](../../../testatron/ipopt/tests/baselining_case_decision_log.md)
+contains the case. **Candidate Artifact** distinguishes retained baselining evidence
 from a promoted curated result. A `not eligible` manual decision means the
 case is an immutable-SNOPT mismatch, not that it failed to run or current-state
 verification.
@@ -211,4 +211,3 @@ No paired cases. This directory contains the placement marker only.
 | 135 | `transcription_tests/PSBI_EMintercept` | `d9d3f3ddaaef7aa00d8a0ee5bccb70c8f68ecd33df9050e0fc4f902a56dd132e` | `c21fd0f23aab577141d7254d7db4ad41d89d4d0c1bb0b97b595225fe40700aef` | mismatch_snopt | not run | mismatch_snopt | recorded | baselining evidence | not eligible | not created |
 | 136 | `transcription_tests/PSFB_EMintercept` | `de2a0a93c7e14b24a6a6823f8e2cad8201611786db985e1b6e78164d547cedc4` | `e778f3352bf8aafa1a2b980f2de4b846c21bdc725cab4d78743b30e967b42f58` | mismatch_snopt | not run | mismatch_snopt | recorded | baselining evidence | not eligible | not created |
 | 137 | `transcription_tests/SundmanCoastPhase_EMintercept` | `ba38300a0a97f49c02392a032ca855d8c686b4c794994956c3d617dfdb013579` | `5eaf56c07daeda784c88ef288d7a6d90eb92b68bd0f39717f05b350f0d96a02a` | mismatch_snopt | not run | mismatch_snopt | recorded | baselining evidence | not eligible | not created |
-

@@ -904,7 +904,7 @@ in `compatibility.json`; it does not modify immutable inputs or claim that the
 mapped resources reproduce the historical SNOPT environment.
 
 The generated companion record is
-[`baselining_case_decision_log.md`](baselining_case_decision_log.md). It must
+[`baselining_case_decision_log.md`](../../../testatron/ipopt/tests/baselining_case_decision_log.md). It must
 not replace or overwrite the narrative
 [`baselining_decision_log.md`](baselining_decision_log.md). The artifact root
 contains replaceable batch evidence; promotion into the curated case root

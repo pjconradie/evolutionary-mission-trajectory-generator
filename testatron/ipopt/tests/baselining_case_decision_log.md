@@ -1,5 +1,7 @@
 # IPOPT Baselining Decision Log
 
+This generated resource is stored with the Testatron IPOPT contracts.
+
 This generated log documents the final, two-attempt IPOPT replay evidence for every immutable Testatron SNOPT case. It is generated from the fixed baselining evidence root; source `.emtgopt` files and SNOPT `.emtg` baselines are not modified.
 
 ## Universal Runtime Staging

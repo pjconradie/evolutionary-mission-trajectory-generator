@@ -36,7 +36,7 @@ and applied settings. Each schema, replay, and refinement directory retains
 both its EMTG-native `run.log` and the Docker probe capture
 `docker-probe.log`; no tutorial probe logs are written at the benchmark root.
 
-## Complete Tutorial Case List
+## Complete tutorial case list
 
 ```zsh
 tutorial_baselining_case 'Config_Files/LowSIRIS-REx'
@@ -64,9 +64,48 @@ tutorial_baselining_case 'Flybys/HighFidelity'
 tutorial_baselining_case 'Flybys/EVM_singlePhase'
 ```
 
-These 17 commands produce 33 tutorial stage outcomes: 17 replay stages and 16
-refinement stages.
+## Promotion
 
+```zsh
+promote_tutorial_if_matched() {
+	local case_id="$1"
+	shift
+	.venv/bin/python testatron/ipopt_characterization.py \
+		--promote-tutorial-baseline "$case_id" \
+		--approve-baseline \
+		--output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+		--tutorial-verification-reference \
+		"$PWD/testatron/ipopt/tests/tutorial_baselining_verification.json" \
+		"$@"
+}
+```
+
+
+```zsh
+promote_tutorial_if_matched 'Config_Files/LowSIRIS-REx'
+promote_tutorial_if_matched 'Config_Files/LowSIRIS-REx_high_thrust'
+promote_tutorial_if_matched 'Config_Files/LowSIRIS-REx_high_thrust_low_c3'
+
+promote_tutorial_if_matched 'Journey_Boundaries/EVM'
+promote_tutorial_if_matched 'Journey_Boundaries/EVM_freepoint'
+
+promote_tutorial_if_matched 'OSIRIS-REx/OSIRIS-REx'
+
+promote_tutorial_if_matched 'Force_Models/LowSIRIS-REx_forcemodel_nlp'
+promote_tutorial_if_matched 'Force_Models/LowSIRIS-REx'
+promote_tutorial_if_matched 'Force_Models/LowSIRIS-REx_forcemodel'
+
+promote_tutorial_if_matched 'LowSIRIS-REx/LowSIRIS-REx_FBLT'
+promote_tutorial_if_matched 'LowSIRIS-REx/LowSIRIS-REx'
+
+promote_tutorial_if_matched 'Constraint_Scripting/EVM_freepoint_boundary_constraint'
+promote_tutorial_if_matched 'Constraint_Scripting/EVM_freepoint'
+promote_tutorial_if_matched 'Constraint_Scripting/EVM_freepoint_maneuver_constraint'
+
+promote_tutorial_if_matched 'Flybys/EVM'
+promote_tutorial_if_matched 'Flybys/HighFidelity'
+promote_tutorial_if_matched 'Flybys/EVM_singlePhase'
+```
 ## Evidence Layout
 
 For `group/case`, the launcher writes:
@@ -130,7 +169,9 @@ tutorial baselining command.
 ```zsh
 python testatron/ipopt_characterization.py \
 	--write-tutorial-baselining-verification \
-	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+	--tutorial-verification-output \
+	"$PWD/testatron/ipopt/tests/tutorial_baselining_verification.json"
 ```
 
 Do not treat that candidate as accepted until it has been reviewed and
@@ -140,11 +181,15 @@ verification then uses that accepted file:
 ```zsh
 python testatron/ipopt_characterization.py \
 	--verify-tutorial-baselining \
-	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+	--tutorial-verification-reference \
+	"$PWD/testatron/ipopt/tests/tutorial_baselining_verification.json" \
+	--tutorial-verification-report-output \
+	"$PWD/testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json"
 ```
 
 It writes
-`testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-verification-report.json`
+`testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json`
 and rejects missing or unexpected case-stage evidence, source/reference or
 dependency-inventory changes, repeatability failures, execution/topology
 changes, and numeric drift beyond the tutorial verification policy.
@@ -167,7 +212,9 @@ one eligible case with:
 python testatron/ipopt_characterization.py \
 	--promote-tutorial-baseline 'Config_Files/LowSIRIS-REx' \
 	--approve-baseline \
-	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+	--tutorial-verification-reference \
+	"$PWD/testatron/ipopt/tests/tutorial_baselining_verification.json"
 ```
 
 The curated package is written below:

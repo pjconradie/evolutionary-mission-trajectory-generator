@@ -1,0 +1,17 @@
+{
+  "status": "approved",
+  "case_id": "physics_options/physicsoptions_add3rdbody",
+  "source_options": {
+    "path": "testatron/tests/physics_options/physicsoptions_add3rdbody.emtgopt",
+    "sha256": "7e0e16400f724c1e917c9198ce926a69fcd679091680de9ecd632679c6f3f5ce"
+  },
+  "baseline_mission": {
+    "path": "testatron/tests/physics_options/physicsoptions_add3rdbody.emtg",
+    "sha256": "61638026eeb24414cf43b8fda51b97edb44d034ab9248596c27f6d6b3593ff60"
+  },
+  "baselining_policy": {
+    "path": "testatron/ipopt/tests/baselining_policy.json",
+    "sha256": "209ce05f2e3e708e4368a1e40175275249ff43587c3e4ef6df00d527e007e1c3",
+    "version": 2
+  }
+}

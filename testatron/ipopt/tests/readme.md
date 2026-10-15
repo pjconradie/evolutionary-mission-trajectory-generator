@@ -203,7 +203,7 @@ make one result pass.
 
 Baselining evidence is replaceable and remains under `baselining/`. Promotion
 is a separate, explicit action that creates a curated result below
-`testatron/ipopt/tests/tests/<group>/<case>/`. It never runs automatically as
+`testatron/ipopt/tests/tests/tests-promoted-baselines/<group>/<case>/`. It never runs automatically as
 part of a pytest baselining command.
 
 Before promotion, a reviewer must record approval in

@@ -192,6 +192,9 @@ def test_tutorial_baselining_contract_paths_are_separate_from_corpus_contracts(
 ):
     tutorial_contract_root = repository_root / "testatron/ipopt/tests"
 
+    assert ipopt_characterization.DEFAULT_BASELINING_DECISION_LOG == (
+        tutorial_contract_root / "baselining_case_decision_log.md"
+    )
     assert ipopt_characterization.TUTORIAL_BASELINING_POLICY == (
         tutorial_contract_root / "tutorial_baselining_policy.json"
     )
@@ -2545,7 +2548,11 @@ def test_promote_baselining_case_copies_verified_canonical_evidence(
         ipopt_characterization.case_id(source), tmp_path
     )
 
-    curated_root = tmp_path / ipopt_characterization.case_id(source)
+    curated_root = (
+        tmp_path
+        / ipopt_characterization.BASELINING_PROMOTED_DIRECTORY
+        / ipopt_characterization.case_id(source)
+    )
     assert promotion["selected_attempt"] == "attempt-1"
     assert (curated_root / f"{source.stem}.emtg").is_file()
     assert (curated_root / "promotion.json").is_file()
@@ -2569,7 +2576,11 @@ def test_promote_baselining_case_rejects_nonmatching_evidence_without_overwrite(
     summary = json.loads(summary_path.read_text())
     summary["first"]["classification"] = "mismatch_snopt"
     summary_path.write_text(json.dumps(summary))
-    curated_root = tmp_path / ipopt_characterization.case_id(source)
+    curated_root = (
+        tmp_path
+        / ipopt_characterization.BASELINING_PROMOTED_DIRECTORY
+        / ipopt_characterization.case_id(source)
+    )
     curated_root.mkdir(parents=True)
     sentinel = curated_root / "keep.txt"
     sentinel.write_text("preserve\n")
@@ -2592,7 +2603,9 @@ def test_promote_baselining_case_requires_explicit_curated_replacement(
     _write_promotable_baselining_evidence(tmp_path, source)
     case_identifier = ipopt_characterization.case_id(source)
     ipopt_characterization.promote_baselining_case(case_identifier, tmp_path)
-    curated_root = tmp_path / case_identifier
+    curated_root = (
+        tmp_path / ipopt_characterization.BASELINING_PROMOTED_DIRECTORY / case_identifier
+    )
     sentinel = curated_root / "keep.txt"
     sentinel.write_text("preserve\n")
 
@@ -2789,6 +2802,65 @@ def test_main_requires_manual_approval_for_tutorial_promotion(tmp_path):
                 str(tmp_path),
             ]
         )
+
+
+@pytest.mark.parametrize(
+    ("arguments", "message"),
+    (
+        (
+            ["--write-tutorial-baselining-verification"],
+            "tutorial-verification-output",
+        ),
+        (
+            ["--verify-tutorial-baselining"],
+            "tutorial-verification-reference",
+        ),
+        (
+            [
+                "--verify-tutorial-baselining",
+                "--tutorial-verification-reference",
+                "accepted-reference.json",
+            ],
+            "tutorial-verification-report-output",
+        ),
+    ),
+)
+def test_main_requires_explicit_tutorial_verification_paths(
+    tmp_path, arguments, message
+):
+    with pytest.raises(SystemExit, match=message):
+        ipopt_characterization.main([*arguments, "--output-root", str(tmp_path)])
+
+
+def test_main_reports_tutorial_promotion_refusal_without_traceback(
+    tmp_path, monkeypatch, capsys
+):
+    def refuse_promotion(*args, **kwargs):
+        raise ValueError("case evidence is not promotion-eligible")
+
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "promote_tutorial_baselining_case",
+        refuse_promotion,
+    )
+
+    exit_code = ipopt_characterization.main(
+        [
+            "--promote-tutorial-baseline",
+            "Force_Models/LowSIRIS-REx_forcemodel",
+            "--approve-baseline",
+            "--tutorial-verification-reference",
+            "accepted-reference.json",
+            "--output-root",
+            str(tmp_path),
+        ]
+    )
+
+    assert exit_code == 1
+    assert capsys.readouterr().err == (
+        "Not promoted Force_Models/LowSIRIS-REx_forcemodel: "
+        "case evidence is not promotion-eligible\n"
+    )
 
 
 def test_main_dispatches_baselining_to_fixed_batch_root(

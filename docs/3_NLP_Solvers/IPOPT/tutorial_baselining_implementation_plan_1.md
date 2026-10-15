@@ -71,7 +71,7 @@ A list of 33 independent stage commands would split replay/refinement evidence f
    │       ├── repeatability.json
    │       └── result.json
    ├── tutorial-baselining-summary.json
-   └── tutorial-baselining-verification-report.json
+   └── tutorial_baselining_verification_report.json
    ```
 
 3. Place tutorial JSON contracts exactly as you specified under `testatron/ipopt/tests/`.

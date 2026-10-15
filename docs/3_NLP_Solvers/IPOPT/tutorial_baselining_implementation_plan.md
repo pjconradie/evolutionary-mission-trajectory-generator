@@ -51,7 +51,7 @@ testatron/ipopt/tests/benchmarks/baselining/
 │       ├── repeatability.json
 │       └── result.json
 ├── tutorial-baselining-summary.json
-└── tutorial-baselining-verification-report.json
+└── tutorial_baselining_verification_report.json
 
 testatron/ipopt/tests/tutorial_baselining_verification.json
 testatron/ipopt/tests/tutorial_baselining_case_decision_log.md
