@@ -48,11 +48,14 @@ python -m pytest tests/test_ipopt_characterization.py -q
 Docker required. Estimated runtime order of magnitude minutes:
 
 ```zsh
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \ python -m pytest -m ipopt_benchmarks -q
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \ 
+	python -m pytest -m ipopt_benchmarks -q
 
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \ python -m pytest -m ipopt_tests -q
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \
+	python -m pytest -m ipopt_tests -q
 
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \ python -m pytest -m integration -q
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \ 
+	python -m pytest -m integration -q
 ```
 
 9, 10
@@ -871,4 +874,3 @@ The portable IPOPT Testatron implementation is complete when:
 6. `pytest -m ipopt_tests` and `pytest -m ipopt_benchmarks` both pass, and
 	plain pytest collection includes both core marker groups.
 
-test
