@@ -69,12 +69,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "tests.readme"
+              "title": "baselining_case_decision_log"
+            }
+          },
+          {
+            "id": "7d3e676a9f6ad44f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "testatron/ipopt/tests/tutorial_baselining_case_decision_log.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "tutorial_baselining_case_decision_log"
             }
           },
           {
@@ -120,7 +134,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -182,7 +196,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 301.06640625
+    "width": 441.98046875
   },
   "right": {
     "id": "66aa8d3610c9c55c",
@@ -285,22 +299,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "65db72b700f3bb04",
+  "active": "7d3e676a9f6ad44f",
   "lastOpenFiles": [
-    "testatron/ipopt/tests/benchmarks/baselining/Config_Files/LowSIRIS-REx_high_thrust_low_c3/attempt-1 3",
+    "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
+    "testatron/ipopt/tests/tutorial_baselining_case_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan_1.md",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/result.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/repeatability.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/result.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/provenance.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/result.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/comparison.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM.mission_maneuver_spec",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM.mission_target_spec",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM.emtg",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM/attempt-2/refinement/EVM_Sun(EVM)XFfile.csv",
-    "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+    "testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint/result 2.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint/repeatability 2.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint/attempt-2 2",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint/attempt-1 3",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint_boundary_constraint/repeatability 2.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint_boundary_constraint/attempt-2 2",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint_boundary_constraint/result 2.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Constraint_Scripting/EVM_freepoint_boundary_constraint/attempt-1 3",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2 2",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
     "testatron/ipopt/tests/readme.md",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
@@ -308,7 +323,6 @@
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan.md",
     "2026-10-14.md",
-    "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.adsgnc_specifications.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/legacy/open_source_emtg_container_plan.md",

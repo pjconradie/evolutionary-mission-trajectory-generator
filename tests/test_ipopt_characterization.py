@@ -392,6 +392,155 @@ def test_tutorial_baselining_accepts_declared_replay_only_case():
         )
 
 
+def _write_tutorial_verification_evidence(tmp_path):
+    for case in ipopt_characterization.TUTORIAL_CASES:
+        case_root = tmp_path / "baselining" / case.case_id
+        first = {
+            "source_sha256": f"{case.case_id}-source",
+            "reference_sha256": f"{case.case_id}-reference",
+            "inventory": {
+                "status": "ready",
+                "files": [{"role": "source_options", "sha256": "source"}],
+                "missing": [],
+            },
+        }
+        second = json.loads(json.dumps(first))
+        for stage in case.stages:
+            stage_result = {
+                "classification": "completed",
+                "acceptable": True,
+                "comparison": {"checks": {"event_topology": True}},
+                "output_file": f"{stage}.emtg",
+            }
+            first[stage] = stage_result
+            second[stage] = json.loads(json.dumps(stage_result))
+        result = {
+            "case_id": case.case_id,
+            "taxonomy": case.taxonomy,
+            "stages": list(case.stages),
+            "first": first,
+            "second": second,
+            "repeatability": {"stable": True, "differences": {}},
+            "classification": "matched_tutorial_reference",
+            "promotion_eligible": True,
+        }
+        case_root.mkdir(parents=True)
+        (case_root / "result.json").write_text(json.dumps(result))
+
+
+def _tutorial_snapshot(objective):
+    return {
+        "objective": objective,
+        "schema": {"decision_vector_length": 1, "decision_descriptions": ["x"]},
+        "topology": [[["launch", "Earth"], ["arrival", "Mars"]]],
+        "flight_time_years": 1.0,
+        "final_mass_kg": 2.0,
+        "deterministic_deltav_km_s": 3.0,
+        "endpoints": [
+            {
+                "journey_index": 0,
+                "start": {
+                    "epoch_julian_date": 1.0,
+                    "position_km": [1.0, 2.0, 3.0],
+                    "velocity_km_s": [4.0, 5.0, 6.0],
+                    "mass_kg": 7.0,
+                },
+                "end": {
+                    "epoch_julian_date": 8.0,
+                    "position_km": [9.0, 10.0, 11.0],
+                    "velocity_km_s": [12.0, 13.0, 14.0],
+                    "mass_kg": 15.0,
+                },
+            }
+        ],
+    }
+
+
+def test_tutorial_summary_requires_complete_17_case_33_stage_suite(tmp_path):
+    _write_tutorial_verification_evidence(tmp_path)
+
+    summary_path, summary = ipopt_characterization.write_tutorial_baselining_summary(
+        tmp_path
+    )
+
+    assert summary_path == tmp_path / "baselining/tutorial-baselining-summary.json"
+    assert summary["case_count"] == 17
+    assert summary["stage_count"] == 33
+    assert summary["missing_cases"] == []
+    assert summary["unexpected_cases"] == []
+    assert summary["incomplete_cases"] == []
+
+
+def test_tutorial_verification_is_stage_qualified_and_detects_drift(
+    tmp_path, monkeypatch
+):
+    _write_tutorial_verification_evidence(tmp_path)
+    objective = [1.0]
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "_tutorial_mission_snapshot",
+        lambda stage_result, stage_directory: _tutorial_snapshot(objective[0]),
+    )
+    reference_path = tmp_path / "reference.json"
+
+    _, reference = ipopt_characterization.write_tutorial_baselining_verification(
+        tmp_path, reference_path
+    )
+
+    assert reference["case_count"] == 17
+    assert reference["stage_count"] == 33
+    assert all({"case_id", "stage"} <= set(record) for record in reference["stages"])
+    assert ipopt_characterization.verify_tutorial_baselining_verification(
+        tmp_path, reference_path
+    )["acceptable"]
+
+    objective[0] = 2.0
+    report = ipopt_characterization.verify_tutorial_baselining_verification(
+        tmp_path, reference_path
+    )
+    assert any(record["status"] == "numeric_drift" for record in report["stages"])
+
+
+def test_tutorial_verification_detects_dependency_change(tmp_path, monkeypatch):
+    _write_tutorial_verification_evidence(tmp_path)
+    monkeypatch.setattr(
+        ipopt_characterization,
+        "_tutorial_mission_snapshot",
+        lambda stage_result, stage_directory: _tutorial_snapshot(1.0),
+    )
+    reference_path = tmp_path / "reference.json"
+    ipopt_characterization.write_tutorial_baselining_verification(
+        tmp_path, reference_path
+    )
+    result_path = (
+        tmp_path / "baselining/Config_Files/LowSIRIS-REx/result.json"
+    )
+    result = json.loads(result_path.read_text())
+    result["first"]["inventory"]["files"][0]["sha256"] = "changed"
+    result_path.write_text(json.dumps(result))
+
+    report = ipopt_characterization.verify_tutorial_baselining_verification(
+        tmp_path, reference_path
+    )
+
+    assert any(record["status"] == "execution_changed" for record in report["stages"])
+
+
+def test_tutorial_decision_log_renders_every_case_and_stage(tmp_path):
+    _write_tutorial_verification_evidence(tmp_path)
+
+    document_path, case_count = ipopt_characterization.write_tutorial_baselining_decision_log(
+        tmp_path, tmp_path / "tutorial-log.md"
+    )
+    document = document_path.read_text()
+
+    assert case_count == 17
+    assert "## Journey_Boundaries/EVM_freepoint" in document
+    assert "### replay" in document
+    assert "### refinement" in document
+    assert "Promotion eligible: `True`." in document
+
+
 def test_repeatable_tutorial_baselining_writes_two_attempts(tmp_path, repository_root):
     case = ipopt_characterization.TUTORIAL_CASES[0]
     calls = []

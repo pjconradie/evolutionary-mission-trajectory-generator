@@ -89,5 +89,60 @@ testatron/ipopt/tests/benchmarks/baselining/group/case/
 and reports `dependency_blocked` rather than running EMTG when a required
 hardware, universe, ephemeris, or seed file is unavailable.
 
-Tutorial summary, decision-log, verification-reference, and promotion commands
-will be added after their corresponding implementation phases.
+## Reporting and Current-State Verification
+
+Run these only after all 17 case commands have completed and their evidence has
+been reviewed. They operate only on
+`testatron/ipopt/tests/benchmarks/baselining/`; they do not read or change the
+137-case corpus evidence root.
+
+```zsh
+tutorial_baselining_report() {
+	python testatron/ipopt_characterization.py \
+		--summarize-tutorial-baselining \
+		--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+	python testatron/ipopt_characterization.py \
+		--write-tutorial-baselining-decision-log \
+		--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+}
+
+tutorial_baselining_report
+```
+
+This writes:
+
+```text
+testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json
+testatron/ipopt/tests/tutorial_baselining_case_decision_log.md
+```
+
+The summary requires 17 tutorial cases and 33 case-stage records. The decision
+log renders both attempts, dependency status, stage result, repeatability,
+classification, and promotion eligibility for every case.
+
+Create a tutorial verification candidate only after manually reviewing those
+two reports. This command overwrites
+`tutorial_baselining_verification.json`; it is never run automatically by a
+tutorial baselining command.
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--write-tutorial-baselining-verification \
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+```
+
+Do not treat that candidate as accepted until it has been reviewed and
+intentionally retained as the tutorial current-state contract. Ordinary
+verification then uses that accepted file:
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--verify-tutorial-baselining \
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+```
+
+It writes
+`testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-verification-report.json`
+and rejects missing or unexpected case-stage evidence, source/reference or
+dependency-inventory changes, repeatability failures, execution/topology
+changes, and numeric drift beyond the tutorial verification policy.

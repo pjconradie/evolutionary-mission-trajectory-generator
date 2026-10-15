@@ -3279,6 +3279,395 @@ def run_repeatable_tutorial_baselining_case(
     return result
 
 
+def _tutorial_result_paths(output_root):
+    """Return only case-level tutorial results below the isolated evidence root."""
+    return sorted(
+        (Path(output_root) / "baselining").glob("*/*/result.json"),
+        key=lambda path: path.parent.as_posix(),
+    )
+
+
+def _tutorial_expected_stage_keys():
+    """Return the fixed case/stage identity set for tutorial verification."""
+    return {
+        (case.case_id, stage)
+        for case in TUTORIAL_CASES
+        for stage in case.stages
+    }
+
+
+def _tutorial_mission_snapshot(stage_result, stage_directory):
+    """Extract portable generated-mission values for tutorial drift checks."""
+    output_name = stage_result.get("output_file")
+    if not output_name:
+        return None
+    mission_path = Path(stage_directory) / output_name
+    if not mission_path.is_file():
+        raise ValueError(f"Tutorial stage output is missing: {mission_path}")
+    Mission, _ = _load_pyemtg()
+    mission = Mission.Mission(str(mission_path))
+    return {
+        "objective": mission.objective_value,
+        "schema": {
+            "decision_vector_length": len(mission.DecisionVector),
+            "decision_descriptions": [
+                _normalized_description(description)
+                for description in mission.Xdescriptions
+            ],
+        },
+        "topology": _event_topology(mission),
+        "flight_time_years": mission.total_flight_time_years,
+        "final_mass_kg": mission.final_mass_including_propellant_margin,
+        "deterministic_deltav_km_s": mission.total_deterministic_deltav,
+        "endpoints": _baselining_endpoint_summary(mission),
+    }
+
+
+def _tutorial_verification_stage_record(stage, stage_result, stage_directory):
+    """Build one stage-level tutorial verification record from saved evidence."""
+    if stage_result is None:
+        return {
+            "stage": stage,
+            "state": "not_run",
+            "reason": "replay_not_acceptable",
+        }
+    comparison = stage_result.get("comparison") or {}
+    ipopt = comparison.get("ipopt")
+    return {
+        "stage": stage,
+        "execution": {
+            "classification": stage_result.get("classification"),
+            "acceptable": bool(stage_result.get("acceptable")),
+            "detail": stage_result.get("detail", ""),
+            "has_output": bool(stage_result.get("output_file")),
+            "checks": comparison.get("checks"),
+            "native_exit": ipopt.get("native_exit") if ipopt else None,
+        },
+        "snapshot": _tutorial_mission_snapshot(stage_result, stage_directory),
+    }
+
+
+def _tutorial_verification_case_records(case_root, result):
+    """Build flattened, case-qualified tutorial stage records."""
+    first = result.get("first") or {}
+    second = result.get("second") or {}
+    inventory = first.get("inventory") or {}
+    records = []
+    for stage in result.get("stages", []):
+        records.append(
+            {
+                "case_id": result["case_id"],
+                "stage": stage,
+                "taxonomy": result.get("taxonomy"),
+                "classification": result.get("classification"),
+                "promotion_eligible": bool(result.get("promotion_eligible")),
+                "source_sha256": first.get("source_sha256"),
+                "reference_sha256": first.get("reference_sha256"),
+                "dependency_inventory": inventory,
+                "repeatability": result.get("repeatability") or {},
+                "attempts": {
+                    "first": _tutorial_verification_stage_record(
+                        stage,
+                        first.get(stage),
+                        Path(case_root) / "attempt-1" / stage,
+                    ),
+                    "second": _tutorial_verification_stage_record(
+                        stage,
+                        second.get(stage),
+                        Path(case_root) / "attempt-2" / stage,
+                    ),
+                },
+            }
+        )
+    return records
+
+
+def write_tutorial_baselining_summary(output_root=TUTORIAL_BASELINING_ROOT):
+    """Write completeness and classification evidence for the tutorial suite."""
+    results = {}
+    for result_path in _tutorial_result_paths(output_root):
+        result = _read_baselining_json(result_path, "tutorial baselining result")
+        identifier = result.get("case_id")
+        if not identifier:
+            raise ValueError(f"Tutorial result has no case_id: {result_path}")
+        if identifier in results:
+            raise ValueError(f"Duplicate tutorial result for {identifier}")
+        results[identifier] = result
+    expected = {case.case_id: case for case in TUTORIAL_CASES}
+    missing_cases = sorted(set(expected) - set(results))
+    unexpected_cases = sorted(set(results) - set(expected))
+    incomplete = []
+    for identifier, case in expected.items():
+        result = results.get(identifier)
+        if result is None:
+            continue
+        if result.get("stages") != list(case.stages):
+            incomplete.append(
+                {
+                    "case_id": identifier,
+                    "reason": "declared_stage_set_changed",
+                }
+            )
+            continue
+        for attempt in ("first", "second"):
+            attempt_result = result.get(attempt) or {}
+            if attempt_result.get("inventory", {}).get("status") != "ready":
+                incomplete.append(
+                    {"case_id": identifier, "reason": f"{attempt}_inventory_not_ready"}
+                )
+            if not attempt_result.get("replay"):
+                incomplete.append(
+                    {"case_id": identifier, "reason": f"{attempt}_replay_missing"}
+                )
+    classification_counts = {
+        classification: sum(
+            result.get("classification") == classification
+            for result in results.values()
+        )
+        for classification in TUTORIAL_BASELINING_CLASSIFICATIONS
+    }
+    summary = {
+        "version": 1,
+        "expected_case_count": len(TUTORIAL_CASES),
+        "expected_stage_count": len(_tutorial_expected_stage_keys()),
+        "case_count": len(results),
+        "stage_count": sum(len(result.get("stages", [])) for result in results.values()),
+        "classification_counts": classification_counts,
+        "replay_only_deliberate_infeasible_case_count": sum(
+            case.taxonomy == "deliberate_infeasible" for case in TUTORIAL_CASES
+        ),
+        "missing_cases": missing_cases,
+        "unexpected_cases": unexpected_cases,
+        "incomplete_cases": incomplete,
+        "cases": [
+            {
+                "case_id": identifier,
+                "classification": results[identifier].get("classification"),
+                "repeatability_stable": bool(
+                    (results[identifier].get("repeatability") or {}).get("stable")
+                ),
+                "source_sha256": (results[identifier].get("first") or {}).get(
+                    "source_sha256"
+                ),
+                "reference_sha256": (results[identifier].get("first") or {}).get(
+                    "reference_sha256"
+                ),
+                "dependency_status": (
+                    (results[identifier].get("first") or {})
+                    .get("inventory", {})
+                    .get("status")
+                ),
+            }
+            for identifier in sorted(results)
+        ],
+    }
+    summary_path = Path(output_root) / "baselining" / "tutorial-baselining-summary.json"
+    summary_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return summary_path, summary
+
+
+def build_tutorial_baselining_verification(
+    output_root=TUTORIAL_BASELINING_ROOT,
+    policy_path=TUTORIAL_BASELINING_VERIFICATION_POLICY,
+):
+    """Build a complete 33-stage tutorial current-state verification candidate."""
+    policy = load_tutorial_baselining_verification_policy(policy_path)
+    records = []
+    for result_path in _tutorial_result_paths(output_root):
+        result = _read_baselining_json(result_path, "tutorial baselining result")
+        records.extend(_tutorial_verification_case_records(result_path.parent, result))
+    observed_keys = {(record["case_id"], record["stage"]) for record in records}
+    expected_keys = _tutorial_expected_stage_keys()
+    if len(records) != len(expected_keys) or observed_keys != expected_keys:
+        raise ValueError(
+            "Tutorial verification requires exactly the registered 33 case/stage records"
+        )
+    records.sort(key=lambda record: (record["case_id"], record["stage"]))
+    return {
+        "version": 1,
+        "policy": {"version": policy["version"], "sha256": _sha256(policy_path)},
+        "case_count": len(TUTORIAL_CASES),
+        "stage_count": len(records),
+        "stages": records,
+    }
+
+
+def write_tutorial_baselining_verification(
+    output_root=TUTORIAL_BASELINING_ROOT,
+    verification_path=DEFAULT_TUTORIAL_BASELINING_VERIFICATION,
+    policy_path=TUTORIAL_BASELINING_VERIFICATION_POLICY,
+):
+    """Explicitly write a review candidate; never called by tutorial execution."""
+    verification_path = Path(verification_path)
+    verification = build_tutorial_baselining_verification(output_root, policy_path)
+    verification_path.parent.mkdir(parents=True, exist_ok=True)
+    verification_path.write_text(
+        json.dumps(verification, indent=2) + "\n", encoding="utf-8"
+    )
+    return verification_path, verification
+
+
+def _tutorial_verification_stage_status(expected, actual, tolerances):
+    if expected.get("state") or actual.get("state"):
+        return "matched" if expected == actual else "execution_changed"
+    if expected["execution"] != actual["execution"]:
+        return "execution_changed"
+    return _verification_snapshot_status(
+        expected.get("snapshot"), actual.get("snapshot"), tolerances
+    )
+
+
+def verify_tutorial_baselining_verification(
+    output_root=TUTORIAL_BASELINING_ROOT,
+    verification_path=DEFAULT_TUTORIAL_BASELINING_VERIFICATION,
+    policy_path=TUTORIAL_BASELINING_VERIFICATION_POLICY,
+):
+    """Verify complete tutorial evidence against an accepted 33-stage reference."""
+    reference = _read_baselining_json(
+        verification_path, "tutorial verification reference"
+    )
+    if (
+        reference.get("version") != 1
+        or reference.get("case_count") != len(TUTORIAL_CASES)
+        or reference.get("stage_count") != len(_tutorial_expected_stage_keys())
+    ):
+        raise ValueError("Tutorial verification reference must declare 17 cases and 33 stages")
+    policy = load_tutorial_baselining_verification_policy(policy_path)
+    actual = build_tutorial_baselining_verification(output_root, policy_path)
+    expected = {
+        (record["case_id"], record["stage"]): record
+        for record in reference.get("stages", [])
+    }
+    observed = {
+        (record["case_id"], record["stage"]): record
+        for record in actual["stages"]
+    }
+    statuses = []
+    for key in sorted(set(expected) | set(observed)):
+        reference_record = expected.get(key)
+        observed_record = observed.get(key)
+        if reference_record is None or observed_record is None:
+            status = "missing_evidence"
+        elif not observed_record["repeatability"].get("stable"):
+            status = "unstable"
+        elif any(
+            reference_record[field] != observed_record[field]
+            for field in (
+                "taxonomy",
+                "classification",
+                "promotion_eligible",
+                "source_sha256",
+                "reference_sha256",
+                "dependency_inventory",
+            )
+        ):
+            status = "execution_changed"
+        else:
+            first_status = _tutorial_verification_stage_status(
+                reference_record["attempts"]["first"],
+                observed_record["attempts"]["first"],
+                policy["numeric_tolerances"],
+            )
+            second_status = _tutorial_verification_stage_status(
+                reference_record["attempts"]["second"],
+                observed_record["attempts"]["second"],
+                policy["numeric_tolerances"],
+            )
+            status = first_status if first_status != "matched" else second_status
+        statuses.append({"case_id": key[0], "stage": key[1], "status": status})
+    return {
+        "version": 1,
+        "reference": str(verification_path),
+        "case_count": len(TUTORIAL_CASES),
+        "stage_count": len(statuses),
+        "stages": statuses,
+        "acceptable": all(record["status"] == "matched" for record in statuses),
+    }
+
+
+def render_tutorial_baselining_decision_log(output_root=TUTORIAL_BASELINING_ROOT):
+    """Render an audit log for every declared tutorial case and stage."""
+    results = {}
+    for result_path in _tutorial_result_paths(output_root):
+        result = _read_baselining_json(result_path, "tutorial baselining result")
+        results[result["case_id"]] = result
+    lines = [
+        "# Tutorial IPOPT Baselining Decision Log",
+        "",
+        "This generated log records two-attempt tutorial evidence. Immutable "
+        "tutorial inputs and archived reference packages are never modified.",
+        "",
+        "## Case Records",
+        "",
+    ]
+    for case in TUTORIAL_CASES:
+        result = results.get(case.case_id)
+        lines.extend((f"## {case.case_id}", ""))
+        if result is None:
+            lines.extend(("- Evidence: `missing`.", ""))
+            continue
+        first = result.get("first") or {}
+        inventory = first.get("inventory") or {}
+        repeatability = result.get("repeatability") or {}
+        lines.extend(
+            (
+                f"- Taxonomy: `{case.taxonomy}`.",
+                f"- Classification: `{result.get('classification')}`.",
+                "- Repeatability: `{}`.".format(
+                    "stable" if repeatability.get("stable") else "unstable"
+                ),
+                f"- Promotion eligible: `{bool(result.get('promotion_eligible'))}`.",
+                "- Dependencies: `{}`; missing: `{}`.".format(
+                    inventory.get("status", "unknown"),
+                    len(inventory.get("missing", [])),
+                ),
+                "",
+            )
+        )
+        for stage in case.stages:
+            lines.extend((f"### {stage}", ""))
+            for attempt in ("first", "second"):
+                stage_result = (result.get(attempt) or {}).get(stage)
+                if stage_result is None:
+                    lines.append(f"- {attempt}: not run after replay.")
+                    continue
+                comparison = stage_result.get("comparison") or {}
+                ipopt = comparison.get("ipopt") or {}
+                lines.append(
+                    "- {}: classification `{}`, acceptable `{}`, output `{}`.".format(
+                        attempt,
+                        stage_result.get("classification"),
+                        stage_result.get("acceptable"),
+                        stage_result.get("output_file", "none"),
+                    )
+                )
+                if ipopt:
+                    lines.append(
+                        "- {} IPOPT: exit `{}`, iterations `{}`, terminal violation `{}`.".format(
+                            attempt,
+                            ipopt.get("native_exit"),
+                            _markdown_value(ipopt.get("iterations")),
+                            _markdown_value(
+                                ipopt.get("terminal_constraint_violation")
+                            ),
+                        )
+                    )
+            lines.append("")
+    return "\n".join(lines).rstrip() + "\n", len(TUTORIAL_CASES)
+
+
+def write_tutorial_baselining_decision_log(
+    output_root=TUTORIAL_BASELINING_ROOT,
+    document_path=DEFAULT_TUTORIAL_BASELINING_DECISION_LOG,
+):
+    """Write the generated tutorial decision log without running EMTG."""
+    document_path = Path(document_path)
+    document, case_count = render_tutorial_baselining_decision_log(output_root)
+    document_path.parent.mkdir(parents=True, exist_ok=True)
+    document_path.write_text(document, encoding="utf-8")
+    return document_path, case_count
+
+
 def run_repeatable_baselining_case(*args, attempt_directories=None, **kwargs):
     """Run a case twice and disqualify matching classifications that are unstable."""
     if attempt_directories is None:
@@ -4232,9 +4621,19 @@ def build_parser():
         help="write a compact summary of existing fixed baselining evidence",
     )
     parser.add_argument(
+        "--summarize-tutorial-baselining",
+        action="store_true",
+        help="write a compact summary of existing tutorial baselining evidence",
+    )
+    parser.add_argument(
         "--write-baselining-decision-log",
         action="store_true",
         help="write a complete Markdown decision log from existing baselining evidence",
+    )
+    parser.add_argument(
+        "--write-tutorial-baselining-decision-log",
+        action="store_true",
+        help="write a complete Markdown decision log from tutorial evidence",
     )
     parser.add_argument(
         "--decision-log-output",
@@ -4242,13 +4641,28 @@ def build_parser():
         help="output path for --write-baselining-decision-log",
     )
     parser.add_argument(
+        "--tutorial-decision-log-output",
+        default=str(DEFAULT_TUTORIAL_BASELINING_DECISION_LOG),
+        help="output path for --write-tutorial-baselining-decision-log",
+    )
+    parser.add_argument(
         "--write-baselining-verification",
         action="store_true",
         help="write an explicit current-state verification reference from baselining evidence",
     )
     parser.add_argument(
+        "--write-tutorial-baselining-verification",
+        action="store_true",
+        help="explicitly write a 33-stage tutorial verification candidate",
+    )
+    parser.add_argument(
         "--verification-output",
         help="required output path for --write-baselining-verification",
+    )
+    parser.add_argument(
+        "--tutorial-verification-output",
+        default=str(DEFAULT_TUTORIAL_BASELINING_VERIFICATION),
+        help="output path for --write-tutorial-baselining-verification",
     )
     parser.add_argument(
         "--verify-baselining",
@@ -4256,12 +4670,26 @@ def build_parser():
         help="compare existing baselining evidence with a current-state reference",
     )
     parser.add_argument(
+        "--verify-tutorial-baselining",
+        action="store_true",
+        help="verify tutorial evidence against its accepted 33-stage reference",
+    )
+    parser.add_argument(
         "--verification-reference",
         help="required reference path for --verify-baselining",
     )
     parser.add_argument(
+        "--tutorial-verification-reference",
+        default=str(DEFAULT_TUTORIAL_BASELINING_VERIFICATION),
+        help="accepted reference path for --verify-tutorial-baselining",
+    )
+    parser.add_argument(
         "--verification-report-output",
         help="optional report path for --verify-baselining",
+    )
+    parser.add_argument(
+        "--tutorial-verification-report-output",
+        help="optional report path for --verify-tutorial-baselining",
     )
     parser.add_argument(
         "--promote-baseline",
@@ -4321,11 +4749,27 @@ def main(argv=None):
         summary_path, summary = write_baselining_summary(output_root)
         print(f"Wrote baselining summary for {summary['case_count']} case(s): {summary_path}")
         return 0
+    if args.summarize_tutorial_baselining:
+        summary_path, summary = write_tutorial_baselining_summary(output_root)
+        print(
+            "Wrote tutorial baselining summary for "
+            f"{summary['case_count']} case(s): {summary_path}"
+        )
+        return 0
     if args.write_baselining_decision_log:
         document_path, case_count = write_baselining_decision_log(
             output_root, args.decision_log_output
         )
         print(f"Wrote baselining decision log for {case_count} case(s): {document_path}")
+        return 0
+    if args.write_tutorial_baselining_decision_log:
+        document_path, case_count = write_tutorial_baselining_decision_log(
+            output_root, args.tutorial_decision_log_output
+        )
+        print(
+            "Wrote tutorial baselining decision log for "
+            f"{case_count} case(s): {document_path}"
+        )
         return 0
     if args.write_baselining_verification:
         if not args.verification_output:
@@ -4336,6 +4780,15 @@ def main(argv=None):
         print(
             "Wrote baselining verification reference for "
             f"{verification['case_count']} case(s): {verification_path}"
+        )
+        return 0
+    if args.write_tutorial_baselining_verification:
+        verification_path, verification = write_tutorial_baselining_verification(
+            output_root, args.tutorial_verification_output
+        )
+        print(
+            "Wrote tutorial baselining verification candidate for "
+            f"{verification['stage_count']} stage(s): {verification_path}"
         )
         return 0
     if args.verify_baselining:
@@ -4352,6 +4805,22 @@ def main(argv=None):
             "Baselining verification "
             f"{'passed' if report['acceptable'] else 'failed'} for "
             f"{report['case_count']} case(s): {report_path}"
+        )
+        return 0 if report["acceptable"] else 1
+    if args.verify_tutorial_baselining:
+        report = verify_tutorial_baselining_verification(
+            output_root, args.tutorial_verification_reference
+        )
+        report_path = Path(
+            args.tutorial_verification_report_output
+            or output_root / "baselining" / "tutorial-baselining-verification-report.json"
+        )
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        print(
+            "Tutorial baselining verification "
+            f"{'passed' if report['acceptable'] else 'failed'} for "
+            f"{report['stage_count']} stage(s): {report_path}"
         )
         return 0 if report["acceptable"] else 1
     if args.promote_baseline:
