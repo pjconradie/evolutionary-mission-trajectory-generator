@@ -306,6 +306,11 @@ def test_tutorial_case_discovery_filters_registered_case_ids():
             "dependency_blocked",
         ),
         (
+            {"classification": "topology_changed"},
+            None,
+            "topology_changed",
+        ),
+        (
             {"classification": "parse_failed"},
             None,
             "parse_failed",
@@ -347,6 +352,27 @@ def test_tutorial_baselining_requires_refinement_when_declared():
         ipopt_characterization.classify_tutorial_baselining_case(
             case, {"acceptable": True}
         )
+
+
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    (
+        (
+            "Decision variable description lengths differ: 33 != 48",
+            "topology_changed",
+        ),
+        (
+            "Missing tutorial dependencies for example: ephemeris: de430.bsp",
+            "dependency_blocked",
+        ),
+        ("Tutorial option file is malformed", "parse_failed"),
+    ),
+)
+def test_tutorial_preflight_error_classification(message, expected):
+    assert (
+        ipopt_characterization.classify_tutorial_preflight_error(ValueError(message))
+        == expected
+    )
 
 
 def test_tutorial_baselining_accepts_declared_replay_only_case():

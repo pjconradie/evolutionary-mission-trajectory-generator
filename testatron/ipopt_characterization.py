@@ -1188,6 +1188,8 @@ def tutorial_dependency_inventory(case, root=None):
         "tutorial": case.case_id,
         "stages": list(case.stages),
         "taxonomy": case.taxonomy,
+        "replay_seed_source": case.replay_seed_source,
+        "refinement_seed_source": case.refinement_seed_source,
         "expected_output": case.expected_output,
         "timeout_seconds": case.timeout_seconds,
         "files": files,
@@ -1238,6 +1240,11 @@ def tutorial_provenance(case, stage, generated_files, root=None):
         "status": "unreviewed",
         "tutorial": case.case_id,
         "stage": stage,
+        "seed_source": (
+            case.replay_seed_source
+            if stage == "replay"
+            else case.refinement_seed_source
+        ),
         "sources": sources,
         "dependencies": dependency_files,
         "inventory": inventory,
@@ -1805,6 +1812,16 @@ def _tutorial_reference_classification(comparison):
     return "mismatch_tutorial_reference"
 
 
+def classify_tutorial_preflight_error(error):
+    """Classify a known tutorial preparation failure without running EMTG."""
+    message = str(error)
+    if "Decision variable description" in message:
+        return "topology_changed"
+    if "Missing tutorial dependencies" in message:
+        return "dependency_blocked"
+    return "parse_failed"
+
+
 def validate_tutorial_baselining_case(case, policy=None):
     """Require each tutorial case to conform to its taxonomy policy."""
     policy = policy or load_tutorial_baselining_policy()
@@ -1823,6 +1840,7 @@ def classify_tutorial_baselining_case(case, replay, refinement=None):
     validate_tutorial_baselining_case(case)
     terminal_classifications = {
         "dependency_blocked",
+        "topology_changed",
         "parse_failed",
         "process_failed",
         "timed_out",

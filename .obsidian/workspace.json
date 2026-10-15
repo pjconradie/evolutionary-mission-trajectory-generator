@@ -64,20 +64,6 @@
             }
           },
           {
-            "id": "8df92330efd81148",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "tutorial_baselining_commands"
-            }
-          },
-          {
             "id": "65db72b700f3bb04",
             "type": "leaf",
             "state": {
@@ -134,7 +120,27 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 3
+      },
+      {
+        "id": "26c25a34786a7317",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8df92330efd81148",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "tutorial_baselining_commands"
+            }
+          }
+        ]
       }
     ],
     "direction": "vertical"
@@ -196,7 +202,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 439.3828125
+    "width": 301.06640625
   },
   "right": {
     "id": "66aa8d3610c9c55c",
@@ -299,21 +305,22 @@
       "bases:Create new base": false
     }
   },
-  "active": "65db72b700f3bb04",
+  "active": "8df92330efd81148",
   "lastOpenFiles": [
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2 2",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/result.json",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/repeatability.json",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/result.json",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/refinement/provenance.json",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/refinement/result.json",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/refinement/comparison.json",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/refinement/LowSIRIS-REx.emtg",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/refinement/LowSIRIS-REx_Sun(EB)_Sun(BE)XFfile.csv",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/refinement/XFfile.csv",
-    "test-artifacts/tutorial-baselining-phase4/baselining/Config_Files/LowSIRIS-REx/attempt-2/refinement/hardware_models/empty.ThrottleTableOUTPUT",
-    "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+    "testatron/ipopt/tests/benchmarks/baselining/Config_Files/LowSIRIS-REx/attempt-1 2",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/repeatability.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/provenance.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/comparison.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_maneuver_spec",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_target_spec",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.emtg",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase_Sun(EV)_Sun(VM)XFfile.csv",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan_1.md",
+    "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "testatron/ipopt/tests/readme.md",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
@@ -321,7 +328,6 @@
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan.md",
     "2026-10-14.md",
-    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.adsgnc_specifications.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",

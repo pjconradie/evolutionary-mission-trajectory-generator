@@ -1,0 +1,169 @@
+{
+  "suite": "tutorials",
+  "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+  "taxonomy": "demonstration",
+  "stages": [
+    "replay",
+    "refinement"
+  ],
+  "source_sha256": "9bc026d6bf99179b04af14c349abb06cedb1f555a8f111a36dcd96ff06cc5c7d",
+  "reference_sha256": "da7bb2a53ddaba9ff23f661d2a771080d3fddc4f40f51347976447028886d5e6",
+  "inventory": {
+    "status": "ready",
+    "tutorial": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+    "stages": [
+      "replay",
+      "refinement"
+    ],
+    "taxonomy": "demonstration",
+    "replay_seed_source": "current_infeasible_trial",
+    "refinement_seed_source": "current_infeasible_trial",
+    "expected_output": "success",
+    "timeout_seconds": 600,
+    "files": [
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/LowSIRIS-REx_forcemodel.emtgopt",
+        "role": "refinement_seed_options",
+        "sha256": "dcddc210f5ecf4448dff527a23fac06c7fc882393a5e5f0f00d1242672f94865"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/LowSIRIS-REx_forcemodel_nlp.emtgopt",
+        "role": "source_options",
+        "sha256": "9bc026d6bf99179b04af14c349abb06cedb1f555a8f111a36dcd96ff06cc5c7d"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/hardware_models/default.emtg_launchvehicleopt",
+        "role": "hardware",
+        "sha256": "f382c8f6eb2be073ce02432314bd3ea8978cae1c4d845665fa6edd0934264646"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/hardware_models/default.emtg_powersystemsopt",
+        "role": "hardware",
+        "sha256": "dcb0980fbf7e021b9a8fb0c57265e6ba49894a2296431231941dc9d08ee29857"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/hardware_models/default.emtg_propulsionsystemopt",
+        "role": "hardware",
+        "sha256": "4dae7025b0b88cde354beee662a176a0accac8361a704f7e5667b3df86337844"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/hardware_models/default.emtg_spacecraftopt",
+        "role": "hardware",
+        "sha256": "2b3e61e2f368a0187027b25640db05c189445cc6b0c80febd7b85263ca000023"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/hardware_models/empty.ThrottleTable",
+        "role": "hardware",
+        "sha256": "1739781949b2679f42fa5fc0114eb6ba39d615df32d36bfa5d7a02e26e39bf9e"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/results/LowSIRIS-REx_forcemodel_nlp_11292022_94615/LowSIRIS-REx_forcemodel_nlp_Sun(EB)_Sun(BE).emtg",
+        "role": "reference_mission",
+        "sha256": "da7bb2a53ddaba9ff23f661d2a771080d3fddc4f40f51347976447028886d5e6"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/results/LowSIRIS-REx_forcemodel_nlp_11292022_94615/XFfile.csv",
+        "role": "seed_alignment_source",
+        "sha256": "fe29200be2280e79a9c685df97963e3bcf27843c41a0906e95c9c07b45202296"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/Sun_OREx.emtg_universe",
+        "role": "universe",
+        "sha256": "48a68c7023b68956dec8bc97d5989d428a55afc37e6495811ff512d25c4d4304"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/bennu_refdrmc_v1.bsp",
+        "role": "universe",
+        "sha256": "0d7696d9f6623d1aefb9f9fd1eef4a1151bb4c7e03f3e2181ed293a2895cedb2"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/de430.bsp",
+        "role": "universe",
+        "sha256": "6e1b277c5f07135a84950604b83e56b736be696a7f3560bcddb1d4aeb944fca1"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/go_get_these_files.txt",
+        "role": "universe",
+        "sha256": "e41215a3d3384096ae4c0f7de6da0d8b7b3dc74d2eac7cd3eb9fd5a9e1bf7617"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/naif0012.tls",
+        "role": "universe",
+        "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+      },
+      {
+        "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/pck00010.tpc",
+        "role": "universe",
+        "sha256": "59468328349aa730d18bf1f8d7e86efe6e40b75dfb921908f99321b3a7a701d2"
+      }
+    ],
+    "missing": []
+  },
+  "replay": {
+    "classification": "completed",
+    "acceptable": true,
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "checks": {
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "finite_decision_vector": true,
+        "finite_constraint_vector": true,
+        "intentionally_infeasible": true
+      },
+      "generated_feasibility_metric": 0.0005993830127909225,
+      "feasibility_tolerance": 1e-05,
+      "duration_seconds": 3.8366528330006986
+    },
+    "output_file": "FAILURE_LowSIRIS-REx_forcemodel_nlp.emtg",
+    "stage": "replay"
+  },
+  "refinement": {
+    "classification": "completed",
+    "acceptable": true,
+    "comparison": {
+      "status": "unreviewed",
+      "acceptable": true,
+      "checks": {
+        "finite_objective": true,
+        "finite_feasibility": true,
+        "decision_bounds_complete": true,
+        "finite_decision_vector": true,
+        "decision_vector_in_bounds": true,
+        "finite_constraint_vector": true,
+        "feasible": true,
+        "journey_names": true,
+        "event_topology": true,
+        "decision_descriptions": true,
+        "objective_non_regression": true,
+        "expected_infeasible_initialization": true,
+        "ipopt_native_success": true
+      },
+      "baseline_objective": -0.21743322408728574,
+      "generated_objective": -0.21759942146732425,
+      "objective_sense": "maximize",
+      "objective_relative_tolerance": 0.001,
+      "objective_absolute_tolerance": 1e-08,
+      "objective_comparison_band": 0.00021760942146732424,
+      "objective_delta": -0.00016619738003850748,
+      "objective_absolute_delta": 0.00016619738003850748,
+      "generated_feasibility_metric": 8.06382091436611e-06,
+      "feasibility_tolerance": 1e-05,
+      "decision_bounds_absolute_tolerance": 1e-12,
+      "ipopt": {
+        "initialization_policy": "infeasible-primal-seed",
+        "initial_infeasibility": 0.0342,
+        "iterations": 126,
+        "terminal_constraint_violation": 0.0,
+        "native_exit": "Optimal Solution Found."
+      },
+      "duration_seconds": 5.4794923330046
+    },
+    "output_file": "LowSIRIS-REx_forcemodel_nlp.emtg",
+    "stage": "refinement"
+  },
+  "classification": "matched_tutorial_reference",
+  "promotion_eligible": true
+}

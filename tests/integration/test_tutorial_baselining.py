@@ -53,8 +53,9 @@ def test_tutorial_baselining_cli_writes_fixed_mirrored_layout(
         assert result["classification"] != "unstable"
         for attempt_name in ("attempt-1", "attempt-2"):
             attempt_root = case_root / attempt_name
+            attempt = json.loads((attempt_root / "result.json").read_text())
             assert (attempt_root / "replay" / "result.json").is_file()
-            if "refinement" in case.stages:
+            if attempt["refinement"] is not None:
                 assert (attempt_root / "refinement" / "result.json").is_file()
             else:
                 assert not (attempt_root / "refinement").exists()

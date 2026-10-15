@@ -1126,15 +1126,36 @@ def tutorial_baselining_stage_runner(
     def run(case, stage, artifacts):
         attempt_name = Path(artifacts).parent.name
         schema_cache = schema_caches.setdefault(attempt_name, {})
-        checks = _run_tutorial_stage(
-            case=case,
-            stage=stage,
-            toolchain_image=toolchain_image,
-            repository_root=repository_root,
-            tmp_path_factory=tmp_path_factory,
-            schema_cache=schema_cache,
-            artifacts=artifacts,
-        )
+        try:
+            checks = _run_tutorial_stage(
+                case=case,
+                stage=stage,
+                toolchain_image=toolchain_image,
+                repository_root=repository_root,
+                tmp_path_factory=tmp_path_factory,
+                schema_cache=schema_cache,
+                artifacts=artifacts,
+            )
+        except ValueError as error:
+            result = {
+                "status": "unreviewed",
+                "tutorial": case.case_id,
+                "stage": stage,
+                "taxonomy": case.taxonomy,
+                "classification": ipopt_characterization.classify_tutorial_preflight_error(
+                    error
+                ),
+                "acceptable": False,
+                "detail": str(error),
+            }
+            artifacts = Path(artifacts)
+            (artifacts / "result.json").write_text(
+                json.dumps(result, indent=2) + "\n"
+            )
+            ipopt_characterization.write_tutorial_provenance(
+                artifacts, case, stage, [], repository_root
+            )
+            return result
         comparison = checks["comparison"]
         return {
             "classification": "completed",
