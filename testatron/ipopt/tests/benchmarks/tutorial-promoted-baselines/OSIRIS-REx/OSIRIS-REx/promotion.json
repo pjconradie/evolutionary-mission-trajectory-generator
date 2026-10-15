@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "OSIRIS-REx/OSIRIS-REx",
+  "source_evidence": "baselining/OSIRIS-REx/OSIRIS-REx",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "OSIRIS-REx.emtg",
+  "canonical_mission_sha256": "e322f7b3cacb8c7c8630959be9c21deef47e04c7664ce759e026e91aa78f3281",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}

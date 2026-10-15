@@ -1,0 +1,29 @@
+{
+  "status": "approved",
+  "case_id": "OSIRIS-REx/OSIRIS-REx",
+  "taxonomy": "authoritative",
+  "source_options": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/OSIRIS-REx.emtgopt",
+    "sha256": "34d3779433858bcd420379fe98145a67ef7c6c4b0de3830155d1520f40d94cf0"
+  },
+  "reference_mission": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS-REx/results/OSIRIS-REx_412024_11530/OSIRIS-REx_Sun(EEB)_Sun(BE).emtg",
+    "sha256": "5758f0757c67fe0ce61c92cc0d36ca2dab45474e16831ea6ea1a1de9ef932543"
+  },
+  "tutorial_verification": {
+    "path": "testatron/ipopt/tests/tutorial_baselining_verification.json",
+    "sha256": "284cdeff26fc5a510970ffafffa16bde47ef87423e167ac2ff2c007a25752300",
+    "selected_case_stages": [
+      {
+        "case_id": "OSIRIS-REx/OSIRIS-REx",
+        "stage": "refinement",
+        "status": "matched"
+      },
+      {
+        "case_id": "OSIRIS-REx/OSIRIS-REx",
+        "stage": "replay",
+        "status": "matched"
+      }
+    ]
+  }
+}

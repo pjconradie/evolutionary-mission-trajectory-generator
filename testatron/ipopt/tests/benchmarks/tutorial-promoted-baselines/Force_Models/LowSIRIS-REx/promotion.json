@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "Force_Models/LowSIRIS-REx",
+  "source_evidence": "baselining/Force_Models/LowSIRIS-REx",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "LowSIRIS-REx.emtg",
+  "canonical_mission_sha256": "367ae766ae2ddf1ef1ecdcf3b9f839d412e06372730e3d11ededa559507fad07",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}

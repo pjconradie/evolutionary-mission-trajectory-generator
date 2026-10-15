@@ -1,0 +1,32 @@
+{
+  "status": "unreviewed",
+  "source_options": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Constraint_Scripting/EVM_freepoint.emtgopt",
+  "mappings": [],
+  "replacement_resources": [],
+  "staged_earliest_possible_epoch": null,
+  "seed_bound_violations": [
+    {
+      "index": 1,
+      "description": "j0p0MGAnDSMsEphemerisPeggedLaunchDirectInsertion: magnitude of outgoing velocity asymptote",
+      "value": 6.970010775938721,
+      "lower_bound": 0.0,
+      "upper_bound": 6.97
+    },
+    {
+      "index": 40,
+      "description": "j1p0CoastPhaseFreePointChemRendezvous: event left state TA",
+      "value": 1.822700395226e-08,
+      "lower_bound": -1.74533e-15,
+      "upper_bound": 1.74533e-15
+    }
+  ],
+  "tutorial_refinement_policy": {
+    "path": "testatron/ipopt/tests/tutorial_baselining_policy.json",
+    "sha256": "9029a1c35169af9be70e7349cc8b30e955dfb143f2305cb940d12dc9356a160e",
+    "version": 1,
+    "seed_MBH": 0,
+    "MBH_RNG_seed": 12345,
+    "snopt_max_run_time": 600,
+    "snopt_major_iterations": 32000
+  }
+}
