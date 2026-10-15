@@ -354,6 +354,8 @@ The narrative decision record should remain separate: do **not** overwrite `base
 
 ### Verify the fresh 137-case results against the **existing** reviewed current-state reference
 
+#### Verification command
+
 ```zsh
 python testatron/ipopt_characterization.py \
 	--verify-baselining \
@@ -375,6 +377,20 @@ python testatron/ipopt_characterization.py \
 Baselining verification passed for 137 case(s): */evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tests/baselining/baselining_verification_report.json
 ```
 
+#### Verification report
+
+```zsh
+python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/tests/baselining/baselining_verification_report.json")); print(report["case_count"]); print(dict(sorted(Counter(case["status"] for case in report["cases"]).items()))); print(report["acceptable"])'
+```
+
+```zsh
+% python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/tests/baselining/baselining_verification_report.json")); print(report["case_count"]); print(dict(sorted(Counter(case["status"] for case in report["cases"]).items()))); print(report["acceptable"])'
+137
+{'matched': 137}
+True
+```
+#### Verification override command
+
 > [!warning] When you want to OVERRIDE an existing `baselining_verification.json`
 > It overwrites the accepted 137-case current-state contract: `baselining_verification.json`. Use it only after manually reviewing a complete fresh 137-case corpus run, including its summary and generated decision log, and intentionally accepting the new current-state behavior.
 > 
@@ -385,7 +401,6 @@ Baselining verification passed for 137 case(s): */evolutionary-mission-trajector
   --verification-output \
   "$PWD/testatron/ipopt/tests/baselining_verification.json"
 > ```
-
 
 ### Promote tests if matched
 
@@ -402,7 +417,7 @@ The 17 tutorial tests in [[tutorial_baselining_commands#Complete Tutorial Case L
 ```zsh
 tutorial_baselining_case() {
 	EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks" \
-	.venv/bin/python -m pytest tests/integration/test_tutorial_baselining.py -q \
+	python -m pytest tests/integration/test_tutorial_baselining.py -q \
 	--tutorials \
 	--tutorial-baselining-filter "$1"
 }
@@ -448,12 +463,13 @@ Wrote tutorial baselining summary for 17 case(s): repo/testatron/ipopt/tests/ben
 #### Classification summary
 
 ```zsh
-python -c 'import json; summary=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(summary["classification_counts"].items())))'
+python -c 'import json; summary=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json")); print(summary["case_count"]); print(summary["stage_count"]); print(dict(sorted(summary["classification_counts"].items())))'
 ```
 
 ```zsh
-% python -c 'import json; summary=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(summary["classification_counts"].items())))'
+% python -c 'import json; summary=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json")); print(summary["case_count"]); print(summary["stage_count"]); print(dict(sorted(summary["classification_counts"].items())))'
 17
+33
 {'dependency_blocked': 0, 'matched_tutorial_reference': 9, 'mismatch_tutorial_reference': 5, 'parse_failed': 0, 'process_failed': 0, 'timed_out': 0, 'topology_changed': 3, 'unstable': 0}
 ```
 
@@ -486,6 +502,8 @@ No output means the regenerated report matches the checked-in/generated prior ve
 The narrative decision record should remain separate: do **not** overwrite `baselining_decision_log.md` merely because the generated companion report was refreshed.
 ### Verify the fresh 17-case results against the **existing** reviewed current-state reference
 
+#### Verification command
+
 ```zsh
 python testatron/ipopt_characterization.py \
   --verify-tutorial-baselining \
@@ -507,6 +525,21 @@ python testatron/ipopt_characterization.py \
 Tutorial baselining verification passed for 33 stage(s): /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json
 ```
 
+#### Verification report
+
+```zsh
+python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json")); print(report["case_count"]); print(report["stage_count"]); print(dict(sorted(Counter(stage["status"] for stage in report["stages"]).items()))); print(report["acceptable"])'
+```
+
+```zsh
+% python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json")); print(report["case_count"]); print(report["stage_count"]); print(dict(sorted(Counter(stage["status"] for stage in report["stages"]).items()))); print(report["acceptable"])'
+17
+33
+{'matched': 33}
+True
+```
+
+#### Verification override command
 
 > [!warning] When you want to OVERRIDE an existing `tutorial_baselining_verification.json`
 > It rebuilds the 33-stage current-state contract from the current tutorial evidence. Use it **only** after manually reviewing a completed tutorial run and intentionally accepting a new contract.
@@ -523,7 +556,6 @@ python testatron/ipopt_characterization.py \
 ### Promote tutorial if matched
 
 See [[tutorial_baselining_commands#Promotion]].
-
 # Baselining workflow
 
 See [[baselining_commands]].
