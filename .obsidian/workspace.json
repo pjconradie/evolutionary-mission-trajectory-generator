@@ -273,6 +273,7 @@
   },
   "active": "4a88b66df0a9f7db",
   "lastOpenFiles": [
+    "opensource_readme.txt",
     "README.md",
     "readme.md.md",
     "readme.md",
@@ -307,7 +308,6 @@
     "docs/3_NLP_Solvers/IPOPT/legacy/open_source_emtg_container_plan.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log_test.md",
-    "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
-    "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md"
+    "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md"
   ]
 }
