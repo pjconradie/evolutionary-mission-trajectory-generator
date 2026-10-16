@@ -97,12 +97,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
+                "file": "readme.md.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "docker_deployment.implementation_plan"
+              "title": "readme.md"
             }
           }
         ],
@@ -273,11 +273,14 @@
   },
   "active": "4a88b66df0a9f7db",
   "lastOpenFiles": [
+    "testatron/ipopt/tests/benchmarks/how_to_generate_osiris_rex_track_acs_prop_results.readme.md",
+    "readme.md.md",
+    "testatron/ipopt/tests/benchmarks/how_to_interpret_osiris_rex_track_acs_prop_results.readme.md",
+    "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/todo_updated_20261016.md",
     "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
-    "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/archived/tests.implementation_plan_archived_20261013.md",
     "docs/3_NLP_Solvers/IPOPT/archived/tutorial_baselining_implementation_plan_1_archived_20261016.md",
     "docs/3_NLP_Solvers/IPOPT/archived/tutorial_baselining_implementation_plan_archived_20261010.md",
@@ -305,9 +308,6 @@
     "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md",
     "baseline-artifacts/how_to_generate_results.readme.md",
-    "testatron/ipopt/tests/benchmarks/how_to_interpret_results.readme.md",
-    "testatron/ipopt/tests/benchmarks/how_to_generate_results.readme.md",
-    "testatron/ipopt/tests/benchmarks/benchmarks/how_to_interpret_results.readme.md",
-    "testatron/ipopt/tests/benchmarks/benchmarks/how_to_generate_results.readme.md"
+    "testatron/ipopt/tests/benchmarks/benchmarks/how_to_interpret_results.readme.md"
   ]
 }

@@ -90,7 +90,7 @@ Each successful directory contains at least:
 - `run.log`: EMTG and IPOPT diagnostics.
 - Generated `.emtg` mission and `XFfile.csv` data where applicable.
 
-Use [how_to_interpret_results.readme.md](how_to_interpret_results.readme.md)
+Use [how_to_interpret_results.readme.md](how_to_interpret_osiris_rex_track_acs_prop_results.readme.md)
 to review replay and refinement acceptance criteria. A passing pytest result
 does not promote any generated file to a regression truth.
 
