@@ -273,7 +273,9 @@
   },
   "active": "4a88b66df0a9f7db",
   "lastOpenFiles": [
+    "README.opensource",
     "opensource_readme.txt",
+    "readme.opensource",
     "README.md",
     "readme.md.md",
     "readme.md",
@@ -297,8 +299,6 @@
     "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/result.json",
     "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/provenance.json",
     "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/result.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/comparison.json",
-    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_maneuver_spec",
     "testatron/ipopt/tests/tutorial_baselining_case_decision_log.md",
     "testatron/ipopt/tests/baselining_case_decision_log.md",
     "testatron/ipopt/tests/readme.md",
