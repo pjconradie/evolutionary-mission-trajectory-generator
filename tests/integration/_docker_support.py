@@ -235,6 +235,7 @@ def run_probe(
     build_volume: str | None = None,
     writable_artifacts: Path | None = None,
     read_only_mounts: tuple[tuple[Path, str], ...] = (),
+    log_path: Path | None = None,
     timeout: int = COMMAND_TIMEOUT_SECONDS,
 ) -> dict[str, str]:
     """Run one probe in a disposable amd64 container and return its checks."""
@@ -281,7 +282,12 @@ def run_probe(
                 check=False,
             )
 
-    log = artifact_directory(tmp_path_factory) / f"{probe_name}.log"
+    log = (
+        Path(log_path)
+        if log_path is not None
+        else artifact_directory(tmp_path_factory) / f"{probe_name}.log"
+    )
+    log.parent.mkdir(parents=True, exist_ok=True)
     log.write_text(result.stdout + result.stderr, encoding="utf-8")
     if result.returncode != 0:
         pytest.fail(

@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+  "source_evidence": "baselining/Force_Models/LowSIRIS-REx_forcemodel_nlp",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "LowSIRIS-REx_forcemodel_nlp.emtg",
+  "canonical_mission_sha256": "65989b5638dab8bd66968e5cea29176c0b7900a8601b7ea373ba7f6dc3cce0f2",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}

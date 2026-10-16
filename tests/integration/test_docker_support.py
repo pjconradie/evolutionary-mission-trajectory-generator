@@ -21,6 +21,7 @@ def test_probe_logs_honor_configured_artifact_directory(
 ):
     artifact_root = tmp_path / "configured-artifacts"
     monkeypatch.setenv("EMTG_TEST_ARTIFACT_DIR", str(artifact_root))
+    success_log = artifact_root / "nested" / "artifact-contract-success.log"
 
     checks = run_probe(
         image=toolchain_image,
@@ -37,14 +38,15 @@ printf 'EMTG_CHECK source_mount=read_only\n'
 ''',
         probe_name="artifact-contract-success",
         tmp_path_factory=tmp_path_factory,
+        log_path=success_log,
     )
 
     assert checks["source_mount"] == "read_only"
-    success_log = artifact_root / "artifact-contract-success.log"
     assert success_log.is_file()
     assert "EMTG_CHECK source_mount=read_only" in success_log.read_text(
         encoding="utf-8"
     )
+    assert not (artifact_root / "artifact-contract-success.log").exists()
     assert not (repository_root / "emtg-read-only-probe").exists()
 
     failure_log = artifact_root / "artifact-contract-failure.log"

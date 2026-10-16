@@ -1,4 +1,4 @@
-# Baselining Commands
+# 137 Corpus Baselining Commands
 
 Run these from the repository root. `baselining_case` uses the supported Docker-backed pytest launcher and replaces only the selected case's evidence root. Replacement removes the complete prior case directory—including stale duplicate-suffixed files and folders—before writing fresh evidence; other case directories are preserved. A cleanup failure stops the run rather than silently mixing old and new evidence. The immutable source pairs under `testatron/tests` are never modified.
 
@@ -22,16 +22,6 @@ baselining_case() {
 	pytest tests/integration/test_baselining.py -q \
 		-k baselining_cli_writes_fixed_mirrored_layout \
 		--baselining-filter "$1"
-}
-
-promote_if_matched() {
-	local case_id="$1"
-	shift
-	python testatron/ipopt_characterization.py \
-		--promote-baseline "$case_id" \
-		--approve-baseline \
-		--output-root "$PWD/testatron/ipopt/tests/tests" \
-		"$@"
 }
 ```
 
@@ -365,10 +355,156 @@ baselining_case 'transcription_tests/SundmanCoastPhase_EMintercept'
 
 ## Promotion
 
-For a reviewed, stable `matched_snopt` case:
+```zsh
+promote_if_matched() {
+	local case_id="$1"
+	shift
+	python testatron/ipopt_characterization.py \
+		--promote-baseline "$case_id" \
+		--approve-baseline \
+		--output-root "$PWD/testatron/ipopt/tests/tests" \
+		"$@"
+}
+```
 
 ```zsh
-promote_if_matched 'group/case'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_DLAbounds'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_RLAbounds'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_constrDryMass'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_constrFinalMass'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_includeInitialImpulse'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_numtimesteps'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj0'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj1'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj14'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj15'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj17'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj18'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj19'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj20'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj22'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj23'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj3'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj4'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj5'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj8'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_obj9'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_postFlybyCoast'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_postLaunchTCM'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_postlaunchCoast'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_preFlybyCoast'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_preFlybyTCM'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGALT_timeboundsOFF'
+promote_if_matched 'global_mission_options/globalmissionoptions_MGAnDSMs_obj0'
+promote_if_matched 'journey_options/AerodynamicDrag_EarthOrbit_Maneuver'
+promote_if_matched 'journey_options/EME_stageAfterArrival'
+promote_if_matched 'journey_options/EME_stageBeforeArrival'
+promote_if_matched 'journey_options/EarthMarsVenus_FlybyDeparture'
+promote_if_matched 'journey_options/EarthMars_Depart2-2_Arrive2-2'
+promote_if_matched 'journey_options/EarthToMarsBallisticRendezvous'
+promote_if_matched 'journey_options/EarthToMarsParkingOrbit'
+promote_if_matched 'journey_options/EarthToMarsParkingOrbit_PatchedConic'
+promote_if_matched 'journey_options/EarthToMarsPeri'
+promote_if_matched 'journey_options/EarthToMarsPeri_boundedAggFlightTime'
+promote_if_matched 'journey_options/EarthToMarsPeri_boundedarrivaldate'
+promote_if_matched 'journey_options/EarthToMarsPeri_boundedtime'
+promote_if_matched 'journey_options/EarthToMarsPeri_ovverrideproptype'
+promote_if_matched 'journey_options/EarthToMarsRendezvous'
+promote_if_matched 'journey_options/EarthToMars_ForcedInitialCoast'
+promote_if_matched 'journey_options/EarthToMars_ForcedTerminalCoast'
+promote_if_matched 'journey_options/EarthToMars_JourneyEndDeltaV'
+promote_if_matched 'journey_options/EarthToMars_OverrideDutyCycle'
+promote_if_matched 'journey_options/EarthToMars_coastphasematchpt'
+promote_if_matched 'journey_options/EarthToMars_dep1-2_atMars'
+promote_if_matched 'journey_options/EarthToMars_fixedEndMassInc'
+promote_if_matched 'journey_options/EarthToMars_fixedStartingMassInc'
+promote_if_matched 'journey_options/EarthToMars_overrideTimesteps'
+promote_if_matched 'journey_options/EarthToMars_variableMassInc'
+promote_if_matched 'journey_options/LEO_to_GEO'
+promote_if_matched 'journey_options/default_PSBI_fixed_inertial_control'
+promote_if_matched 'journey_options/default_force_unit_magnitude_control'
+promote_if_matched 'journey_options/default_with_Jupiter_perturbation'
+promote_if_matched 'journey_options/default_with_Jupiter_perturbations_PSBI'
+promote_if_matched 'journey_options/default_zeroControl_intercept_MGALT'
+promote_if_matched 'journey_options/default_zeroControl_intercept_PSBI'
+promote_if_matched 'journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector'
+promote_if_matched 'journey_options/park_to_SOI_FBLT'
+promote_if_matched 'output_options/outputoptions_frameICRF'
+promote_if_matched 'output_options/outputoptions_frameJ2000BCF'
+promote_if_matched 'output_options/outputoptions_frameTODBCF'
+promote_if_matched 'output_options/outputoptions_frameTODBCI'
+promote_if_matched 'output_options/outputoptions_outputjourneywaittimes'
+promote_if_matched 'physics_options/Earth_to_SmallBody_SAM'
+promote_if_matched 'physics_options/physicsoptions_SPICEphem'
+promote_if_matched 'physics_options/physicsoptions_add3rdbody'
+promote_if_matched 'physics_options/physicsoptions_addJ2'
+promote_if_matched 'physics_options/physicsoptions_addSRP'
+promote_if_matched 'physics_options/physicsoptions_periapseCartesian'
+promote_if_matched 'physics_options/physicsoptions_periapseIncomingBplane'
+promote_if_matched 'physics_options/physicsoptions_periapseSphericalAZFPA'
+promote_if_matched 'physics_options/physicsoptions_periapseSphericalRADEC'
+promote_if_matched 'physics_options/physicsoptions_shortspline'
+promote_if_matched 'script_constraint_tests/EVM_MGAnDSMs_bEnd_but_not_pEnd_maneuverMagnitude'
+promote_if_matched 'script_constraint_tests/EVM_MGAnDSMs_flybyDeparture_distance_from_Earth'
+promote_if_matched 'script_constraint_tests/EVM_MGAnDSMs_pEnd_and_Bend_maneuverMagnitude'
+promote_if_matched 'script_constraint_tests/EVM_MGAnDSMs_pEndbutnotBend_maneuverMagnitude'
+promote_if_matched 'script_constraint_tests/EVM_PSBI_pEnd_bpt'
+promote_if_matched 'script_constraint_tests/EVM_PSBI_pEnd_distance'
+promote_if_matched 'script_constraint_tests/EVM_pEndRRP_arrival'
+promote_if_matched 'script_constraint_tests/EVM_pEnd_distance'
+promote_if_matched 'script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RPRconjunction'
+promote_if_matched 'script_constraint_tests/EarthMarsLikePointFreePointChemRendezvous_RRPconjunction'
+promote_if_matched 'script_constraint_tests/EarthMars_RPRangle_force_conjunction'
+promote_if_matched 'script_constraint_tests/EarthMars_RRPangle_force_conjunction'
+promote_if_matched 'script_constraint_tests/ShuttlePark_to_Molniya'
+promote_if_matched 'solver_options/solveroptions_ACEfeasibility'
+promote_if_matched 'solver_options/solveroptions_MBH_RNG_seed'
+promote_if_matched 'solver_options/solveroptions_NLPstepsub1'
+promote_if_matched 'solver_options/solveroptions_noChaperone'
+promote_if_matched 'solver_options/solveroptions_skip1stNLP'
+promote_if_matched 'spacecraft_options/Earth_to_SmallBody_SAM_RTG'
+promote_if_matched 'spacecraft_options/Earth_to_SmallBody_SAM_solar_power'
+promote_if_matched 'spacecraft_options/default_SCfile_PM'
+promote_if_matched 'spacecraft_options/spacecraft_LT_multiStage_spacecraftFile'
+promote_if_matched 'spacecraft_options/spacecraft_LT_powerFile'
+promote_if_matched 'spacecraft_options/spacecraft_LT_propFile'
+promote_if_matched 'spacecraft_options/spacecraft_LT_spacecraftFile'
+promote_if_matched 'spacecraft_options/spacecraftoptions_Chem_TrackACSProp'
+promote_if_matched 'spacecraft_options/spacecraftoptions_Chemmargin'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_Emargin'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_ThrotMaxThrusters'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_ThrotMinThrusters'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_ThrotSharpness'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_TrackACSProp'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_eng0'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_eng3'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_eng3_polyArray'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_eng3_powmod1'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_eng5'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_maxEprop'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_powdecay'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LT_powsrc0'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LV_FixedInitMass'
+promote_if_matched 'spacecraft_options/spacecraftoptions_LVmargin'
+promote_if_matched 'spacecraft_options/spacecraftoptions_chemPropTankConstr'
+promote_if_matched 'spacecraft_options/spacecraftoptions_dutyCycle'
+promote_if_matched 'spacecraft_options/spacecraftoptions_dutyCycleReal'
+promote_if_matched 'spacecraft_options/spacecraftoptions_maxChemOx'
+promote_if_matched 'spacecraft_options/spacecraftoptions_powMargin'
+promote_if_matched 'spacecraft_options/spacecraftoptions_varinitmass'
+promote_if_matched 'state_representation_tests/FreePointArrival_IncomingBplaneRpTA_testatron'
+promote_if_matched 'state_representation_tests/FreePointArrival_OutgoingBplaneRpTA_testatron'
+promote_if_matched 'state_representation_tests/FreePointDeparture_IncomingBplaneRpTA_testatron'
+promote_if_matched 'state_representation_tests/FreePointDeparture_OutgoingBplaneRpTA_testatron'
+promote_if_matched 'state_representation_tests/PeriapseArrival_IncomingBplaneRpTA_testatron'
+promote_if_matched 'state_representation_tests/PeriapseArrival_OutgoingBplaneRpTA_testatron'
+promote_if_matched 'transcription_tests/CoastPhase_EMintercept'
+promote_if_matched 'transcription_tests/FBLT_EMintercept'
+promote_if_matched 'transcription_tests/MGALT_EMintercept'
+promote_if_matched 'transcription_tests/MGAnDSMs_EMintercept'
+promote_if_matched 'transcription_tests/PSBI_EMintercept'
+promote_if_matched 'transcription_tests/PSFB_EMintercept'
+promote_if_matched 'transcription_tests/SundmanCoastPhase_EMintercept'
 ```
 
 # Summarise baselining directory
@@ -400,16 +536,15 @@ Generate the per-case companion report from the existing baselining evidence aft
 ```zsh
 python testatron/ipopt_characterization.py \
 	--write-baselining-decision-log \
-	--output-root "$PWD/testatron/ipopt/tests/tests" \
-	--decision-log-output "$PWD/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md"
+	--output-root "$PWD/testatron/ipopt/tests/tests"
 ```
 
-This command does not run EMTG or modify immutable Testatron inputs. It reads the existing case artifacts and writes one record for each case, including staged runtime changes, replay mismatch values, and refinement status. It preserves the narrative decision log at `docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md`; the generated companion report is `docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md`.
+This command does not run EMTG or modify immutable Testatron inputs. It reads the existing case artifacts and writes one record for each case, including staged runtime changes, replay mismatch values, and refinement status. It preserves the narrative decision log at `docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md`; the generated companion report is `testatron/ipopt/tests/baselining_case_decision_log.md`.
 
 Expected output for the completed corpus:
 
 ```zsh
-Wrote baselining decision log for 137 case(s): .../docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md
+Wrote baselining decision log for 137 case(s): .../testatron/ipopt/tests/baselining_case_decision_log.md
 ```
 
 ## Verify Current EMTG/IPOPT State

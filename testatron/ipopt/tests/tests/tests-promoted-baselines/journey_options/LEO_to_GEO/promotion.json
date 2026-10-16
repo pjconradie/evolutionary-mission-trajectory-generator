@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "journey_options/LEO_to_GEO",
+  "source_evidence": "baselining/journey_options/LEO_to_GEO",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "LEO_to_GEO.emtg",
+  "canonical_mission_sha256": "29ef5566a357d251c3964da05d7c6e66f69ab3d216a6c30f9c9a330513f0ed9f",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}

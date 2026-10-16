@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "physics_options/physicsoptions_addJ2",
+  "source_evidence": "baselining/physics_options/physicsoptions_addJ2",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "physicsoptions_addJ2.emtg",
+  "canonical_mission_sha256": "20998b5c87a3155f2e7139cb7b8be6f57a11fd8933660af9328fdb720e88c4a1",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}

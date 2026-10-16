@@ -878,8 +878,13 @@ def _run_tutorial_schema_probe(
     toolchain_image,
     repository_root,
     tmp_path_factory,
+    artifacts=None,
 ):
-    artifacts = _tutorial_artifacts(tmp_path_factory, case, "schema")
+    if artifacts is None:
+        artifacts = _tutorial_artifacts(tmp_path_factory, case, "schema")
+    else:
+        artifacts = Path(artifacts)
+        artifacts.mkdir(parents=True, exist_ok=True)
     options_path = ipopt_characterization.prepare_tutorial_schema_probe(
         case, artifacts, repository_root=repository_root
     )
@@ -908,6 +913,7 @@ check tutorial_schema_run passed
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
+        log_path=artifacts / "docker-probe.log",
         timeout=case.timeout_seconds + 300,
     )
     schema_path = artifacts / "schema-XFfile.csv"
@@ -932,6 +938,7 @@ def _run_tutorial_stage(
     repository_root,
     tmp_path_factory,
     schema_cache,
+    artifacts=None,
 ):
     schema_descriptions = None
     if case.schema_probe:
@@ -941,10 +948,19 @@ def _run_tutorial_stage(
                 toolchain_image=toolchain_image,
                 repository_root=repository_root,
                 tmp_path_factory=tmp_path_factory,
+                artifacts=(
+                    Path(artifacts).parent / "schema"
+                    if artifacts is not None
+                    else None
+                ),
             )
         schema_descriptions = schema_cache[case.case_id]
 
-    artifacts = _tutorial_artifacts(tmp_path_factory, case, stage)
+    if artifacts is None:
+        artifacts = _tutorial_artifacts(tmp_path_factory, case, stage)
+    else:
+        artifacts = Path(artifacts)
+        artifacts.mkdir(parents=True, exist_ok=True)
     options_path = ipopt_characterization.prepare_tutorial_case(
         case,
         stage,
@@ -995,6 +1011,7 @@ check tutorial_{stage}_run passed
         tmp_path_factory=tmp_path_factory,
         build_volume=build_volume_name(toolchain_image, "ipopt"),
         writable_artifacts=artifacts,
+        log_path=artifacts / "docker-probe.log",
         timeout=case.timeout_seconds + 300,
     )
     duration_seconds = time.monotonic() - started
@@ -1095,6 +1112,59 @@ def tutorial_stage_runner(
             tmp_path_factory=tmp_path_factory,
             schema_cache=tutorial_schema_cache,
         )
+
+    return run
+
+
+@pytest.fixture
+def tutorial_baselining_stage_runner(
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+):
+    """Run one tutorial stage inside a caller-owned baselining attempt."""
+    schema_caches = {}
+
+    def run(case, stage, artifacts):
+        attempt_name = Path(artifacts).parent.name
+        schema_cache = schema_caches.setdefault(attempt_name, {})
+        try:
+            checks = _run_tutorial_stage(
+                case=case,
+                stage=stage,
+                toolchain_image=toolchain_image,
+                repository_root=repository_root,
+                tmp_path_factory=tmp_path_factory,
+                schema_cache=schema_cache,
+                artifacts=artifacts,
+            )
+        except ValueError as error:
+            result = {
+                "status": "unreviewed",
+                "tutorial": case.case_id,
+                "stage": stage,
+                "taxonomy": case.taxonomy,
+                "classification": ipopt_characterization.classify_tutorial_preflight_error(
+                    error
+                ),
+                "acceptable": False,
+                "detail": str(error),
+            }
+            artifacts = Path(artifacts)
+            (artifacts / "result.json").write_text(
+                json.dumps(result, indent=2) + "\n"
+            )
+            ipopt_characterization.write_tutorial_provenance(
+                artifacts, case, stage, [], repository_root
+            )
+            return result
+        comparison = checks["comparison"]
+        return {
+            "classification": "completed",
+            "acceptable": comparison["acceptable"],
+            "comparison": comparison,
+            "output_file": checks["result"]["generated_mission"],
+        }
 
     return run
 

@@ -1,6 +1,3 @@
-
-How to baseline?
-
 # Purpose
 
 This plan makes the complete `testatron/tests` corpus executable with the open-source IPOPT backend and uses the committed SNOPT-generated `.emtg` files as the immutable numerical baseline.
@@ -13,20 +10,20 @@ Run the commands in this document from the repository root.
 
 Tests against a pinned Docker image already available.
 
-| #   | Test                                              | Command                                                                                                        | Runtime information                              | Docker required |
-| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | --------------- |
-| 1   | Run clean bootstrap                               |                                                                                                                |                                                  | Yes             |
-| 2   | Run collection sanity                             | python -m pytest --collect-only -q                                                                             | 285/319 tests collected (34 deselected) in 0.13s | No              |
-| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 114 passed, 205 deselected in 2.82s              | No              |
-| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 174 deselected in 1.49s              | No              |
-| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 113 passed in 1.22s                              | No              |
-|     |                                                   |                                                                                                                | < 10 seconds                                     |                 |
-| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 307 deselected in 33.78s              | Yes             |
-| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 316 deselected in 19.22s               | Yes             |
-| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 293 deselected in 658.13s (0:10:58)   | Yes             |
-|     |                                                   |                                                                                                                | < 15 min                                         | Yes             |
-| 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                         | Yes             |
-| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                         | Yes             |
+| #   | Test                                              | Command                                                                                                        | Runtime information                                                                                  | Docker required |
+| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------- |
+| 1   | Run clean bootstrap                               |                                                                                                                |                                                                                                      | Yes             |
+| 2   | Run collection sanity                             | python -m pytest --collect-only -q<br>python -m pytest --collect-only -q --tutorials                           | 327/362 tests collected (35 deselected) in 0.22s<br>34/376 tests collected (342 deselected) in 0.09s | No              |
+| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 170 passed, 206 deselected in 10.08s                                                                 | No              |
+| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 231 deselected in 2.38s                                                                  | No              |
+| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 169 passed in 9.96s                                                                                  | No              |
+|     |                                                   |                                                                                                                | < 10 seconds                                                                                         |                 |
+| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 364 deselected in 39.82s                                                                  | Yes             |
+| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 373 deselected in 10.60s                                                                   | Yes             |
+| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 350 deselected in 88.02s (0:01:28)                                                        | Yes             |
+|     |                                                   |                                                                                                                | < 15 min                                                                                             | Yes             |
+| 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
+| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
 
 1
 Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
@@ -36,6 +33,7 @@ Docker NOT required. Estimated runtime order of magnitude seconds.
 
 ```zsh
 python -m pytest --collect-only -q
+python -m pytest --collect-only -q --tutorials
 
 python -m pytest -m unit
 
@@ -48,53 +46,68 @@ python -m pytest tests/test_ipopt_characterization.py -q
 Docker required. Estimated runtime order of magnitude minutes:
 
 ```zsh
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \ python -m pytest -m ipopt_benchmarks -q
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \
+	python -m pytest -m ipopt_benchmarks -q
 
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \ python -m pytest -m ipopt_tests -q
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \
+	python -m pytest -m ipopt_tests -q
 
-EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \ python -m pytest -m integration -q
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \
+	python -m pytest -m integration -q
 ```
 
 9, 10
 Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
 
+
+## 1. Run clean bootstrap
+
+Not implemented yet.
+
+
 ## 2. Run collection sanity
 
 `--collect-only` executes no tests and does not invoke Docker, EMTG, or IPOPT. It confirms that the expected test modules, markers, and test-discovery configuration are visible to pytest.
-
-Run it at the beginning to detect missing coverage and again at the end to record the final collection state.
-
-Terminal command:
 
 ```zsh
 python -m pytest --collect-only -q
 ```
 
-Example output:
 ```zsh
 % python -m pytest --collect-only -q
 tests/integration/test_baselining.py::test_baselining_repeatability_in_pinned_toolchain[global_mission_options/globalmissionoptions_MGALT_DLAbounds]
 tests/integration/test_baselining.py::test_baselining_repeatability_in_pinned_toolchain[transcription_tests/SundmanCoastPhase_EMintercept]
-tests/integration/test_baselining.py::test_baselining_cli_writes_fixed_mirrored_layout
-.
-.
-.
-tests/test_ipopt_characterization.py::test_benchmark_provenance_hashes_current_sources
+...
 tests/test_ipopt_characterization.py::test_benchmark_provenance_rejects_unknown_stage
 tests/test_ipopt_characterization.py::test_committed_provenance_matches_registry_and_directory
 
 285/319 tests collected (34 deselected) in 0.12s
 ```
 
+Tutorial collection
+
+```zsh
+python -m pytest --collect-only -q --tutorials
+```
+
+```zsh
+% python -m pytest --collect-only -q --tutorials
+tests/integration/test_tutorial_baselining.py::test_tutorial_baselining_cli_writes_fixed_mirrored_layout
+tests/integration/test_tutorials.py::test_tutorial_replay[Config_Files/LowSIRIS-REx]
+...
+tests/integration/test_tutorials.py::test_tutorial_ipopt_refinement[Flybys/HighFidelity]
+tests/integration/test_tutorials.py::test_tutorial_ipopt_refinement[Flybys/EVM_singlePhase]
+
+34/376 tests collected (342 deselected) in 0.16s
+```
+
 The **34 deselected tests are exactly:**
 
-| Opt-in group                       |  Count | Why excluded by default                                                                |
-| ---------------------------------- | -----: | -------------------------------------------------------------------------------------- |
-| `clean_bootstrap`                  |      1 | Rebuilds the Docker toolchain with `--no-cache`; intentionally expensive.              |
-| `tutorials` replay tests           |     17 | Docker-backed verification of the current tutorial input/reference packages.           |
-| `tutorials` IPOPT-refinement tests |     16 | Docker-backed IPOPT refinement verification for tutorial cases that permit refinement. |
-| **Total**                          | **34** |                                                                                        |
-|                                    |        |                                                                                        |
+| Opt-in group             | Count | Why excluded by default                                                   |
+| ------------------------ | ----: | ------------------------------------------------------------------------- |
+| `clean_bootstrap`        |     1 | Rebuilds the Docker toolchain with `--no-cache`; intentionally expensive. |
+| `tutorials` replay tests |    34 | 17 Tutorial baselining tests.                                             |
+
 ## 3. Run unit tests
 
 This checks isolated Python/C++ contract behavior without deliberately running the Docker mission corpus.
@@ -119,6 +132,7 @@ tests/test_ipopt_characterization.py ...........................................
 
 ================================================================================================================ 114 passed, 205 deselected in 2.82s ================================================================================================================
 ```
+
 
 ## 4. Run regression tests
 
@@ -149,6 +163,7 @@ tests/regression/test_mission_parser.py ........................................
 
 ```
 
+
 ## 5. Run IPOPT characterisation contracts
 
 This checks staging, compatibility mappings, result serialization, comparison policy, promotion eligibility, and current-state verification logic.
@@ -168,6 +183,7 @@ python -m pytest -m ipopt_benchmarks -q
 ............                                                                                                                                                                                                                                                  [100%]
 12 passed, 307 deselected in 33.78s
 ```
+
 
 ## 6,7. Run focused IPOPT integration checks
 
@@ -218,6 +234,7 @@ python -m pytest -m ipopt_tests -q
 3 passed, 316 deselected in 19.22s
 ```
 
+
 ## 8. Run full integration suite
 
 ### Run `integration`
@@ -244,12 +261,13 @@ python -m pytest -m integration -q
 26 passed, 293 deselected in 658.13s (0:10:58)
 ```
 
-
-
 ## 9. Run 137 corpus tests
 
-The 137 corpus tests in [[baselining_commands#Corpus tests|Corpus tests]]. Run the following terminal commands
-### Create the terminal function
+The 137 corpus tests in [[baselining_commands#Corpus tests|Corpus tests]].
+
+### Run the 137 cases under the [[baselining_commands#Complete list of tests]]
+
+#### Create the terminal function
 
 ```zsh
 baselining_case() {
@@ -260,7 +278,9 @@ baselining_case() {
 }
 ```
 
-### Run the 137 cases under the [[baselining_commands#Complete list of tests| complete list of 137 corpus baselining tests]].
+#### Complete test case list
+
+See [[baselining_commands#Complete list of tests]].
 
 ```zsh
 baselining_case 'global_mission_options/globalmissionoptions_MGALT_DLAbounds'
@@ -279,7 +299,23 @@ baselining_case 'transcription_tests/SundmanCoastPhase_EMintercept'
 1 passed, 2 deselected in 5.46s
 ```
 
-Classification summary.
+### Generate the corpus summary
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--summarize-baselining \
+	--output-root "$PWD/testatron/ipopt/tests/tests"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py \
+	--summarize-baselining \
+	--output-root "$PWD/testatron/ipopt/tests/tests"
+Wrote baselining summary for 137 case(s): repo/testatron/ipopt/tests/tests/baselining/baselining-summary.json
+```
+
+#### Classification summary
+
 ```zsh
 python -c 'import json; from collections import Counter; summary=json.load(open("testatron/ipopt/tests/tests/baselining/baselining-summary.json")); print(summary["case_count"]); print(dict(sorted(Counter(case["classification"] for case in summary["cases"]).items())))'
 ```
@@ -290,67 +326,35 @@ python -c 'import json; from collections import Counter; summary=json.load(open(
 {'matched_snopt': 5, 'mismatch_snopt': 132}
 ```
 
-### Generate the corpus summary
-
-```zsh
-python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
-```
-
-```zsh
-% python testatron/ipopt_characterization.py --summarize-baselining --output-root "$PWD/testatron/ipopt/tests/tests"
-
-Wrote baselining summary for 137 case(s): */evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tests/baselining/baselining-summary.json
-```
-
 ### Regenerate the human-readable decision-log report from the new artifacts
 
 ```zsh
 python testatron/ipopt_characterization.py \
 	--write-baselining-decision-log \
-	--output-root "$PWD/testatron/ipopt/tests/tests" \
-	--decision-log-output \
-	"$PWD/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md"
+	--output-root "$PWD/testatron/ipopt/tests/tests"
 ```
 
 ```zsh
 % python testatron/ipopt_characterization.py \
         --write-baselining-decision-log \
-        --output-root "$PWD/testatron/ipopt/tests/tests" \
-        --decision-log-output \
-        "$PWD/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md"
-Wrote baselining decision log for 137 case(s): */evolutionary-mission-trajectory-generator/docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md
+        --output-root "$PWD/testatron/ipopt/tests/tests"
+Wrote baselining decision log for 137 case(s): repo/testatron/ipopt/tests/baselining_case_decision_log.md
 ```
 
 To inspect the generated decision log
 
 ```zsh
 git --no-pager diff -- \
-	docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md
+	testatron/ipopt/tests/baselining_case_decision_log.md
 ```
 
 No output means the regenerated report matches the checked-in/generated prior version exactly. A diff shows which case evidence, mappings, mismatch values, or refinement record changed.
 
 The narrative decision record should remain separate: do **not** overwrite `baselining_decision_log.md` merely because the generated companion report was refreshed.
 
-#### If you want an exact before-versus-after summary diff next time
+### Verify the fresh 137-case results against the **existing** reviewed current-state reference
 
-Before rerunning the corpus, snapshot the old generated output somewhere outside the canonical evidence tree:
-
-```zsh
-mkdir -p test-artifacts/baselining-comparisons
-
-cp testatron/ipopt/tests/tests/baselining/baselining-summary.json \
-	test-artifacts/baselining-comparisons/baselining-summary.before.json
-```
-
-After the rerun and summary generation:
-
-```zsh
-diff -u \
-	test-artifacts/baselining-comparisons/baselining-summary.before.json \
-	testatron/ipopt/tests/tests/baselining/baselining-summary.json
-```
-### Verify the fresh 137-case results against the **existing** reviewed current-state reference.
+#### Verification command
 
 ```zsh
 python testatron/ipopt_characterization.py \
@@ -373,49 +377,187 @@ python testatron/ipopt_characterization.py \
 Baselining verification passed for 137 case(s): */evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tests/baselining/baselining_verification_report.json
 ```
 
-To inspect the report explicitly after running verification:
+#### Verification report
 
 ```zsh
-python - <<'PY'
-import json
-from collections import Counter
-from pathlib import Path
-
-path = Path("testatron/ipopt/tests/tests/baselining/baselining_verification_report.json")
-report = json.loads(path.read_text(encoding="utf-8"))
-statuses = Counter(case["status"] for case in report["cases"])
-
-print(f'case_count: {report["case_count"]}')
-print(f'acceptable: {report["acceptable"]}')
-print(f"statuses: {dict(sorted(statuses.items()))}")
-
-for case in report["cases"]:
-	if case["status"] != "matched":
-		print(f'{case["case_id"]}: {case["status"]}')
-PY
+python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/tests/baselining/baselining_verification_report.json")); print(report["case_count"]); print(dict(sorted(Counter(case["status"] for case in report["cases"]).items()))); print(report["acceptable"])'
 ```
 
 ```zsh
-% python - <...
-case_count: 137
-acceptable: True
-statuses: {'matched': 137}
+% python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/tests/baselining/baselining_verification_report.json")); print(report["case_count"]); print(dict(sorted(Counter(case["status"] for case in report["cases"]).items()))); print(report["acceptable"])'
+137
+{'matched': 137}
+True
 ```
+#### Verification override command
 
-## 10. Run 33 tutorial tests
+> [!warning] When you want to OVERRIDE an existing `baselining_verification.json`
+> It overwrites the accepted 137-case current-state contract: `baselining_verification.json`. Use it only after manually reviewing a complete fresh 137-case corpus run, including its summary and generated decision log, and intentionally accepting the new current-state behavior.
+> 
+> ```zsh
+> python testatron/ipopt_characterization.py \
+  --write-baselining-verification \
+  --output-root "$PWD/testatron/ipopt/tests/tests" \
+  --verification-output \
+  "$PWD/testatron/ipopt/tests/baselining_verification.json"
+> ```
 
+### Promote tests if matched
 
-Terminal command:
+See [[baselining_commands#Promotion]].
+
+## 10. Run 17 tutorial tests
+
+The 17 tutorial tests in [[tutorial_baselining_commands#Complete Tutorial Case List]].
+
+### Run the 17 cases under  [[tutorial_baselining_commands#Complete tutorial case list]].
+
+#### Create the terminal function
 
 ```zsh
-
+tutorial_baselining_case() {
+	EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/benchmarks" \
+	python -m pytest tests/integration/test_tutorial_baselining.py -q \
+	--tutorials \
+	--tutorial-baselining-filter "$1"
+}
 ```
 
-Example output:
+#### Complete tutorial case list
+
+See [[tutorial_baselining_commands#Complete Tutorial Case List]].
 
 ```zsh
-
+tutorial_baselining_case 'Config_Files/LowSIRIS-REx'
+tutorial_baselining_case 'Config_Files/LowSIRIS-REx_high_thrust'
+...
+tutorial_baselining_case 'Flybys/HighFidelity'
+tutorial_baselining_case 'Flybys/EVM_singlePhase'
 ```
+
+
+```zsh
+.                                                                                                                                                                                                                                                             [100%]
+1 passed, 2 deselected in 5.63s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed, 2 deselected in 6.63s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed, 2 deselected in 5.46s
+```
+
+### Generate the tutorial summary
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--summarize-tutorial-baselining \
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py \
+        --summarize-tutorial-baselining \
+        --output-root "$PWD/testatron/ipopt/tests/benchmarks"
+Wrote tutorial baselining summary for 17 case(s): repo/testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json
+```
+
+#### Classification summary
+
+```zsh
+python -c 'import json; summary=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json")); print(summary["case_count"]); print(summary["stage_count"]); print(dict(sorted(summary["classification_counts"].items())))'
+```
+
+```zsh
+% python -c 'import json; summary=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json")); print(summary["case_count"]); print(summary["stage_count"]); print(dict(sorted(summary["classification_counts"].items())))'
+17
+33
+{'dependency_blocked': 0, 'matched_tutorial_reference': 9, 'mismatch_tutorial_reference': 5, 'parse_failed': 0, 'process_failed': 0, 'timed_out': 0, 'topology_changed': 3, 'unstable': 0}
+```
+
+
+### Regenerate the human-readable decision-log report from the new artifacts
+
+```zsh
+python testatron/ipopt_characterization.py \
+	--write-tutorial-baselining-decision-log \
+	--output-root "$PWD/testatron/ipopt/tests/benchmarks"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py \
+        --write-tutorial-baselining-decision-log \
+        --output-root "$PWD/testatron/ipopt/tests/benchmarks"
+Wrote tutorial baselining decision log for 17 case(s): repo/testatron/ipopt/tests/tutorial_baselining_case_decision_log.md
+```
+
+
+To inspect the generated decision log
+
+```zsh
+git --no-pager diff -- \
+	testatron/ipopt/tests/tutorial_baselining_case_decision_log.md
+```
+
+No output means the regenerated report matches the checked-in/generated prior version exactly. A diff shows which case evidence, mappings, mismatch values, or refinement record changed.
+
+The narrative decision record should remain separate: do **not** overwrite `baselining_decision_log.md` merely because the generated companion report was refreshed.
+### Verify the fresh 17-case results against the **existing** reviewed current-state reference
+
+#### Verification command
+
+```zsh
+python testatron/ipopt_characterization.py \
+  --verify-tutorial-baselining \
+  --output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+  --tutorial-verification-reference \
+  "$PWD/testatron/ipopt/tests/tutorial_baselining_verification.json" \
+  --tutorial-verification-report-output \
+  "$PWD/testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json"
+```
+
+```zsh
+% python testatron/ipopt_characterization.py \
+  --verify-tutorial-baselining \
+  --output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+  --tutorial-verification-reference \
+  "$PWD/testatron/ipopt/tests/tutorial_baselining_verification.json" \
+  --tutorial-verification-report-output \
+  "$PWD/testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json"
+Tutorial baselining verification passed for 33 stage(s): /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json
+```
+
+#### Verification report
+
+```zsh
+python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json")); print(report["case_count"]); print(report["stage_count"]); print(dict(sorted(Counter(stage["status"] for stage in report["stages"]).items()))); print(report["acceptable"])'
+```
+
+```zsh
+% python -c 'import json; from collections import Counter; report=json.load(open("testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json")); print(report["case_count"]); print(report["stage_count"]); print(dict(sorted(Counter(stage["status"] for stage in report["stages"]).items()))); print(report["acceptable"])'
+17
+33
+{'matched': 33}
+True
+```
+
+#### Verification override command
+
+> [!warning] When you want to OVERRIDE an existing `tutorial_baselining_verification.json`
+> It rebuilds the 33-stage current-state contract from the current tutorial evidence. Use it **only** after manually reviewing a completed tutorial run and intentionally accepting a new contract.
+> 
+> ```zsh
+python testatron/ipopt_characterization.py \
+  --write-tutorial-baselining-verification \
+  --output-root "$PWD/testatron/ipopt/tests/benchmarks" \
+  --tutorial-verification-output \
+  "$PWD/testatron/ipopt/tests/tutorial_baselining_verification.json"
+> ```
+
+
+### Promote tutorial if matched
+
+See [[tutorial_baselining_commands#Promotion]].
+
+---
 
 # Baselining workflow
 
@@ -437,7 +579,7 @@ The first is a diagnostic comparison to historical truth. The second is the regr
 | `testatron/tests/<group>/<case>.emtgopt` | Immutable Testatron mission-options source. |
 | `testatron/tests/<group>/<case>.emtg` | Immutable historical SNOPT baseline. |
 | `testatron/ipopt/tests/tests/baselining/<group>/<case>/` | Replaceable staged runtime evidence, attempts, logs, comparisons, and summaries. |
-| `testatron/ipopt/tests/tests/<group>/<case>/` | Curated promoted output for an explicitly approved stable `matched_snopt` case. |
+| `testatron/ipopt/tests/tests/tests-promoted-baselines/<group>/<case>/` | Curated promoted output for an explicitly approved stable `matched_snopt` case. |
 | `testatron/ipopt/tests/baselining_verification.json` | Reviewed current-state reference for all 137 cases. |
 | `testatron/ipopt/tests/baselining_verification_policy.json` | Versioned numeric policy used only for current-state verification. |
 
@@ -524,8 +666,8 @@ toolchain provenance. Do not change SPICE, propagation, or numerical
 tolerances to force immutable-SNOPT agreement.
 
 The generated per-case record is
-[`baselining_case_decision_log.md`](baselining_case_decision_log.md). The
-manual review ledger is [`baselined_checklist.md`](baselined_checklist.md).
+[`baselining_case_decision_log.md`](../../../testatron/ipopt/tests/baselining_case_decision_log.md).
+The manual review ledger is [`baselined_checklist.md`](baselined_checklist.md).
 
 ## Current-State Verification
 
@@ -545,11 +687,24 @@ and verification commands, and
 [`ipopt.readme.md`](ipopt.readme.md) for the Docker toolchain.
 
 ## Promotion and Review
- Promotion is a separate manual operation. It may copy only reviewed, stable `matched_snopt` evidence into the curated case root; it never replaces the immutable SNOPT pair. A completed or current-state-matched `mismatch_snopt` case is not eligible for promotion.
+
+Promotion is a separate manual operation. Corpus promotion may copy only
+reviewed, stable `matched_snopt` evidence into its curated case root; it never
+replaces the immutable SNOPT pair. A completed or current-state-matched
+`mismatch_snopt` case is not eligible for promotion.
+
+Tutorial promotion is separately selected with `--promote-tutorial-baseline`.
+It requires explicit `--approve-baseline`, matching accepted verification
+records for every declared stage of the selected case, and stable
+promotion-eligible `matched_tutorial_reference` evidence. It writes only to
+`testatron/ipopt/tests/benchmarks/tutorial-promoted-baselines/<group>/<case>/`;
+it never modifies immutable tutorial inputs, archived tutorial references, or
+the accepted tutorial verification reference.
 
 The baselining summary is a compact generated index. The decision log and verification reference are the authoritative detailed records. Do not infer promotion or README approval merely from an evidence directory existing.
 
 ## Python Test Coverage
+
  `ipopt_benchmarks` covers benchmark artifact behavior. The runner contracts are ordinary unit tests and validate staging, comparison, serialization, promotion eligibility, and current-state verification behavior.
 
 `ipopt_tests` remains reserved for a future Docker-backed per-case pytest suite. Its absence does not weaken the completed artifact-based current-state verification workflow. Any future runtime suite must verify against the reviewed current-state reference and retain immutable-SNOPT comparison as a separate diagnostic.

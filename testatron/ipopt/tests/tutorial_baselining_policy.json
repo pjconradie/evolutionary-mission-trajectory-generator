@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "accepted_native_exits": [
+    "Optimal Solution Found."
+  ],
+  "seeded_refinement": {
+    "seed_MBH": 0,
+    "MBH_RNG_seed": 12345
+  },
+  "decision_bounds_absolute_tolerance": 1e-11,
+  "replay_max_cpu_time_seconds": 600,
+  "refinement_max_cpu_time_seconds": 600,
+  "refinement_max_major_iterations": 32000,
+  "execution_environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "taxonomy_policies": {
+    "authoritative": {
+      "eligible_stages": [
+        "replay",
+        "refinement"
+      ],
+      "promotion_eligible": true,
+      "objective_tolerance": {
+        "absolute": 1e-10,
+        "relative": 1e-06
+      }
+    },
+    "demonstration": {
+      "eligible_stages": [
+        "replay",
+        "refinement"
+      ],
+      "promotion_eligible": true,
+      "objective_tolerance": {
+        "absolute": 1e-08,
+        "relative": 0.001
+      }
+    },
+    "deliberate_infeasible": {
+      "eligible_stages": [
+        "replay"
+      ],
+      "promotion_eligible": false
+    }
+  }
+}

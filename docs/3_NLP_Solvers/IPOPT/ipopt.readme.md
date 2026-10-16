@@ -239,8 +239,8 @@ different questions:
 
 - [`tests.readme.md`](tests.readme.md) defines the immutable-SNOPT comparison,
    staging, replay, and refinement contract.
-- [`baselining_case_decision_log.md`](baselining_case_decision_log.md) records
-   the generated per-case evidence for the 137-case corpus.
+- [`baselining_case_decision_log.md`](../../../testatron/ipopt/tests/baselining_case_decision_log.md)
+  records the generated per-case evidence for the 137-case corpus.
 - `testatron/ipopt/tests/baselining_verification.json` is the reviewed
    current-EMTG/IPOPT reference; its independent numeric policy is
    `testatron/ipopt/tests/baselining_verification_policy.json`.

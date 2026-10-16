@@ -1,0 +1,29 @@
+{
+  "status": "approved",
+  "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+  "taxonomy": "demonstration",
+  "source_options": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/LowSIRIS-REx_high_thrust.emtgopt",
+    "sha256": "c4762383da935534b0fecf14a17fac49fb159fca9a0bda9deb46fb1ba5398a12"
+  },
+  "reference_mission": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Config_Files/results/LowSIRIS-REx_high_thrust_11292022_133015/LowSIRIS-REx_high_thrust_Sun(EB)_Sun(BE).emtg",
+    "sha256": "03cbfa2771930277fd46f37bb5aba10059121f0d0d2d70694a99e6a2a3ddb741"
+  },
+  "tutorial_verification": {
+    "path": "testatron/ipopt/tests/tutorial_baselining_verification.json",
+    "sha256": "284cdeff26fc5a510970ffafffa16bde47ef87423e167ac2ff2c007a25752300",
+    "selected_case_stages": [
+      {
+        "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+        "stage": "refinement",
+        "status": "matched"
+      },
+      {
+        "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+        "stage": "replay",
+        "status": "matched"
+      }
+    ]
+  }
+}

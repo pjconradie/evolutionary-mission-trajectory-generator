@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector",
+  "source_evidence": "baselining/journey_options/escape_from_KSC_FreePointDirectDeparture_along_velocity_vector",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "escape_from_KSC_FreePointDirectDeparture_along_velocity_vector.emtg",
+  "canonical_mission_sha256": "7fb398be61a601d86378a02aea5920daa11167ca8e20ae3e5acf6e97574e4683",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}
