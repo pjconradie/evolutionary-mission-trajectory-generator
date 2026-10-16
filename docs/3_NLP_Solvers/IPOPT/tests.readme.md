@@ -1,6 +1,3 @@
-
-How to baseline?
-
 # Purpose
 
 This plan makes the complete `testatron/tests` corpus executable with the open-source IPOPT backend and uses the committed SNOPT-generated `.emtg` files as the immutable numerical baseline.
@@ -13,20 +10,20 @@ Run the commands in this document from the repository root.
 
 Tests against a pinned Docker image already available.
 
-| #   | Test                                              | Command                                                                                                        | Runtime information                              | Docker required |
-| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | --------------- |
-| 1   | Run clean bootstrap                               |                                                                                                                |                                                  | Yes             |
-| 2   | Run collection sanity                             | python -m pytest --collect-only -q                                                                             | 327/362 tests collected (35 deselected) in 0.22s | No              |
-| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 156 passed, 206 deselected in 8.22s              | No              |
-| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 217 deselected in 1.78s              | No              |
-| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 155 passed in 6.83s                              | No              |
-|     |                                                   |                                                                                                                | < 10 seconds                                     |                 |
-| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 360 deselected in 42.10s              | Yes             |
-| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 369 deselected in 11.12s               | Yes             |
-| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 346 deselected in 89.86s (0:01:29)    | Yes             |
-|     |                                                   |                                                                                                                | < 15 min                                         | Yes             |
-| 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                         | Yes             |
-| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                         | Yes             |
+| #   | Test                                              | Command                                                                                                        | Runtime information                                                                                  | Docker required |
+| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------- |
+| 1   | Run clean bootstrap                               |                                                                                                                |                                                                                                      | Yes             |
+| 2   | Run collection sanity                             | python -m pytest --collect-only -q<br>python -m pytest --collect-only -q --tutorials                           | 327/362 tests collected (35 deselected) in 0.22s<br>34/376 tests collected (342 deselected) in 0.09s | No              |
+| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 170 passed, 206 deselected in 10.08s                                                                 | No              |
+| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 231 deselected in 2.38s                                                                  | No              |
+| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 169 passed in 9.96s                                                                                  | No              |
+|     |                                                   |                                                                                                                | < 10 seconds                                                                                         |                 |
+| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 364 deselected in 39.82s                                                                  | Yes             |
+| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 373 deselected in 10.60s                                                                   | Yes             |
+| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 350 deselected in 88.02s (0:01:28)                                                        | Yes             |
+|     |                                                   |                                                                                                                | < 15 min                                                                                             | Yes             |
+| 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
+| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
 
 1
 Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
@@ -36,6 +33,7 @@ Docker NOT required. Estimated runtime order of magnitude seconds.
 
 ```zsh
 python -m pytest --collect-only -q
+python -m pytest --collect-only -q --tutorials
 
 python -m pytest -m unit
 
@@ -71,39 +69,44 @@ Not implemented yet.
 
 `--collect-only` executes no tests and does not invoke Docker, EMTG, or IPOPT. It confirms that the expected test modules, markers, and test-discovery configuration are visible to pytest.
 
-Run it at the beginning to detect missing coverage and again at the end to record the final collection state.
-
-Terminal command:
-
 ```zsh
 python -m pytest --collect-only -q
 ```
 
-Example output:
 ```zsh
 % python -m pytest --collect-only -q
 tests/integration/test_baselining.py::test_baselining_repeatability_in_pinned_toolchain[global_mission_options/globalmissionoptions_MGALT_DLAbounds]
 tests/integration/test_baselining.py::test_baselining_repeatability_in_pinned_toolchain[transcription_tests/SundmanCoastPhase_EMintercept]
-tests/integration/test_baselining.py::test_baselining_cli_writes_fixed_mirrored_layout
-.
-.
-.
-tests/test_ipopt_characterization.py::test_benchmark_provenance_hashes_current_sources
+...
 tests/test_ipopt_characterization.py::test_benchmark_provenance_rejects_unknown_stage
 tests/test_ipopt_characterization.py::test_committed_provenance_matches_registry_and_directory
 
 285/319 tests collected (34 deselected) in 0.12s
 ```
 
+Tutorial collection
+
+```zsh
+python -m pytest --collect-only -q --tutorials
+```
+
+```zsh
+% python -m pytest --collect-only -q --tutorials
+tests/integration/test_tutorial_baselining.py::test_tutorial_baselining_cli_writes_fixed_mirrored_layout
+tests/integration/test_tutorials.py::test_tutorial_replay[Config_Files/LowSIRIS-REx]
+...
+tests/integration/test_tutorials.py::test_tutorial_ipopt_refinement[Flybys/HighFidelity]
+tests/integration/test_tutorials.py::test_tutorial_ipopt_refinement[Flybys/EVM_singlePhase]
+
+34/376 tests collected (342 deselected) in 0.16s
+```
+
 The **34 deselected tests are exactly:**
 
-| Opt-in group                       |  Count | Why excluded by default                                                                |
-| ---------------------------------- | -----: | -------------------------------------------------------------------------------------- |
-| `clean_bootstrap`                  |      1 | Rebuilds the Docker toolchain with `--no-cache`; intentionally expensive.              |
-| `tutorials` replay tests           |     17 | Docker-backed verification of the current tutorial input/reference packages.           |
-| `tutorials` IPOPT-refinement tests |     16 | Docker-backed IPOPT refinement verification for tutorial cases that permit refinement. |
-| **Total**                          | **34** |                                                                                        |
-|                                    |        |                                                                                        |
+| Opt-in group             | Count | Why excluded by default                                                   |
+| ------------------------ | ----: | ------------------------------------------------------------------------- |
+| `clean_bootstrap`        |     1 | Rebuilds the Docker toolchain with `--no-cache`; intentionally expensive. |
+| `tutorials` replay tests |    34 | 17 Tutorial baselining tests.                                             |
 
 ## 3. Run unit tests
 
@@ -257,9 +260,6 @@ python -m pytest -m integration -q
 ..........................                                                                                                                                                                                                                                    [100%]
 26 passed, 293 deselected in 658.13s (0:10:58)
 ```
-
-
-
 
 ## 9. Run 137 corpus tests
 
@@ -556,6 +556,9 @@ python testatron/ipopt_characterization.py \
 ### Promote tutorial if matched
 
 See [[tutorial_baselining_commands#Promotion]].
+
+---
+
 # Baselining workflow
 
 See [[baselining_commands]].

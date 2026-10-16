@@ -3781,6 +3781,24 @@ def test_repo_relative_returns_posix_relative(repository_root):
     )
 
 
+def test_repo_relative_preserves_logical_path_through_nested_mount(tmp_path):
+    root = tmp_path / "repo"
+    staged_testatron = tmp_path / "staged-testatron"
+    source = staged_testatron / "tests" / "example.emtgopt"
+    source.parent.mkdir(parents=True)
+    source.write_text("example", encoding="utf-8")
+    root.mkdir()
+    (root / "testatron").symlink_to(staged_testatron, target_is_directory=True)
+
+    assert (
+        ipopt_characterization.repo_relative(
+            root / "testatron" / "tests" / "example.emtgopt",
+            root,
+        )
+        == "testatron/tests/example.emtgopt"
+    )
+
+
 def test_repo_relative_rejects_paths_outside_repository(tmp_path):
     outside = tmp_path / "elsewhere" / "artifact.json"
 
