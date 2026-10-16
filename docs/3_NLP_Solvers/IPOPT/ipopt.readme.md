@@ -244,5 +244,5 @@ different questions:
 - `testatron/ipopt/tests/baselining_verification.json` is the reviewed
    current-EMTG/IPOPT reference; its independent numeric policy is
    `testatron/ipopt/tests/baselining_verification_policy.json`.
-- [`tests.implementation_plan.md`](tests.implementation_plan.md) retains the
+- [`tests.implementation_plan.md`](tests.implementation_plan_archived_20261013.md) retains the
    implementation history and its current-state closure.
