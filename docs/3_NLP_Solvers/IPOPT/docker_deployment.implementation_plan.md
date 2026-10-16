@@ -276,7 +276,7 @@ wrapper status is one of:
 
 | Wrapper status | Meaning |
 | --- | --- |
-| `completed` | Process returned and any produced solution was parsed |
+| `completed` | Process returned code `0` and the produced solution was parsed |
 | `launch_error` | Executable could not be started |
 | `timed_out` | `subprocess.run` raised a timeout |
 | `process_failed` | Process returned a non-zero code |
@@ -285,7 +285,9 @@ wrapper status is one of:
 
 For a parsed solution, `worst_constraint_violation <= 1e-5` is feasible;
 a larger value is an infeasible incumbent and must be returned with an
-explicit warning. Launch failure, timeout, non-zero process exit, missing
+explicit warning. A non-zero process exit is `process_failed` even when a
+solution file can be parsed; retain that parsed result and the raw return code
+for diagnostics. Launch failure, timeout, non-zero process exit, missing
 solution, malformed solution, optimizer state, and feasibility remain distinct
 structured result fields.
 
@@ -305,10 +307,24 @@ Use this precedence for universe, kernel, hardware, and output path values:
 2. The relevant container environment variable.
 3. The value in the selected baseline `.emtgopt` template.
 
-The runner/wrapper rewrites legacy Windows drive paths such as `C:\...` to the
-matching container locations before running EMTG. It preserves normal Linux
-forward-slash paths. Universe, hardware, and SPICE paths remain independently
-configured; a value for one resource is never used as a fallback for another.
+The runner/wrapper preserves normal Linux forward-slash paths. It may rewrite
+only an explicitly enumerated legacy Windows source prefix and only for its
+matching option field:
+
+| Path purpose | Approved container destination |
+| --- | --- |
+| Universe data | `/opt/toolkit/emtg/universe/` |
+| Hardware data | `/opt/toolkit/emtg/hardware/` |
+| SPICE kernels | `/opt/kernels/` |
+| Working and output paths | `/opt/work/<run_id>/` |
+
+Collect legacy source prefixes from the option files and templates included in
+the artifact, document the field-specific mapping table, and cover it with
+tests. Reject unmapped Windows paths, UNC paths, and ambiguous mappings; never
+guess a destination. A universe prefix must not be used for a kernel or output
+field, and output paths remain confined to the per-run directory. Universe,
+hardware, and SPICE paths remain independently configured; a value for one
+resource is never used as a fallback for another.
 
 The ADSGNC service accepts an uploaded options file or an approved template
 identifier and its `raw_options` overrides, never an arbitrary host filesystem
@@ -335,10 +351,11 @@ checks pass:
    image with the metadata-declared packages installed.
 4. The clean runtime image imports `MissionOptions`, `Mission`, and
    `EMTGRunner` without GUI packages, then runs a baseline IPOPT mission.
-5. Runner tests cover request-option precedence, Windows-path rewriting,
-   explicit Linux paths, launch failure, raw return-code preservation, timeout,
-   missing/malformed solutions, captured logs, optimizer state, and feasible
-   versus infeasible parsed solutions.
+5. Runner tests cover request-option precedence; the documented,
+   field-specific Windows-path mappings; rejection of unmapped Windows, UNC,
+   and ambiguous paths; explicit Linux paths; launch failure; raw return-code
+   preservation; timeout; missing/malformed solutions; captured logs; optimizer
+   state; and feasible versus infeasible parsed solutions.
 6. Archive tests verify the required layout and assets, forbidden content,
    tar-entry safety, `EMTGv9` mode, metadata, checksum verification, and clean
    extraction.
