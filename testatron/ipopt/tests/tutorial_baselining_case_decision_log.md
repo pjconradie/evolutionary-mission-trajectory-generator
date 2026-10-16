@@ -11,7 +11,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 
@@ -32,7 +32,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 
@@ -53,7 +53,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 
@@ -114,7 +114,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 
@@ -135,7 +135,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 
@@ -156,7 +156,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 
@@ -210,7 +210,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 
@@ -294,7 +294,7 @@ This generated log records two-attempt tutorial evidence. Immutable tutorial inp
 - Repeatability: `stable`.
 - Promotion eligible: `True`.
 - Dependencies: `ready`; missing: `0`.
-- Promotion: `not_promoted`.
+- Promotion: `approved`.
 
 ### replay
 

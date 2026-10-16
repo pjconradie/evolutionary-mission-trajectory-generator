@@ -1,6 +1,6 @@
 # Purpose
 
-This plan makes the complete `testatron/tests` corpus executable with the open-source IPOPT backend and uses the committed SNOPT-generated `.emtg` files as the immutable numerical baseline.
+
 
 IPOPT is not accepted merely because it produces a feasible result. For each comparable case, the IPOPT result must agree with the corresponding SNOPT result within an explicit, reviewed numerical contract. The committed SNOPT options and `.emtg` files are never overwritten, regenerated, or promoted from an IPOPT run.
 
@@ -58,7 +58,6 @@ EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \
 
 9, 10
 Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
-
 
 ## 1. Run clean bootstrap
 
@@ -561,8 +560,6 @@ See [[tutorial_baselining_commands#Promotion]].
 
 # Baselining workflow
 
-See [[baselining_commands]].
-
 The IPOPT Testatron Baselining workflow executes the immutable `testatron/tests` corpus with the open-source IPOPT backend while preserving each adjacent SNOPT-generated `.emtg` file as immutable historical evidence. The workflow answers two separate questions:
 
 1. **Immutable-SNOPT comparison:** does a staged replay and, when eligible,
@@ -571,7 +568,7 @@ The IPOPT Testatron Baselining workflow executes the immutable `testatron/tests`
 2. **Current-state regression verification:** does fresh evidence reproduce the
 	reviewed behavior of the current EMTG/IPOPT environment?
 
-The first is a diagnostic comparison to historical truth. The second is the regression gate for the currently supported Docker toolchain. A stable `mismatch_snopt` can be expected current-state behavior; it is not a solver pass against SNOPT, nor a regression by itself.
+The first (Replay) is a diagnostic comparison to historical truth. The second (Refinement) is the regression gate for the currently supported Docker toolchain. A stable `mismatch_snopt` can be expected current-state behavior; it is not a solver pass against SNOPT, nor a regression by itself.
 ## Immutable Inputs and Evidence Layout
 
 | Root | Contents |
@@ -648,101 +645,6 @@ Current-state verification does not reuse or relax any immutable-SNOPT policy.
 It uses the independent, versioned numeric tolerances in
 `testatron/ipopt/tests/baselining_verification_policy.json` to compare fresh
 evidence with the reviewed current-state reference.
-
-## Completed Corpus State
-
-The reviewed corpus contains 137 immutable source/SNOPT pairs. The two-attempt
-baselining run is stable for every case:
-
-| Classification | Count | Meaning |
-| --- | ---: | --- |
-| `matched_snopt` | 5 | Replay and IPOPT refinement meet the immutable-SNOPT agreement policy. |
-| `mismatch_snopt` | 132 | Replay differs from the immutable SNOPT baseline; refinement is not run. |
-| `topology_changed`, `parse_failed`, `dependency_blocked`, `process_failed`, `timed_out` | 0 | No final classifications in the completed corpus. |
-
-The recurring long Earth-Mars endpoint difference remains an unresolved
-historical-environment diagnostic, most likely involving ephemeris, kernel, or
-toolchain provenance. Do not change SPICE, propagation, or numerical
-tolerances to force immutable-SNOPT agreement.
-
-The generated per-case record is
-[`baselining_case_decision_log.md`](../../../testatron/ipopt/tests/baselining_case_decision_log.md).
-The manual review ledger is [`baselined_checklist.md`](baselined_checklist.md).
-
-## Current-State Verification
-
-The reference records the expected present EMTG/IPOPT result for every case,
-including expected `mismatch_snopt` outcomes. It contains immutable input
-hashes, repeatability, runtime compatibility records, replay state, and,
-where refinement ran, native IPOPT exit and numerical snapshots.
-
-Ordinary baselining must never overwrite the reference. Writing or refreshing
-`baselining_verification.json` is an explicit review and acceptance action.
-Verification is artifact-only: it does not run EMTG and exits nonzero for
-numeric drift, changed topology, changed execution state, missing evidence, or
-unstable attempts.
-
-See [`baselining_commands.md`](baselining_commands.md) for the reference-write
-and verification commands, and
-[`ipopt.readme.md`](ipopt.readme.md) for the Docker toolchain.
-
-## Promotion and Review
-
-Promotion is a separate manual operation. Corpus promotion may copy only
-reviewed, stable `matched_snopt` evidence into its curated case root; it never
-replaces the immutable SNOPT pair. A completed or current-state-matched
-`mismatch_snopt` case is not eligible for promotion.
-
-Tutorial promotion is separately selected with `--promote-tutorial-baseline`.
-It requires explicit `--approve-baseline`, matching accepted verification
-records for every declared stage of the selected case, and stable
-promotion-eligible `matched_tutorial_reference` evidence. It writes only to
-`testatron/ipopt/tests/benchmarks/tutorial-promoted-baselines/<group>/<case>/`;
-it never modifies immutable tutorial inputs, archived tutorial references, or
-the accepted tutorial verification reference.
-
-The baselining summary is a compact generated index. The decision log and verification reference are the authoritative detailed records. Do not infer promotion or README approval merely from an evidence directory existing.
-
-## Python Test Coverage
-
- `ipopt_benchmarks` covers benchmark artifact behavior. The runner contracts are ordinary unit tests and validate staging, comparison, serialization, promotion eligibility, and current-state verification behavior.
-
-`ipopt_tests` remains reserved for a future Docker-backed per-case pytest suite. Its absence does not weaken the completed artifact-based current-state verification workflow. Any future runtime suite must verify against the reviewed current-state reference and retain immutable-SNOPT comparison as a separate diagnostic.
-# Readme
-
-## IPOPT Suite Layout
-
-The immutable source inputs and SNOPT baselines remain below
-`testatron/tests`. IPOPT-generated characterization evidence is organized
-separately beneath `testatron/ipopt/tests`:
-
-| Root | Contents | Pytest marker |
-| --- | --- | --- |
-| `testatron/ipopt/tests/tests` | Per-case IPOPT Testatron staging, logs, comparisons, and manifests | `ipopt_tests` |
-| `testatron/ipopt/tests/benchmarks` | IPOPT benchmark replay and refinement evidence | `ipopt_benchmarks` |
-
-`testatron/ipopt/tests/tests` is artifact data despite its nested `tests/tests`
-name. Python test code remains below the repository-level `tests/` directory.
-
-`ipopt_benchmarks` marks the current Python tests that create or validate the
-benchmark artifact root. `ipopt_tests` is reserved for the future Docker-backed
-per-case suite: each node must replay an immutable SNOPT baseline, refine it
-with IPOPT, and enforce direct SNOPT/IPOPT agreement. The existing
-characterization-runner contracts are `unit` tests; they do not carry
-`ipopt_tests` because they neither execute the corpus nor compare IPOPT against
-SNOPT.
-
-Use focused selections when working on one suite:
-
-```bash
-pytest -m ipopt_benchmarks
-```
-
-After the per-case suite is implemented, run it with:
-
-```bash
-pytest -m ipopt_tests
-```
 
 ## Baseline Rules
 
@@ -926,102 +828,3 @@ The staging layer must resolve them before EMTG runs:
 The full dependency inventory, source URL or repository source, SHA-256,
 mapping reason, and final staged path must be written to `compatibility.json`.
 
-## Implementation Plan
-
-1. Keep IPOPT characterization artifacts below `testatron/ipopt/tests/tests`
-	and benchmark artifacts below `testatron/ipopt/tests/benchmarks`. Update
-	operational references and the benchmark registry without changing immutable
-	source inputs, SNOPT baselines, or historical generated-evidence paths.
-2. Register `ipopt_tests` and `ipopt_benchmarks` in `pytest.ini`. Apply them
-	to Python tests that respectively execute or validate case and benchmark
-	evidence. Keep both markers included in ordinary pytest collection.
-3. Add a versioned Testatron dependency manifest for externally provided NAIF
-	kernels, including canonical source URL for provenance, filename, SHA-256,
-	and required destination.
-4. Extend `testatron/ipopt_characterization.py` with a preflight command that
-	validates all Testatron case dependencies without downloading anything. It
-	must reject missing or checksum-mismatched kernels and report the exact
-	required filename, expected destination, canonical source URL, and expected
-	SHA-256 so an operator can provide the correct resource.
-5. Refactor `prepare_case()` into dependency resolution plus staged option
-	generation. Preserve its current legacy NLSII and guarded throttle-table
-	mappings, and rewrite paths only in the generated option copy.
-6. Extend the case result and comparison output with endpoint deltas, IPOPT
-	diagnostics, and a structured SNOPT-agreement result.
-7. Add comparison classifications that distinguish:
-	- `matched_snopt`: native IPOPT success and every approved comparison check
-	  passes.
-	- `mismatch_snopt`: IPOPT completed but differs materially from the SNOPT
-	  baseline.
-	- `dependency_blocked`, `timed_out`, `process_failed`, `parse_failed`,
-	  `infeasible`, and `topology_changed`: operational or physics/solver
-	  outcomes that are not matches.
-8. Add a manifest summary with counts for each classification and a direct list
-	of all non-matches. The all-case acceptance condition is zero unresolved
-	dependencies **and** zero unexplained SNOPT mismatches for the approved
-	comparable set.
-9. Add unit tests for dependency mapping, checksum behavior, path rewriting,
-	zero-order gravity, comparison bands, objective direction, topology, and
-	native IPOPT exit handling.
-10. Add Docker-backed smoke tests for one case using public NLSII data and one
-	case requiring SPICE kernels. Run complete `ipopt_tests` and
-	`ipopt_benchmarks` selections as core pytest coverage; record cold and warm
-	runtimes before setting CI resource limits.
-
-## Execution Model
-
-The legacy `testatron/testatron.py` runner remains historical tooling. It uses
-direct paths and a global Comparatron tolerance and is not the IPOPT
-implementation target.
-
-The supported path is the staged runner in
-`testatron/ipopt_characterization.py`:
-
-1. Preflight public dependencies.
-2. Copy each source option into an isolated writable artifact directory below
-	`testatron/ipopt/tests/tests`.
-3. Write the IPOPT-specific staged option and `compatibility.json`.
-4. Run the IPOPT-enabled `/build/src/EMTGv9` inside the Docker toolchain.
-5. Parse the generated mission, compare it directly to the adjacent immutable
-	SNOPT `.emtg` baseline, and write `result.json`, comparison data, and
-	`run.log`.
-6. Update a resumable unreviewed manifest after each case. Benchmark stages
-	write their evidence below `testatron/ipopt/tests/benchmarks`.
-
-The repository mount is read-only in Docker. Only the selected artifact
-directory is writable. This prevents a test run from modifying SNOPT baselines
-or source options by accident.
-
-## Required Artifacts
-
-Each staged case must produce:
-
-| Artifact | Content |
-| --- | --- |
-| `run.log` | EMTG and IPOPT native diagnostics |
-| `compatibility.json` | Source dependencies, substitutions, hashes, and staging provenance |
-| `comparison.json` | Structured SNOPT/IPOPT checks, tolerances, baseline values, IPOPT values, and deltas |
-| `comparison.csv` | Tabular numerical deltas for review |
-| `result.json` | Classification, exit status, timing, and artifact paths |
-| `manifest.json` and `manifest.csv` | Resumable aggregate inventory and classification counts |
-
-No generated file is a replacement truth. A reviewer must investigate every
-`mismatch_snopt` before accepting IPOPT for that case.
-
-## Success Criteria
-
-The portable IPOPT Testatron implementation is complete when:
-
-1. Every discovered `testatron/tests/**/*.emtgopt` case has dependency
-	provenance and can pass preflight without an unresolved input.
-2. The complete Docker run creates one result record per source case without
-	modifying any source option or SNOPT baseline hash.
-3. Each successful IPOPT case has a native IPOPT success exit, feasible result,
-	and a direct structured comparison to its SNOPT baseline.
-4. Every approved comparable case is classified `matched_snopt`; all remaining
-	cases have a specific, reproducible issue classification and are not counted
-	as solver verification passes.
-5. Any new or adjusted comparison tolerance is reviewed, versioned, and backed
-	by recorded cross-solver evidence.
-6. `pytest -m ipopt_tests` and `pytest -m ipopt_benchmarks` both pass, and
-	plain pytest collection includes both core marker groups.
