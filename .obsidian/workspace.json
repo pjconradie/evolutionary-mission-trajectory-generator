@@ -97,12 +97,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "readme.md.md",
+                "file": "testatron/ipopt/tests/benchmarks/how_to_generate_osiris_rex_track_acs_prop_results.readme.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "readme.md"
+              "title": "how_to_generate_osiris_rex_track_acs_prop_results.readme"
             }
           }
         ],
@@ -273,8 +273,9 @@
   },
   "active": "4a88b66df0a9f7db",
   "lastOpenFiles": [
-    "testatron/ipopt/tests/benchmarks/how_to_generate_osiris_rex_track_acs_prop_results.readme.md",
     "readme.md.md",
+    "readme.md",
+    "testatron/ipopt/tests/benchmarks/how_to_generate_osiris_rex_track_acs_prop_results.readme.md",
     "testatron/ipopt/tests/benchmarks/how_to_interpret_osiris_rex_track_acs_prop_results.readme.md",
     "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
@@ -307,7 +308,6 @@
     "docs/3_NLP_Solvers/IPOPT/baselining_decision_log_test.md",
     "docs/3_NLP_Solvers/IPOPT/stage6_checklist.md",
     "docs/3_NLP_Solvers/IPOPT/implementation_plan_prompts/Untitled.md",
-    "baseline-artifacts/how_to_generate_results.readme.md",
-    "testatron/ipopt/tests/benchmarks/benchmarks/how_to_interpret_results.readme.md"
+    "baseline-artifacts/how_to_generate_results.readme.md"
   ]
 }
