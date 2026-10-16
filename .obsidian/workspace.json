@@ -8,90 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "be32af688ddd23f2",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/tests.implementation_plan.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "tests.implementation_plan"
-            }
-          },
-          {
-            "id": "2bb7e13f04755740",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "baselined_checklist"
-            }
-          },
-          {
-            "id": "1248c444cdae4c80",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_implementation_plan_1.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "tutorial_baselining_implementation_plan_1"
-            }
-          },
-          {
-            "id": "412c2fcbb7664492",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "tutorial_baselining_commands"
-            }
-          },
-          {
-            "id": "24c361dd14a09544",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "tests.readme"
-            }
-          },
-          {
-            "id": "6b55445157447998",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "baselining_commands"
-            }
-          },
-          {
             "id": "4a88b66df0a9f7db",
             "type": "leaf",
             "state": {
@@ -106,21 +22,49 @@
             }
           },
           {
+            "id": "ff894778fc3b35aa",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "ipopt.readme"
+            }
+          },
+          {
+            "id": "37fe986dd889e6f8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/emtg_archive.implementation_plan.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "emtg_archive.implementation_plan"
+            }
+          },
+          {
             "id": "4a817e9e9e049e35",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "docker_deployment.implementation_plan"
+              "title": "README"
             }
           }
         ],
-        "currentTab": 7
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -182,7 +126,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 724.796875
+    "width": 464.8203125
   },
   "right": {
     "id": "66aa8d3610c9c55c",
@@ -285,13 +229,21 @@
       "bases:Create new base": false
     }
   },
-  "active": "4a817e9e9e049e35",
+  "active": "37fe986dd889e6f8",
   "lastOpenFiles": [
-    "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
+    "docs/3_NLP_Solvers/IPOPT/emtg_archive.implementation_plan_2.md",
+    "docs/3_NLP_Solvers/IPOPT/emtg_archive.implementation_plan.md",
+    "docs/3_NLP_Solvers/IPOPT/emtg_archive.design.md",
+    "testatron/ipopt/manual_testron_execution.README.md",
+    "testatron/ipopt/README.md",
+    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "README.md",
-    "todo_updated_20261016.md",
-    "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.md",
+    "docs/3_NLP_Solvers/IPOPT/archived/tests.implementation_plan_archived_20261013.md",
+    "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
+    "todo_updated_20261016.md",
     "docs/3_NLP_Solvers/IPOPT/todo_updated_20261016 2.md",
     "README 2.md",
     "testatron/ipopt/tests/benchmarks/how_to_generate_osiris_rex_track_acs_prop_results.readme.md",
@@ -301,13 +253,9 @@
     "readme.md.md",
     "readme.md",
     "testatron/ipopt/tests/benchmarks/how_to_interpret_osiris_rex_track_acs_prop_results.readme.md",
-    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
-    "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
-    "docs/3_NLP_Solvers/IPOPT/archived/tests.implementation_plan_archived_20261013.md",
     "docs/3_NLP_Solvers/IPOPT/archived/tutorial_baselining_implementation_plan_1_archived_20261016.md",
     "docs/3_NLP_Solvers/IPOPT/archived/tutorial_baselining_implementation_plan_archived_20261010.md",
     "docs/3_NLP_Solvers/IPOPT/archived",
-    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json",
     "testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json",
     "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/result.json",
@@ -318,10 +266,6 @@
     "testatron/ipopt/tests/baselining_case_decision_log.md",
     "testatron/ipopt/tests/readme.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_case_decision_log.md",
-    "2026-10-14.md",
-    "docs/3_NLP_Solvers/IPOPT/docker_deployment.implementation_plan.adsgnc_specifications.md",
-    "docs/3_NLP_Solvers/IPOPT/legacy/open_source_emtg_container_plan.md",
-    "docs/3_NLP_Solvers/IPOPT/baselining_decision_log.md",
-    "docs/3_NLP_Solvers/IPOPT/baselining_decision_log_test.md"
+    "2026-10-14.md"
   ]
 }

@@ -34,9 +34,9 @@ Based on the [ADSGNC](https://github.com/pjconradie/adsgnc) repository, the modi
 2. Pass deployment tests. Includes all the tests under [[testatron/ipopt/tests/readme]].
 3. Pass 3rd party deployment tests (ADSGNC will be the first user).
 
-## EMTG Package
+## EMTG Package for 3rd party deployment
 
-1. See 
+1. See [[emtg_archive.design]].
 
 ## Update Baselined Checklist table
 
