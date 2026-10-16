@@ -134,11 +134,10 @@ Bookworm image and resolve every dependency reported by `ldd`.
 
 ### 4. Stage the minimal runtime archive payload
 
-1. Stage a single archive root, named from the requested release version, with
-   this layout:
+1. Stage a single archive root named `emtg/`, with this layout:
 
    ```text
-   emtg-ipopt-<version>/
+   emtg/
    ├── bin/
    │   └── EMTGv9
    ├── universe/
@@ -151,6 +150,10 @@ Bookworm image and resolve every dependency reported by `ldd`.
    ├── RUNTIME_REQUIREMENTS.txt
    └── README.md
    ```
+
+   The versioned archive filename identifies the package variant and release;
+   it must not add another extracted directory level. Extracting the archive
+   into `/opt/toolkit` must produce `/opt/toolkit/emtg/bin/EMTGv9`.
 
 2. Use an explicit source-to-destination manifest:
    - Include committed `Universe/*.emtg_universe`.
@@ -166,7 +169,7 @@ Bookworm image and resolve every dependency reported by `ldd`.
 4. Preserve the executable mode on `bin/EMTGv9`.
 5. Build the archive using only normalized, relative tar member names. Reject
    absolute paths and traversal entries before writing, then reopen the final
-   archive and verify the same condition.
+   archive and verify the same condition and the single `emtg/` root.
 
 **Acceptance:** the archive contains the listed runtime payload only, has one
 root directory, no unsafe member names, and an executable `bin/EMTGv9`.
@@ -175,7 +178,8 @@ root directory, no unsafe member names, and an executable `bin/EMTGv9`.
 
 1. Write the archive `README.md` to state:
    - the required Debian runtime packages and `RUNTIME_REQUIREMENTS.txt`;
-   - extraction under an ADSGNC-selected toolkit root;
+   - extraction into `/opt/toolkit`, resulting in
+     `/opt/toolkit/emtg/bin/EMTGv9`;
    - the fixed EMTG invocation form and the fact that no shell is required;
    - the working-directory behavior expected by EMTG;
    - which universe/hardware inputs are bundled;
@@ -237,7 +241,8 @@ sha256sum -c emtg-ipopt-<version>.tar.gz.sha256
      argument list and isolated writable run directory;
    - retain per-case logs, generated artifacts, comparisons, and provenance;
    - run the existing tutorial-baselining verification workflow against its
-     reviewed reference; and
+     reviewed reference, recording the EMTG commit SHA and checksum of that
+     reference with the deployment evidence; and
    - require every one of the 17 registered tutorial cases to pass
      verification. A missing, skipped, timed-out, failed, or mismatched case
      blocks deployment approval.
