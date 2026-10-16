@@ -1,0 +1,29 @@
+{
+  "status": "approved",
+  "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+  "taxonomy": "demonstration",
+  "source_options": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/LowSIRIS-REx_forcemodel_nlp.emtgopt",
+    "sha256": "9bc026d6bf99179b04af14c349abb06cedb1f555a8f111a36dcd96ff06cc5c7d"
+  },
+  "reference_mission": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Force_Models/results/LowSIRIS-REx_forcemodel_nlp_11292022_94615/LowSIRIS-REx_forcemodel_nlp_Sun(EB)_Sun(BE).emtg",
+    "sha256": "da7bb2a53ddaba9ff23f661d2a771080d3fddc4f40f51347976447028886d5e6"
+  },
+  "tutorial_verification": {
+    "path": "testatron/ipopt/tests/tutorial_baselining_verification.json",
+    "sha256": "284cdeff26fc5a510970ffafffa16bde47ef87423e167ac2ff2c007a25752300",
+    "selected_case_stages": [
+      {
+        "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+        "stage": "refinement",
+        "status": "matched"
+      },
+      {
+        "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+        "stage": "replay",
+        "status": "matched"
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "status": "approved",
+  "case_id": "Flybys/EVM",
+  "taxonomy": "demonstration",
+  "source_options": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Flybys/EVM.emtgopt",
+    "sha256": "4238b9ec9615e484e5b1b7f554e194ca0164c3a401143c7c90e106f2a3118da0"
+  },
+  "reference_mission": {
+    "path": "docs/0_Users/tutorial/Tutorial_EMTG_Files/Flybys/results/EVM_11292022_112047/EVM.emtg",
+    "sha256": "7dc9c1c7586a4e8316eab83011f3c0368a096a4c201709f9b45301843be80b11"
+  },
+  "tutorial_verification": {
+    "path": "testatron/ipopt/tests/tutorial_baselining_verification.json",
+    "sha256": "284cdeff26fc5a510970ffafffa16bde47ef87423e167ac2ff2c007a25752300",
+    "selected_case_stages": [
+      {
+        "case_id": "Flybys/EVM",
+        "stage": "refinement",
+        "status": "matched"
+      },
+      {
+        "case_id": "Flybys/EVM",
+        "stage": "replay",
+        "status": "matched"
+      }
+    ]
+  }
+}

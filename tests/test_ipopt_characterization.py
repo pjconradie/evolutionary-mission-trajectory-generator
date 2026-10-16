@@ -3781,20 +3781,23 @@ def test_repo_relative_returns_posix_relative(repository_root):
     )
 
 
-def test_repo_relative_preserves_logical_path_through_nested_mount(tmp_path):
+def test_repo_relative_preserves_existing_relative_path():
+    assert (
+        ipopt_characterization.repo_relative("testatron/tests/example.emtgopt")
+        == "testatron/tests/example.emtgopt"
+    )
+
+
+def test_repo_relative_maps_staged_testatron_mount(monkeypatch, tmp_path):
     root = tmp_path / "repo"
-    staged_testatron = tmp_path / "staged-testatron"
-    source = staged_testatron / "tests" / "example.emtgopt"
+    source = tmp_path / "staged-testatron" / "tests" / "example.emtgopt"
     source.parent.mkdir(parents=True)
     source.write_text("example", encoding="utf-8")
     root.mkdir()
-    (root / "testatron").symlink_to(staged_testatron, target_is_directory=True)
+    monkeypatch.setattr(ipopt_characterization, "TESTS_ROOT", source.parent)
 
     assert (
-        ipopt_characterization.repo_relative(
-            root / "testatron" / "tests" / "example.emtgopt",
-            root,
-        )
+        ipopt_characterization.repo_relative(source, root)
         == "testatron/tests/example.emtgopt"
     )
 

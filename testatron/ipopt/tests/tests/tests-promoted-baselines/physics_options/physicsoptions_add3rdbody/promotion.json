@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "physics_options/physicsoptions_add3rdbody",
+  "source_evidence": "baselining/physics_options/physicsoptions_add3rdbody",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "physicsoptions_add3rdbody.emtg",
+  "canonical_mission_sha256": "0d0bc7c9130e05b75499ee1c2fac78e88f2e780a4c0c80606184f96656aa2943",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}

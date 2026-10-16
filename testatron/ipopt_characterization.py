@@ -363,8 +363,16 @@ def discover_tutorial_cases(filters=None):
 def repo_relative(path, root=None):
     """Return a repository-relative POSIX path, refusing paths outside the repo."""
     root = Path(root) if root is not None else REPOSITORY_ROOT
+    path = Path(path)
+    if not path.is_absolute():
+        if ".." in path.parts:
+            raise ValueError(
+                f"Refusing to persist path outside repository root: "
+                f"{path} is not under {root}"
+            )
+        return path.as_posix()
     logical_root = root.absolute()
-    logical_path = Path(path).absolute()
+    logical_path = path.absolute()
     try:
         return logical_path.relative_to(logical_root).as_posix()
     except ValueError as error:
@@ -372,10 +380,14 @@ def repo_relative(path, root=None):
         try:
             return resolved.relative_to(root.resolve()).as_posix()
         except ValueError:
-            raise ValueError(
-                f"Refusing to persist path outside repository root: "
-                f"{resolved} is not under {root}"
-            ) from error
+            try:
+                test_source = resolved.relative_to(TESTS_ROOT.resolve())
+            except ValueError:
+                raise ValueError(
+                    f"Refusing to persist path outside repository root: "
+                    f"{resolved} is not under {root}"
+                ) from error
+            return (Path("testatron") / "tests" / test_source).as_posix()
 
 
 @dataclass(frozen=True)

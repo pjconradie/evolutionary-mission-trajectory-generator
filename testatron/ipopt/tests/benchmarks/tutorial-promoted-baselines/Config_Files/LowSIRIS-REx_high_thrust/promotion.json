@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+  "source_evidence": "baselining/Config_Files/LowSIRIS-REx_high_thrust",
+  "selected_attempt": "attempt-1",
+  "canonical_mission": "LowSIRIS-REx_high_thrust.emtg",
+  "canonical_mission_sha256": "53e2e89aa233e33e04989759aa682ca87f723b48dceabed906672d40f72cbb6d",
+  "replay_acceptable": true,
+  "refinement_acceptable": true,
+  "native_exit": "Optimal Solution Found."
+}
