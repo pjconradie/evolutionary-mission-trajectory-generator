@@ -38,6 +38,15 @@ Based on the [ADSGNC](https://github.com/pjconradie/adsgnc) repository, the modi
 
 1. See 
 
+## Update Baselined Checklist table
+
+Update [[baselined_checklist]] tables, especially the readme that describes the concept of operations
+- Refinement
+- Classification
+- Decision Log
+- Candidate Artifact
+- Manual Decision
+- README
 
 # Original NASA EMTG readme
 
