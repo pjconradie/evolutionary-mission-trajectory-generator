@@ -225,21 +225,37 @@ sha256sum -c emtg-ipopt-<version>.tar.gz.sha256
    - verifies its checksum;
    - inspects `ldd` after installing only the declared runtime packages; and
    - confirms no unresolved, SNOPT, or CSPICE shared-library linkage.
-3. Add one reproducible clean-Bookworm smoke test:
+3. Use the complete 17-case tutorial corpus as the reproducible
+   clean-Bookworm deployment smoke test:
    - use a fresh `python:3.12-slim-bookworm` image;
    - install the declared runtime packages;
    - extract the archive;
-   - copy/mount a known mission's required external kernels and options into a
-     writable test run directory;
-   - run `EMTGv9` directly with an argument list; and
-   - assert exit code zero and expected generated output.
-4. Reuse the existing IPOPT mission preparation and Docker test utilities
-   where practical. The existing broader IPOPT/Testatron tests remain useful
-   repository validation but are not packaging-release prerequisites.
+   - provide the repository's existing tutorial options, expected references,
+     and required external kernels as test-only mounted inputs, not as archive
+     payload;
+   - run each tutorial through the extracted fixed `EMTGv9` executable with an
+     argument list and isolated writable run directory;
+   - retain per-case logs, generated artifacts, comparisons, and provenance;
+   - run the existing tutorial-baselining verification workflow against its
+     reviewed reference; and
+   - require every one of the 17 registered tutorial cases to pass
+     verification. A missing, skipped, timed-out, failed, or mismatched case
+     blocks deployment approval.
+4. Preserve the existing tutorial verification semantics: where the current
+   corpus has replay and refinement stages, every required stage for each of
+   the 17 cases must be accepted by the reviewed verification reference. The
+   deployment gate is not satisfied merely because `EMTGv9` exits zero or
+   writes an `.emtg` file.
+5. Reuse the existing IPOPT mission preparation, tutorial-baselining, and
+   Docker test utilities where practical. Adapt them to invoke the extracted
+   archive binary rather than a binary in the source build directory. The
+   broader Testatron corpus remains useful repository validation but is not a
+   packaging-release prerequisite.
 
-**Acceptance:** the packaging command and the clean runtime smoke test prove
-that the archive works without compilers, CMake, source checkout, PyEMTG, or
-GUI dependencies in the deployment image.
+**Acceptance:** the archive runs without compilers, CMake, source checkout,
+PyEMTG, or GUI dependencies in the deployment image, and the complete
+17-case tutorial verification report is accepted before a deployment is
+greenlit.
 
 ## Completion Criteria
 
@@ -251,8 +267,11 @@ This first integration milestone is complete when:
 2. A corresponding SHA-256 file verifies the archive successfully.
 3. The dependency list is derived from the packaged binary's actual linkage.
 4. A clean Debian 12 runtime container installs the declared packages,
-   extracts the archive, and runs a known mission with external mission data
-   supplied separately.
-5. Documentation explicitly states that ADSGNC owns FastAPI request handling,
+   extracts the archive, and passes verification for all 17 registered
+   tutorial cases using the extracted executable and separately supplied
+   test-only tutorial inputs/kernels.
+5. Missing, skipped, timed-out, failed, or mismatched tutorial verification
+   blocks deployment approval.
+6. Documentation explicitly states that ADSGNC owns FastAPI request handling,
    process execution, timeout/error/log behavior, path validation, artifact
    management, and all future structured `.emtg` result handling.
