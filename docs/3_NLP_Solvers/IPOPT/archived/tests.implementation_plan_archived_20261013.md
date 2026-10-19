@@ -2,7 +2,7 @@
 
 ## Goal
 
-Implement [IPOPT Testatron Verification Plan](tests.readme.md) in stages without confusing pre-existing failures with regressions caused by the artifact layout change. Do not begin the Docker deployment plan until the benchmark and case suites are stable, dependency-ready, and pass their approved SNOPT/IPOPT comparison contracts.
+Implement [IPOPT Testatron Verification Plan](docs/3_NLP_Solvers/IPOPT/tests.readme.md) in stages without confusing pre-existing failures with regressions caused by the artifact layout change. Do not begin the Docker deployment plan until the benchmark and case suites are stable, dependency-ready, and pass their approved SNOPT/IPOPT comparison contracts.
 
 The immutable source options and SNOPT `.emtg` results below `testatron/tests`
 remain untouched throughout this work.
@@ -679,7 +679,7 @@ decision, and README status.
 ### 6.3: Replay and Refinement Evidence
 
 Implement and enforce the two stages defined in
-[tests.readme.md](tests.readme.md):
+[tests.readme.md](docs/3_NLP_Solvers/IPOPT/tests.readme.md):
 
 1. **Replay:** extract the decision vector and schema from the immutable SNOPT
    baseline, inject the aligned seed into staged options, and set

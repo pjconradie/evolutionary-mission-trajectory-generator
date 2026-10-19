@@ -237,7 +237,7 @@ current-state verification.
 The immutable-SNOPT comparison and current-state regression checks answer
 different questions:
 
-- [`tests.readme.md`](tests.readme.md) defines the immutable-SNOPT comparison,
+- [`tests.readme.md`](docs/3_NLP_Solvers/IPOPT/tests.readme.md) defines the immutable-SNOPT comparison,
    staging, replay, and refinement contract.
 - [`baselining_case_decision_log.md`](../../../testatron/ipopt/tests/baselining_case_decision_log.md)
   records the generated per-case evidence for the 137-case corpus.
@@ -246,3 +246,54 @@ different questions:
    `testatron/ipopt/tests/baselining_verification_policy.json`.
 - [`tests.implementation_plan.md`](tests.implementation_plan_archived_20261013.md) retains the
    implementation history and its current-state closure.
+
+## EMTG Runtime Archive
+
+The archive toolchain builds the current source checkout in the existing
+IPOPT builder image, then writes a deployment payload for ADSGNC. The archive
+is a runtime product, not a source distribution: it contains `EMTGv9`, public
+runtime universe/hardware assets, a runtime dependency manifest, and usage
+documentation.
+
+Create an archive from the repository root:
+
+```bash
+python -m emtg_toolchain package \
+   --emtg-repo "$PWD" \
+   --output "$PWD/test-artifacts/emtg-ipopt.tar.gz"
+```
+
+The default package path reuses a validated content-addressed CMake build
+volume for unchanged source/configuration inputs. It still reruns CMake and
+creates a new archive. Use a cache-free native build for release candidates or
+after build-policy changes:
+
+```bash
+python -m emtg_toolchain package --cold \
+   --emtg-repo "$PWD" \
+   --output "$PWD/test-artifacts/emtg-ipopt.tar.gz"
+```
+
+These are archive-build paths. They do not replace the separate source-builder
+Docker cold-bootstrap workflow.
+
+Verify it before extraction:
+
+```bash
+cd test-artifacts
+sha256sum -c emtg-ipopt.tar.gz.sha256
+```
+
+Extracting into `/opt/toolkit` produces the fixed executable path:
+
+```text
+/opt/toolkit/emtg/bin/EMTGv9
+```
+
+ADSGNC installs the Debian packages listed in the archive's
+`RUNTIME_REQUIREMENTS.txt`, provides mission-specific kernels and inputs, and
+invokes the fixed executable with an argument list rather than a shell.
+
+The archive deployment test cold-builds a fresh compiler-free Bookworm runtime
+image from the archive and declared runtime packages. It does not mount EMTG
+source or use the source-builder binary.

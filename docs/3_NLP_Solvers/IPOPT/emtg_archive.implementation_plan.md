@@ -264,7 +264,7 @@ no newly published artifact.
 1. Extend [`ipopt.readme.md`](ipopt.readme.md) with package/build/run/shell
    usage, required Docker platform, archive output location, expected
    duration/resource notes, and cleanup limited to known toolchain resources.
-2. Update [`tests.readme.md`](tests.readme.md) with focused non-Docker unit
+2. Update [`tests.readme.md`](docs/3_NLP_Solvers/IPOPT/tests.readme.md) with focused non-Docker unit
    tests, package integration tests, clean-runtime test, and full release-gate
    command. Keep generated-result examples separate from immutable baselines.
 3. Add a package-consumption section describing:

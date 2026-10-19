@@ -2,15 +2,17 @@
 
 ## Objective
 
-Deliver a versioned, checksummed `linux/amd64` Debian 12 archive that ADSGNC
-can unpack into an ADSGNC-built Docker image and execute directly:
+Deliver a versioned, checksummed `linux/amd64` Debian 12 archive that a
+third-party deployment environment can unpack into its Docker image and
+execute directly:
 
 ```bash
 /opt/toolkit/emtg/bin/EMTGv9 /opt/work/<run-id>/request.emtgopt
 ```
 
 The archive must contain an IPOPT-enabled `EMTGv9` executable and the
-runtime EMTG assets that ADSGNC will not mount separately. It must have a
+runtime EMTG assets that the third-party deployment environment will not mount
+separately. It must have a
 runtime-dependency list derived from the executable's actual linkage and a
 reproducible clean-Bookworm smoke test.
 
@@ -28,7 +30,7 @@ reproducible clean-Bookworm smoke test.
 - Verifying that a clean Bookworm runtime image can extract and execute the
   archive with the declared runtime packages.
 
-### ADSGNC owns
+### Third-party deployment environment owns
 
 - Its Docker image, FastAPI endpoint, and API authentication/authorization.
 - Supplying uploaded option files or approved templates and validating them.
@@ -41,8 +43,9 @@ reproducible clean-Bookworm smoke test.
 - Returning raw process status, stdout/stderr, timeout state, and generated
   artifact references from its API.
 
-ADSGNC direct pass-through means EMTG arguments and inputs only. It must not
-accept an arbitrary shell command to run inside the container.
+The third-party deployment environment's direct pass-through accepts EMTG
+arguments and inputs only. It must not accept an arbitrary shell command to
+run inside the container.
 
 ## Explicit Non-Goals for This Phase
 
@@ -52,7 +55,7 @@ accept an arbitrary shell command to run inside the container.
   response semantics.
 - Implementing path rewriting, request path validation, or run-directory
   confinement in EMTG Python code.
-- Implementing ADSGNC FastAPI routes, service lifecycle, mounted-volume
+- Implementing third-party FastAPI routes, service lifecycle, mounted-volume
   management, or cleanup behavior.
 - Immutable-release aliases, atomic alias publication, a metadata schema, or
   package-version provenance beyond the dependency manifest.
@@ -67,6 +70,22 @@ accept an arbitrary shell command to run inside the container.
 | [`CMakeLists.txt`](../../../CMakeLists.txt) and [`src/CMakeLists.txt`](../../../src/CMakeLists.txt) | Select IPOPT and build `EMTGv9`. | Add only the staging/install support required to package the executable cleanly. |
 | [`Universe/`](../../../Universe) | Contains public base universe files and basic SPICE support files. | Map required runtime files into the archive. |
 | [`HardwareModels/`](../../../HardwareModels) | Contains standard public hardware files. | Map required runtime files into the archive. |
+
+## Implementation Status
+
+The following status records observed evidence from the current implementation
+session; it is not a claim that all earlier plan acceptance criteria have been
+audited.
+
+| Plan phase | Evidence-based status |
+| --- | --- |
+| 1–6 | Partially implemented and not yet acceptance-audited against this plan. |
+| 7 | In progress. Cold archive integration and hot archive integration passed. The hot deployment tutorial gate passed all 17 cases and 33 required stages against the reviewed verification reference. The archive deployment adapter preserves the established `/artifacts` tutorial staging contract without changing source tutorial preparation or baselines. A successful cold deployment tutorial gate remains required: the latest cold attempt exhausted host storage while staging evidence and did not reach tutorial verification. |
+| 8 | Planned; no implementation or verification evidence yet. |
+
+Before declaring any phase complete, audit the current worktree against that
+phase's acceptance criteria and retain the corresponding command output and
+evidence.
 
 ## Implementation Layout and Resource Lifecycle
 
@@ -83,7 +102,6 @@ not pytest fixture code. Its initial files are:
 | `emtg_toolchain/docker.py` | Create; retain | Reuses the canonical Bookworm image contract, invokes Docker with `linux/amd64`, and runs the package build. |
 | `emtg_toolchain/archive.py` | Create; retain | Builds the explicit payload manifest, stages `emtg/`, validates tar paths/layout, and writes the archive/checksum. |
 | `emtg_toolchain/runtime.py` | Create; retain | Captures `ldd`, maps verified libraries to Debian runtime packages, and renders `RUNTIME_REQUIREMENTS.txt` and the archive README. |
-| `tests/emtg_toolchain/__init__.py` | Create; retain | Makes the focused archive-toolchain test package explicit. |
 | `tests/emtg_toolchain/unit/` | Create; retain | Unit-test directory. |
 | `tests/emtg_toolchain/unit/test_cli.py` | Create; retain | `unit`-marked tests for argument, repository, output, and error handling. |
 | `tests/emtg_toolchain/unit/test_archive.py` | Create; retain | `unit`-marked tests for payload selection, tar safety/layout, modes, checksums, and cleanup. |
@@ -101,7 +119,7 @@ The following existing repository resources are updated only where required:
 | [`tests/integration/_docker_support.py`](../../../tests/integration/_docker_support.py) | Add reusable helpers for package-image invocation and clean-runtime containers; preserve the existing Docker image/volume behavior for current tests. |
 | [`tests/conftest.py`](../../../tests/conftest.py) | No change planned: existing `--unit`, `--integration`, `--tutorials`, and `--clean-bootstrap` selection logic covers the new tests. |
 | [`pytest.ini`](../../../pytest.ini) | No change planned: every required marker is already registered. |
-| [`ipopt.readme.md`](ipopt.readme.md) and [`tests.readme.md`](tests.readme.md) | Add packaging, resource-cleanup, and exact test-command documentation. |
+| [`ipopt.readme.md`](ipopt.readme.md) and [`tests.readme.md`](docs/3_NLP_Solvers/IPOPT/tests.readme.md) | Add packaging, resource-cleanup, and exact test-command documentation. |
 
 No PyEMTG source, tutorial source/options, committed universe/hardware input,
 immutable tutorial references, or existing Testatron policy/reference files are
@@ -115,7 +133,8 @@ modified by this work.
 | Package archive and checksum | `emtg-toolchain package` at the caller-provided `--output` path | Retained only after every package gate passes: `<output>` and `<output>.sha256`. A failed invocation leaves neither newly created file. |
 | Existing source-builder Docker image | Existing IPOPT test infrastructure, content-addressed as `emtg-pytest-toolchain:<hash>` | Reused only to compile the source checkout and produce the archive. Source-builder bootstrap hardening is explicitly out of scope for this plan. |
 | Clean archive-runtime Docker image | Deployment test, built from the pinned Bookworm runtime base, generated runtime package list, and completed archive | Built without reusable build layers under a unique per-archive tag. Destroyed after the deployment gate completes; it is test evidence, not a published EMTG image. |
-| Package build volume | Package command, named uniquely for that invocation | Destroyed by the command after success or failure. It must not reuse or delete the existing persistent pytest backend volumes. |
+| Hot package build volume | Default package command, content-addressed by source fingerprint, CMake configuration, and builder-image identity | Retained and reused only when its recorded identity matches. Never shared with existing pytest backend volumes. |
+| Cold package build directory | `emtg-toolchain package --cold`, inside the command-owned staging directory | Destroyed after success or failure. It has no persistent CMake objects or generated build state. |
 | Disposable Docker containers | Package, integration, and deployment tests | Run with `--rm`; the helper also targets only its exact generated container name if cleanup after interruption is needed. |
 | Test artifact directory | `EMTG_TEST_ARTIFACT_DIR`, when supplied | Retained for review and contains logs, archive-test outputs, tutorial comparisons, and verification evidence. Without the variable, pytest temporary artifacts are discarded by pytest. |
 | Tutorial test run directories | Archive tutorial test | Created beneath the configured artifact directory, one isolated directory per tutorial case/stage; retained only with configured artifacts, otherwise discarded with pytest temporary files. |
@@ -124,6 +143,45 @@ No command deletes an existing user archive, repository source file, Docker
 image/volume not named by the toolchain, or external kernel mount. Cleanup is
 limited to the command-owned staging directory, uniquely named package volume,
 disposable container, and the clean archive-runtime image.
+
+## Archive Build Paths
+
+This plan defines archive-build cache behavior only. Full cold bootstrap of the
+source-builder Docker image remains a separate concern and is not changed here.
+Both paths use the existing pinned source-builder image and always create a
+new archive plus a new clean archive-runtime image for validation.
+
+### Cold archive build
+
+```bash
+python -m emtg_toolchain package --cold \
+  --emtg-repo "$PWD" \
+  --output "$PWD/test-artifacts/emtg-ipopt.tar.gz"
+```
+
+The cold path uses a command-owned temporary CMake build directory. It runs
+CMake configure and compiles `EMTGv9` without reusing compiled objects or a
+package build volume. Use it for release candidates, after CMake/build-policy
+changes, and whenever cache-independent compilation evidence is required.
+
+### Hot archive build
+
+```bash
+python -m emtg_toolchain package \
+  --emtg-repo "$PWD" \
+  --output "$PWD/test-artifacts/emtg-ipopt.tar.gz"
+```
+
+The default hot path uses a persistent named CMake build volume. Its identity
+contains the source-tree content fingerprint, the canonical builder-image
+identity, target platform, IPOPT solver configuration, and CMake dependency
+configuration. Every hot invocation re-runs CMake configure and the build;
+unchanged sources make the native build a no-op or incremental rebuild.
+
+Before reuse, the tool verifies the recorded cache identity. A mismatch causes
+creation of a separate cache volume; it never reuses a volume for a different
+source/configuration identity. The hot path is for fast iteration, not a
+replacement for a cache-free release build.
 
 ## Test Workflow and Pytest Selectors
 
@@ -205,7 +263,7 @@ CSPICE library rather than a CSPICE shared object.
 3. Write `RUNTIME_REQUIREMENTS.txt` into the archive. It must include:
    - target platform: `linux/amd64`;
    - base OS: Debian 12 Bookworm;
-   - `apt` package names ADSGNC must install;
+   - `apt` package names the third-party deployment environment must install;
    - the exact `ldd` output used to derive the list;
    - a statement that the archive does not include mission-specific SPICE SPK
      kernels; and
@@ -214,8 +272,9 @@ CSPICE library rather than a CSPICE shared object.
    verified linkage fixture so a library change cannot silently make the
    manifest stale.
 
-**Acceptance:** ADSGNC can install the declared package names in a clean
-Bookworm image and resolve every dependency reported by `ldd`.
+**Acceptance:** the third-party deployment environment can install the
+declared package names in a clean Bookworm image and resolve every dependency
+reported by `ldd`.
 
 ### 4. Stage the minimal runtime archive payload
 
@@ -268,18 +327,19 @@ root directory, no unsafe member names, and an executable `bin/EMTGv9`.
    - the fixed EMTG invocation form and the fact that no shell is required;
    - the working-directory behavior expected by EMTG;
    - which universe/hardware inputs are bundled;
-   - which external kernels and mission data ADSGNC must supply; and
-   - that outputs belong in ADSGNC's isolated writable run directory.
+   - which external kernels and mission data the third-party deployment
+     environment must supply; and
+   - that outputs belong in its isolated writable run directory.
 2. Update [`ipopt.readme.md`](ipopt.readme.md) with the package command,
    archive output, checksum verification, and clean-runtime smoke-test
    command.
-3. Update [`tests.readme.md`](tests.readme.md) with the focused archive test
+3. Update [`tests.readme.md`](docs/3_NLP_Solvers/IPOPT/tests.readme.md) with the focused archive test
    and clean-Bookworm runtime test. Do not make full-corpus Testatron
    baselining part of the package command's required gates.
 
-**Acceptance:** an ADSGNC engineer can build an image that extracts the
-archive, installs the declared packages, supplies its mission inputs, and runs
-the fixed executable without reading EMTG source code.
+**Acceptance:** an engineer can build a third-party deployment image that
+extracts the archive, installs the declared packages, supplies its mission
+inputs, and runs the fixed executable without reading EMTG source code.
 
 ### 6. Generate checksum and publish the completed archive
 
@@ -352,6 +412,36 @@ PyEMTG, or GUI dependencies in the deployment image, and the complete
 17-case tutorial verification report is accepted before a deployment is
 greenlit.
 
+### 8. Baseline the release archive and document third-party handoff
+
+1. Add a release-baselining path that accepts an existing versioned archive,
+   rather than calling `package` to create a substitute test archive.
+2. Verify the supplied archive checksum, read its
+   `RUNTIME_REQUIREMENTS.txt`, build the clean runtime image from that exact
+   archive, and run the complete 17-case deployment tutorial gate.
+3. Retain release evidence that records the archive filename and SHA-256,
+   source commit SHA, cold build mode, runtime-requirements checksum, tutorial
+   verification-reference checksum, final `verification.json`, and the
+   evidence-directory location.
+4. Require the same deployment acceptance criteria: 17 cases, 33 stages,
+   repeatable attempts, and every stage marked `matched`.
+5. Document the third-party deployment-environment handoff:
+   - versioned archive filename and accompanying SHA-256 checksum;
+   - checksum verification;
+   - extraction into `/opt/toolkit`, yielding
+     `/opt/toolkit/emtg/bin/EMTGv9`;
+   - installation of the declared runtime packages;
+   - the runtime package manifest;
+   - the release-baseline command and required accepted
+     `verification.json`; and
+   - ownership of container construction, API behavior, request validation,
+     process control, logs, output retention, and cleanup.
+
+**Acceptance:** the exact versioned archive delivered to a third-party
+deployment environment has a retained, accepted, cold release-baseline record;
+the handoff documentation enables independent checksum, extraction, and
+runtime-package verification.
+
 ## Completion Criteria
 
 This first integration milestone is complete when:
@@ -367,6 +457,9 @@ This first integration milestone is complete when:
    test-only tutorial inputs/kernels.
 5. Missing, skipped, timed-out, failed, or mismatched tutorial verification
    blocks deployment approval.
-6. Documentation explicitly states that ADSGNC owns FastAPI request handling,
-   process execution, timeout/error/log behavior, path validation, artifact
-   management, and all future structured `.emtg` result handling.
+6. Documentation explicitly states that the third-party deployment environment
+   owns FastAPI request handling, process execution, timeout/error/log
+   behavior, path validation, artifact management, and all future structured
+   `.emtg` result handling.
+7. Phase 8 release baselining verifies the exact versioned archive intended
+   for handoff, not a newly generated substitute archive.

@@ -6,7 +6,7 @@ IPOPT is not accepted merely because it produces a feasible result. For each com
 
 Run the commands in this document from the repository root.
 
-# Testing workflow
+# EMTG Source testing workflow
 
 Tests against a pinned Docker image already available.
 
@@ -558,6 +558,311 @@ See [[tutorial_baselining_commands#Promotion]].
 
 ---
 
+
+
+# EMTG Archive testing workflow
+
+The EMTG archive workflow validates a deployable **third-party deployment environment** runtime payload. The archive is a runtime artifact, not a source distribution.
+
+The source-builder environment compiles EMTG from the repository checkout. The deployment runtime image contains only:
+
+```
+/opt/toolkit/emtg/bin/EMTGv9
+/opt/toolkit/emtg/universe/
+/opt/toolkit/emtg/hardware/
+/opt/toolkit/emtg/RUNTIME_REQUIREMENTS.txt
+/opt/toolkit/emtg/README.md
+```
+
+The clean runtime image must not contain EMTG source code, a CMake build directory, CMake, compilers, development headers, PyEMTG, or source-builder `/opt/emtg-deps` state.
+
+Run all commands from the repository root.
+
+Archive test category selectors are mutually exclusive:
+```
+--unit
+--integration
+--tutorials
+```
+
+Observed testing durations:
+
+| Path                          |                    Observed time | Expected use                                      |
+| ----------------------------- | -------------------------------: | ------------------------------------------------- |
+| Unit tests                    |                     `< 1 second` | Every archive-toolchain change                    |
+| Cold archive integration      |                     `~9 minutes` | Release candidates and cache-independent proof    |
+| Hot archive integration       |                    `~18 seconds` | Iteration on unchanged source/configuration       |
+| Hot deployment tutorial gate  |          `~3 minutes 53 seconds` | Iteration after archive/deployment-runner changes |
+| Cold deployment tutorial gate | `TBD: successful rerun required` | Final cache-independent deployment greenlight     |
+
+Use a distinct `EMTG_TEST_ARTIFACT_DIR` for each Docker-backed test layer. Each invocation creates a unique child directory so previous retained evidence is not overwritten.
+## 1. Run unit tests
+
+```zsh
+python -m pytest tests/emtg_toolchain/unit --unit -q
+```
+
+```zsh
+% python -m pytest tests/emtg_toolchain/unit --unit -q
+.....................                                                                                                                                                                               [100%]
+21 passed in 0.09s
+```
+These tests require no Docker daemon and validate the archive-toolchain logic without compiling EMTG.
+
+They cover:
+
+- CLI argument validation:
+    - valid EMTG repository validation;
+    - `.tar.gz` output naming;
+    - rejection of pre-existing archives and checksum files;
+    - `--cold` package selection.
+- Runtime-linkage validation:
+    - required IPOPT linkage;
+    - rejection of unresolved libraries;
+    - rejection of SNOPT linkage;
+    - rejection of dynamic CSPICE linkage;
+    - rejection of leaked source-builder paths.
+- Runtime dependency manifest generation and parsing.
+- Archive payload allowlisting:
+    - `EMTGv9`;
+    - base universe files;
+    - baseline leap-second and planetary-constants files;
+    - public hardware assets.
+- Archive safety:
+    - one `emtg/` archive root;
+    - no absolute or traversal tar entries;
+    - executable mode preservation for `emtg/bin/EMTGv9`.
+- SHA-256 manifest generation and validation.
+- Content-addressed hot-cache identity and invalidation behavior.
+
+A passing unit run proves archive-toolchain behavior, but does not compile EMTG or invoke Docker.
+## 2. Run integration tests
+
+The integration test builds an archive from the current source checkout and verifies it in a clean compiler-free Bookworm runtime image.
+
+Both integration paths:
+
+1. Build `EMTGv9` with IPOPT from the source checkout.
+2. Create `emtg-ipopt.tar.gz` and `emtg-ipopt.tar.gz.sha256`.
+3. Verify the checksum.
+4. Build a new runtime image from the pinned Bookworm base.
+5. Install no additional EMTG packages beyond `tar` and the runtime packages declared by the archive’s `RUNTIME_REQUIREMENTS.txt`.
+6. Extract the archive into `/opt/toolkit`.
+7. Verify the executable exists at:
+
+```
+/opt/toolkit/emtg/bin/EMTGv9
+```
+
+8. Verify that the runtime image does not contain CMake, `gcc`, `g++`, a source checkout, a CMake build directory, or `/opt/emtg-deps`.
+9. Run `ldd` on the extracted executable and reject:
+    - `not found`;
+    - SNOPT linkage;
+    - dynamic CSPICE linkage.
+
+### Run cold archive build and fresh runtime-image integration tests
+
+```zsh
+EMTG_ARCHIVE_COLD=1 \
+	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+```
+
+```zsh
+% EMTG_ARCHIVE_COLD=1 \
+	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+.                                                                                                                                                                                                   [100%]
+1 passed in 546.22s (0:09:06)
+```
+
+The cold archive-build path compiles EMTG in a command-owned temporary CMake build directory. It does not reuse the package CMake build cache or prior compiled EMTG objects.
+
+The clean archive-runtime image is also built with:
+```zsh
+--no-cache
+--platform linux/amd64
+```
+
+Use the cold path when:
+
+- preparing a release candidate;
+- validating a new archive for deployment;
+- changing CMake/build policy;
+- changing compiler/IPOPT assumptions;
+- requiring cache-independent evidence.
+
+This is the slower path. It validates that the archive can be produced without a previously compiled EMTG build tree.
+
+> The archive cold path does not replace the separate source-builder Docker cold-bootstrap workflow. Source-builder image hardening remains a separate workflow.
+
+### Run hot archive build integration tests
+
+The hot package CMake cache is a persistent Docker volume. It survives pytest process exit and is reused only when its content-addressed identity matches the current source and build configuration.
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+```
+
+```zsh
+% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+.                                                                                                                                                                                                   [100%]
+1 passed in 18.04s
+```
+
+The hot archive-build path reuses only a validated, content-addressed package CMake build volume.
+
+The cache identity includes:
+
+```
+EMTG source-tree content fingerprint
+canonical source-builder image identity
+linux/amd64 target platform
+EMTG_NLP_SOLVER=IPOPT
+CSPICE, GSL, and Boost CMake configuration
+```
+
+Every invocation still reruns:
+
+```zsh
+CMake configure
+cmake --build
+archive generation
+checksum validation
+fresh clean runtime-image construction
+runtime linkage validation
+```
+
+For unchanged source and configuration, `cmake --build` should be incremental or a no-op, avoiding the full native recompilation.
+
+The hot path is appropriate for development iteration. It is not a substitute for the cold archive-build path required for a release/deployment greenlight.
+
+> The runtime deployment image is never hot-reused. Each integration run creates a fresh clean runtime image from the newly generated archive.
+
+### Archive integration evidence
+
+When `EMTG_TEST_ARTIFACT_DIR` is set, each integration run retains evidence under a unique directory such as:
+
+```
+test-artifacts/emtg-archive-hot/emtg-toolchain-*/
+├── emtg-ipopt.tar.gz
+├── emtg-ipopt.tar.gz.sha256
+├── source-build.log
+├── source-EMTGv9.ldd
+├── source-runtime-packages.tsv
+├── runtime-image-build.log
+├── runtime-image.txt
+└── runtime-ldd.log
+```
+
+## 3. Run deployment tests
+
+```zsh
+EMTG_ARCHIVE_COLD=1 \
+	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \
+	python -m pytest tests/emtg_toolchain/deployment --tutorials -q
+```
+
+This is the archive deployment-greenlight gate.
+
+The test:
+
+1. Uses the cold archive-build path to create an archive without reusable CMake objects.
+2. Cold-builds a fresh compiler-free Bookworm runtime image from the archive and declared runtime dependencies.
+3. Extracts EMTG at:
+
+```
+/opt/toolkit/emtg/bin/EMTGv9
+```
+
+4. Stages tutorial-specific options, universe data, hardware data, and required external kernels into isolated per-case directories.
+5. Starts a new disposable `--rm` clean runtime container for every tutorial stage.
+6. Mounts only the corresponding staged case directory at /artifacts.
+
+```
+/opt/toolkit/emtg/bin/EMTGv9 /artifacts/<prepared-options>.emtgopt
+```
+
+`/artifacts` is deliberate: the established tutorial staging contract rewrites legacy hardware references to `/artifacts/hardware_models/...`. This is an archive-test adapter convention; it does not modify source tutorial inputs or baseline behavior.
+
+7. Captures stdout, stderr, exit status, generated `.emtg` output, comparisons, and provenance.
+8. Runs each tutorial case twice to verify repeatability.
+9. Compares the generated evidence to the reviewed tutorial verification reference.
+
+The repository checkout is used by the pytest test orchestrator to prepare tutorial inputs and compare generated outputs. It is never mounted into the clean runtime container.
+
+The reviewed tutorial contract contains:
+
+```zsh
+17 tutorial cases
+33 required replay/refinement stages
+2 attempts per case
+at least 66 packaged-binary stage executions
+```
+
+Schema-probe executions may add further packaged-binary invocations.
+
+Deployment is greenlit only when:
+
+- all 17 tutorial cases have complete evidence;
+- all 33 required stages match the reviewed verification reference;
+- both attempts for every case are stable;
+- no case is missing, skipped, timed out, process-failed, parse-failed, dependency-blocked, or numerically mismatched;
+- the final verification report has:
+
+```zsh
+{
+	"case_count": 17,
+	"stage_count": 33,
+	"acceptable": true
+}
+```
+
+### Deployment evidence
+
+Each deployment invocation retains a unique evidence directory:
+
+```
+test-artifacts/<chosen-artifact-root>/emtg-toolchain-*/
+```
+
+It contains:
+```
+├── emtg-ipopt.tar.gz
+├── emtg-ipopt.tar.gz.sha256
+├── source-build.log
+├── source-EMTGv9.ldd
+├── source-runtime-packages.tsv
+├── runtime-image-build.log
+├── runtime-image.txt
+├── archive-build-mode.txt
+├── verification.json
+└── evidence/
+    └── baselining/
+        └── <tutorial-case>/
+            ├── attempt-1/
+            ├── attempt-2/
+            ├── repeatability.json
+            └── result.json
+```
+
+The deployment result is accepted only when verification.json states:
+
+- case_count is 17;
+- stage_count is 33;
+- acceptable is true;
+- every entry in stages has status "matched";
+- reference identifies the reviewed tutorial verification reference:
+  testatron/ipopt/tests/tutorial_baselining_verification.json.
+
+Also state that a green pytest result is the primary gate, while `verification.json` is the retained, inspectable evidence of that decision.
+
+A useful inspection command to document:
+```zsh
+python -m json.tool "<artifact-directory>/verification.json"
+```
 # Baselining workflow
 
 The IPOPT Testatron Baselining workflow executes the immutable `testatron/tests` corpus with the open-source IPOPT backend while preserving each adjacent SNOPT-generated `.emtg` file as immutable historical evidence. The workflow answers two separate questions:
