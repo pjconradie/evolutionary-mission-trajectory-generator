@@ -104,12 +104,12 @@ not pytest fixture code. Its initial files are:
 | `emtg_toolchain/runtime.py` | Create; retain | Captures `ldd`, maps verified libraries to Debian runtime packages, and renders `RUNTIME_REQUIREMENTS.txt` and the archive README. |
 | `tests/emtg_toolchain/unit/` | Create; retain | Unit-test directory. |
 | `tests/emtg_toolchain/unit/test_cli.py` | Create; retain | `unit`-marked tests for argument, repository, output, and error handling. |
-| `tests/emtg_toolchain/unit/test_archive.py` | Create; retain | `unit`-marked tests for payload selection, tar safety/layout, modes, checksums, and cleanup. |
+| `tests/emtg_toolchain/unit/test_emtg_archive_unit.py` | Create; retain | `unit`-marked tests for payload selection, tar safety/layout, modes, checksums, and cleanup. |
 | `tests/emtg_toolchain/unit/test_runtime.py` | Create; retain | `unit`-marked tests for linkage parsing and runtime manifest generation. |
 | `tests/emtg_toolchain/integration/` | Create; retain | Docker-backed archive integration-test directory. |
-| `tests/emtg_toolchain/integration/test_archive.py` | Create; retain | `integration`, `docker`, `toolchain`, `ipopt_backend`, and `solver_runtime`-marked archive build, extraction, checksum, and runtime-linkage test. |
+| `tests/emtg_toolchain/integration/test_emtg_archive_integration.py` | Create; retain | `integration`, `docker`, `toolchain`, `ipopt_backend`, and `solver_runtime`-marked archive build, extraction, checksum, and runtime-linkage test. |
 | `tests/emtg_toolchain/deployment/` | Create; retain | Deployment-gate test directory. |
-| `tests/emtg_toolchain/deployment/test_tutorials.py` | Create; retain | `tutorials`, `docker`, `ipopt_backend`, and `solver_runtime`-marked extracted-archive execution and complete 17-case tutorial verification gate. |
+| `tests/emtg_toolchain/deployment/test_emtg_archive_tutorials.py` | Create; retain | `tutorials`, `docker`, `ipopt_backend`, and `solver_runtime`-marked extracted-archive execution and complete 17-case tutorial verification gate. |
 
 The following existing repository resources are updated only where required:
 

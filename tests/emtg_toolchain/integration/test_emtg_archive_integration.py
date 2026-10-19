@@ -1,4 +1,4 @@
-"""Docker-backed tests for the EMTG runtime archive."""
+"""Docker-backed integration tests for the EMTG runtime archive."""
 
 from pathlib import PurePosixPath
 

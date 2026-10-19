@@ -1,4 +1,4 @@
-"""Verify the extracted EMTG archive against all tutorial references."""
+"""Deployment verification for the extracted EMTG archive tutorial references."""
 
 from __future__ import annotations
 

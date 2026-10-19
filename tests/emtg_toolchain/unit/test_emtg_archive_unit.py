@@ -1,4 +1,4 @@
-"""Unit tests for archive staging and validation."""
+"""Unit tests for EMTG archive staging and validation."""
 
 import stat
 import tarfile
