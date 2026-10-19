@@ -68,12 +68,97 @@ accept an arbitrary shell command to run inside the container.
 | [`Universe/`](../../../Universe) | Contains public base universe files and basic SPICE support files. | Map required runtime files into the archive. |
 | [`HardwareModels/`](../../../HardwareModels) | Contains standard public hardware files. | Map required runtime files into the archive. |
 
+## Implementation Layout and Resource Lifecycle
+
+### Repository resources
+
+The archive toolchain is production code in [`emtg_toolchain/`](../../../emtg_toolchain),
+not pytest fixture code. Its initial files are:
+
+| Resource | Lifecycle | Responsibility |
+| --- | --- | --- |
+| `emtg_toolchain/__init__.py` | Create; retain | Package identity and public command entry point. |
+| `emtg_toolchain/__main__.py` | Create; retain | Enables `python -m emtg_toolchain`. |
+| `emtg_toolchain/cli.py` | Create; retain | Parses `package --emtg-repo --output`, validates arguments, reports failures, and selects exit statuses. |
+| `emtg_toolchain/docker.py` | Create; retain | Reuses the canonical Bookworm image contract, invokes Docker with `linux/amd64`, and runs the package build. |
+| `emtg_toolchain/archive.py` | Create; retain | Builds the explicit payload manifest, stages `emtg/`, validates tar paths/layout, and writes the archive/checksum. |
+| `emtg_toolchain/runtime.py` | Create; retain | Captures `ldd`, maps verified libraries to Debian runtime packages, and renders `RUNTIME_REQUIREMENTS.txt` and the archive README. |
+| `tests/emtg_toolchain/__init__.py` | Create; retain | Makes the focused archive-toolchain test package explicit. |
+| `tests/emtg_toolchain/unit/` | Create; retain | Unit-test directory. |
+| `tests/emtg_toolchain/unit/test_cli.py` | Create; retain | `unit`-marked tests for argument, repository, output, and error handling. |
+| `tests/emtg_toolchain/unit/test_archive.py` | Create; retain | `unit`-marked tests for payload selection, tar safety/layout, modes, checksums, and cleanup. |
+| `tests/emtg_toolchain/unit/test_runtime.py` | Create; retain | `unit`-marked tests for linkage parsing and runtime manifest generation. |
+| `tests/emtg_toolchain/integration/` | Create; retain | Docker-backed archive integration-test directory. |
+| `tests/emtg_toolchain/integration/test_archive.py` | Create; retain | `integration`, `docker`, `toolchain`, `ipopt_backend`, and `solver_runtime`-marked archive build, extraction, checksum, and runtime-linkage test. |
+| `tests/emtg_toolchain/deployment/` | Create; retain | Deployment-gate test directory. |
+| `tests/emtg_toolchain/deployment/test_tutorials.py` | Create; retain | `tutorials`, `docker`, `ipopt_backend`, and `solver_runtime`-marked extracted-archive execution and complete 17-case tutorial verification gate. |
+
+The following existing repository resources are updated only where required:
+
+| Resource | Update |
+| --- | --- |
+| [`src/CMakeLists.txt`](../../../src/CMakeLists.txt) | Add a narrow, prefix-respecting install/staging destination for `EMTGv9`; preserve ordinary source-tree builds. |
+| [`tests/integration/_docker_support.py`](../../../tests/integration/_docker_support.py) | Add reusable helpers for package-image invocation and clean-runtime containers; preserve the existing Docker image/volume behavior for current tests. |
+| [`tests/conftest.py`](../../../tests/conftest.py) | No change planned: existing `--unit`, `--integration`, `--tutorials`, and `--clean-bootstrap` selection logic covers the new tests. |
+| [`pytest.ini`](../../../pytest.ini) | No change planned: every required marker is already registered. |
+| [`ipopt.readme.md`](ipopt.readme.md) and [`tests.readme.md`](tests.readme.md) | Add packaging, resource-cleanup, and exact test-command documentation. |
+
+No PyEMTG source, tutorial source/options, committed universe/hardware input,
+immutable tutorial references, or existing Testatron policy/reference files are
+modified by this work.
+
+### Ephemeral and output resources
+
+| Resource | Created by | Retained or destroyed |
+| --- | --- | --- |
+| Package staging directory | `emtg-toolchain package`, as a uniquely named sibling of the requested output | Destroyed after success or failure. It is never extracted into the repository. |
+| Package archive and checksum | `emtg-toolchain package` at the caller-provided `--output` path | Retained only after every package gate passes: `<output>` and `<output>.sha256`. A failed invocation leaves neither newly created file. |
+| Existing source-builder Docker image | Existing IPOPT test infrastructure, content-addressed as `emtg-pytest-toolchain:<hash>` | Reused only to compile the source checkout and produce the archive. Source-builder bootstrap hardening is explicitly out of scope for this plan. |
+| Clean archive-runtime Docker image | Deployment test, built from the pinned Bookworm runtime base, generated runtime package list, and completed archive | Built without reusable build layers under a unique per-archive tag. Destroyed after the deployment gate completes; it is test evidence, not a published EMTG image. |
+| Package build volume | Package command, named uniquely for that invocation | Destroyed by the command after success or failure. It must not reuse or delete the existing persistent pytest backend volumes. |
+| Disposable Docker containers | Package, integration, and deployment tests | Run with `--rm`; the helper also targets only its exact generated container name if cleanup after interruption is needed. |
+| Test artifact directory | `EMTG_TEST_ARTIFACT_DIR`, when supplied | Retained for review and contains logs, archive-test outputs, tutorial comparisons, and verification evidence. Without the variable, pytest temporary artifacts are discarded by pytest. |
+| Tutorial test run directories | Archive tutorial test | Created beneath the configured artifact directory, one isolated directory per tutorial case/stage; retained only with configured artifacts, otherwise discarded with pytest temporary files. |
+
+No command deletes an existing user archive, repository source file, Docker
+image/volume not named by the toolchain, or external kernel mount. Cleanup is
+limited to the command-owned staging directory, uniquely named package volume,
+disposable container, and the clean archive-runtime image.
+
+## Test Workflow and Pytest Selectors
+
+The test layers are deliberately separate. Category selectors in
+[`tests/conftest.py`](../../../tests/conftest.py) are mutually exclusive: do
+not combine `--unit`, `--integration`, `--regression`, `--clean-bootstrap`,
+or `--tutorials` in one command.
+
+| Layer | Command | What it proves |
+| --- | --- | --- |
+| Unit | `python -m pytest tests/emtg_toolchain/unit --unit -q` | CLI validation, manifest rendering, tar safety, payload layout, file modes, checksums, linkage-to-package mapping, and cleanup behavior without Docker. |
+| Archive integration | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive" python -m pytest tests/emtg_toolchain/integration --integration -q` | Canonical amd64 builder, IPOPT binary build, archive creation, checksum validation, clean extraction, and declared runtime linkage. |
+| Deployment gate | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-tutorials" python -m pytest tests/emtg_toolchain/deployment --tutorials -q` | Cold-bootstraps a clean Bookworm runtime image from the archive and declared packages, then verifies the extracted archive binary against every required stage for all 17 tutorial cases. |
+
+The normal deployment approval workflow is:
+
+1. Run the unit command.
+2. Run the archive-integration command.
+3. Run the deployment-gate command.
+4. Publish the archive only when all three commands succeed and the tutorial
+   verification report records all 17 cases and all required stages as
+   accepted.
+
+The archive integration and deployment-gate commands use separate
+`EMTG_TEST_ARTIFACT_DIR` values so one test layer cannot overwrite the other
+layer's evidence. The deployment-gate test records the package archive
+checksum, EMTG commit SHA, tutorial verification-reference checksum, per-case
+logs, comparisons, generated outputs, and final verification report.
+
 ## Implementation Steps
 
 ### 1. Define one packaging command
 
-1. Add a small repository-owned packaging script or CLI. Its minimum command
-   is:
+1. Add the package CLI in [`emtg_toolchain/`](../../../emtg_toolchain). Its
+   minimum command is:
 
    ```text
    emtg-toolchain package --emtg-repo PATH --output ARCHIVE.tar.gz
@@ -229,16 +314,21 @@ sha256sum -c emtg-ipopt-<version>.tar.gz.sha256
    - verifies its checksum;
    - inspects `ldd` after installing only the declared runtime packages; and
    - confirms no unresolved, SNOPT, or CSPICE shared-library linkage.
-3. Use the complete 17-case tutorial corpus as the reproducible
-   clean-Bookworm deployment smoke test:
-   - use a fresh `python:3.12-slim-bookworm` image;
-   - install the declared runtime packages;
-   - extract the archive;
+3. Use the complete 17-case tutorial corpus as the reproducible clean-runtime
+   deployment test:
+   - generate a temporary Dockerfile from the pinned
+     `python:3.12-slim-bookworm` base image;
+   - build a unique archive-runtime image with `--no-cache --platform
+     linux/amd64`, installing only the runtime packages declared by the
+     completed archive and extracting that archive to `/opt/toolkit`;
+   - assert the image contains no source checkout, CMake, compiler, build
+     volume, or source-builder `/opt/emtg-deps` directory;
    - provide the repository's existing tutorial options, expected references,
      and required external kernels as test-only mounted inputs, not as archive
      payload;
-   - run each tutorial through the extracted fixed `EMTGv9` executable with an
-     argument list and isolated writable run directory;
+   - start a fresh `--rm` container from the clean archive-runtime image for
+     each tutorial stage and run the extracted fixed `EMTGv9` executable with
+     an argument list and isolated writable run directory;
    - retain per-case logs, generated artifacts, comparisons, and provenance;
    - run the existing tutorial-baselining verification workflow against its
      reviewed reference, recording the EMTG commit SHA and checksum of that
@@ -253,9 +343,9 @@ sha256sum -c emtg-ipopt-<version>.tar.gz.sha256
    writes an `.emtg` file.
 5. Reuse the existing IPOPT mission preparation, tutorial-baselining, and
    Docker test utilities where practical. Adapt them to invoke the extracted
-   archive binary rather than a binary in the source build directory. The
-   broader Testatron corpus remains useful repository validation but is not a
-   packaging-release prerequisite.
+   archive binary in the clean archive-runtime image rather than a binary in
+   the source build directory. The broader Testatron corpus remains useful
+   repository validation but is not a packaging-release prerequisite.
 
 **Acceptance:** the archive runs without compilers, CMake, source checkout,
 PyEMTG, or GUI dependencies in the deployment image, and the complete
