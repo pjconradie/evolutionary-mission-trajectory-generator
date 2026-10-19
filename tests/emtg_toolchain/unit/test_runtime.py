@@ -59,11 +59,13 @@ def test_runtime_manifest_records_provenance_and_linkage():
     manifest = render_runtime_requirements(
         report,
         commit_sha="abc123",
+        build_mode="cold",
         build_time=datetime(2026, 10, 19, tzinfo=timezone.utc),
     )
 
     assert "linux/amd64" in manifest
     assert "2026-10-19T00:00:00Z" in manifest
+    assert "Build mode: `cold`" in manifest
     assert "`coinor-libipopt1v5`" in manifest
     assert LDD_OUTPUT.rstrip() in manifest
 
@@ -74,7 +76,9 @@ def test_apt_arguments_preserve_first_occurrence_order():
 
 def test_runtime_requirements_parser_reads_generated_package_list():
     report = validate_ldd_output(LDD_OUTPUT)
-    requirements = render_runtime_requirements(report, commit_sha="abc123")
+    requirements = render_runtime_requirements(
+        report, commit_sha="abc123", build_mode="cold"
+    )
 
     assert parse_runtime_requirements(requirements) == REQUIRED_RUNTIME_PACKAGES
 

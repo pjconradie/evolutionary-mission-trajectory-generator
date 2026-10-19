@@ -35,8 +35,7 @@
               "title": "emtg_archive.implementation_plan_2"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -201,21 +200,21 @@
       "bases:Create new base": false
     }
   },
-  "active": "a9a06d320402ca84",
+  "active": "2fb447d22e8d56f1",
   "lastOpenFiles": [
-    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
-    "emtg_toolchain/tests.readme.md",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/Force_Models/LowSIRIS-REx/attempt-2/refinement/universe/ephemeris_files/go_get_these_files 2.txt",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe/Sun_OREx.emtg_universe",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe/ephemeris_files/bennu_refdrmc_v1.bsp",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe/ephemeris_files/de430.bsp",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe/ephemeris_files/pck00010.tpc",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe/ephemeris_files/naif0012.tls",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe/ephemeris_files/go_get_these_files.txt",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe/ephemeris_files",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement/universe",
-    "test-artifacts/emtg-archive-deployment-cold-fixed/emtg-toolchain-6zea_aci/evidence/baselining/LowSIRIS-REx/LowSIRIS-REx/attempt-1/refinement",
     "docs/3_NLP_Solvers/IPOPT/emtg_archive.implementation_plan_2.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/release-baseline.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/verification.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/result.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/repeatability.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/result.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/provenance.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/result.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/comparison.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/run.log",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-9pwziuhs/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_maneuver_spec",
+    "emtg_toolchain/tests.readme.md",
     "docs/3_NLP_Solvers/IPOPT/emtg_bootstrapping.implementation_plan.md",
     "docs/3_NLP_Solvers/IPOPT/emtg_archive.implementation_plan.md",
     "2026-10-16.md",

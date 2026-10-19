@@ -46,6 +46,22 @@ def test_parser_rejects_non_archive_output(tmp_path):
         )
 
 
+def test_parser_rejects_literal_release_version_placeholder(tmp_path):
+    repository = _repository(tmp_path)
+    parser = cli.build_parser()
+
+    with pytest.raises(SystemExit):
+        parser.parse_args(
+            [
+                "package",
+                "--emtg-repo",
+                str(repository),
+                "--output",
+                str(tmp_path / "emtg-ipopt-<version>.tar.gz"),
+            ]
+        )
+
+
 def test_parser_rejects_existing_archive_or_checksum(tmp_path):
     repository = _repository(tmp_path)
     output = tmp_path / "emtg.tar.gz"
@@ -76,7 +92,9 @@ def test_parser_accepts_cold_package_build(tmp_path):
     assert arguments.cold
 
 
-def test_package_publishes_archive_and_checksum_after_validation(tmp_path, monkeypatch):
+def test_package_publishes_archive_and_checksum_after_validation(
+    tmp_path, monkeypatch, capsys
+):
     repository = _repository(tmp_path)
     output = tmp_path / "output" / "emtg.tar.gz"
 
@@ -94,6 +112,7 @@ def test_package_publishes_archive_and_checksum_after_validation(tmp_path, monke
 
     assert output.is_file()
     assert output.with_name("emtg.tar.gz.sha256").is_file()
+    assert "[1/5] Building IPOPT EMTG (hot build)" in capsys.readouterr().out
 
 
 def test_package_does_not_publish_outputs_when_build_fails(tmp_path, monkeypatch):

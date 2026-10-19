@@ -76,9 +76,12 @@ def render_runtime_requirements(
     report: LinkageReport,
     *,
     commit_sha: str,
+    build_mode: str,
     build_time: datetime | None = None,
 ) -> str:
     """Render the runtime manifest shipped inside the archive."""
+    if build_mode not in {"cold", "hot"}:
+        raise ValueError("build mode must be cold or hot")
     timestamp = (build_time or datetime.now(timezone.utc)).replace(microsecond=0)
     package_lines = "\n".join(f"- `{package}`" for package in report.packages)
     return f"""# EMTG IPOPT Runtime Requirements
@@ -89,14 +92,17 @@ Base OS: `{BASE_OS}`
 
 Build commit: `{commit_sha}`
 
+Build mode: `{build_mode}`
+
 Build time: `{timestamp.isoformat().replace("+00:00", "Z")}`
 
-Install these packages in the ADSGNC Debian runtime image:
+Install these packages in the third-party Debian runtime image:
 
 {package_lines}
 
-The archive does not include mission-specific SPICE SPK kernels. ADSGNC must
-provide those kernels and all request-specific mission inputs separately.
+The archive does not include mission-specific SPICE SPK kernels. The
+third-party deployment environment must provide those kernels and all
+request-specific mission inputs separately.
 
 ## Verified dynamic linkage
 

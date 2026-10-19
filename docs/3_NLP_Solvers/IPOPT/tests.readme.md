@@ -587,13 +587,13 @@ Archive test category selectors are mutually exclusive:
 
 Observed testing durations:
 
-| Path                          |                    Observed time | Expected use                                      |
-| ----------------------------- | -------------------------------: | ------------------------------------------------- |
-| Unit tests                    |                     `< 1 second` | Every archive-toolchain change                    |
-| Cold archive integration      |                     `~9 minutes` | Release candidates and cache-independent proof    |
-| Hot archive integration       |                    `~18 seconds` | Iteration on unchanged source/configuration       |
-| Hot deployment tutorial gate  |          `~3 minutes 53 seconds` | Iteration after archive/deployment-runner changes |
-| Cold deployment tutorial gate | `TBD: successful rerun required` | Final cache-independent deployment greenlight     |
+| Path                          |                 Observed time | Expected use                                      |
+| ----------------------------- | ----------------------------: | ------------------------------------------------- |
+| Unit tests                    |            23 passed in 0.12s | Every archive-toolchain change                    |
+| Cold archive integration      | 1 passed in 546.22s (0:09:06) | Release candidates and cache-independent proof    |
+| Hot archive integration       |            1 passed in 35.55s | Iteration on unchanged source/configuration       |
+| Hot deployment tutorial gate  |             ? passed in 3.53s | Iteration after archive/deployment-runner changes |
+| Cold deployment tutorial gate | 1 passed in 720.21s (0:12:00) | Final cache-independent deployment greenlight     |
 
 Use a distinct `EMTG_TEST_ARTIFACT_DIR` for each Docker-backed test layer. Each invocation creates a unique child directory so previous retained evidence is not overwritten.
 ## 1. Run unit tests
@@ -762,8 +762,17 @@ test-artifacts/emtg-archive-hot/emtg-toolchain-*/
 ```zsh
 EMTG_ARCHIVE_COLD=1 \
 	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \
-	python -m pytest tests/emtg_toolchain/deployment --tutorials -q
+	python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s
 ```
+
+```zsh
+% EMTG_ARCHIVE_COLD=1 \
+        EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \
+        python -m pytest tests/emtg_toolchain/deployment --tutorials -q
+.                                                                                                                                                                                                   [100%]
+1 passed in 720.21s (0:12:00)
+```
+
 
 This is the archive deployment-greenlight gate.
 
@@ -857,12 +866,273 @@ The deployment result is accepted only when verification.json states:
 - reference identifies the reviewed tutorial verification reference:
   testatron/ipopt/tests/tutorial_baselining_verification.json.
 
-Also state that a green pytest result is the primary gate, while `verification.json` is the retained, inspectable evidence of that decision.
 
 A useful inspection command to document:
+
 ```zsh
 python -m json.tool "<artifact-directory>/verification.json"
 ```
+
+example:
+```zsh
+% python -m json.tool "test-artifacts/emtg-archive-deployment-cold/emtg-toolchain-mqzlsfut/verification.json"
+{
+    "version": 1,
+    "reference": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tutorial_baselining_verification.json",
+    "case_count": 17,
+    "stage_count": 33,
+    "stages": [
+        {
+            "case_id": "Config_Files/LowSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust_low_c3",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust_low_c3",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_boundary_constraint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_boundary_constraint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_maneuver_constraint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_maneuver_constraint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM_singlePhase",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM_singlePhase",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/HighFidelity",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/HighFidelity",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx_forcemodel",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM_freepoint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM_freepoint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx_FBLT",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx_FBLT",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "OSIRIS-REx/OSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "OSIRIS-REx/OSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        }
+    ],
+    "acceptable": true
+}
+```
+
+## 4. Baseline an existing release archive
+
+The deployment gate above packages a new archive as part of the test. Before
+handing an archive to a third-party deployment environment, baseline the exact
+versioned archive that will be distributed.
+
+First create the release archive with a cold build:
+
+```zsh
+EMTG_VERSION="9.02"
+mkdir -p releases
+
+python -m emtg_toolchain package \
+	--cold \
+	--emtg-repo "$PWD" \
+	--output "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+```
+
+Verify the checksum without changing directories:
+
+```zsh
+archive="$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+checksum="${archive}.sha256"
+expected="$(awk 'NR == 1 { print $1 }' "$checksum")"
+actual="$(shasum -a 256 "$archive" | awk '{ print $1 }')"
+
+if [[ "$actual" == "$expected" ]]; then
+	print "SHA-256 verified: $archive"
+else
+	print -u2 "SHA-256 verification failed: $archive"
+	exit 1
+fi
+```
+
+Then verify that exact archive and its adjacent checksum:
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
+python -m pytest tests/emtg_toolchain/deployment \
+	--tutorials \
+	--release-archive "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz" \
+	-q -s
+```
+
+```zsh
+
+```
+
+The release baseline:
+
+1. requires `<archive>.sha256` next to the supplied archive;
+2. validates the archive layout and checksum before reading it;
+3. requires the archive's `RUNTIME_REQUIREMENTS.txt` to record
+   `Build mode: cold`;
+4. builds the clean runtime image from the supplied archive, without invoking
+   `emtg_toolchain package`;
+5. performs the same 17-case, 33-stage, two-attempt tutorial verification; and
+6. writes `verification.json` and `release-baseline.json` under the unique
+   evidence directory.
+
+`release-baseline.json` binds the accepted result to the archive filename and
+SHA-256, archive build mode, source commit recorded in the archive manifest,
+runtime-requirements checksum, tutorial-reference checksum, final verification
+decision, and evidence-directory path.
+
+Release approval requires both files to report an accepted result:
+
+```zsh
+python -m json.tool "<artifact-directory>/verification.json"
+python -m json.tool "<artifact-directory>/release-baseline.json"
+```
+
+The archive and `<archive>.sha256` are the handoff payload. The third-party
+deployment environment must verify the checksum, install the packages declared
+in `emtg/RUNTIME_REQUIREMENTS.txt`, extract the archive into `/opt/toolkit`,
+and invoke `/opt/toolkit/emtg/bin/EMTGv9` from its isolated writable run
+directory.
+
+Also state that a green pytest result is the primary gate, while `verification.json` is the retained, inspectable evidence of that decision.
+
+
 # Baselining workflow
 
 The IPOPT Testatron Baselining workflow executes the immutable `testatron/tests` corpus with the open-source IPOPT backend while preserving each adjacent SNOPT-generated `.emtg` file as immutable historical evidence. The workflow answers two separate questions:
@@ -1132,4 +1402,3 @@ The staging layer must resolve them before EMTG runs:
 
 The full dependency inventory, source URL or repository source, SHA-256,
 mapping reason, and final staged path must be written to `compatibility.json`.
-

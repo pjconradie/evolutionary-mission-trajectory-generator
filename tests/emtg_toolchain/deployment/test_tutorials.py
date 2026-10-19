@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import time
 from pathlib import Path, PurePosixPath
 
@@ -11,13 +12,19 @@ import MissionOptions
 import pytest
 
 from emtg_toolchain import cli
-from emtg_toolchain.archive import ARCHIVE_ROOT, read_archive_text
+from emtg_toolchain.archive import (
+    ARCHIVE_ROOT,
+    read_archive_text,
+    validate_archive,
+    validate_checksum,
+)
 from emtg_toolchain.docker import (
     build_archive_runtime_image,
     remove_image,
     run_archive_runtime,
 )
 from emtg_toolchain.runtime import parse_runtime_requirements
+from emtg_toolchain.release import release_baseline_record
 from testatron import ipopt_characterization
 
 
@@ -218,20 +225,33 @@ def test_extracted_archive_passes_all_tutorial_verification(
     repository_root,
     emtg_toolchain_artifact_root,
     emtg_archive_cold,
+    request,
 ):
     """Require all 17 tutorial cases and 33 stages to match reviewed evidence."""
     artifact_root = emtg_toolchain_artifact_root
-    archive = artifact_root / "emtg-ipopt.tar.gz"
-    cli.package(
-        repository_root,
-        archive,
-        cold=emtg_archive_cold,
-        build_log_path=artifact_root / "source-build.log",
-    )
-    (artifact_root / "archive-build-mode.txt").write_text(
-        f"{'cold' if emtg_archive_cold else 'hot'}\n",
-        encoding="ascii",
-    )
+    release_archive = request.config.getoption("--release-archive")
+    if release_archive is None:
+        archive = artifact_root / "emtg-ipopt.tar.gz"
+        cli.package(
+            repository_root,
+            archive,
+            cold=emtg_archive_cold,
+            build_log_path=artifact_root / "source-build.log",
+        )
+        (artifact_root / "archive-build-mode.txt").write_text(
+            f"{'cold' if emtg_archive_cold else 'hot'}\n",
+            encoding="ascii",
+        )
+    else:
+        archive = release_archive.expanduser().resolve()
+        checksum = archive.with_name(f"{archive.name}.sha256")
+        if not archive.is_file():
+            raise ValueError(f"release archive does not exist: {archive}")
+        if not checksum.is_file():
+            raise ValueError(f"release archive checksum does not exist: {checksum}")
+        validate_archive(archive)
+        validate_checksum(archive, checksum)
+        shutil.copy2(checksum, artifact_root / checksum.name)
     requirements = read_archive_text(
         archive, PurePosixPath(ARCHIVE_ROOT, "RUNTIME_REQUIREMENTS.txt")
     )
@@ -255,7 +275,14 @@ def test_extracted_archive_passes_all_tutorial_verification(
         )
 
     try:
-        for case in ipopt_characterization.TUTORIAL_CASES:
+        cases = ipopt_characterization.TUTORIAL_CASES
+        print(
+            f"Verifying archive tutorials: {len(cases)} cases, "
+            "33 required stages, two attempts per case"
+        )
+        for index, case in enumerate(cases, start=1):
+            started = time.monotonic()
+            print(f"[{index}/{len(cases)}] Starting {case.case_id}")
             result = ipopt_characterization.run_repeatable_tutorial_baselining_case(
                 case,
                 stage_runner,
@@ -263,6 +290,10 @@ def test_extracted_archive_passes_all_tutorial_verification(
                 repository_root=repository_root,
             )
             assert result["repeatability"]["stable"], case.case_id
+            print(
+                f"[{index}/{len(cases)}] Completed {case.case_id} "
+                f"in {time.monotonic() - started:.1f}s"
+            )
         verification = ipopt_characterization.verify_tutorial_baselining_verification(
             output_root
         )
@@ -272,6 +303,19 @@ def test_extracted_archive_passes_all_tutorial_verification(
     (artifact_root / "verification.json").write_text(
         json.dumps(verification, indent=2) + "\n", encoding="utf-8"
     )
+    if release_archive is not None:
+        release_record = release_baseline_record(
+            archive=archive,
+            requirements=requirements,
+            verification=verification,
+            verification_reference=(
+                ipopt_characterization.DEFAULT_TUTORIAL_BASELINING_VERIFICATION
+            ),
+            evidence_root=artifact_root,
+        )
+        (artifact_root / "release-baseline.json").write_text(
+            json.dumps(release_record, indent=2) + "\n", encoding="utf-8"
+        )
     assert verification["case_count"] == 17
     assert verification["stage_count"] == 33
     assert verification["acceptable"], verification["stages"]

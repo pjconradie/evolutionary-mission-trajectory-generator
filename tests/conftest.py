@@ -63,6 +63,14 @@ def pytest_addoption(parser):
         default=[],
         help="tutorial case-ID glob passed to the Docker-backed baselining launcher",
     )
+    group.addoption(
+        "--release-archive",
+        type=Path,
+        help=(
+            "verify this existing EMTG runtime archive and its adjacent .sha256 "
+            "checksum with the complete deployment tutorial gate"
+        ),
+    )
 
 
 def pytest_collection_modifyitems(config, items):

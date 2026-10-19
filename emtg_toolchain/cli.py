@@ -46,6 +46,10 @@ def _output_path(value: str) -> Path:
     output = Path(value).expanduser().resolve()
     if output.suffixes[-2:] != [".tar", ".gz"]:
         raise argparse.ArgumentTypeError("output must end in .tar.gz")
+    if "<" in output.name or ">" in output.name:
+        raise argparse.ArgumentTypeError(
+            "output filename must use a concrete release version, not <version>"
+        )
     if output.exists() or output.with_name(f"{output.name}.sha256").exists():
         raise argparse.ArgumentTypeError("output archive or checksum already exists")
     return output
@@ -79,10 +83,10 @@ Invoke the fixed executable with an options file and no shell:
 /opt/toolkit/emtg/bin/EMTGv9 /opt/work/request.emtgopt
 ```
 
-The archive includes base universe and standard public hardware data. ADSGNC
-must provide request-specific inputs and mission SPICE kernels, keep them
-read-only where possible, and use an isolated writable run directory for
-outputs.
+The archive includes base universe and standard public hardware data. The
+third-party deployment environment must provide request-specific inputs and
+mission SPICE kernels, keep them read-only where possible, and use an isolated
+writable run directory for outputs.
 """
 
 
@@ -95,6 +99,8 @@ def package(
 ) -> None:
     """Build, validate, and publish a runtime archive and checksum."""
     output.parent.mkdir(parents=True, exist_ok=True)
+    build_mode = "cold" if cold else "hot"
+    print(f"[1/5] Building IPOPT EMTG ({build_mode} build)")
     with tempfile.TemporaryDirectory(
         prefix=f".{output.stem}-", dir=output.parent
     ) as temporary:
@@ -106,6 +112,7 @@ def package(
             cold=cold,
             log_path=build_log_path,
         )
+        print("[2/5] Validating EMTG runtime linkage")
         if build_log_path is not None:
             build_log_path.with_name("source-EMTGv9.ldd").write_text(
                 ldd_output,
@@ -117,6 +124,7 @@ def package(
             )
         report = validate_ldd_output(ldd_output)
 
+        print("[3/5] Staging archive runtime payload")
         archive_stage = temporary_root / "archive"
         entries: list[ArchiveEntry] = build_payload_manifest(
             repository_root, build_stage / "bin" / "EMTGv9"
@@ -128,6 +136,7 @@ def package(
             render_runtime_requirements(
                 report,
                 commit_sha=_commit_sha(repository_root),
+                build_mode=build_mode,
                 build_time=datetime.now(timezone.utc),
             ),
         )
@@ -137,12 +146,14 @@ def package(
             _archive_readme(),
         )
 
+        print("[4/5] Creating archive and SHA-256 checksum")
         temporary_archive = temporary_root / output.name
         temporary_checksum = temporary_root / f"{output.name}.sha256"
         create_archive(archive_stage, temporary_archive)
         write_checksum(temporary_archive, temporary_checksum)
         validate_archive(temporary_archive)
         validate_checksum(temporary_archive, temporary_checksum)
+        print("[5/5] Publishing validated archive")
         shutil.move(str(temporary_archive), output)
         shutil.move(str(temporary_checksum), output.with_name(f"{output.name}.sha256"))
 
@@ -169,6 +180,13 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if arguments.command == "package":
             package(arguments.emtg_repo, arguments.output, cold=arguments.cold)
+            checksum = arguments.output.with_name(f"{arguments.output.name}.sha256")
+            print(f"Published EMTG archive: {arguments.output}")
+            print(f"Published SHA-256 checksum: {checksum}")
+            print(
+                "Next: baseline this exact archive with "
+                "--release-archive after verifying its checksum."
+            )
             return 0
     except (RuntimeError, ValueError, OSError) as error:
         parser.exit(1, f"emtg-toolchain: error: {error}\n")

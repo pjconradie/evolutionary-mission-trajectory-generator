@@ -79,13 +79,13 @@ audited.
 
 | Plan phase | Evidence-based status |
 | --- | --- |
-| 1–6 | Partially implemented and not yet acceptance-audited against this plan. |
-| 7 | In progress. Cold archive integration and hot archive integration passed. The hot deployment tutorial gate passed all 17 cases and 33 required stages against the reviewed verification reference. The archive deployment adapter preserves the established `/artifacts` tutorial staging contract without changing source tutorial preparation or baselines. A successful cold deployment tutorial gate remains required: the latest cold attempt exhausted host storage while staging evidence and did not reach tutorial verification. |
-| 8 | Planned; no implementation or verification evidence yet. |
+| 1–6 | Implemented. The archive workflow builds a versioned IPOPT runtime archive, derives its runtime-package manifest from verified linkage, includes the allowlisted runtime payload, and publishes an adjacent SHA-256 checksum. A separate acceptance-criteria audit remains useful before a future change is declared ready. |
+| 7 | Verified by the archive workflow. The unit suite passed with 23 tests. Hot archive integration passed in 35.55 seconds. Cold archive integration passed in 546.22 seconds. The cold deployment tutorial gate passed in 720.21 seconds, verifying all 17 cases and 33 required stages against the reviewed reference. The archive deployment adapter preserves the established `/artifacts` tutorial staging contract without changing source tutorial preparation or baselines. |
+| 8 | Implemented and verified for EMTG 9.02. A cold-built `emtg-ipopt-9.02.tar.gz` and adjacent checksum were generated and checksum-verified. The exact archive passed the release baseline in 217.89 seconds: 17 cases, 33 stages, and `acceptable: true`. Its release record identified source commit `9dc80f4b6900485addd0e337ea077788e8e17cba`. The detailed per-case evidence was reviewed and then intentionally deleted; retain it for future release approvals. The remaining Phase 8 deliverable is the third-party distribution guide. |
 
-Before declaring any phase complete, audit the current worktree against that
-phase's acceptance criteria and retain the corresponding command output and
-evidence.
+Future releases must rerun the documented cold package and exact-archive
+release-baseline commands, then retain the command output and evidence for the
+release record.
 
 ## Implementation Layout and Resource Lifecycle
 
@@ -190,11 +190,11 @@ The test layers are deliberately separate. Category selectors in
 not combine `--unit`, `--integration`, `--regression`, `--clean-bootstrap`,
 or `--tutorials` in one command.
 
-| Layer | Command | What it proves |
-| --- | --- | --- |
-| Unit | `python -m pytest tests/emtg_toolchain/unit --unit -q` | CLI validation, manifest rendering, tar safety, payload layout, file modes, checksums, linkage-to-package mapping, and cleanup behavior without Docker. |
-| Archive integration | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive" python -m pytest tests/emtg_toolchain/integration --integration -q` | Canonical amd64 builder, IPOPT binary build, archive creation, checksum validation, clean extraction, and declared runtime linkage. |
-| Deployment gate | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-tutorials" python -m pytest tests/emtg_toolchain/deployment --tutorials -q` | Cold-bootstraps a clean Bookworm runtime image from the archive and declared packages, then verifies the extracted archive binary against every required stage for all 17 tutorial cases. |
+| Layer               | Command                                                                                                                               | What it proves                                                                                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit                | `python -m pytest tests/emtg_toolchain/unit --unit -q`                                                                                | CLI validation, manifest rendering, tar safety, payload layout, file modes, checksums, linkage-to-package mapping, and cleanup behavior without Docker.                                   |
+| Archive integration | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive" python -m pytest tests/emtg_toolchain/integration --integration -q`        | Canonical amd64 builder, IPOPT binary build, archive creation, checksum validation, clean extraction, and declared runtime linkage.                                                       |
+| Deployment gate     | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-tutorials" python -m pytest tests/emtg_toolchain/deployment --tutorials -q` | Cold-bootstraps a clean Bookworm runtime image from the archive and declared packages, then verifies the extracted archive binary against every required stage for all 17 tutorial cases. |
 
 The normal deployment approval workflow is:
 
