@@ -1,14 +1,78 @@
 # Purpose
 
-
-
 IPOPT is not accepted merely because it produces a feasible result. For each comparable case, the IPOPT result must agree with the corresponding SNOPT result within an explicit, reviewed numerical contract. The committed SNOPT options and `.emtg` files are never overwritten, regenerated, or promoted from an IPOPT run.
 
 Run the commands in this document from the repository root.
 
-# Testing workflow
+# EMTG clean bootstrapping
 
-Tests against a pinned Docker image already available.
+## Introduction
+
+Can a clean machine build the EMTG Docker environment from the pinned recipe, without relying on an already-existing EMTG compiler image, CMake build tree, or cached native executable?
+
+It verifies the **factory**, not EMTG’s mission results and not the archive.
+
+It should establish that Docker can create the shared canonical source-builder environment containing:
+
+- Debian 12 / Bookworm;
+- the compiler toolchain;
+- IPOPT and required development dependencies;
+- validated CSPICE;
+- the other native build dependencies.
+
+A successful clean bootstrap says:
+
+> “We can recreate the controlled EMTG build environment.”
+
+It does **not** say:
+
+> “The source code is correct.”  
+> “The archive works.”  
+> “The tutorial results match.”
+
+This is a prerequisite for both source verification and archive verification.
+
+
+
+## Testing summary
+
+To be implemented.
+
+# EMTG Source testing workflow
+
+## Introduction
+
+Given the canonical Docker build environment, does the EMTG source checkout compile and behave correctly?
+
+It verifies the **product source code**.
+
+It uses the source checkout and source-built executable, typically:
+
+```
+/build/src/EMTGv9
+```
+
+It covers:
+
+- unit tests;
+- regression tests;
+- IPOPT characterization contracts;
+- source integration tests;
+- the 137-case corpus;
+- the 17 tutorial replay/refinement verification;
+- reviewed source/current-state references.
+
+A successful source verification says:
+
+> “This EMTG source revision compiles and produces the accepted solver behavior.”
+
+It does **not** say:
+
+> “A third party can deploy the emitted archive correctly.”
+
+The source workflow can be perfect while the package is broken, missing files, has a bad runtime dependency list, extracts to the wrong path, or fails in a compiler-free runtime image.
+
+## Testing summary
 
 | #   | Test                                              | Command                                                                                                        | Runtime information                                                                                  | Docker required |
 | --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------- |
@@ -557,10 +621,844 @@ python testatron/ipopt_characterization.py \
 See [[tutorial_baselining_commands#Promotion]].
 
 ---
+# EMTG Archive testing workflow
 
-# Baselining workflow
+## Introduction
 
-The IPOPT Testatron Baselining workflow executes the immutable `testatron/tests` corpus with the open-source IPOPT backend while preserving each adjacent SNOPT-generated `.emtg` file as immutable historical evidence. The workflow answers two separate questions:
+Can the built EMTG runtime archive be handed to a third-party deployment environment, extracted into a clean runtime container, and produce the same accepted tutorial behavior without source code or compilers?
+
+It verifies the **deliverable**.
+
+It starts from an archive containing:
+
+```
+emtg-ipopt-9.02.tar.gz
+emtg-ipopt-9.02.tar.gz.sha256
+```
+
+The archive workflow verifies:
+
+- archive payload and tar safety;
+- SHA-256 checksum;
+- actual runtime package requirements;
+- extraction layout:
+
+```
+/opt/toolkit/emtg/bin/EMTGv9
+```
+
+- a clean compiler-free runtime image;
+- no source checkout, CMake, compiler, PyEMTG, or source-builder dependency prefix;
+- all 17 tutorial cases;
+- all 33 required replay/refinement stages;
+- repeatability;
+- exact-release archive baselining.
+
+A successful archive verification says:
+
+> “This exact archive is a valid EMTG deliverable for a third-party deployment environment.”
+
+It does **not** replace source verification. It proves deployment packaging and runtime behavior, not the whole source development quality process.
+
+## Testing summary
+
+The EMTG archive workflow validates a deployable **third-party deployment environment** runtime payload. The archive is a runtime artifact, not a source distribution.
+
+The source-builder environment compiles EMTG from the repository checkout. The deployment runtime image contains only:
+
+```
+/opt/toolkit/emtg/bin/EMTGv9
+/opt/toolkit/emtg/universe/
+/opt/toolkit/emtg/hardware/
+/opt/toolkit/emtg/RUNTIME_REQUIREMENTS.txt
+/opt/toolkit/emtg/README.md
+```
+
+The clean runtime image must not contain EMTG source code, a CMake build directory, CMake, compilers, development headers, PyEMTG, or source-builder `/opt/emtg-deps` state.
+
+Run all commands from the repository root.
+
+Archive test category selectors are mutually exclusive:
+```
+--unit
+--integration
+--tutorials
+```
+
+Observed testing durations:
+
+| Path                          |                 Observed time | Expected use                                      |
+| ----------------------------- | ----------------------------: | ------------------------------------------------- |
+| Unit tests                    |            23 passed in 0.12s | Every archive-toolchain change                    |
+| Cold archive integration      | 1 passed in 546.22s (0:09:06) | Release candidates and cache-independent proof    |
+| Hot archive integration       |            1 passed in 35.55s | Iteration on unchanged source/configuration       |
+| Hot deployment tutorial gate  |             ? passed in 3.53s | Iteration after archive/deployment-runner changes |
+| Cold deployment tutorial gate | 1 passed in 720.21s (0:12:00) | Final cache-independent deployment greenlight     |
+
+Use a distinct `EMTG_TEST_ARTIFACT_DIR` for each Docker-backed test layer. Each invocation creates a unique child directory so previous retained evidence is not overwritten.
+
+
+| #   | Test                                      | Command                                                                                                                                                                                                                                          | Runtime information                                                                   | Docker required |
+| --- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------- |
+| 1   | Run archive collection sanity             | `python -m pytest tests/emtg_toolchain/unit --unit --collect-only -q`<br>`python -m pytest tests/emtg_toolchain/integration --integration --collect-only -q`<br>`python -m pytest tests/emtg_toolchain/deployment --tutorials --collect-only -q` | 28 tests collected in 0.03s<br>1 test collected in 0.01s<br>1 test collected in 0.05s | No              |
+| 2   | Run archive-toolchain unit tests          | `python -m pytest tests/emtg_toolchain/unit --unit -q`                                                                                                                                                                                           | 28 passed in 0.08s                                                                    | No              |
+| 3   | Run cold archive integration test         | `EMTG_ARCHIVE_COLD=1 \`<br>`EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \`<br>`python -m pytest tests/emtg_toolchain/integration --integration -q`                                                                            | 1 passed in 2751.88s (0:45:51)                                                        | Yes             |
+| 3   | Run hot archive integration test          | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \`<br>`python -m pytest tests/emtg_toolchain/integration --integration -q`                                                                                                        | 1 passed in 504.63s (0:08:24)                                                         | Yes             |
+| 4   | Run cold deployment tutorial gate         | `EMTG_ARCHIVE_COLD=1 \`<br>`EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \`<br>`python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s`                                                                 | 1 passed in 694.96s (0:11:34)                                                         | Yes             |
+| 4   | Run hot deployment tutorial gate          | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \`<br>`python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s`                                                                                             | 1 passed in 244.27s (0:04:04)                                                         | Yes             |
+| 4   | Inspection command                        | `python -m json.tool "<artifact-directory>/verification.json"`                                                                                                                                                                                   | 0.01s                                                                                 | No              |
+| 5   | Create the versioned EMTG release archive |                                                                                                                                                                                                                                                  | 10-20 min                                                                             | Yes             |
+| 5   | Verify the release archive checksum       |                                                                                                                                                                                                                                                  | 10-20 min                                                                             | No              |
+| 5   | Baseline the exact release archive        |                                                                                                                                                                                                                                                  | 10-20 min                                                                             | Yes             |
+
+1, 2
+```zsh
+python -m pytest tests/emtg_toolchain/unit --unit --collect-only -q
+python -m pytest tests/emtg_toolchain/integration --integration --collect-only -q
+python -m pytest tests/emtg_toolchain/deployment --tutorials --collect-only -q
+python -m pytest tests/emtg_toolchain/unit --unit -q
+```
+
+3
+```zsh
+EMTG_ARCHIVE_COLD=1 \
+	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+```
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+```
+
+4
+```zsh
+EMTG_ARCHIVE_COLD=1 \
+	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \
+	python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s
+```
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \
+	python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s
+```
+
+```zsh
+python -m json.tool "<artifact-directory>/verification.json"
+```
+
+5 - Test existing baseline
+
+5 - Generate a new baseline
+```zsh
+% rm -f \
+	"$PWD/releases/emtg-ipopt-9.02.tar.gz" \
+	"$PWD/releases/emtg-ipopt-9.02.tar.gz.sha256"
+```
+
+```zsh
+EMTG_VERSION="9.02"
+mkdir -p releases
+
+python -m emtg_toolchain package \
+	--cold \
+	--emtg-repo "$PWD" \
+	--output "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+```
+
+```zsh
+archive="$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+checksum="${archive}.sha256"
+expected="$(awk 'NR == 1 { print $1 }' "$checksum")"
+actual="$(shasum -a 256 "$archive" | awk '{ print $1 }')"
+
+if [[ "$actual" == "$expected" ]]; then
+	print "SHA-256 verified: $archive"
+else
+	print -u2 "SHA-256 verification failed: $archive"
+	exit 1
+fi
+```
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
+python -m pytest tests/emtg_toolchain/deployment \
+	--tutorials \
+	--release-archive "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz" \
+	-q -s
+```
+
+## 1. Run collection sanity
+
+Unit test collection
+
+```zsh
+python -m pytest tests/emtg_toolchain/unit --unit --collect-only -q
+```
+
+```zsh
+% python -m pytest tests/emtg_toolchain/unit --unit --collect-only -q
+tests/emtg_toolchain/unit/test_cli.py::test_parser_rejects_non_archive_output
+tests/emtg_toolchain/unit/test_cli.py::test_parser_rejects_literal_release_version_placeholder
+...
+tests/emtg_toolchain/unit/test_runtime.py::test_runtime_requirements_parser_reads_generated_package_list
+tests/emtg_toolchain/unit/test_runtime.py::test_runtime_requirements_parser_rejects_missing_package_list
+
+28 tests collected in 0.03s
+```
+
+Integration test collection
+
+```zsh
+python -m pytest tests/emtg_toolchain/integration --integration --collect-only -q
+```
+
+```zsh
+% python -m pytest tests/emtg_toolchain/integration --integration --collect-only -q
+tests/emtg_toolchain/integration/test_emtg_archive_integration.py::test_archive_extracts_into_clean_bookworm_runtime
+
+1 test collected in 0.01s
+```
+
+Deployment test collection
+
+```
+python -m pytest tests/emtg_toolchain/deployment --tutorials --collect-only -q
+```
+
+```zsh
+% python -m pytest tests/emtg_toolchain/deployment --tutorials --collect-only -q
+tests/emtg_toolchain/deployment/test_emtg_archive_tutorials.py::test_extracted_archive_passes_all_tutorial_verification
+
+1 test collected in 0.05s
+```
+
+## 2. Run unit tests
+
+```zsh
+python -m pytest tests/emtg_toolchain/unit --unit -q
+```
+
+```zsh
+% python -m pytest tests/emtg_toolchain/unit --unit -q
+
+............................                                                                                                                                                                 [100%]
+28 passed in 0.08s
+```
+
+These tests require no Docker daemon and validate the archive-toolchain logic without compiling EMTG.
+
+They cover:
+
+- CLI argument validation:
+- Runtime-linkage validation:
+- Runtime dependency manifest generation and parsing.
+- Archive payload allowlisting:
+- Archive safety:
+- SHA-256 manifest generation and validation.
+- Content-addressed hot-cache identity and invalidation behavior.
+
+A passing unit run proves archive-toolchain behavior, but does not compile EMTG or invoke Docker.
+
+## 3. Run integration tests
+
+### Run cold archive build and fresh runtime-image integration tests
+
+```zsh
+EMTG_ARCHIVE_COLD=1 \
+	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+```
+
+```zsh
+% EMTG_ARCHIVE_COLD=1 \                   
+    EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \
+    python -m pytest tests/emtg_toolchain/integration --integration -q
+.                                                                                                                                                                                                                                                    [100%]
+1 passed in 2751.88s (0:45:51)
+```
+
+The cold archive-build path compiles EMTG in a command-owned temporary CMake build directory. It does not reuse the package CMake build cache or prior compiled EMTG objects.
+
+The clean archive-runtime image is also built with:
+```zsh
+--no-cache
+--platform linux/amd64
+```
+
+Use the cold path when:
+
+- preparing a release candidate;
+- validating a new archive for deployment;
+- changing CMake/build policy;
+- changing compiler/IPOPT assumptions;
+- requiring cache-independent evidence.
+
+This is the slower path. It validates that the archive can be produced without a previously compiled EMTG build tree.
+
+> The archive cold path does not replace the separate source-builder Docker cold-bootstrap workflow. Source-builder image hardening remains a separate workflow.
+
+### Run hot archive build integration tests
+
+The hot package CMake cache is a persistent Docker volume. It survives pytest process exit and is reused only when its content-addressed identity matches the current source and build configuration.
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \
+	python -m pytest tests/emtg_toolchain/integration --integration -q
+```
+
+```zsh
+% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \
+        python -m pytest tests/emtg_toolchain/integration --integration -q
+.                                                                                                                                                                                                                                                    [100%]
+1 passed in 504.63s (0:08:24)
+```
+
+The hot archive-build path reuses only a validated, content-addressed package CMake build volume.
+
+The cache identity includes:
+
+```
+EMTG source-tree content fingerprint
+canonical source-builder image identity
+linux/amd64 target platform
+EMTG_NLP_SOLVER=IPOPT
+CSPICE, GSL, and Boost CMake configuration
+```
+
+Every invocation still reruns:
+
+```zsh
+CMake configure
+cmake --build
+archive generation
+checksum validation
+fresh clean runtime-image construction
+runtime linkage validation
+```
+
+For unchanged source and configuration, `cmake --build` should be incremental or a no-op, avoiding the full native recompilation.
+
+The hot path is appropriate for development iteration. It is not a substitute for the cold archive-build path required for a release/deployment greenlight.
+
+> The runtime deployment image is never hot-reused. Each integration run creates a fresh clean runtime image from the newly generated archive.
+
+### Archive integration evidence
+
+When `EMTG_TEST_ARTIFACT_DIR` is set, each integration run retains evidence under a unique directory such as:
+
+```
+test-artifacts/emtg-archive-hot/emtg-toolchain-*/
+├── emtg-ipopt.tar.gz
+├── emtg-ipopt.tar.gz.sha256
+├── source-build.log
+├── source-EMTGv9.ldd
+├── source-runtime-packages.tsv
+├── runtime-image-build.log
+├── runtime-image.txt
+└── runtime-ldd.log
+```
+
+2026-10-19 cont.
+## 4. Run deployment tests
+
+Run cold deployment tutorial gate
+
+```zsh
+EMTG_ARCHIVE_COLD=1 \
+	EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \
+	python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s
+```
+
+```zsh
+% EMTG_ARCHIVE_COLD=1 \
+        EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \
+        python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s
+[1/5] Building IPOPT EMTG (cold build)
+[2/5] Validating EMTG runtime linkage
+...
+[17/17] Starting Flybys/EVM_singlePhase
+[17/17] Completed Flybys/EVM_singlePhase in 12.8s
+.
+1 passed in 694.96s (0:11:34)
+```
+
+Run hot deployment tutorial gate
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \
+	python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s
+```
+
+
+```zsh
+% 
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \
+        python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s
+[1/5] Building IPOPT EMTG (hot build)
+[2/5] Validating EMTG runtime linkage
+...
+[17/17] Starting Flybys/EVM_singlePhase
+[17/17] Completed Flybys/EVM_singlePhase in 13.1s
+.
+1 passed in 244.27s (0:04:04)
+```
+
+This is the archive deployment-greenlight gate.
+
+The test:
+
+1. Uses the cold archive-build path to create an archive without reusable CMake objects.
+2. Cold-builds a fresh compiler-free Bookworm runtime image from the archive and declared runtime dependencies.
+3. Extracts EMTG at:
+
+```
+/opt/toolkit/emtg/bin/EMTGv9
+```
+
+4. Stages tutorial-specific options, universe data, hardware data, and required external kernels into isolated per-case directories.
+5. Starts a new disposable `--rm` clean runtime container for every tutorial stage.
+6. Mounts only the corresponding staged case directory at /artifacts.
+
+```
+/opt/toolkit/emtg/bin/EMTGv9 /artifacts/<prepared-options>.emtgopt
+```
+
+`/artifacts` is deliberate: the established tutorial staging contract rewrites legacy hardware references to `/artifacts/hardware_models/...`. This is an archive-test adapter convention; it does not modify source tutorial inputs or baseline behavior.
+
+7. Captures stdout, stderr, exit status, generated `.emtg` output, comparisons, and provenance.
+8. Runs each tutorial case twice to verify repeatability.
+9. Compares the generated evidence to the reviewed tutorial verification reference.
+
+The repository checkout is used by the pytest test orchestrator to prepare tutorial inputs and compare generated outputs. It is never mounted into the clean runtime container.
+
+The reviewed tutorial contract contains:
+
+```zsh
+17 tutorial cases
+33 required replay/refinement stages
+2 attempts per case
+at least 66 packaged-binary stage executions
+```
+
+Schema-probe executions may add further packaged-binary invocations.
+
+Deployment is greenlit only when:
+
+- all 17 tutorial cases have complete evidence;
+- all 33 required stages match the reviewed verification reference;
+- both attempts for every case are stable;
+- no case is missing, skipped, timed out, process-failed, parse-failed, dependency-blocked, or numerically mismatched;
+- the final verification report has:
+
+```zsh
+{
+	"case_count": 17,
+	"stage_count": 33,
+	"acceptable": true
+}
+```
+
+### Deployment evidence
+
+Each deployment invocation retains a unique evidence directory:
+
+```
+test-artifacts/<chosen-artifact-root>/emtg-toolchain-*/
+```
+
+It contains:
+```
+├── emtg-ipopt.tar.gz
+├── emtg-ipopt.tar.gz.sha256
+├── source-build.log
+├── source-EMTGv9.ldd
+├── source-runtime-packages.tsv
+├── runtime-image-build.log
+├── runtime-image.txt
+├── archive-build-mode.txt
+├── verification.json
+└── evidence/
+    └── baselining/
+        └── <tutorial-case>/
+            ├── attempt-1/
+            ├── attempt-2/
+            ├── repeatability.json
+            └── result.json
+```
+
+The deployment result is accepted only when verification.json states:
+
+- case_count is 17;
+- stage_count is 33;
+- acceptable is true;
+- every entry in stages has status "matched";
+- reference identifies the reviewed tutorial verification reference:
+  testatron/ipopt/tests/tutorial_baselining_verification.json.
+
+
+A useful inspection command to document:
+
+```zsh
+python -m json.tool "<artifact-directory>/verification.json"
+```
+
+example:
+```zsh
+% python -m json.tool "test-artifacts/emtg-archive-deployment-cold/emtg-toolchain-mqzlsfut/verification.json"
+{
+    "version": 1,
+    "reference": "/Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/testatron/ipopt/tests/tutorial_baselining_verification.json",
+    "case_count": 17,
+    "stage_count": 33,
+    "stages": [
+        {
+            "case_id": "Config_Files/LowSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust_low_c3",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Config_Files/LowSIRIS-REx_high_thrust_low_c3",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_boundary_constraint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_boundary_constraint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_maneuver_constraint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Constraint_Scripting/EVM_freepoint_maneuver_constraint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM_singlePhase",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/EVM_singlePhase",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/HighFidelity",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Flybys/HighFidelity",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx_forcemodel",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Force_Models/LowSIRIS-REx_forcemodel_nlp",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM_freepoint",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "Journey_Boundaries/EVM_freepoint",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx_FBLT",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "LowSIRIS-REx/LowSIRIS-REx_FBLT",
+            "stage": "replay",
+            "status": "matched"
+        },
+        {
+            "case_id": "OSIRIS-REx/OSIRIS-REx",
+            "stage": "refinement",
+            "status": "matched"
+        },
+        {
+            "case_id": "OSIRIS-REx/OSIRIS-REx",
+            "stage": "replay",
+            "status": "matched"
+        }
+    ],
+    "acceptable": true
+}
+```
+
+## 5. Baseline an existing release archive
+
+### Test an existing baseline
+
+Verify the baselined archive:
+
+```zsh
+archive="$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+checksum="${archive}.sha256"
+expected="$(awk 'NR == 1 { print $1 }' "$checksum")"
+actual="$(shasum -a 256 "$archive" | awk '{ print $1 }')"
+
+if [[ "$actual" == "$expected" ]]; then
+	print "SHA-256 verified: $archive"
+else
+	print -u2 "SHA-256 verification failed: $archive"
+	exit 1
+fi
+```
+
+```zsh
+% archive="$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+checksum="${archive}.sha256"
+expected="$(awk 'NR == 1 { print $1 }' "$checksum")"
+actual="$(shasum -a 256 "$archive" | awk '{ print $1 }')"
+
+if [[ "$actual" == "$expected" ]]; then
+        print "SHA-256 verified: $archive"
+else
+        print -u2 "SHA-256 verification failed: $archive"
+        exit 1
+fi
+SHA-256 verified: /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/releases/emtg-ipopt-9.02.tar.gz
+```
+
+### Generate a new baseline
+
+Remove the named archive and checksum:
+
+```zsh
+rm -f \
+	"$PWD/releases/emtg-ipopt-9.02.tar.gz" \
+	"$PWD/releases/emtg-ipopt-9.02.tar.gz.sha256"
+```
+
+Create the release archive with a cold build:
+
+```zsh
+EMTG_VERSION="9.02"
+mkdir -p releases
+
+python -m emtg_toolchain package \
+	--cold \
+	--emtg-repo "$PWD" \
+	--output "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+```
+
+```zsh
+% EMTG_VERSION="9.02"
+mkdir -p releases
+
+python -m emtg_toolchain package \
+        --cold \
+        --emtg-repo "$PWD" \
+        --output "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+[1/5] Building IPOPT EMTG (cold build)
+[2/5] Validating EMTG runtime linkage
+[3/5] Staging archive runtime payload
+[4/5] Creating archive and SHA-256 checksum
+[5/5] Publishing validated archive
+Published EMTG archive: /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/releases/emtg-ipopt-9.02.tar.gz
+Published SHA-256 checksum: /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/releases/emtg-ipopt-9.02.tar.gz.sha256
+Next: baseline this exact archive with --release-archive after verifying its checksum.
+```
+
+Verify that exact archive and its adjacent checksum:
+
+> [!Warning] HERE
+
+```zsh
+EMTG_VERSION="9.02"
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
+python -m pytest tests/emtg_toolchain/deployment \
+	--tutorials \
+	--release-archive "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz" \
+	-q -s
+```
+
+```zsh
+% EMTG_VERSION="9.02"
+% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
+python -m pytest tests/emtg_toolchain/deployment \
+        --tutorials \
+        --release-archive "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz" \
+        -q -s
+Verifying archive tutorials: 17 cases, 33 required stages, two attempts per case
+[1/17] Starting Config_Files/LowSIRIS-REx
+[1/17] Completed Config_Files/LowSIRIS-REx in 4.1s
+...
+[17/17] Starting Flybys/EVM_singlePhase
+[17/17] Completed Flybys/EVM_singlePhase in 12.5s
+.
+1 passed in 202.17s (0:03:22)
+```
+
+
+Verify the baselined archive:
+
+```zsh
+EMTG_VERSION="9.02"
+archive="$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+checksum="${archive}.sha256"
+expected="$(awk 'NR == 1 { print $1 }' "$checksum")"
+actual="$(shasum -a 256 "$archive" | awk '{ print $1 }')"
+
+if [[ "$actual" == "$expected" ]]; then
+	print "SHA-256 verified: $archive"
+else
+	print -u2 "SHA-256 verification failed: $archive"
+	exit 1
+fi
+```
+
+```zsh
+% EMTG_VERSION="9.02"
+archive="$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz"
+checksum="${archive}.sha256"
+expected="$(awk 'NR == 1 { print $1 }' "$checksum")"
+actual="$(shasum -a 256 "$archive" | awk '{ print $1 }')"
+
+if [[ "$actual" == "$expected" ]]; then
+        print "SHA-256 verified: $archive"
+else
+        print -u2 "SHA-256 verification failed: $archive"
+        exit 1
+fi
+SHA-256 verified: /Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/releases/emtg-ipopt-9.02.tar.gz
+```
+
+
+The release baseline:
+
+1. requires `<archive>.sha256` next to the supplied archive;
+2. validates the archive layout and checksum before reading it;
+3. requires the archive's `RUNTIME_REQUIREMENTS.txt` to record
+   `Build mode: cold`;
+4. builds the clean runtime image from the supplied archive, without invoking
+   `emtg_toolchain package`;
+5. performs the same 17-case, 33-stage, two-attempt tutorial verification; and
+6. writes `verification.json` and `release-baseline.json` under the unique
+   evidence directory.
+
+`release-baseline.json` binds the accepted result to the archive filename and
+SHA-256, archive build mode, source commit recorded in the archive manifest,
+runtime-requirements checksum, tutorial-reference checksum, final verification
+decision, and evidence-directory path.
+
+Release approval requires both files to report an accepted result:
+
+```zsh
+python -m json.tool "<artifact-directory>/verification.json"
+python -m json.tool "<artifact-directory>/release-baseline.json"
+```
+
+The archive and `<archive>.sha256` are the handoff payload. The third-party
+deployment environment must verify the checksum, install the packages declared
+in `emtg/RUNTIME_REQUIREMENTS.txt`, extract the archive into `/opt/toolkit`,
+and invoke `/opt/toolkit/emtg/bin/EMTGv9` from its isolated writable run
+directory.
+
+Also state that a green pytest result is the primary gate, while `verification.json` is the retained, inspectable evidence of that decision.
+
+# Case and Tutorial testing workflow
+
+The IPOPT Testatron Case and Tutorial workflow describes the Case and Tutorial testing framework and thinking.
+
+It describes the execution of immutable `testatron/tests` corpus with the open-source IPOPT backend while preserving each adjacent SNOPT-generated `.emtg` file as immutable historical evidence. The workflow answers two separate questions:
 
 1. **Immutable-SNOPT comparison:** does a staged replay and, when eligible,
 	IPOPT refinement agree with the historical SNOPT result?

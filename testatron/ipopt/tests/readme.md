@@ -61,7 +61,7 @@ artifacts, set `EMTG_TEST_ARTIFACT_DIR`.
 More general pytest categories and markers are documented in
 [`testatron/ipopt/README.md`](../README.md). The Docker lifecycle constraints
 are documented in
-[`docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md`](docker_deployment.implementation_plan.md).
+[`docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md`](emtg_archive.design.md).
 
 ## Baselining Framework
 
@@ -264,7 +264,7 @@ promotion leaves both curated output and immutable Testatron inputs untouched.
   verification, and general IPOPT evidence rules.
 - [`testatron/ipopt/tests/baselining_policy.json`](baselining_policy.json):
   deterministic controls and accepted native IPOPT exits.
-- [`docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md`](docker_deployment.implementation_plan.md): Docker deployment contract.
+- [`docs/3_NLP_Solvers/IPOPT/docker_deployment.readme.md`](emtg_archive.design.md): Docker deployment contract.
 - [`docs/3_NLP_Solvers/IPOPT/stage6_checklist.md`](../../../docs/3_NLP_Solvers/IPOPT/stage6_checklist.md): manual-only review checklist.
 
 
