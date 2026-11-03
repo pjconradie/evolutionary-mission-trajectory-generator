@@ -90,15 +90,30 @@ std::string SPICE_meta_kernel; // optional SPICE meta-kernel (.tm) filename; emp
 
 The option accepts two forms, resolved as follows:
 
-- A **bare filename** (e.g. `meta_kernel.tm`, no path separator) is resolved
-  relative to `<universe_folder>/ephemeris_files/`, exactly like the two
-  existing SPICE filename options. This preserves tutorial-style compatibility
-  with the current delivery contract — drop the file into `ephemeris_files/`.
+- A **bare filename** (e.g. `meta_kernel.tm`, no directory component) is
+  resolved relative to `<universe_folder>/ephemeris_files/`, exactly like the
+  two existing SPICE filename options. This preserves tutorial-style
+  compatibility with the current delivery contract — drop the file into
+  `ephemeris_files/`.
 - An **absolute or explicitly relative path** (e.g.
   `/opt/emtg/input/kernel-set/meta_kernel.tm` or `./kernel-set/meta_kernel.tm`,
-  i.e. containing a path separator) is used directly, unmodified. This
+  i.e. having a directory component) is used directly, unmodified. This
   supports third-party deployments that mount a reviewed kernel-set tree
   outside the universe folder.
+
+The two forms must **not** be distinguished by scanning the string for a
+literal `/` or `\` character. This repository explicitly supports Windows
+builds (see the `#ifdef _WIN32` branch already in
+[EMTG_v9.cpp](/Users/jacoconradie/Documents/GitHub/Surreal%20Technologies/evolutionary-mission-trajectory-generator/src/Executable/EMTG_v9.cpp)),
+and a manual separator-character check mis-classifies Windows-style paths
+(`\` is not `/`) and drive-letter forms (`C:\...`). `boost::filesystem` is
+already linked and used in this exact file, so the resolution helper should
+test `boost::filesystem::path(options.SPICE_meta_kernel).has_parent_path()`:
+`false` means a bare filename (resolve under `ephemeris_files/`); `true`
+means the value already has a directory component, whether absolute or
+relative, and is used as-is. This is portable across both separator
+conventions and correctly handles drive letters, with no manual string
+scanning.
 
 Either way, the meta-kernel's own `PATH_SYMBOLS`/`PATH_VALUES` are free to
 point anywhere on disk (e.g. a sibling `kernels/` tree) for the individual
@@ -189,6 +204,18 @@ if (options.ephemeris_source >= 1)
 loaded, in one call — CSPICE tracks this internally, so no bookkeeping of the
 individual resolved kernel paths is needed on the EMTG side.
 
+Note: the existing flat-mode load/unload code in
+[EMTG_v9.cpp](/Users/jacoconradie/Documents/GitHub/Surreal%20Technologies/evolutionary-mission-trajectory-generator/src/Executable/EMTG_v9.cpp)
+has a latent path-string asymmetry — the load block builds paths with a
+leading slash (`universe_folder + "/ephemeris_files/..."`) while the unload
+block omits it (`universe_folder + "ephemeris_files/..."`). That is
+out-of-scope baseline behavior and is not being fixed here, but it is the
+reason `meta_kernel_path` is computed exactly once, at load time, and reused
+verbatim at teardown, rather than being re-resolved from
+`options.SPICE_meta_kernel` in the unload block: reusing the identical string
+avoids introducing the same class of load/unload mismatch for the new
+feature.
+
 ### 3.4 Error handling (resolved)
 
 Both failure modes are hard errors, not fallbacks:
@@ -276,8 +303,10 @@ loads it.
    the `else` branch (no logic changes to it).
 3. Branch the unload block per §3.3, using the outer-scope `using_meta_kernel`
    to select between `unload_c(meta_kernel_path)` and the existing per-file loop.
-4. Implement path resolution (§3.1: bare filename vs. absolute/relative path)
-   as a small helper, e.g. `resolve_spice_kernel_path(...)`.
+4. Implement path resolution (§3.1: bare filename vs. absolute/relative path,
+   using `boost::filesystem::path(...).has_parent_path()`, not manual
+   separator-character scanning) as a small helper, e.g.
+   `resolve_spice_kernel_path(...)`.
 5. Set `erract_c(..., "RETURN")` **before** the meta-kernel `furnsh_c` call
    (not after), then check `failed_c()` / `getmsg_c()` / `reset_c()` per §3.4
    and throw a `std::runtime_error` with the CSPICE diagnostic on failure.
@@ -285,9 +314,14 @@ loads it.
    call it after a successful meta-kernel load.
 
 ### Step 3 — Documentation
-1. Add `SPICE_meta_kernel` to wherever `SPICE_leap_seconds_kernel` /
-   `SPICE_reference_frame_kernel` are documented for users (options reference
-   docs under `docs/`).
+1. There is currently **no existing hand-written user-facing reference** for
+   `SPICE_leap_seconds_kernel` / `SPICE_reference_frame_kernel` or
+   `ephemeris_source` under `docs/` (confirmed by search — these options
+   appear only in generated `.emtgopt` dumps and PyEMTG docstrings/autogen
+   output, never in a hand-authored options guide). So item 2 below is not an
+   addition to a pre-existing reference — it is the first user-facing
+   reference for this family of options, and should be written as a
+   self-contained explanation rather than assuming surrounding context exists.
 2. Add a short "Using a SPICE meta-kernel" subsection near the existing
    SPICE/ephemeris documentation, including the delivery contract from §3.5,
    the priority rule, the hard-fail behavior from §3.4, and both path-
