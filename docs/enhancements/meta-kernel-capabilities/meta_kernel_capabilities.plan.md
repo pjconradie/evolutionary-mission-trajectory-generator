@@ -336,21 +336,42 @@ both `none_backend_configure` and `none_backend_compile` passed, confirming
 `missionoptions.h/.cpp` and `EMTG_v9.cpp` build cleanly together with the rest
 of the solver-neutral target.
 
-### Step 3 — Documentation (not yet done)
-1. There is currently **no existing hand-written user-facing reference** for
-   `SPICE_leap_seconds_kernel` / `SPICE_reference_frame_kernel` or
-   `ephemeris_source` under `docs/` (confirmed by search — these options
-   appear only in generated `.emtgopt` dumps and PyEMTG docstrings/autogen
-   output, never in a hand-authored options guide). So item 2 below is not an
-   addition to a pre-existing reference — it is the first user-facing
-   reference for this family of options, and should be written as a
-   self-contained explanation rather than assuming surrounding context exists.
-2. Add a short "Using a SPICE meta-kernel" subsection near the existing
-   SPICE/ephemeris documentation, including the delivery contract from §3.5,
-   the priority rule, the hard-fail behavior from §3.4, and both path-
-   resolution forms from §3.1.
-3. Note in the changelog/release notes that this is additive and backward
-   compatible.
+### Step 3 — Documentation (implemented)
+1. **Correction to an earlier draft of this plan:** the claim that there is
+   "no existing hand-written user-facing reference" for
+   `SPICE_leap_seconds_kernel` / `SPICE_reference_frame_kernel` was wrong —
+   that search missed the LaTeX-based EMTG user guide. A hand-written
+   reference does exist: `docs/0_Users/emtg_user_guide/options/s-physics.tex`,
+   "Ephemeris Settings" subsection, with existing `\item`s for "Leap seconds
+   kernel" and "Frame kernel" (the generated/autogen hits found by the
+   earlier search were a red herring — they don't reflect this hand-authored
+   guide).
+2. **Revised approach (per user direction):** editing `s-physics.tex` directly
+   was rejected — that file is one input into the generated EMTG user guide
+   PDF, and editing it would require regenerating the PDF, which is out of
+   scope here. Instead, the documentation lives in a new, standalone Markdown
+   file: `docs/0_Users/emtg_user_guide/options/meta_kernels.md`. It covers the
+   same ground the `s-physics.tex` item would have (delivery contract from
+   §3.5, priority rule, hard-fail behavior from §3.4, both path-resolution
+   forms from §3.1), cross-references the existing "Ephemeris Settings"
+   section in `s-physics.tex` as the options this feature is an alternative
+   to, and links back to this plan document. An earlier version of this step
+   did add the content directly to `s-physics.tex` and compile-verified it
+   with `pdflatex` against a minimal standalone harness — that approach
+   caught one real bug (an initial draft used `\ac{CSPICE}`, but no
+   `\acro{CSPICE}` entry exists in `docs/shared_latex_inputs/acronymlist.tex`,
+   so the real `acronym` package would have hard-errored) — but that change
+   was reverted in favor of the standalone Markdown file once the PDS/PDF
+   regeneration concern was raised.
+3. **No changelog/release-notes file exists in this repository** (confirmed
+   by search — only vendored third-party changelogs under `depend/`, nothing
+   at the repository root or under `docs/`). Creating a new top-level
+   changelog file was judged out of scope for this feature (a larger,
+   unrelated process change the user did not ask for); this item is therefore
+   not applicable as originally written. If/when this repo adopts a
+   changelog convention, this feature should be noted there as additive and
+   backward compatible (empty default preserves existing flat-file loading
+   exactly).
 
 ### Step 4 — Fixtures
 

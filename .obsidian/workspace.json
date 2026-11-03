@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.plan.md",
+                "file": "docs/0_Users/emtg_user_guide/options/meta_kernels.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "meta_kernel_capabilities.plan"
+              "title": "meta_kernels"
             }
           },
           {
@@ -232,18 +232,20 @@
   },
   "active": "2fb447d22e8d56f1",
   "lastOpenFiles": [
-    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
-    "tests/__pycache__/test_meta_kernel.cpython-313-pytest-9.1.1.pyc",
-    "tests/integration/__pycache__/test_meta_kernel_integration.cpython-313-pytest-9.1.1.pyc",
-    "emtg_toolchain/__pycache__/release.cpython-313.pyc",
-    "emtg_toolchain/__pycache__/runtime.cpython-313.pyc",
-    "emtg_toolchain/__pycache__/docker.cpython-313.pyc",
-    "emtg_toolchain/__pycache__/archive.cpython-313.pyc",
-    "emtg_toolchain/__pycache__/cli.cpython-313.pyc",
-    "emtg_toolchain/__pycache__/__init__.cpython-313.pyc",
-    "tests/integration/__pycache__/test_meta_kernel_integration.cpython-311-pytest-8.4.1.pyc",
-    "tests/integration/test_meta_kernel_integration.py",
     "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.plan.md",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide/options/meta_kernels.md",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide/options",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies",
+    "Users/jacoconradie/Documents/GitHub",
+    "Users/jacoconradie/Documents",
+    "Users/jacoconradie",
+    "Users",
+    "docs/0_Users/emtg_user_guide/options/meta_kernels.md",
+    "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.requirements.md",
     "README.md",
     "emtg_toolchain/emtg_toolchain.readme.md",
@@ -265,7 +267,6 @@
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
-    "todo_updated_20261016.md",
-    "docs/3_NLP_Solvers/IPOPT/todo_updated_20261016 2.md"
+    "todo_updated_20261016.md"
   ]
 }
