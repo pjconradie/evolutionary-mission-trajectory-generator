@@ -78,14 +78,14 @@ The source workflow can be perfect while the package is broken, missing files, h
 | --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------- |
 | 1   | Run clean bootstrap                               |                                                                                                                |                                                                                                      | Yes             |
 | 2   | Run collection sanity                             | python -m pytest --collect-only -q<br>python -m pytest --collect-only -q --tutorials                           | 327/362 tests collected (35 deselected) in 0.22s<br>34/376 tests collected (342 deselected) in 0.09s | No              |
-| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 170 passed, 206 deselected in 10.08s                                                                 | No              |
-| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 231 deselected in 2.38s                                                                  | No              |
-| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 169 passed in 9.96s                                                                                  | No              |
+| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 206 passed, 212 deselected in 11.20s                                                                 | No              |
+| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 273 deselected in 2.09s                                                                  | No              |
+| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 171 passed in 5.12s                                                                                  | No              |
 |     |                                                   |                                                                                                                | < 10 seconds                                                                                         |                 |
-| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 364 deselected in 39.82s                                                                  | Yes             |
-| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 373 deselected in 10.60s                                                                   | Yes             |
-| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 350 deselected in 88.02s (0:01:28)                                                        | Yes             |
-|     |                                                   |                                                                                                                | < 15 min                                                                                             | Yes             |
+| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 406 deselected in 31.03s                                                                  | Yes             |
+| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 415 deselected in 15.75s                                                                   | Yes             |
+| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 31 passed, 387 deselected in 103.61s (0:01:43)                                                       | Yes             |
+|     |                                                   |                                                                                                                |                                                                                                      |                 |
 | 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
 | 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
 
@@ -621,6 +621,12 @@ python testatron/ipopt_characterization.py \
 See [[tutorial_baselining_commands#Promotion]].
 
 ---
+
+
+
+## 11. Run 8 promoted baselined tutorials tests using `meta_kernel.tm`
+
+
 # EMTG Archive testing workflow
 
 ## Introduction

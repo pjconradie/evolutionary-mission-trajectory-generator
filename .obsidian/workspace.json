@@ -13,12 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.plan.md",
+                "file": "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "meta_kernel_capabilities.plan"
+              "title": "tests.readme"
+            }
+          },
+          {
+            "id": "eda99a12a60556bb",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "tutorial_baselining_commands"
             }
           },
           {
@@ -232,20 +246,22 @@
   },
   "active": "2fb447d22e8d56f1",
   "lastOpenFiles": [
-    "docs/0_Users/emtg_user_guide/options/meta_kernels.md",
-    "tests/cpp/test_meta_kernel_cspice_probe.cpp",
-    "tests/integration/fixtures/meta_kernel/malformed_meta_kernel.tm",
-    "tests/integration/fixtures/meta_kernel/meta_kernel.tm",
-    "tests/integration/fixtures/meta_kernel",
-    "tests/integration/fixtures",
-    "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.plan.md",
-    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide/options/meta_kernels.md",
-    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide/options",
-    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide",
-    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users",
-    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs",
-    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator",
+    "testatron/ipopt/tests/benchmarks/baselining/tutorial_baselining_verification_report.json",
+    "testatron/ipopt/tests/benchmarks/baselining/tutorial-baselining-summary.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/repeatability.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/provenance.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/result.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/comparison.json",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_maneuver_spec",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.mission_target_spec",
+    "testatron/ipopt/tests/benchmarks/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/EVM_singlePhase.emtg",
+    "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
+    "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.plan.md",
+    "docs/0_Users/emtg_user_guide/options/meta_kernels.md",
+    "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide/options/meta_kernels.md",
     "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.requirements.md",
     "README.md",
     "emtg_toolchain/emtg_toolchain.readme.md",
@@ -265,7 +281,6 @@
     "docs/3_NLP_Solvers/IPOPT/ipopt.readme.md",
     "docs/3_NLP_Solvers/IPOPT/archived/tests.implementation_plan_archived_20261013.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
-    "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md"
   ]
 }

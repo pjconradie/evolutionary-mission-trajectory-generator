@@ -12,6 +12,25 @@ Two tiers of coverage, matching the plan's §4 Step 4 fixture split:
   instead of the flat ``ephemeris_files/`` scan, cover the "mission still
   solves" path and the two EMTG-side hard-fail paths (missing meta-kernel
   file, and a meta-kernel CSPICE itself fails to load).
+
+It does not compare against any testatron/ipopt/tests/benchmarks/ truth file 
+(not track-acs-prop, not any other benchmark). Specifically:
+
+test_meta_kernel_cspice_load_resolves_path_symbols doesn't even run EMTGv9 — 
+it's a standalone g++-compiled probe linked directly against libcspice.a, 
+checking furnsh_c/ktotal_c/kdata_c/unload_c behavior in isolation.
+
+test_meta_kernel_mission_still_solves runs real EMTGv9, but against 
+testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt — a small,
+fast, pre-existing CI smoke-test mission (synthetic Moon/Sun/GatewayNRHO body
+set), not a benchmark case. Success is verified only by: stdout containing 
+"Completed loading SPICE meta-kernel", stdout not containing the flat-mode 
+"Completed loading SPICE kernels.", and a .emtg output file existing. There 
+is no numerical/objective/trajectory comparison against any truth file.
+The two hard-fail tests (missing_file, malformed_tm) use _mission_error_probe, 
+which also builds+runs real EMTGv9 but only checks stdout text ("EMTG failed 
+with error:", "does not exist", "Failed to load SPICE meta-kernel") since the 
+outer catch in EMTG_v9.cpp always returns exit code 0.
 """
 
 import pytest
