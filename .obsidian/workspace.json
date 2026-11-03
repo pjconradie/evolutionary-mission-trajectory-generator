@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/0_Users/emtg_user_guide/options/meta_kernels.md",
+                "file": "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.plan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "meta_kernels"
+              "title": "meta_kernel_capabilities.plan"
             }
           },
           {
@@ -232,6 +232,12 @@
   },
   "active": "2fb447d22e8d56f1",
   "lastOpenFiles": [
+    "docs/0_Users/emtg_user_guide/options/meta_kernels.md",
+    "tests/cpp/test_meta_kernel_cspice_probe.cpp",
+    "tests/integration/fixtures/meta_kernel/malformed_meta_kernel.tm",
+    "tests/integration/fixtures/meta_kernel/meta_kernel.tm",
+    "tests/integration/fixtures/meta_kernel",
+    "tests/integration/fixtures",
     "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.plan.md",
     "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide/options/meta_kernels.md",
     "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users/emtg_user_guide/options",
@@ -239,12 +245,6 @@
     "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs/0_Users",
     "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator/docs",
     "Users/jacoconradie/Documents/GitHub/Surreal Technologies/evolutionary-mission-trajectory-generator",
-    "Users/jacoconradie/Documents/GitHub/Surreal Technologies",
-    "Users/jacoconradie/Documents/GitHub",
-    "Users/jacoconradie/Documents",
-    "Users/jacoconradie",
-    "Users",
-    "docs/0_Users/emtg_user_guide/options/meta_kernels.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "docs/enhancements/meta-kernel-capabilities/meta_kernel_capabilities.requirements.md",
     "README.md",
@@ -266,7 +266,6 @@
     "docs/3_NLP_Solvers/IPOPT/archived/tests.implementation_plan_archived_20261013.md",
     "docs/3_NLP_Solvers/IPOPT/baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",
-    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md",
-    "todo_updated_20261016.md"
+    "docs/3_NLP_Solvers/IPOPT/baselined_checklist.md"
   ]
 }

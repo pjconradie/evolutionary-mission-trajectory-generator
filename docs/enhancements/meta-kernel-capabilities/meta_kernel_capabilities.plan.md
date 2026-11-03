@@ -373,23 +373,63 @@ of the solver-neutral target.
    backward compatible (empty default preserves existing flat-file loading
    exactly).
 
-### Step 4 — Fixtures
+### Step 4 — Fixtures (implemented)
 
 Split into two independent fixtures, since a minimal kernel set sufficient to
-*load* is not necessarily sufficient to *solve a mission*:
+*load* is not necessarily sufficient to *solve a mission*. Both are built
+from kernels already committed to this repository (no new large binary
+kernels were added):
 
-1. **Kernel-load probe fixture**: a small, redistributable `meta_kernel.tm`
-   (e.g. under `testatron/universe/` or a new `tests/` fixture) referencing
-   only the already-available `naif0012.tls` / `pck00010.tpc` plus one small
-   `.bsp`. Used purely to exercise load/log/unload behavior (§5 items 3–4, 6)
-   without needing to actually run an optimizer to completion.
-2. **Executable mission fixture**: a separately prepared, self-contained
-   universe + `.emtgopt` with full body/ephemeris coverage for a real
-   (small/fast) mission, restructured to be driven via a meta-kernel instead of
-   its current flat `ephemeris_files/` layout. Used for §5 item 3's "mission
-   still solves" check and the archive verification test (§5 item 7).
+1. **Kernel-load probe fixture** — `tests/integration/fixtures/meta_kernel/
+   meta_kernel.tm` and a deliberately malformed sibling,
+   `malformed_meta_kernel.tm`. The valid fixture's `PATH_VALUES`/
+   `PATH_SYMBOLS` reference two already-committed directories
+   (`Universe/ephemeris_files/` for `naif0012.tls`/`pck00010.tpc`, and
+   `docs/0_Users/tutorial/Tutorial_EMTG_Files/OSIRIS_universe/ephemeris_files/`
+   for the small `bennu_refdrmc_v1.bsp`), proving both path-resolution forms
+   and multi-directory `PATH_SYMBOLS` resolution in one fixture. The
+   malformed sibling references a kernel file that does not exist, to
+   exercise the CSPICE-level error path. Used by a new standalone CSPICE
+   probe, `tests/cpp/test_meta_kernel_cspice_probe.cpp` (mirroring
+   `tests/cpp/dependency_probe.cpp`'s style/calling convention), which
+   directly exercises `furnsh_c`/`ktotal_c`/`kdata_c`/`unload_c`/`failed_c`/
+   `getmsg_c`/`reset_c` without needing a full `EMTGv9` run — covering §5
+   items 3 (partially: load + inventory), 4 (teardown), and 5 (the
+   CSPICE-side half of the error path).
+   One real-world wrinkle found only by actually running this probe in
+   Docker: `ktotal_c("ALL")` counts the meta-kernel `.tm` file itself as a
+   loaded kernel (CSPICE treats it as a loaded "META" text kernel), so a
+   3-kernel meta-kernel reports a pool size of 4, not 3, right after
+   `furnsh_c` — the probe (and `EMTG_v9.cpp`'s own `log_loaded_spice_kernels`
+   inventory log from Step 2) both reflect this accurately; it is expected
+   CSPICE behavior, not a bug. A second wrinkle: after a meta-kernel fails to
+   load because one of its `KERNELS_TO_LOAD` entries is missing, CSPICE may
+   still have registered the `.tm` file's own text-kernel entry before
+   hitting the missing file, so the pool is not necessarily empty afterward
+   — the probe checks "no `.bsp` data kernel got loaded" rather than
+   asserting an empty pool, which is the more precise and more robust
+   assertion.
+2. **Executable mission fixture** — reuses the existing, already-working,
+   fast (180 s timeout) `testatron/tests/transcription_tests/
+   CoastPhase_EMintercept.emtgopt` mission (Moon/Sun/synthetic-body, no new
+   universe needed) rather than authoring a new universe from scratch. A new
+   `conftest.py` helper (`_write_meta_kernel_for_testatron_ephemeris`) writes
+   a `meta_kernel.tm` at test-runtime (not committed — it is generated into a
+   `tmp_path_factory` directory and mounted read-only into the Docker
+   container) that lists every `*.bsp` file the flat loader would already
+   scan out of the host's `testatron/universe/ephemeris_files/` (so the
+   meta-kernel path loads exactly the same real kernel set the flat path
+   already loads today, discovered dynamically rather than hand-curated, so
+   it can't silently drift out of sync with whatever the host/CI actually has
+   downloaded). The containing fixture (`meta_kernel_mission_probe`) skips
+   with a clear message if `de430.bsp` is not present on the host, matching
+   this repo's existing convention for host-downloaded kernels (see
+   `testatron/universe/ephemeris_files/go_get_these_files.txt`). Used for §5
+   item 3's "mission still solves" check and the two EMTG-side hard-fail
+   checks in §5 item 5 (missing `SPICE_meta_kernel` file, and a mission run
+   against the malformed-`.tm` fixture).
 
-### Step 5 — Automated pytest coverage
+### Step 5 — Automated pytest coverage (implemented)
 
 Add two new pytest files mapping to the unit/integration split already used by
 this repo's test suite (`tests/test_*.py` for unit, `tests/integration/test_*.py`
@@ -397,8 +437,7 @@ for integration — see `tests/test_ipopt_characterization.py`,
 `tests/integration/test_tutorials.py`):
 
 - `tests/test_meta_kernel.py` — `pytestmark = pytest.mark.unit`.
-  **Implemented and passing (4 PyEMTG round-trip + 1 regression test + a
-  host-compiled C++ round-trip test, all green).** Covers §5 items 1
+  **Implemented and passing (6 tests, all green).** Covers §5 items 1
   (missionoptions round-trip, at the C++ level) and 6 (PyEMTG round-trip,
   plus the default-value/empty-value-round-trip edge case found while
   implementing Step 1).
@@ -418,26 +457,50 @@ for integration — see `tests/test_ipopt_characterization.py`,
   host-compiled-and-run test built directly from `missionoptions.cpp` +
   `journeyoptions.cpp` + `file_utilities.cpp` + the testbed driver (skipped,
   not failed, if no host compiler or `boost::filesystem` is available).
-  Items 4 (`ktotal_c` teardown check) and 5 (CSPICE error path) still need a
-  real CSPICE runtime and so remain at the integration tier, where the full
-  toolchain and a real CSPICE build already exist.
+  Items 4 (`ktotal_c` teardown check) and 5 (CSPICE error path) ended up at
+  the integration tier instead (see below) rather than this unit-tier file,
+  since both need a real CSPICE runtime that only the Docker toolchain
+  provides.
 - `tests/integration/test_meta_kernel_integration.py` — `pytestmark =
   [pytest.mark.integration, pytest.mark.docker, pytest.mark.solver_runtime]`,
   matching the exact marker pairing every existing file in
   `tests/integration/` uses (`integration` is never applied alone — see
   `test_baselining.py`, `test_cmake_policy.py`, `test_ipopt_backend.py`, etc.
   — and `solver_runtime` because this test runs `EMTGv9` to completion, the
-  same reason `test_baselining.py`/`test_tutorials.py` carry it). It reuses
-  the existing session-scoped Docker fixtures from
-  `tests/integration/conftest.py`/`_docker_support.py` (`toolchain_image` or
-  `clean_toolchain_image`, `repository_root`, `artifact_directory`) rather
-  than reimplementing container orchestration, so it automatically honors
-  `EMTG_TEST_ARTIFACT_DIR` like every sibling file. Covers §5 items 1
-  (missionoptions round-trip, verified via a built `EMTGv9` run), 3
-  (meta-kernel load + mission solve), 4 (teardown/unload via `ktotal_c`), and 5
-  (error path, both the pure-EMTG missing-file check and the CSPICE
-  `failed_c`/`getmsg_c` malformed-`.tm` path) — see the workflow-verification
-  note below for why item 2 and item 7 are *not* placed here.
+  same reason `test_baselining.py`/`test_tutorials.py` carry it). **Implemented
+  and passing (4 tests, all green, verified via real Docker runs, not just
+  syntax checks):**
+  - `test_meta_kernel_cspice_load_resolves_path_symbols` — runs the Step 4
+    standalone CSPICE probe; covers §5 items 3 (partially) and 4.
+  - `test_meta_kernel_mission_still_solves` — builds and runs `EMTGv9`
+    against the Step 4 executable-mission fixture, asserts the §3.6 inventory
+    log shows `"Completed loading SPICE meta-kernel"` (and *not* the flat
+    path's `"Completed loading SPICE kernels."`), and asserts a `.emtg`
+    output is produced; covers the rest of §5 item 3.
+  - `test_meta_kernel_missing_file_hard_fails` — points `SPICE_meta_kernel`
+    at a nonexistent absolute path and asserts the exact EMTG-side hard-fail
+    text (`"EMTG failed with error:"` / `"does not exist"`) appears and no
+    `.emtg` output is produced; covers the EMTG-side half of §5 item 5.
+  - `test_meta_kernel_malformed_tm_hard_fails` — points `SPICE_meta_kernel` at
+    the malformed `.tm` fixture and asserts both `"EMTG failed with error:"`
+    and `"Failed to load SPICE meta-kernel"` (CSPICE's own diagnostic,
+    surfaced through `getmsg_c`) appear, and no `.emtg` output is produced;
+    covers the CSPICE-side half of §5 item 5 at the full-executable level
+    (the standalone probe above covers the same path at the CSPICE-API
+    level).
+  These tests reuse and extend the existing session-scoped Docker fixtures in
+  `tests/integration/conftest.py`/`_docker_support.py`
+  (`_prepare_mission_options` gained an optional `spice_meta_kernel` kwarg;
+  `_mission_runtime_probe` gained `read_only_mounts`/`log_path` passthrough;
+  a new `_mission_error_probe` helper mirrors `_mission_runtime_probe` but
+  does not assert a zero exit code or a produced `.emtg` file, since
+  `EMTG_v9.cpp`'s outer `catch (std::exception&)` always returns 0 and skips
+  output on a hard-fail — the only reliable signal is the captured log text)
+  rather than reimplementing container orchestration, so they automatically
+  honor `EMTG_TEST_ARTIFACT_DIR` like every sibling file.
+  §5 item 2 (flat-layout regression) and item 7 (clean-runtime archive
+  verification) are **not** part of this file — see the final decision on
+  §7's open questions below.
 
 **Naming note (discovered during implementation, not anticipated in earlier
 drafts):** `tests/integration/test_meta_kernel.py` could not keep that
@@ -462,7 +525,8 @@ basename once the other is renamed).
 Checked this plan's test placement against the established workflow
 documented in
 [tests.readme.md](/Users/jacoconradie/Documents/GitHub/Surreal%20Technologies/evolutionary-mission-trajectory-generator/docs/3_NLP_Solvers/IPOPT/tests.readme.md).
-Two corrections and one open question came out of that review:
+Two corrections and one scope decision (later resolved in §7) came out of
+that review:
 
 1. **Marker pairing, fixed above.** Every file under `tests/integration/`
    pairs `pytest.mark.integration` with `pytest.mark.docker` (confirmed by
@@ -487,16 +551,17 @@ Two corrections and one open question came out of that review:
    (a new test under `tests/emtg_toolchain/integration/` or
    `tests/emtg_toolchain/deployment/`, following the `EMTG_TEST_ARTIFACT_DIR`/
    `EMTG_ARCHIVE_COLD` conventions in that section of `tests.readme.md`) is
-   deferred as an open question (§7) rather than silently folded into the
-   source-workflow integration test.
+   deferred to a later iteration (resolved as item 2 in §7) rather than
+   silently folded into the source-workflow integration test.
 3. **§5 item 2 ("flat-layout regression") is arguably a `tests/regression/`
    concern, not `tests/integration/`.** `tests.readme.md` describes
    `tests/regression/` (marker `pytest.mark.regression`) as "the important
    source/baseline integrity suite" for exactly this kind of
    "does existing behavior still match" check, distinct from the Docker-backed
-   compile-and-run checks in `tests/integration/`. Left as an open question
-   (§7) rather than introducing a third file unilaterally, since the two test
-   files already created by the user are the scope confirmed so far.
+   compile-and-run checks in `tests/integration/`. Deferred to a later
+   iteration (resolved as item 3 in §7) rather than introducing a third file
+   unilaterally, since the two test files already created by the user are
+   the scope confirmed so far.
 
 ## 5. Verification plan
 
@@ -510,10 +575,8 @@ than a gtest-style unit framework, verification is primarily:
    host-compiled (no extra sources added), run against a
    `SPICE_meta_kernel`-bearing `.emtgopt`, and the regenerated
    `tests/newdefault.emtgopt` is asserted to contain the round-tripped value.
-2. **Flat-layout regression** (placement open — see Workflow verification
-   note #3 above; candidate: `tests/integration/test_meta_kernel_integration.py`
-   tagged additionally with `pytest.mark.regression`, or a new
-   `tests/regression/test_meta_kernel.py`): run
+2. **Flat-layout regression** (deferred — see §7 item 3 for the final
+   scope decision): run
    an existing tutorial `.emtgopt`
    (e.g. one under `docs/0_Users/tutorial/...`) with `SPICE_meta_kernel` unset
    and confirm it passes the project's existing tutorial comparison/replay
@@ -522,30 +585,40 @@ than a gtest-style unit framework, verification is primarily:
    diff, since output directories, timestamps, and optimizer internals make
    byte equivalence an inappropriate bar). This proves (ii) and confirms no
    regression.
-3. **Meta-kernel load** (`tests/integration/test_meta_kernel_integration.py`): run
-   `EMTGv9` against the Step 4 executable-mission
-   fixture with `SPICE_meta_kernel` set, confirm via the §3.6 inventory log
-   that the flat `.bsp` loop was skipped and the expected kernel set was
-   loaded through the meta-kernel, and confirm the mission still solves.
-4. **Teardown/unload verification** (`tests/test_meta_kernel.py`): using the
-   kernel-load probe fixture, load
-   the `.tm`, call `unload_c(meta_kernel_path)`, then call `ktotal_c("ALL")`
-   and assert the count returns to whatever it was before the load (zero in a
-   clean process, or the pre-existing pool size if other kernels were already
-   loaded) — do not merely assume `unload_c` behaves correctly.
-5. **Error path** (`tests/test_meta_kernel.py`): run with `SPICE_meta_kernel`
-   set to a non-existent filename
-   (expect the pure EMTG-side existence-check failure from §3.4, no CSPICE
-   call attempted) and to a deliberately malformed `.tm` (bad `PATH_SYMBOLS`,
-   missing referenced kernel — expect the `erract_c`/`failed_c`/`getmsg_c`
-   path) and confirm both hard-fail with a clear message, never a raw CSPICE
-   abort, silent corruption, or fallback to flat discovery.
+3. **Meta-kernel load** (`tests/integration/test_meta_kernel_integration.py`,
+   `test_meta_kernel_cspice_load_resolves_path_symbols` and
+   `test_meta_kernel_mission_still_solves`). **Implemented and verified via
+   real Docker runs.** The CSPICE-level probe confirms the expected kernel
+   set is loaded/resolved; the `EMTGv9`-level test confirms the §3.6
+   inventory log shows the meta-kernel path (not the flat `.bsp` loop) was
+   taken, and that the mission still solves to a produced `.emtg` file.
+4. **Teardown/unload verification**
+   (`tests/integration/test_meta_kernel_integration.py`,
+   `test_meta_kernel_cspice_load_resolves_path_symbols`, backed by the new
+   standalone probe `tests/cpp/test_meta_kernel_cspice_probe.cpp`).
+   **Implemented and verified.** Loads the `.tm`, confirms via `ktotal_c`/
+   `kdata_c` that exactly the expected kernels (plus the meta-kernel's own
+   text-kernel pool entry — see the Step 4 note on this) were loaded, calls
+   `unload_c(meta_kernel_path)`, then asserts `ktotal_c("ALL")` returns to
+   zero — this ended up at the integration tier (not `tests/test_meta_kernel.py`
+   as originally planned) since it needs a real CSPICE runtime, which only
+   the Docker toolchain provides.
+5. **Error path** (`tests/integration/test_meta_kernel_integration.py`,
+   `test_meta_kernel_missing_file_hard_fails`,
+   `test_meta_kernel_malformed_tm_hard_fails`, and
+   `test_meta_kernel_cspice_load_resolves_path_symbols`'s malformed-`.tm`
+   section). **Implemented and verified**, at both the full-`EMTGv9`
+   level (missing file and malformed `.tm`, asserted via captured stdout
+   text — not exit code, since `EMTG_v9.cpp`'s outer catch always returns 0)
+   and the standalone-CSPICE-probe level (`erract_c`/`failed_c`/`getmsg_c`/
+   `reset_c` directly). Also moved to the integration tier for the same
+   real-CSPICE-runtime reason as item 4.
 6. **PyEMTG round-trip** (`tests/test_meta_kernel.py`): open/save an
    `.emtgopt` containing `SPICE_meta_kernel`
    through the PyEMTG GUI (or its options read/write module directly) and
    confirm the value is preserved.
-7. **Clean-runtime archive verification** (deferred — see Workflow
-   verification note #2 above; not part of the two files created so far):
+7. **Clean-runtime archive verification** (deferred — see §7 item 2 for the
+   final scope decision; not part of the two files created so far):
    when taken up, add one test
    under `tests/emtg_toolchain/integration/` or `tests/emtg_toolchain/deployment/`
    that mounts a nested meta-kernel tree (kernel-load probe fixture or a
@@ -574,19 +647,36 @@ than a gtest-style unit framework, verification is primarily:
   entry-point's pre-flight SPICE setup/teardown (see the file-scope table in
   §1).
 
-## 7. Open questions / review decisions
+## 7. Open questions / review decisions (resolved)
 
-1. Where the kernel-load probe fixture and the executable mission fixture
-   (§4 Step 4) should live.
-2. Whether the archive-deployment verification test (§5 item 7) is taken up
-   now under `tests/emtg_toolchain/integration/` or
-   `tests/emtg_toolchain/deployment/` (per the workflow-verification note in
-   §4 Step 5), or deferred to a later iteration, and whether it runs in normal
-   CI or is reserved, like the full OSIRIS-REx bundle and the cold archive
-   integration test, for a separate acceptance gate given its clean-runtime/
-   Docker dependency.
-3. Whether §5 item 2 (flat-layout regression) should be tagged
-   `pytest.mark.regression` within `tests/integration/test_meta_kernel.py`, or
-   split into a new `tests/regression/test_meta_kernel.py`, to match this
-   repo's convention of routing baseline-integrity checks through
-   `tests/regression/` rather than the Docker-backed `tests/integration/` tier.
+1. **Fixture placement** — resolved. The kernel-load probe fixture lives at
+   `tests/integration/fixtures/meta_kernel/` (`meta_kernel.tm` and
+   `malformed_meta_kernel.tm`), alongside the test tier that consumes it. The
+   executable-mission fixture is *not* a committed file at all: it is
+   generated at test-runtime into a `tmp_path_factory` directory by
+   `_write_meta_kernel_for_testatron_ephemeris` in `conftest.py`, since it
+   must enumerate whatever real `.bsp` files are actually present on the
+   host/CI (gitignored, host-downloaded) rather than hard-code a kernel list
+   that could drift out of sync.
+2. **Archive-deployment verification (§5 item 7)** — resolved as **deferred,
+   out of scope for this iteration**. It was a Medium-priority recommendation
+   in the original review, not a blocker, and it depends on the separate
+   clean-runtime/archive-extraction workflow (`tests/emtg_toolchain/`) rather
+   than the source-build workflow this iteration's two test files exercise.
+   Taking it up means adding a new test under `tests/emtg_toolchain/
+   integration/` or `tests/emtg_toolchain/deployment/` that mounts a nested
+   meta-kernel tree in a clean, compiler-free extracted-archive runtime image
+   and verifies the meta-kernel loads, its nested `PATH_VALUES` resolve, a
+   flat sentinel `.bsp` placed alongside it is *not* loaded, and a mission
+   output is produced — left for a follow-up iteration.
+3. **Flat-layout regression placement (§5 item 2)** — resolved as **deferred,
+   out of scope for this iteration**, for the same reason: it is a
+   Medium-priority recommendation (replace a byte-for-byte diff with the
+   project's existing tutorial comparison/replay checks), not a blocker to
+   the core SPICE_meta_kernel capability landing, and it depends on
+   whichever existing tutorial-comparison mechanism `tests/regression/`
+   already uses for other options, which should be surveyed on its own
+   rather than guessed at here. When taken up, route it through
+   `tests/regression/` (`pytest.mark.regression`) rather than
+   `tests/integration/`, per this repo's convention of keeping baseline-
+   integrity checks out of the Docker-backed integration tier.
