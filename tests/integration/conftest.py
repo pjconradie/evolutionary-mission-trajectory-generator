@@ -1362,24 +1362,6 @@ def tutorial_baselining_stage_runner(
     return run
 
 
-def _meta_kernel_tutorial_fixture_path(repository_root, case_id, execution_repository_root="/repo"):
-    """Resolve the committed meta-kernel fixture for one promoted tutorial case.
-
-    Fixtures are committed one-to-one with ``case_id`` under
-    ``testatron/ipopt/tests/meta_kernel/fixtures/<case_id>/meta_kernel.tm`` (see
-    docs/3_NLP_Solvers/IPOPT/meta_kernel_baselining_commands.md). There is no
-    dynamic generation and no flat-mode fallback: a case without a committed
-    fixture is a configuration error, not something to silently skip.
-    """
-    relative = Path("testatron/ipopt/tests/meta_kernel/fixtures") / case_id / "meta_kernel.tm"
-    if not (Path(repository_root) / relative).is_file():
-        raise FileNotFoundError(
-            f"No committed meta-kernel fixture for tutorial case {case_id!r}: "
-            f"expected {relative}"
-        )
-    return str(Path(execution_repository_root) / relative)
-
-
 @pytest.fixture
 def meta_kernel_tutorial_baselining_stage_runner(
     toolchain_image,
@@ -1393,8 +1375,10 @@ def meta_kernel_tutorial_baselining_stage_runner(
     def run(case, stage, artifacts):
         attempt_name = Path(artifacts).parent.name
         schema_cache = schema_caches.setdefault(attempt_name, {})
-        spice_meta_kernel = _meta_kernel_tutorial_fixture_path(
-            repository_root, case.case_id
+        artifacts = Path(artifacts)
+        artifacts.mkdir(parents=True, exist_ok=True)
+        spice_meta_kernel = ipopt_characterization.stage_tutorial_meta_kernel(
+            case, artifacts, repository_root=repository_root
         )
         try:
             checks = _run_tutorial_stage(

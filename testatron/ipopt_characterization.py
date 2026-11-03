@@ -190,6 +190,7 @@ TUTORIAL_SHARED_EPHEMERIS_FILES = (
     "naif0012.tls",
     "pck00010.tpc",
 )
+TUTORIAL_META_KERNEL_FIXTURES_ROOT = "testatron/ipopt/tests/meta_kernel/fixtures"
 
 
 @dataclass(frozen=True)
@@ -1468,6 +1469,46 @@ def prepare_tutorial_universe(case, case_directory, repository_root=REPOSITORY_R
             raise FileNotFoundError(f"Tutorial ephemeris file does not exist: {source}")
         shutil.copy2(source, destination_file)
     return destination
+
+
+def stage_tutorial_meta_kernel(
+    case,
+    case_directory,
+    *,
+    repository_root=REPOSITORY_ROOT,
+    execution_directory="/artifacts",
+):
+    """Copy one tutorial's committed meta-kernel fixture into the staged case directory.
+
+    Fixtures are committed one-to-one with ``case.case_id`` under
+    ``testatron/ipopt/tests/meta_kernel/fixtures/<case_id>/meta_kernel.tm`` (see
+    docs/3_NLP_Solvers/IPOPT/meta_kernel_baselining_commands.md). There is no
+    dynamic generation and no flat-mode fallback: a case without a committed
+    fixture is a configuration error, not something to silently skip.
+
+    Copying the fixture directly into ``case_directory`` (alongside the staged
+    ``universe``/``hardware_models`` directories prepare_tutorial_universe() and
+    prepare_tutorial_hardware() already write there) keeps it portable across
+    every execution context that mounts the whole staged case directory as one
+    unit: the toolchain dev container, and a packaged archive-runtime container
+    with no ``/repo`` mount. Returns the execution-root path to use for the
+    ``SPICE_meta_kernel`` option.
+    """
+    repository_root = Path(repository_root)
+    source = (
+        repository_root
+        / TUTORIAL_META_KERNEL_FIXTURES_ROOT
+        / case.case_id
+        / "meta_kernel.tm"
+    )
+    if not source.is_file():
+        raise FileNotFoundError(
+            f"No committed meta-kernel fixture for tutorial case {case.case_id!r}: "
+            f"expected {source.relative_to(repository_root)}"
+        )
+    destination = Path(case_directory) / "meta_kernel.tm"
+    shutil.copy2(source, destination)
+    return str(Path(execution_directory) / "meta_kernel.tm")
 
 
 def validate_tutorial_case_dependencies(case, repository_root=REPOSITORY_ROOT):
