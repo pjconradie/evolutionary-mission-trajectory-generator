@@ -87,7 +87,8 @@ The source workflow can be perfect while the package is broken, missing files, h
 | 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 31 passed, 387 deselected in 103.61s (0:01:43)                                                       | Yes             |
 |     |                                                   |                                                                                                                |                                                                                                      |                 |
 | 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
-| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
+| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 30 min                                                                                             | Yes             |
+| 11  | Run 8 meta kernel tests                           | Manual multi step process.                                                                                     | < 15 min                                                                                             | Yes             |
 
 1
 Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
@@ -635,7 +636,7 @@ meta_kernel_tutorial_baselining_case() {
 
 #### Complete tutorial case list
 
-See [[tutorial_baselining_commands#Complete Tutorial Case List]].
+See [[meta_kernel_baselining_commands#Complete tutorial case list]].
 
 ```zsh
 tutorial_baselining_case 'Config_Files/LowSIRIS-REx'

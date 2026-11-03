@@ -390,6 +390,21 @@ def repo_relative(path, root=None):
             return (Path("testatron") / "tests" / test_source).as_posix()
 
 
+def _portable_reference_path(path):
+    """Return a repo-relative path when possible, else the original path string.
+
+    Verification references are normally repository-tracked files, in which
+    case the stored path should be repo-relative (portable, no absolute
+    paths in committed/generated artifacts). Callers (including tests) may
+    also pass references outside the repository (e.g. tmp directories); for
+    those, fall back to the original string rather than raising.
+    """
+    try:
+        return repo_relative(path)
+    except ValueError:
+        return str(path)
+
+
 @dataclass(frozen=True)
 class Benchmark:
     """Immutable provenance record for one IPOPT benchmark, repo-relative only."""
@@ -3624,7 +3639,7 @@ def verify_tutorial_baselining_verification(
         statuses.append({"case_id": key[0], "stage": key[1], "status": status})
     return {
         "version": 1,
-        "reference": str(verification_path),
+        "reference": _portable_reference_path(verification_path),
         "case_count": len(TUTORIAL_CASES),
         "stage_count": len(statuses),
         "stages": statuses,
@@ -4074,7 +4089,7 @@ def verify_baselining_verification(
         statuses.append({"case_id": identifier, "status": status})
     return {
         "version": 1,
-        "reference": str(verification_path),
+        "reference": _portable_reference_path(verification_path),
         "case_count": len(statuses),
         "cases": statuses,
         "acceptable": all(record["status"] == "matched" for record in statuses),
