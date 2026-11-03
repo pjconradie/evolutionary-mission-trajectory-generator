@@ -1130,6 +1130,7 @@ def _run_tutorial_stage(
     tmp_path_factory,
     schema_cache,
     artifacts=None,
+    spice_meta_kernel=None,
 ):
     schema_descriptions = None
     if case.schema_probe:
@@ -1158,6 +1159,7 @@ def _run_tutorial_stage(
         artifacts,
         repository_root=repository_root,
         schema_descriptions=schema_descriptions,
+        spice_meta_kernel=spice_meta_kernel,
     )
     options = MissionOptions.MissionOptions(str(options_path))
     mission_name = options.mission_name
@@ -1328,6 +1330,82 @@ def tutorial_baselining_stage_runner(
                 tmp_path_factory=tmp_path_factory,
                 schema_cache=schema_cache,
                 artifacts=artifacts,
+            )
+        except ValueError as error:
+            result = {
+                "status": "unreviewed",
+                "tutorial": case.case_id,
+                "stage": stage,
+                "taxonomy": case.taxonomy,
+                "classification": ipopt_characterization.classify_tutorial_preflight_error(
+                    error
+                ),
+                "acceptable": False,
+                "detail": str(error),
+            }
+            artifacts = Path(artifacts)
+            (artifacts / "result.json").write_text(
+                json.dumps(result, indent=2) + "\n"
+            )
+            ipopt_characterization.write_tutorial_provenance(
+                artifacts, case, stage, [], repository_root
+            )
+            return result
+        comparison = checks["comparison"]
+        return {
+            "classification": "completed",
+            "acceptable": comparison["acceptable"],
+            "comparison": comparison,
+            "output_file": checks["result"]["generated_mission"],
+        }
+
+    return run
+
+
+def _meta_kernel_tutorial_fixture_path(repository_root, case_id, execution_repository_root="/repo"):
+    """Resolve the committed meta-kernel fixture for one promoted tutorial case.
+
+    Fixtures are committed one-to-one with ``case_id`` under
+    ``testatron/ipopt/tests/meta_kernel/fixtures/<case_id>/meta_kernel.tm`` (see
+    docs/3_NLP_Solvers/IPOPT/meta_kernel_baselining_commands.md). There is no
+    dynamic generation and no flat-mode fallback: a case without a committed
+    fixture is a configuration error, not something to silently skip.
+    """
+    relative = Path("testatron/ipopt/tests/meta_kernel/fixtures") / case_id / "meta_kernel.tm"
+    if not (Path(repository_root) / relative).is_file():
+        raise FileNotFoundError(
+            f"No committed meta-kernel fixture for tutorial case {case_id!r}: "
+            f"expected {relative}"
+        )
+    return str(Path(execution_repository_root) / relative)
+
+
+@pytest.fixture
+def meta_kernel_tutorial_baselining_stage_runner(
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+):
+    """Run one promoted tutorial stage with SPICE kernels loaded via a committed
+    meta-kernel fixture instead of the flat universe ephemeris directory."""
+    schema_caches = {}
+
+    def run(case, stage, artifacts):
+        attempt_name = Path(artifacts).parent.name
+        schema_cache = schema_caches.setdefault(attempt_name, {})
+        spice_meta_kernel = _meta_kernel_tutorial_fixture_path(
+            repository_root, case.case_id
+        )
+        try:
+            checks = _run_tutorial_stage(
+                case=case,
+                stage=stage,
+                toolchain_image=toolchain_image,
+                repository_root=repository_root,
+                tmp_path_factory=tmp_path_factory,
+                schema_cache=schema_cache,
+                artifacts=artifacts,
+                spice_meta_kernel=spice_meta_kernel,
             )
         except ValueError as error:
             result = {

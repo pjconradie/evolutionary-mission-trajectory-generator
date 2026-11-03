@@ -620,13 +620,53 @@ python testatron/ipopt_characterization.py \
 
 See [[tutorial_baselining_commands#Promotion]].
 
----
-
-
-
 ## 11. Run 8 promoted baselined tutorials tests using `meta_kernel.tm`
 
+#### Create the terminal function
 
+```zsh
+meta_kernel_tutorial_baselining_case() {
+	EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/meta_kernel" \
+	python -m pytest tests/integration/test_meta_kernel_tutorial_baselining.py -q \
+		--tutorials \
+		--tutorial-baselining-filter "$1"
+}
+```
+
+#### Complete tutorial case list
+
+See [[tutorial_baselining_commands#Complete Tutorial Case List]].
+
+```zsh
+tutorial_baselining_case 'Config_Files/LowSIRIS-REx'
+.
+.
+.
+tutorial_baselining_case 'Flybys/EVM'
+```
+
+
+```zsh
+.                                                                                                                                                                                                                                                             [100%]
+1 passed in 16.95s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed in 17.52s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed in 15.98s
+```
+
+#### Verify results
+
+```zsh
+python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py
+```
+
+- **Prerequisite**: this step only has evidence to read once all 8 `meta_kernel_tutorial_baselining_case ...` runs have completed successfully (the ones already in your template, writing under `EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/meta_kernel"`). The script doesn't run anything itself — it just reads `testatron/ipopt/tests/meta_kernel/baselining/<case_id>/result.json` for each of the 8 case IDs and reformats what's already there.
+- **No CLI args** — it's hardcoded to the 8 promoted meta-kernel case IDs and the fixed `testatron/ipopt/tests/meta_kernel/baselining/` root, so the command is always exactly `python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py`.
+- **`Force_Models/LowSIRIS-REx_forcemodel_nlp` is expected to show blank objective columns** — it's the one deliberately-infeasible seeded case (`compare_deliberate_infeasible`), so it has no objective pair; `n/a (deliberate_infeasible)` in `objective_match` is the correct/expected output, not a failure. `replay_acceptable: True` is what confirms it passed its own (structural/feasibility) comparison.
+- This script is intended as the **practical substitute for the blocked `--verify-tutorial-baselining` step** for this 8-case subset (that machinery hard-requires all 17 registered cases and can't be scoped down without code changes) — so I'd suggest documenting it under a heading like `### Verify the fresh 8-case results against the flat-mode baselines` rather than trying to force the existing verify/decision-log commands.
+
+---
 # EMTG Archive testing workflow
 
 ## Introduction

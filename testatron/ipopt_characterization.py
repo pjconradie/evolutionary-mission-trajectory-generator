@@ -1977,6 +1977,7 @@ def prepare_tutorial_case(
     execution_repository_root="/repo",
     execution_directory="/artifacts",
     schema_descriptions=None,
+    spice_meta_kernel=None,
 ):
     """Prepare one tutorial replay or refinement from its declared seed policy."""
     if stage not in case.stages:
@@ -2008,6 +2009,8 @@ def prepare_tutorial_case(
         )
         if stage == "refinement":
             _apply_tutorial_refinement_policy(prepared_options)
+        if spice_meta_kernel is not None:
+            _apply_tutorial_spice_meta_kernel(prepared_options, spice_meta_kernel)
         return prepared_options
     if seed_source != "current_infeasible_trial":
         raise ValueError(f"Unknown tutorial seed source: {seed_source!r}")
@@ -2055,7 +2058,25 @@ def prepare_tutorial_case(
     )
     if stage == "refinement":
         _apply_tutorial_refinement_policy(prepared_options)
+    if spice_meta_kernel is not None:
+        _apply_tutorial_spice_meta_kernel(prepared_options, spice_meta_kernel)
     return prepared_options
+
+
+def _apply_tutorial_spice_meta_kernel(options_path, spice_meta_kernel):
+    """Point a staged tutorial input at a committed meta-kernel instead of flat files.
+
+    Reopens the already-written ``.emtgopt`` and sets ``SPICE_meta_kernel`` as a
+    final override, leaving ``universe_folder`` and every other staged setting
+    untouched: the meta-kernel only changes how SPICE kernels are loaded, not
+    where body/hardware/gravity files are read from.
+    """
+    _, MissionOptions = _load_pyemtg()
+    options = MissionOptions.MissionOptions(str(options_path))
+    options.SPICE_meta_kernel = spice_meta_kernel
+    options.write_options_file(
+        str(options_path), not options.print_only_non_default_options
+    )
 
 
 def _execution_path(path, execution_repository_root):
