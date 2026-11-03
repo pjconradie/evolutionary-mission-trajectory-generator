@@ -66,6 +66,50 @@
 #include "SplineEphem_universe.h"
 #endif
 
+namespace
+{
+    //Resolve a configured SPICE kernel filename/path against the universe folder's
+    //ephemeris_files directory. A bare filename (no directory component) is resolved
+    //relative to <universe_folder>/ephemeris_files/, exactly like the existing
+    //SPICE_leap_seconds_kernel/SPICE_reference_frame_kernel options. A value that
+    //already has a directory component (absolute or explicitly relative) is used
+    //as-is, unmodified. boost::filesystem::path::has_parent_path() is used instead of
+    //scanning for a literal path separator so that this works portably on both
+    //POSIX and Windows path conventions (including drive letters).
+    std::string resolve_spice_kernel_path(const std::string& universe_folder, const std::string& kernel_value)
+    {
+        if (::boost::filesystem::path(kernel_value).has_parent_path())
+            return kernel_value;
+        else
+            return universe_folder + "/ephemeris_files/" + kernel_value;
+    }
+
+    //Log every kernel CSPICE currently has loaded, via ktotal_c/kdata_c, so that
+    //third-party meta-kernel deployments can be diagnosed from the EMTG log alone
+    //rather than having to re-derive the loaded set from the .tm file by hand.
+    void log_loaded_spice_kernels()
+    {
+        SpiceInt file_count = 0;
+        ktotal_c((SpiceChar*)"ALL", &file_count);
+
+        std::cout << "SPICE kernel pool contains " << file_count << " file(s):" << std::endl;
+
+        for (SpiceInt k = 0; k < file_count; ++k)
+        {
+            SpiceChar file[256];
+            SpiceChar filtyp[32];
+            SpiceChar source[256];
+            SpiceInt handle;
+            SpiceBoolean found;
+
+            kdata_c(k, (SpiceChar*)"ALL", 256, 32, 256, file, filtyp, source, &handle, &found);
+
+            if (found)
+                std::cout << "  [" << k << "] " << file << " (type " << filtyp << ")" << std::endl;
+        }
+    }
+}
+
 int main(int argc, char* argv[]) 
 {
     std::cout << "program starting" << std::endl;
@@ -137,33 +181,73 @@ int main(int argc, char* argv[])
         std::vector<::boost::filesystem::path> SPICE_files_required;
         std::vector<int> SPICE_bodies_required;
         std::string filestring;
+        bool using_meta_kernel = false;
+        std::string meta_kernel_path;
         if (options.ephemeris_source >= 1)
         {
-            //load all BSP files
-            EMTG::file_utilities::get_all_files_with_extension(::boost::filesystem::path(options.universe_folder + "/ephemeris_files/"), ".bsp", SPICE_files_initial);
+            using_meta_kernel = !options.SPICE_meta_kernel.empty();
 
-            for (size_t k = 0; k < SPICE_files_initial.size(); ++k)
+            if (using_meta_kernel)
             {
-                filestring = options.universe_folder + "/ephemeris_files/" + SPICE_files_initial[k].string();
-                furnsh_c(filestring.c_str());
-                std::cout << filestring << std::endl;
+                meta_kernel_path = resolve_spice_kernel_path(options.universe_folder, options.SPICE_meta_kernel);
+
+                //a configured meta-kernel takes priority over flat discovery; a missing
+                //file is a hard error, never a silent fallback to flat .bsp scanning
+                if (!::boost::filesystem::exists(meta_kernel_path))
+                {
+                    throw std::runtime_error("SPICE_meta_kernel was set to \"" + options.SPICE_meta_kernel
+                        + "\" but the resolved file \"" + meta_kernel_path + "\" does not exist.");
+                }
+
+                //disable quit-on-SPICE-error BEFORE the furnsh_c call that might fail, so that
+                //we can retrieve CSPICE's own diagnostic instead of the process aborting
+                erract_c((SpiceChar*)"SET", 100, (SpiceChar*)"RETURN");
+
+                furnsh_c(meta_kernel_path.c_str());
+
+                if (failed_c())
+                {
+                    SpiceChar cspice_message[1841];
+                    getmsg_c((SpiceChar*)"LONG", 1841, cspice_message);
+                    reset_c();
+                    throw std::runtime_error("Failed to load SPICE meta-kernel \"" + meta_kernel_path
+                        + "\": " + std::string(cspice_message));
+                }
+
+                //disable SPICE error printing. This is because we can, and will often, go off the edge of an ephemeris file.
+                errprt_c((SpiceChar*)"SET", 100, (SpiceChar*)"NONE");
+
+                std::cout << "Completed loading SPICE meta-kernel " << meta_kernel_path << "." << std::endl;
+                log_loaded_spice_kernels();
             }
+            else
+            {
+                //load all BSP files
+                EMTG::file_utilities::get_all_files_with_extension(::boost::filesystem::path(options.universe_folder + "/ephemeris_files/"), ".bsp", SPICE_files_initial);
 
-            //disable quit-on-SPICE-error so that we can see what happens if the leap second and/or frame kernels don't load properly
-            erract_c((SpiceChar*)"SET", 100, (SpiceChar*)"RETURN");
+                for (size_t k = 0; k < SPICE_files_initial.size(); ++k)
+                {
+                    filestring = options.universe_folder + "/ephemeris_files/" + SPICE_files_initial[k].string();
+                    furnsh_c(filestring.c_str());
+                    std::cout << filestring << std::endl;
+                }
 
-            //SPICE reference frame kernel
-            std::string leapsecondstring = options.universe_folder + "/ephemeris_files/" + options.SPICE_leap_seconds_kernel;
-            std::string referenceframestring = options.universe_folder + "/ephemeris_files/" + options.SPICE_reference_frame_kernel;
-            furnsh_c(leapsecondstring.c_str());
-            furnsh_c(referenceframestring.c_str());
+                //disable quit-on-SPICE-error so that we can see what happens if the leap second and/or frame kernels don't load properly
+                erract_c((SpiceChar*)"SET", 100, (SpiceChar*)"RETURN");
 
-            //disable SPICE error printing. This is because we can, and will often, go off the edge of an ephemeris file.
-            errprt_c((SpiceChar*)"SET", 100, (SpiceChar*)"NONE");
+                //SPICE reference frame kernel
+                std::string leapsecondstring = options.universe_folder + "/ephemeris_files/" + options.SPICE_leap_seconds_kernel;
+                std::string referenceframestring = options.universe_folder + "/ephemeris_files/" + options.SPICE_reference_frame_kernel;
+                furnsh_c(leapsecondstring.c_str());
+                furnsh_c(referenceframestring.c_str());
 
-            SPICE_files_required = SPICE_files_initial;
+                //disable SPICE error printing. This is because we can, and will often, go off the edge of an ephemeris file.
+                errprt_c((SpiceChar*)"SET", 100, (SpiceChar*)"NONE");
 
-            std::cout << "Completed loading SPICE kernels." << std::endl;
+                SPICE_files_required = SPICE_files_initial;
+
+                std::cout << "Completed loading SPICE kernels." << std::endl;
+            }
         }
 
         //create a picture of a chinchilla
@@ -758,14 +842,21 @@ int main(int argc, char* argv[])
 
         if (options.ephemeris_source >= 1)
         {
-            for (size_t k = 0; k < SPICE_files_required.size(); ++k)
+            if (using_meta_kernel)
             {
-                filestring = options.universe_folder + "ephemeris_files/" + SPICE_files_required[k].string();
-                unload_c(filestring.c_str());
+                unload_c(meta_kernel_path.c_str());
             }
+            else
+            {
+                for (size_t k = 0; k < SPICE_files_required.size(); ++k)
+                {
+                    filestring = options.universe_folder + "ephemeris_files/" + SPICE_files_required[k].string();
+                    unload_c(filestring.c_str());
+                }
 
-            unload_c((options.universe_folder + "ephemeris_files/" + options.SPICE_leap_seconds_kernel).c_str());
-            unload_c((options.universe_folder + "ephemeris_files/" + options.SPICE_reference_frame_kernel).c_str());
+                unload_c((options.universe_folder + "ephemeris_files/" + options.SPICE_leap_seconds_kernel).c_str());
+                unload_c((options.universe_folder + "ephemeris_files/" + options.SPICE_reference_frame_kernel).c_str());
+            }
         }
 
         std::cout << "EMTG run complete." << std::endl;

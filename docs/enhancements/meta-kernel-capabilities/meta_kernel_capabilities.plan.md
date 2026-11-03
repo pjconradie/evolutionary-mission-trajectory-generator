@@ -289,12 +289,25 @@ loads it.
 
 ## 4. Step-by-step implementation plan
 
-### Step 1 — `missionoptions` plumbing
+### Step 1 — `missionoptions` plumbing (implemented)
 1. Add `SPICE_meta_kernel` field, default, parser entry, and writer entry in
-   `src/Core/missionoptions.h` / `.cpp`.
+   `src/Core/missionoptions.h` / `.cpp`. Done.
 2. Mirror in `PyEMTG/MissionOptions.py` (`__init__`, read loop, write method).
+   Done, with one fix discovered during implementation: the Python reader
+   does `line.rstrip("\n\r ")` before splitting, which strips the trailing
+   delimiter space on a `writeAll`-written empty value (`"SPICE_meta_kernel \n"`
+   → `"SPICE_meta_kernel"`), leaving a 1-element `linecell` and raising
+   `IndexError` on a naive `linecell[1]` lookup. `SPICE_meta_kernel` is the
+   first field in this file with a legitimately empty string default that can
+   be `writeAll`-written, so this edge case had no prior precedent to copy.
+   Fixed with `linecell[1] if len(linecell) > 1 else ""`, covered by
+   `test_empty_spice_meta_kernel_survives_writeall_round_trip` in
+   `tests/test_meta_kernel.py`. The equivalent C++ path
+   (`boost::split(..., boost::token_compress_on)`) was verified empirically to
+   already return a 2-element vector (`["SPICE_meta_kernel", ""]`) for the same
+   input, so no equivalent C++ fix was needed.
 
-### Step 2 — `EMTG_v9.cpp` load/unload changes
+### Step 2 — `EMTG_v9.cpp` load/unload changes (implemented)
 1. Introduce `using_meta_kernel` / `meta_kernel_path` as locals in `main()`'s
    outer scope, declared alongside the existing `SPICE_files_*` vectors —
    **not** re-declared inside the load block — so the teardown/unload block
@@ -313,7 +326,17 @@ loads it.
 6. Implement `log_loaded_spice_kernels()` (§3.6) using `ktotal_c`/`kdata_c` and
    call it after a successful meta-kernel load.
 
-### Step 3 — Documentation
+All six items above are implemented as a free-function helper pair
+(`resolve_spice_kernel_path`, `log_loaded_spice_kernels`) in an anonymous
+namespace ahead of `main()`, plus the load/unload branches in `main()` itself.
+**Compile-verified**: ran the repository's own
+`tests/integration/test_none_backend.py::test_none_backend_configures_and_compiles_without_snopt`
+against the real pinned Docker toolchain image (not a syntax-only check) —
+both `none_backend_configure` and `none_backend_compile` passed, confirming
+`missionoptions.h/.cpp` and `EMTG_v9.cpp` build cleanly together with the rest
+of the solver-neutral target.
+
+### Step 3 — Documentation (not yet done)
 1. There is currently **no existing hand-written user-facing reference** for
    `SPICE_leap_seconds_kernel` / `SPICE_reference_frame_kernel` or
    `ephemeris_source` under `docs/` (confirmed by search — these options
@@ -352,33 +375,66 @@ this repo's test suite (`tests/test_*.py` for unit, `tests/integration/test_*.py
 for integration — see `tests/test_ipopt_characterization.py`,
 `tests/integration/test_tutorials.py`):
 
-- `tests/test_meta_kernel.py` — `pytestmark = pytest.mark.unit`. Covers §5
-  items 1 (missionoptions round-trip), 4 (teardown/unload via `ktotal_c`), 5
-  (error path: missing file / malformed `.tm`), and 6 (PyEMTG round-trip).
-  These do not require building/running `EMTGv9` end-to-end — they exercise
-  CSPICE directly (e.g. via the C++ `missionoptions_tests` driver invoked as a
-  subprocess, or a thin Python/ctypes or SpiceyPy probe against the fixture
-  `.tm`) or the pure-Python `MissionOptions.py` read/write path.
-- `tests/integration/test_meta_kernel.py` — `pytestmark = [pytest.mark.integration,
-  pytest.mark.docker, pytest.mark.solver_runtime]`, matching the exact marker
-  pairing every existing file in `tests/integration/` uses (`integration` is
-  never applied alone — see `test_baselining.py`, `test_cmake_policy.py`,
-  `test_ipopt_backend.py`, etc. — and `solver_runtime` because this test runs
-  `EMTGv9` to completion, the same reason `test_baselining.py`/
-  `test_tutorials.py` carry it). It reuses the existing session-scoped Docker
-  fixtures from `tests/integration/conftest.py`/`_docker_support.py`
-  (`toolchain_image` or `clean_toolchain_image`, `repository_root`,
-  `artifact_directory`) rather than reimplementing container orchestration, so
-  it automatically honors `EMTG_TEST_ARTIFACT_DIR` like every sibling file.
-  Covers §5 item 3 (meta-kernel load + mission solve, built from source in the
-  pinned Linux toolchain image — see the workflow-verification note below for
-  why item 2 and item 7 are *not* placed here as originally drafted).
+- `tests/test_meta_kernel.py` — `pytestmark = pytest.mark.unit`.
+  **Implemented and passing (4 PyEMTG round-trip + 1 regression test + a
+  host-compiled C++ round-trip test, all green).** Covers §5 items 1
+  (missionoptions round-trip, at the C++ level) and 6 (PyEMTG round-trip,
+  plus the default-value/empty-value-round-trip edge case found while
+  implementing Step 1).
+  `doubleType.h`'s `#include "GSAD_2B.h"` is guarded by `#ifdef
+  AD_INSTRUMENTATION` (off by default), so `missionoptions.cpp` does **not**
+  actually pull in the GSAD automatic-differentiation dependency in a normal
+  build — an earlier draft of this plan stated otherwise and was wrong; this
+  was caught and corrected by actually host-compiling it (`g++ -std=c++17 -I
+  src/Core -I src/Utilities -I src/Math`, no GSL/GSAD/CSPICE needed, only
+  `boost::filesystem`). This repo already has a matching, pre-existing,
+  CMake-gated (`RUN_MISSIONOPTIONS_TESTBED`) native driver for exactly this —
+  `src/Testing/missionoptions_tests/missionoptions_testbed_driver.cpp` — which
+  was compiled and run directly against a `SPICE_meta_kernel`-bearing fixture
+  file during implementation (both a normal value and the empty-default
+  `writeAll` edge case) and confirmed to round-trip correctly end-to-end.
+  `tests/test_meta_kernel.py` now includes a `test_cpp_contracts.py`-style
+  host-compiled-and-run test built directly from `missionoptions.cpp` +
+  `journeyoptions.cpp` + `file_utilities.cpp` + the testbed driver (skipped,
+  not failed, if no host compiler or `boost::filesystem` is available).
+  Items 4 (`ktotal_c` teardown check) and 5 (CSPICE error path) still need a
+  real CSPICE runtime and so remain at the integration tier, where the full
+  toolchain and a real CSPICE build already exist.
+- `tests/integration/test_meta_kernel_integration.py` — `pytestmark =
+  [pytest.mark.integration, pytest.mark.docker, pytest.mark.solver_runtime]`,
+  matching the exact marker pairing every existing file in
+  `tests/integration/` uses (`integration` is never applied alone — see
+  `test_baselining.py`, `test_cmake_policy.py`, `test_ipopt_backend.py`, etc.
+  — and `solver_runtime` because this test runs `EMTGv9` to completion, the
+  same reason `test_baselining.py`/`test_tutorials.py` carry it). It reuses
+  the existing session-scoped Docker fixtures from
+  `tests/integration/conftest.py`/`_docker_support.py` (`toolchain_image` or
+  `clean_toolchain_image`, `repository_root`, `artifact_directory`) rather
+  than reimplementing container orchestration, so it automatically honors
+  `EMTG_TEST_ARTIFACT_DIR` like every sibling file. Covers §5 items 1
+  (missionoptions round-trip, verified via a built `EMTGv9` run), 3
+  (meta-kernel load + mission solve), 4 (teardown/unload via `ktotal_c`), and 5
+  (error path, both the pure-EMTG missing-file check and the CSPICE
+  `failed_c`/`getmsg_c` malformed-`.tm` path) — see the workflow-verification
+  note below for why item 2 and item 7 are *not* placed here.
 
-Both files are confirmed to use the singular `test_` prefix —
-`tests/test_meta_kernel.py` and `tests/integration/test_meta_kernel.py` — matching
-pytest's default collection patterns (`test_*.py` / `*_test.py`, unmodified by
-`pytest.ini`) and every other test file in this repo, so they will be
-collected and run under CI once populated.
+**Naming note (discovered during implementation, not anticipated in earlier
+drafts):** `tests/integration/test_meta_kernel.py` could not keep that
+filename. This repo has no `__init__.py` anywhere under `tests/`, so pytest's
+default "prepend" import mode treats same-basename test files in different
+directories as the same module; with both `tests/test_meta_kernel.py` and
+`tests/integration/test_meta_kernel.py` populated, collection fails outright
+with "import file mismatch" (confirmed empirically). Three fixes were
+weighed — `--import-mode=importlib` in `pytest.ini`, adding `__init__.py` to
+every test directory, or renaming one file — and `--import-mode=importlib` was
+tried first but reverted immediately: it breaks four existing files
+(`tests/integration/conftest.py`, `test_baselining.py`, `test_docker_support.py`,
+`test_tutorial_baselining.py`) that rely on prepend-mode's implicit sys.path
+insertion for bare sibling imports like `from _docker_support import
+run_probe`. The zero-risk fix was chosen instead: the integration file is
+named `tests/integration/test_meta_kernel_integration.py`. `tests/test_meta_kernel.py`
+keeps its original name (no collision, since it's the only file with that
+basename once the other is renamed).
 
 ### Workflow verification against `docs/3_NLP_Solvers/IPOPT/tests.readme.md`
 
@@ -404,8 +460,8 @@ Two corrections and one open question came out of that review:
    defined in `tests/conftest.py`, verifying the packaged, compiler-free,
    extracted `emtg-ipopt-*.tar.gz` runtime deliverable). "Mounts a nested
    meta-kernel tree in a clean runtime image" describes the archive workflow,
-   not `tests/integration/test_meta_kernel.py`. Since only
-   `tests/test_meta_kernel.py` and `tests/integration/test_meta_kernel.py`
+   not `tests/integration/test_meta_kernel_integration.py`. Since only
+   `tests/test_meta_kernel.py` and `tests/integration/test_meta_kernel_integration.py`
    have been created, genuine third-party-archive meta-kernel verification
    (a new test under `tests/emtg_toolchain/integration/` or
    `tests/emtg_toolchain/deployment/`, following the `EMTG_TEST_ARTIFACT_DIR`/
@@ -427,13 +483,15 @@ Since this repo's C++ "tests" are small standalone driver executables (see
 `src/Testing/missionoptions_tests/missionoptions_testbed_driver.cpp`) rather
 than a gtest-style unit framework, verification is primarily:
 
-1. **Missionoptions round-trip** (`tests/test_meta_kernel.py`): extend the
-   `missionoptions_tests` driver (or add a focused one) to set
-   `SPICE_meta_kernel`, write an `.emtgopt`, re-read it, and assert the value
-   round-trips.
+1. **Missionoptions round-trip** (`tests/test_meta_kernel.py`,
+   `test_spice_meta_kernel_round_trips_through_native_missionoptions`).
+   **Implemented.** The existing `missionoptions_tests` driver is
+   host-compiled (no extra sources added), run against a
+   `SPICE_meta_kernel`-bearing `.emtgopt`, and the regenerated
+   `tests/newdefault.emtgopt` is asserted to contain the round-tripped value.
 2. **Flat-layout regression** (placement open — see Workflow verification
-   note #3 above; candidate: `tests/integration/test_meta_kernel.py` tagged
-   additionally with `pytest.mark.regression`, or a new
+   note #3 above; candidate: `tests/integration/test_meta_kernel_integration.py`
+   tagged additionally with `pytest.mark.regression`, or a new
    `tests/regression/test_meta_kernel.py`): run
    an existing tutorial `.emtgopt`
    (e.g. one under `docs/0_Users/tutorial/...`) with `SPICE_meta_kernel` unset
@@ -443,7 +501,7 @@ than a gtest-style unit framework, verification is primarily:
    diff, since output directories, timestamps, and optimizer internals make
    byte equivalence an inappropriate bar). This proves (ii) and confirms no
    regression.
-3. **Meta-kernel load** (`tests/integration/test_meta_kernel.py`): run
+3. **Meta-kernel load** (`tests/integration/test_meta_kernel_integration.py`): run
    `EMTGv9` against the Step 4 executable-mission
    fixture with `SPICE_meta_kernel` set, confirm via the §3.6 inventory log
    that the flat `.bsp` loop was skipped and the expected kernel set was

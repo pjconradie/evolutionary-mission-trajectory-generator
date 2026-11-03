@@ -117,6 +117,7 @@ namespace EMTG
         bool quiet_basinhopping;//Quiet MBH?
         std::string SPICE_leap_seconds_kernel;//SPICE leap seconds kernel - required for SPICE to work
         std::string SPICE_reference_frame_kernel;//SPICE_reference_frame_kernel
+        std::string SPICE_meta_kernel;//optional SPICE meta-kernel (.tm) filename; empty = disabled, falls back to flat ephemeris_files/*.bsp discovery
         std::string universe_folder;//Universe folder
         int ephemeris_source;//Choices are 0 - static, 1 - SPICE (default to static if no SPICE file supplied for a body), 2 - SplineEphem
         size_t SplineEphem_points_per_period;//How many sample points should SplineEphem use per orbital period of each body?
