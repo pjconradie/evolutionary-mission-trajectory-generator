@@ -9,8 +9,17 @@ this only reformats evidence the test run already produced.
 
 Usage:
     python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py
+    python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py \\
+        --root "$EMTG_TEST_ARTIFACT_DIR/emtg-toolchain-<run>/evidence/baselining"
+
+The default root is the dev-container case-directory layout
+(testatron/ipopt/tests/meta_kernel/baselining/<case_id>/result.json). Pass
+--root to point at a different evidence root with the same per-case
+result.json layout, e.g. an archive-runtime test's randomly-suffixed
+evidence/baselining directory.
 """
 
+import argparse
 import json
 from pathlib import Path
 
@@ -30,9 +39,21 @@ CASE_IDS = (
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=META_KERNEL_BASELINING_ROOT,
+        help=(
+            "Evidence root containing <case_id>/result.json per case "
+            f"(default: {META_KERNEL_BASELINING_ROOT})"
+        ),
+    )
+    args = parser.parse_args()
+
     rows = []
     for case_id in CASE_IDS:
-        result_path = META_KERNEL_BASELINING_ROOT / case_id / "result.json"
+        result_path = args.root / case_id / "result.json"
         if not result_path.is_file():
             rows.append((case_id, "MISSING", None, None, None, None, None))
             continue
