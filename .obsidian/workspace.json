@@ -196,7 +196,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 647.22265625
+    "width": 401.58203125
   },
   "right": {
     "id": "66aa8d3610c9c55c",
@@ -302,17 +302,17 @@
   },
   "active": "2fb447d22e8d56f1",
   "lastOpenFiles": [
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-i5gz2p00",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-2/replay/universe/ephemeris_files/pck00010.tpc",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-2/replay/universe/ephemeris_files/naif0012.tls",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-2/replay/universe/ephemeris_files/go_get_these_files.txt",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-2/replay/universe/ephemeris_files/bennu_refdrmc_v1.bsp",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-2/replay/universe/ephemeris_files/de430.bsp",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-1/replay/universe/ephemeris_files/pck00010.tpc",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-1/replay/universe/ephemeris_files/naif0012.tls",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-1/replay/universe/ephemeris_files/go_get_these_files.txt",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-1/replay/universe/ephemeris_files/bennu_refdrmc_v1.bsp",
-    "test-artifacts/emtg-archive-meta-kernel-hot/emtg-toolchain-b7ouy83f/evidence/baselining/Config_Files/LowSIRIS-REx/attempt-1/replay/universe/ephemeris_files/de430.bsp",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/release-baseline.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/verification.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/result.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/repeatability.json",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/universe/ephemeris_files/naif0012.tls",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/universe/ephemeris_files/go_get_these_files.txt",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/universe/ephemeris_files/pck00010.tpc",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/refinement/universe/ephemeris_files/de430.bsp",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/replay/universe/ephemeris_files/pck00010.tpc",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/replay/universe/ephemeris_files/naif0012.tls",
+    "test-artifacts/emtg-release-baseline-9.02/emtg-toolchain-5oshal5t/evidence/baselining/Flybys/EVM_singlePhase/attempt-2/replay/universe/ephemeris_files/go_get_these_files.txt",
     "docs/3_NLP_Solvers/IPOPT/meta_kernel_baselining_commands.md",
     "docs/3_NLP_Solvers/IPOPT/tests.readme.md",
     "docs/3_NLP_Solvers/IPOPT/tutorial_baselining_commands.md",

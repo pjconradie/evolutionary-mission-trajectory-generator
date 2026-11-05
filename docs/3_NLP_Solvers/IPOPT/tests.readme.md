@@ -768,7 +768,7 @@ Use a distinct `EMTG_TEST_ARTIFACT_DIR` for each Docker-backed test layer. Eac
 | 3   | Run cold archive integration test         | EMTG_ARCHIVE_COLD=1 \<br>EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \<br>python -m pytest tests/emtg_toolchain/integration --integration -q                                                                            | 1 passed in 2751.88s (0:45:51)                                                        | Yes             |
 | 3   | Run hot archive integration test          | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \<br>python -m pytest tests/emtg_toolchain/integration --integration -q                                                                                                      | 1 passed in 504.63s (0:08:24)                                                         | Yes             |
 | 4   | Run cold deployment tutorial gate         | EMTG_ARCHIVE_COLD=1 \<br>EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \<br>python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s                                                                 | 1 passed in 694.96s (0:11:34)                                                         | Yes             |
-| 4   | Run hot deployment tutorial gate          | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \<br>python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s                                                                                           | 1 passed in 244.27s (0:04:04)                                                         | Yes             |
+| 4   | Run hot deployment tutorial gate          | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \<br>python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s                                                                                           | 2 passed in 317.68s (0:05:17)                                                         | Yes             |
 | 4   | Inspection command                        | python -m json.tool "<artifact-directory>/verification.json"                                                                                                                                                                               | 0.01s                                                                                 | No              |
 | 5   | Create the versioned EMTG release archive |                                                                                                                                                                                                                                            | 10-20 min                                                                             | Yes             |
 | 5   | Verify the release archive checksum       |                                                                                                                                                                                                                                            | 10-20 min                                                                             | No              |
@@ -1541,19 +1541,21 @@ python -m pytest tests/emtg_toolchain/deployment \
 
 ```zsh
 % EMTG_VERSION="9.02"
-% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
 python -m pytest tests/emtg_toolchain/deployment \
         --tutorials \
         --release-archive "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz" \
         -q -s
-Verifying archive tutorials: 17 cases, 33 required stages, two attempts per case
-[1/17] Starting Config_Files/LowSIRIS-REx
-[1/17] Completed Config_Files/LowSIRIS-REx in 4.1s
+Verifying archive meta-kernel tutorials: 8 case(s), two attempts per case
+[1/8] Starting Config_Files/LowSIRIS-REx
 ...
-[17/17] Starting Flybys/EVM_singlePhase
-[17/17] Completed Flybys/EVM_singlePhase in 12.5s
+[8/8] Completed Flybys/EVM
+.Verifying archive tutorials: 17 cases, 33 required stages, two attempts per case
+[1/17] Starting Config_Files/LowSIRIS-REx
+...
+[17/17] Completed Flybys/EVM_singlePhase in 13.4s
 .
-1 passed in 202.17s (0:03:22)
+2 passed in 289.04s (0:04:49)
 ```
 
 
