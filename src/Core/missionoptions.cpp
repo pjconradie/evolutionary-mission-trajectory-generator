@@ -86,6 +86,7 @@ namespace EMTG
         this->quiet_basinhopping = (bool) 0;
         this->SPICE_leap_seconds_kernel = "naif0012.tls";
         this->SPICE_reference_frame_kernel = "pck00010.tpc";
+        this->SPICE_meta_kernel = "";
         this->universe_folder = "C:/emtg/Universe";
         this->ephemeris_source = 2;
         this->SplineEphem_points_per_period = 360;
@@ -860,6 +861,11 @@ namespace EMTG
         if (linecell[0] == "SPICE_reference_frame_kernel")
         {
             this->SPICE_reference_frame_kernel = linecell[1];
+            return;
+        }
+        if (linecell[0] == "SPICE_meta_kernel")
+        {
+            this->SPICE_meta_kernel = linecell[1];
             return;
         }
         if (linecell[0] == "universe_folder")
@@ -2256,6 +2262,12 @@ namespace EMTG
         {
             optionsFileStream << "#SPICE_reference_frame_kernel" << std::endl;
             optionsFileStream << "SPICE_reference_frame_kernel " << this->SPICE_reference_frame_kernel << std::endl;
+        }
+    
+        if (this->SPICE_meta_kernel != "" || writeAll)
+        {
+            optionsFileStream << "#optional SPICE meta-kernel (.tm) filename; takes priority over flat ephemeris_files/*.bsp discovery when non-empty" << std::endl;
+            optionsFileStream << "SPICE_meta_kernel " << this->SPICE_meta_kernel << std::endl;
         }
     
         if (this->universe_folder != "C:/emtg/Universe" || writeAll)

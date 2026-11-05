@@ -78,16 +78,17 @@ The source workflow can be perfect while the package is broken, missing files, h
 | --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------- |
 | 1   | Run clean bootstrap                               |                                                                                                                |                                                                                                      | Yes             |
 | 2   | Run collection sanity                             | python -m pytest --collect-only -q<br>python -m pytest --collect-only -q --tutorials                           | 327/362 tests collected (35 deselected) in 0.22s<br>34/376 tests collected (342 deselected) in 0.09s | No              |
-| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 170 passed, 206 deselected in 10.08s                                                                 | No              |
-| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 231 deselected in 2.38s                                                                  | No              |
-| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 169 passed in 9.96s                                                                                  | No              |
+| 3   | Run unit tests                                    | python -m pytest -m unit                                                                                       | 206 passed, 212 deselected in 11.20s                                                                 | No              |
+| 4   | Run regression tests                              | python -m pytest -m regression                                                                                 | 145 passed, 273 deselected in 2.09s                                                                  | No              |
+| 5   | Run IPOPT characterization contracts              | python -m pytest tests/test_ipopt_characterization.py -q                                                       | 171 passed in 5.12s                                                                                  | No              |
 |     |                                                   |                                                                                                                | < 10 seconds                                                                                         |                 |
-| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 364 deselected in 39.82s                                                                  | Yes             |
-| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 373 deselected in 10.60s                                                                   | Yes             |
-| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 26 passed, 350 deselected in 88.02s (0:01:28)                                                        | Yes             |
-|     |                                                   |                                                                                                                | < 15 min                                                                                             | Yes             |
+| 6   | Run focused IPOPT integration (benchmarks) checks | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-benchmarks" \<br><br>python -m pytest -m ipopt_benchmarks -q | 12 passed, 406 deselected in 31.03s                                                                  | Yes             |
+| 7   | Run focused IPOPT integration (tests) checks      | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/ipopt-tests" \<br><br>python -m pytest -m ipopt_tests -q           | 3 passed, 415 deselected in 15.75s                                                                   | Yes             |
+| 8   | Run full integration suite                        | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/integration" \<br><br>python -m pytest -m integration -q           | 31 passed, 387 deselected in 103.61s (0:01:43)                                                       | Yes             |
+|     |                                                   |                                                                                                                |                                                                                                      |                 |
 | 9   | Run 137 corpus tests                              | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
-| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 60 min                                                                                             | Yes             |
+| 10  | Run 33 tutorial tests                             | Manual multi step process.                                                                                     | < 30 min                                                                                             | Yes             |
+| 11  | Run 8 meta kernel tests                           | Manual multi step process.                                                                                     | < 15 min                                                                                             | Yes             |
 
 1
 Docker required. Manual multi step process of less than an hour from start to finish with everything passing.
@@ -620,6 +621,68 @@ python testatron/ipopt_characterization.py \
 
 See [[tutorial_baselining_commands#Promotion]].
 
+## 11. Run 8 promoted baselined tutorials tests using `meta_kernel.tm`
+
+#### Create the terminal function
+
+```zsh
+meta_kernel_tutorial_baselining_case() {
+	EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/meta_kernel" \
+	python -m pytest tests/integration/test_meta_kernel_tutorial_baselining.py -q \
+		--tutorials \
+		--tutorial-baselining-filter "$1"
+}
+```
+
+#### Complete tutorial case list
+
+See [[meta_kernel_baselining_commands#Complete tutorial case list]].
+
+```zsh
+tutorial_baselining_case 'Config_Files/LowSIRIS-REx'
+.
+.
+.
+tutorial_baselining_case 'Flybys/EVM'
+```
+
+
+```zsh
+.                                                                                                                                                                                                                                                             [100%]
+1 passed in 16.95s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed in 17.52s
+.                                                                                                                                                                                                                                                             [100%]
+1 passed in 15.98s
+```
+
+#### Verify results
+
+```zsh
+python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py
+```
+
+```zsh
+% python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py
++----------------------------------------------+----------------------------+------------+----------------------+----------------------+-----------------------------+------------+
+| case_id                                      | classification             | repeatable | baseline_objective   | generated_objective  | objective_match             | acceptable |
++----------------------------------------------+----------------------------+------------+----------------------+----------------------+-----------------------------+------------+
+| Config_Files/LowSIRIS-REx                    | matched_tutorial_reference | yes        | -0.17403239151054145 | -0.17403239151054145 | yes                         | yes        |
+| Config_Files/LowSIRIS-REx_high_thrust        | matched_tutorial_reference | yes        | -0.19075270414526246 | -0.19075270414526246 | yes                         | yes        |
+| Config_Files/LowSIRIS-REx_high_thrust_low_c3 | matched_tutorial_reference | yes        | -0.18809049221287863 | -0.18809049221287863 | yes                         | yes        |
+| Flybys/EVM                                   | matched_tutorial_reference | yes        | 8.427405598428033    | 8.427405598428033    | yes                         | yes        |
+| Force_Models/LowSIRIS-REx                    | matched_tutorial_reference | yes        | -0.21760827397952195 | -0.21760827397952195 | yes                         | yes        |
+| Force_Models/LowSIRIS-REx_forcemodel_nlp     | matched_tutorial_reference | yes        | --                   | --                   | n/a (deliberate_infeasible) | yes        |
+| LowSIRIS-REx/LowSIRIS-REx                    | matched_tutorial_reference | yes        | -0.13348924156992711 | -0.13348924156992711 | yes                         | yes        |
+| OSIRIS-REx/OSIRIS-REx                        | matched_tutorial_reference | yes        | 7.12363247375915     | 7.12363247375915     | yes                         | yes        |
++----------------------------------------------+----------------------------+------------+----------------------+----------------------+-----------------------------+------------+
+```
+
+- **Prerequisite**: this step only has evidence to read once all 8 `meta_kernel_tutorial_baselining_case ...` runs have completed successfully (the ones already in your template, writing under `EMTG_TEST_ARTIFACT_DIR="$PWD/testatron/ipopt/tests/meta_kernel"`). The script doesn't run anything itself — it just reads `testatron/ipopt/tests/meta_kernel/baselining/<case_id>/result.json` for each of the 8 case IDs and reformats what's already there.
+- **No CLI args** — it's hardcoded to the 8 promoted meta-kernel case IDs and the fixed `testatron/ipopt/tests/meta_kernel/baselining/` root, so the command is always exactly `python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py`.
+- **`Force_Models/LowSIRIS-REx_forcemodel_nlp` is expected to show blank objective columns** — it's the one deliberately-infeasible seeded case (`compare_deliberate_infeasible`), so it has no objective pair; `n/a (deliberate_infeasible)` in `objective_match` is the correct/expected output, not a failure. `replay_acceptable: True` is what confirms it passed its own (structural/feasibility) comparison.
+- This script is intended as the **practical substitute for the blocked `--verify-tutorial-baselining` step** for this 8-case subset (that machinery hard-requires all 17 registered cases and can't be scoped down without code changes) — so I'd suggest documenting it under a heading like `### Verify the fresh 8-case results against the flat-mode baselines` rather than trying to force the existing verify/decision-log commands.
+
 ---
 # EMTG Archive testing workflow
 
@@ -698,18 +761,18 @@ Observed testing durations:
 Use a distinct `EMTG_TEST_ARTIFACT_DIR` for each Docker-backed test layer. Each invocation creates a unique child directory so previous retained evidence is not overwritten.
 
 
-| #   | Test                                      | Command                                                                                                                                                                                                                                          | Runtime information                                                                   | Docker required |
-| --- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------- |
-| 1   | Run archive collection sanity             | `python -m pytest tests/emtg_toolchain/unit --unit --collect-only -q`<br>`python -m pytest tests/emtg_toolchain/integration --integration --collect-only -q`<br>`python -m pytest tests/emtg_toolchain/deployment --tutorials --collect-only -q` | 28 tests collected in 0.03s<br>1 test collected in 0.01s<br>1 test collected in 0.05s | No              |
-| 2   | Run archive-toolchain unit tests          | `python -m pytest tests/emtg_toolchain/unit --unit -q`                                                                                                                                                                                           | 28 passed in 0.08s                                                                    | No              |
-| 3   | Run cold archive integration test         | `EMTG_ARCHIVE_COLD=1 \`<br>`EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \`<br>`python -m pytest tests/emtg_toolchain/integration --integration -q`                                                                            | 1 passed in 2751.88s (0:45:51)                                                        | Yes             |
-| 3   | Run hot archive integration test          | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \`<br>`python -m pytest tests/emtg_toolchain/integration --integration -q`                                                                                                        | 1 passed in 504.63s (0:08:24)                                                         | Yes             |
-| 4   | Run cold deployment tutorial gate         | `EMTG_ARCHIVE_COLD=1 \`<br>`EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \`<br>`python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s`                                                                 | 1 passed in 694.96s (0:11:34)                                                         | Yes             |
-| 4   | Run hot deployment tutorial gate          | `EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \`<br>`python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s`                                                                                             | 1 passed in 244.27s (0:04:04)                                                         | Yes             |
-| 4   | Inspection command                        | `python -m json.tool "<artifact-directory>/verification.json"`                                                                                                                                                                                   | 0.01s                                                                                 | No              |
-| 5   | Create the versioned EMTG release archive |                                                                                                                                                                                                                                                  | 10-20 min                                                                             | Yes             |
-| 5   | Verify the release archive checksum       |                                                                                                                                                                                                                                                  | 10-20 min                                                                             | No              |
-| 5   | Baseline the exact release archive        |                                                                                                                                                                                                                                                  | 10-20 min                                                                             | Yes             |
+| #   | Test                                      | Command                                                                                                                                                                                                                                    | Runtime information                                                                   | Docker required |
+| --- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------- |
+| 1   | Run archive collection sanity             | python -m pytest tests/emtg_toolchain/unit --unit --collect-only -q<br>python -m pytest tests/emtg_toolchain/integration --integration --collect-only -q<br>python -m pytest tests/emtg_toolchain/deployment --tutorials --collect-only -q | 28 tests collected in 0.03s<br>1 test collected in 0.01s<br>1 test collected in 0.05s | No              |
+| 2   | Run archive-toolchain unit tests          | python -m pytest tests/emtg_toolchain/unit --unit -q                                                                                                                                                                                       | 28 passed in 0.08s                                                                    | No              |
+| 3   | Run cold archive integration test         | EMTG_ARCHIVE_COLD=1 \<br>EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-cold" \<br>python -m pytest tests/emtg_toolchain/integration --integration -q                                                                            | 1 passed in 2751.88s (0:45:51)                                                        | Yes             |
+| 3   | Run hot archive integration test          | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-hot" \<br>python -m pytest tests/emtg_toolchain/integration --integration -q                                                                                                      | 1 passed in 504.63s (0:08:24)                                                         | Yes             |
+| 4   | Run cold deployment tutorial gate         | EMTG_ARCHIVE_COLD=1 \<br>EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-cold" \<br>python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s                                                                 | 1 passed in 694.96s (0:11:34)                                                         | Yes             |
+| 4   | Run hot deployment tutorial gate          | EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-deployment-hot" \<br>python -m pytest tests/emtg_toolchain/deployment --tutorials -q -s                                                                                           | 2 passed in 317.68s (0:05:17)                                                         | Yes             |
+| 4   | Inspection command                        | python -m json.tool "<artifact-directory>/verification.json"                                                                                                                                                                               | 0.01s                                                                                 | No              |
+| 5   | Create the versioned EMTG release archive |                                                                                                                                                                                                                                            | 10-20 min                                                                             | Yes             |
+| 5   | Verify the release archive checksum       |                                                                                                                                                                                                                                            | 10-20 min                                                                             | No              |
+| 5   | Baseline the exact release archive        |                                                                                                                                                                                                                                            | 10-20 min                                                                             | Yes             |
 
 1, 2
 ```zsh
@@ -1282,7 +1345,113 @@ example:
 }
 ```
 
-## 5. Baseline an existing release archive
+## 5. Run `meta_kernel.tm` tests
+
+Run cold archive meta-kernel gate
+
+```zsh
+EMTG_ARCHIVE_COLD=1 \
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-meta-kernel-cold" \
+python -m pytest tests/emtg_toolchain/deployment/test_emtg_archive_meta_kernel.py -q -m tutorials
+```
+
+​
+​
+```zsh
+% EMTG_ARCHIVE_COLD=1 \
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-meta-kernel-cold" \
+python -m pytest tests/emtg_toolchain/deployment/test_emtg_archive_meta_kernel.py -q -m tutorials
+.                                                                                                                                                                                                                                                             [100%]
+1 passed in 622.89s (0:10:22)
+```
+
+Run hot archive meta-kernel gate
+
+```zsh
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-meta-kernel-hot" \
+    python -m pytest tests/emtg_toolchain/deployment/test_emtg_archive_meta_kernel.py -q -m tutorials
+​
+```
+
+```
+% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-archive-meta-kernel-hot" \
+        python -m pytest tests/emtg_toolchain/deployment/test_emtg_archive_meta_kernel.py -q -m tutorials
+[1/5] Building IPOPT EMTG (hot build)
+[2/5] Validating EMTG runtime linkage
+[3/5] Staging archive runtime payload
+[4/5] Creating archive and SHA-256 checksum
+[5/5] Publishing validated archive
+Verifying archive meta-kernel tutorials: 8 case(s), two attempts per case
+[1/8] Starting Config_Files/LowSIRIS-REx
+[1/8] Completed Config_Files/LowSIRIS-REx
+...
+[8/8] Starting OSIRIS-REx/OSIRIS-REx
+[8/8] Completed OSIRIS-REx/OSIRIS-REx
+.                                                                        [100%]
+1 passed in 64.46s
+```
+
+This test differs from `## 4. Run deployment tests` in two ways:
+
+- It validates only the **8 promoted meta-kernel tutorial cases**, each run with `SPICE_meta_kernel` pointed at a staged, committed `meta_kernel.tm` fixture instead of flat `ephemeris_files` discovery.
+- Unlike the per-case terminal functions used in dev-container `## 11`, this is a **single pytest test** that internally loops over all 8 cases, builds/reuses one archive, one archive-runtime image, and asserts `repeatability.stable` and `classification == "matched_tutorial_reference"` for every case before the test can pass. There is no separate `--verify-tutorial-baselining` step here — passing the test *is* the verification; a non-matching or unstable case fails the test directly.
+
+Complete tutorial case list (same 8 cases as `## 11` of the Source testing workflow):
+
+
+```
+Config_Files/LowSIRIS-REx
+Config_Files/LowSIRIS-REx_high_thrust
+Config_Files/LowSIRIS-REx_high_thrust_low_c3
+Flybys/EVM
+Force_Models/LowSIRIS-REx
+Force_Models/LowSIRIS-REx_forcemodel_nlp
+LowSIRIS-REx/LowSIRIS-REx
+OSIRIS-REx/OSIRIS-REx
+```
+
+### Verify results
+
+> **Prerequisite**: `compare_meta_kernel_tutorial_results.py` currently hardcodes its output root to `testatron/ipopt/tests/meta_kernel/baselining/` (the dev-container case-directory contract). The archive test instead writes evidence under a per-run, randomly-suffixed directory: `"$EMTG_TEST_ARTIFACT_DIR"/emtg-toolchain-*/evidence/baselining/<case_id>/result.json`. Before this step can be documented as a runnable command, the script needs an optional root argument (e.g. `--root`) so it can be pointed at that evidence directory instead of only the fixed dev-container path.
+
+Locate the most recent run's evidence root:
+
+```zsh
+latest_run="$(ls -td "$PWD/test-artifacts/emtg-archive-meta-kernel-hot"/emtg-toolchain-*/ | head -1)"
+python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py --root "${latest_run}evidence/baselining"
+```
+​
+
+```zsh
+% python testatron/ipopt/tests/meta_kernel/compare_meta_kernel_tutorial_results.py --root "${latest_run}evidence/baselining"
++----------------------------------------------+----------------------------+------------+----------------------+----------------------+-----------------------------+------------+
+| case_id                                      | classification             | repeatable | baseline_objective   | generated_objective  | objective_match             | acceptable |
++----------------------------------------------+----------------------------+------------+----------------------+----------------------+-----------------------------+------------+
+| Config_Files/LowSIRIS-REx                    | matched_tutorial_reference | yes        | -0.17403239151054145 | -0.17403239151054145 | yes                         | yes        |
+| Config_Files/LowSIRIS-REx_high_thrust        | matched_tutorial_reference | yes        | -0.19075270414526246 | -0.19075270414526246 | yes                         | yes        |
+| Config_Files/LowSIRIS-REx_high_thrust_low_c3 | matched_tutorial_reference | yes        | -0.18809049221287863 | -0.18809049221287863 | yes                         | yes        |
+| Flybys/EVM                                   | matched_tutorial_reference | yes        | 8.427405598428033    | 8.427405598428033    | yes                         | yes        |
+| Force_Models/LowSIRIS-REx                    | matched_tutorial_reference | yes        | -0.21760827397952195 | -0.21760827397952195 | yes                         | yes        |
+| Force_Models/LowSIRIS-REx_forcemodel_nlp     | matched_tutorial_reference | yes        | --                   | --                   | n/a (deliberate_infeasible) | yes        |
+| LowSIRIS-REx/LowSIRIS-REx                    | matched_tutorial_reference | yes        | -0.13348924156992711 | -0.13348924156992711 | yes                         | yes        |
+| OSIRIS-REx/OSIRIS-REx                        | matched_tutorial_reference | yes        | 7.12363247375915     | 7.12363247375915     | yes                         | yes        |
++----------------------------------------------+----------------------------+------------+----------------------+----------------------+-----------------------------+------------+
+```
+
+### Run the archive manually with a `meta_kernel.tm`
+
+To invoke the packaged archive directly (outside pytest) with a meta-kernel:
+
+1. Extract the archive: `tar -xzf emtg.tar.gz -C /opt/toolkit` → yields `/opt/toolkit/emtg/bin/EMTGv9`.
+2. Stage a run directory containing your `.emtgopt`, your `meta_kernel.tm`, and the kernel files it references.
+3. Set `SPICE_meta_kernel <path>` in the `.emtgopt`, where `<path>` has a parent path component (not a bare filename) — otherwise EMTG joins it onto `<universe_folder>/ephemeris_files/` instead of using it as-is.
+4. Inside `meta_kernel.tm`, use `PATH_VALUES`/`PATH_SYMBOLS`/`KERNELS_TO_LOAD` as normal — CSPICE resolves these itself, relative to the process's working directory if not absolute.
+5. Run: `/opt/toolkit/emtg/bin/EMTGv9 /path/to/mission.emtgopt`.
+
+A missing/unreadable meta-kernel or a CSPICE load failure raises an explicit error rather than silently falling back to flat kernel discovery.
+
+
+## 6. Baseline an existing release archive
 
 ### Test an existing baseline
 
@@ -1372,19 +1541,21 @@ python -m pytest tests/emtg_toolchain/deployment \
 
 ```zsh
 % EMTG_VERSION="9.02"
-% EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
+EMTG_TEST_ARTIFACT_DIR="$PWD/test-artifacts/emtg-release-baseline-${EMTG_VERSION}" \
 python -m pytest tests/emtg_toolchain/deployment \
         --tutorials \
         --release-archive "$PWD/releases/emtg-ipopt-${EMTG_VERSION}.tar.gz" \
         -q -s
-Verifying archive tutorials: 17 cases, 33 required stages, two attempts per case
-[1/17] Starting Config_Files/LowSIRIS-REx
-[1/17] Completed Config_Files/LowSIRIS-REx in 4.1s
+Verifying archive meta-kernel tutorials: 8 case(s), two attempts per case
+[1/8] Starting Config_Files/LowSIRIS-REx
 ...
-[17/17] Starting Flybys/EVM_singlePhase
-[17/17] Completed Flybys/EVM_singlePhase in 12.5s
+[8/8] Completed Flybys/EVM
+.Verifying archive tutorials: 17 cases, 33 required stages, two attempts per case
+[1/17] Starting Config_Files/LowSIRIS-REx
+...
+[17/17] Completed Flybys/EVM_singlePhase in 13.4s
 .
-1 passed in 202.17s (0:03:22)
+2 passed in 289.04s (0:04:49)
 ```
 
 

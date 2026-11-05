@@ -1,0 +1,46 @@
+# EMTG IPOPT Runtime Requirements
+
+Target platform: `linux/amd64`
+
+Base OS: `Debian 12 Bookworm`
+
+Build commit: `093ee4897014808a1be8e77965bf81f65f119b26`
+
+Build mode: `cold`
+
+Build time: `2026-10-20T11:01:28Z`
+
+Install these packages in the third-party Debian runtime image:
+
+- `coinor-libipopt1v5`
+- `libboost-filesystem1.74.0`
+- `libgfortran5`
+- `csh`
+
+The archive does not include mission-specific SPICE SPK kernels. The
+third-party deployment environment must provide those kernels and all
+request-specific mission inputs separately.
+
+## Verified dynamic linkage
+
+```text
+	libboost_filesystem.so.1.74.0 => /lib/x86_64-linux-gnu/libboost_filesystem.so.1.74.0 (0x00007ffff8c18000)
+	libipopt.so.1 => /lib/libipopt.so.1 (0x00007ffff89f1000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007ffff87d7000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ffff86f7000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007ffff86d7000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ffff84f5000)
+	liblapack.so.3 => /lib/x86_64-linux-gnu/liblapack.so.3 (0x00007ffff7df3000)
+	libblas.so.3 => /lib/x86_64-linux-gnu/libblas.so.3 (0x00007ffff7d85000)
+	libdmumps_seq-5.5.so => /lib/x86_64-linux-gnu/libdmumps_seq-5.5.so (0x00007ffff7b42000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007ffffffcb000)
+	libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x00007ffff7878000)
+	libmumps_common_seq-5.5.so => /lib/x86_64-linux-gnu/libmumps_common_seq-5.5.so (0x00007ffff77f5000)
+	libquadmath.so.0 => /lib/x86_64-linux-gnu/libquadmath.so.0 (0x00007ffff77ac000)
+	libesmumps-7.0.so => /lib/x86_64-linux-gnu/libesmumps-7.0.so (0x00007ffff77a3000)
+	libscotch-7.0.so => /lib/x86_64-linux-gnu/libscotch-7.0.so (0x00007ffff7712000)
+	libscotcherr-7.0.so => /lib/x86_64-linux-gnu/libscotcherr-7.0.so (0x00007ffff770d000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007ffff76ee000)
+	libbz2.so.1.0 => /lib/x86_64-linux-gnu/libbz2.so.1.0 (0x00007ffff76d9000)
+	liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007ffff76aa000)
+```

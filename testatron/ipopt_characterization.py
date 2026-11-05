@@ -190,6 +190,7 @@ TUTORIAL_SHARED_EPHEMERIS_FILES = (
     "naif0012.tls",
     "pck00010.tpc",
 )
+TUTORIAL_META_KERNEL_FIXTURES_ROOT = "testatron/ipopt/tests/meta_kernel/fixtures"
 
 
 @dataclass(frozen=True)
@@ -388,6 +389,21 @@ def repo_relative(path, root=None):
                     f"{resolved} is not under {root}"
                 ) from error
             return (Path("testatron") / "tests" / test_source).as_posix()
+
+
+def _portable_reference_path(path):
+    """Return a repo-relative path when possible, else the original path string.
+
+    Verification references are normally repository-tracked files, in which
+    case the stored path should be repo-relative (portable, no absolute
+    paths in committed/generated artifacts). Callers (including tests) may
+    also pass references outside the repository (e.g. tmp directories); for
+    those, fall back to the original string rather than raising.
+    """
+    try:
+        return repo_relative(path)
+    except ValueError:
+        return str(path)
 
 
 @dataclass(frozen=True)
@@ -1455,6 +1471,46 @@ def prepare_tutorial_universe(case, case_directory, repository_root=REPOSITORY_R
     return destination
 
 
+def stage_tutorial_meta_kernel(
+    case,
+    case_directory,
+    *,
+    repository_root=REPOSITORY_ROOT,
+    execution_directory="/artifacts",
+):
+    """Copy one tutorial's committed meta-kernel fixture into the staged case directory.
+
+    Fixtures are committed one-to-one with ``case.case_id`` under
+    ``testatron/ipopt/tests/meta_kernel/fixtures/<case_id>/meta_kernel.tm`` (see
+    docs/3_NLP_Solvers/IPOPT/meta_kernel_baselining_commands.md). There is no
+    dynamic generation and no flat-mode fallback: a case without a committed
+    fixture is a configuration error, not something to silently skip.
+
+    Copying the fixture directly into ``case_directory`` (alongside the staged
+    ``universe``/``hardware_models`` directories prepare_tutorial_universe() and
+    prepare_tutorial_hardware() already write there) keeps it portable across
+    every execution context that mounts the whole staged case directory as one
+    unit: the toolchain dev container, and a packaged archive-runtime container
+    with no ``/repo`` mount. Returns the execution-root path to use for the
+    ``SPICE_meta_kernel`` option.
+    """
+    repository_root = Path(repository_root)
+    source = (
+        repository_root
+        / TUTORIAL_META_KERNEL_FIXTURES_ROOT
+        / case.case_id
+        / "meta_kernel.tm"
+    )
+    if not source.is_file():
+        raise FileNotFoundError(
+            f"No committed meta-kernel fixture for tutorial case {case.case_id!r}: "
+            f"expected {source.relative_to(repository_root)}"
+        )
+    destination = Path(case_directory) / "meta_kernel.tm"
+    shutil.copy2(source, destination)
+    return str(Path(execution_directory) / "meta_kernel.tm")
+
+
 def validate_tutorial_case_dependencies(case, repository_root=REPOSITORY_ROOT):
     """Fail before execution when a registry source or declared root is absent."""
     inventory = tutorial_dependency_inventory(case, repository_root)
@@ -1977,6 +2033,7 @@ def prepare_tutorial_case(
     execution_repository_root="/repo",
     execution_directory="/artifacts",
     schema_descriptions=None,
+    spice_meta_kernel=None,
 ):
     """Prepare one tutorial replay or refinement from its declared seed policy."""
     if stage not in case.stages:
@@ -2008,6 +2065,8 @@ def prepare_tutorial_case(
         )
         if stage == "refinement":
             _apply_tutorial_refinement_policy(prepared_options)
+        if spice_meta_kernel is not None:
+            _apply_tutorial_spice_meta_kernel(prepared_options, spice_meta_kernel)
         return prepared_options
     if seed_source != "current_infeasible_trial":
         raise ValueError(f"Unknown tutorial seed source: {seed_source!r}")
@@ -2055,7 +2114,25 @@ def prepare_tutorial_case(
     )
     if stage == "refinement":
         _apply_tutorial_refinement_policy(prepared_options)
+    if spice_meta_kernel is not None:
+        _apply_tutorial_spice_meta_kernel(prepared_options, spice_meta_kernel)
     return prepared_options
+
+
+def _apply_tutorial_spice_meta_kernel(options_path, spice_meta_kernel):
+    """Point a staged tutorial input at a committed meta-kernel instead of flat files.
+
+    Reopens the already-written ``.emtgopt`` and sets ``SPICE_meta_kernel`` as a
+    final override, leaving ``universe_folder`` and every other staged setting
+    untouched: the meta-kernel only changes how SPICE kernels are loaded, not
+    where body/hardware/gravity files are read from.
+    """
+    _, MissionOptions = _load_pyemtg()
+    options = MissionOptions.MissionOptions(str(options_path))
+    options.SPICE_meta_kernel = spice_meta_kernel
+    options.write_options_file(
+        str(options_path), not options.print_only_non_default_options
+    )
 
 
 def _execution_path(path, execution_repository_root):
@@ -3603,7 +3680,7 @@ def verify_tutorial_baselining_verification(
         statuses.append({"case_id": key[0], "stage": key[1], "status": status})
     return {
         "version": 1,
-        "reference": str(verification_path),
+        "reference": _portable_reference_path(verification_path),
         "case_count": len(TUTORIAL_CASES),
         "stage_count": len(statuses),
         "stages": statuses,
@@ -4053,7 +4130,7 @@ def verify_baselining_verification(
         statuses.append({"case_id": identifier, "status": status})
     return {
         "version": 1,
-        "reference": str(verification_path),
+        "reference": _portable_reference_path(verification_path),
         "case_count": len(statuses),
         "cases": statuses,
         "acceptable": all(record["status"] == "matched" for record in statuses),

@@ -51,6 +51,7 @@ def _runtime_stage(
     artifacts: Path,
     repository_root: Path,
     schema_cache: dict[Path, list[str]],
+    spice_meta_kernel: str | None = None,
 ) -> dict:
     """Prepare, execute, and compare one tutorial stage using the archive image."""
     attempt_root = artifacts.parent
@@ -93,6 +94,7 @@ def _runtime_stage(
             artifacts,
             repository_root=repository_root,
             schema_descriptions=schema_descriptions,
+            spice_meta_kernel=spice_meta_kernel,
         )
         options = MissionOptions.MissionOptions(str(options_path))
         mission_name = options.mission_name

@@ -340,7 +340,7 @@ check ipopt_runtime passed
 
 
 def _prepare_mission_options(
-    source, artifacts, *, mbh, launch_vehicle_key="Atlas_V_401"
+    source, artifacts, *, mbh, launch_vehicle_key="Atlas_V_401", spice_meta_kernel=None
 ):
     options = MissionOptions.MissionOptions(str(source))
     options.NLP_solver_type = 2
@@ -360,6 +360,8 @@ def _prepare_mission_options(
     )
     options.LaunchVehicleKey = launch_vehicle_key
     options.snopt_max_run_time = 30
+    if spice_meta_kernel is not None:
+        options.SPICE_meta_kernel = spice_meta_kernel
     if mbh:
         options.mission_name = "CoastPhase_EMintercept_MBH_smoke"
         options.run_inner_loop = 1
@@ -389,6 +391,8 @@ def _mission_runtime_probe(
     probe_name,
     mbh,
     launch_vehicle_key="Atlas_V_401",
+    spice_meta_kernel=None,
+    read_only_mounts=(),
 ):
     artifacts = tmp_path_factory.mktemp(probe_name)
     mission_name, options_path = _prepare_mission_options(
@@ -396,6 +400,7 @@ def _mission_runtime_probe(
         artifacts,
         mbh=mbh,
         launch_vehicle_key=launch_vehicle_key,
+        spice_meta_kernel=spice_meta_kernel,
     )
     timeout_seconds = 300 if mbh else 180
     script = _backend_source_script("IPOPT") + rf'''
@@ -413,6 +418,7 @@ test -s /artifacts/{mission_name}.emtg || exit 22
 check {probe_name}_run passed
 '''
     volume = build_volume_name(toolchain_image, "ipopt")
+    log_path = artifacts / f"{probe_name}.log"
     checks = run_probe(
         image=toolchain_image,
         repository_root=repository_root,
@@ -421,11 +427,196 @@ check {probe_name}_run passed
         tmp_path_factory=tmp_path_factory,
         build_volume=volume,
         writable_artifacts=artifacts,
+        read_only_mounts=read_only_mounts,
+        log_path=log_path,
     )
     result_path = artifacts / f"{mission_name}.emtg"
     checks["mission"] = Mission.Mission(str(result_path))
     checks["result_path"] = str(result_path)
+    checks["log"] = log_path.read_text()
     return checks
+
+
+def _mission_error_probe(
+    *,
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+    source,
+    probe_name,
+    spice_meta_kernel,
+    read_only_mounts=(),
+):
+    """Build EMTGv9 and run a mission expected to hard-fail before solving.
+
+    Unlike ``_mission_runtime_probe``, this does not assert that the run
+    exits 0 or produces a ``.emtg`` output file -- ``EMTG_v9.cpp``'s outer
+    ``catch (std::exception&)`` always returns 0 and skips output on a
+    hard-fail, so the only useful assertions here are on the captured log
+    text, which the caller inspects directly.
+    """
+    artifacts = tmp_path_factory.mktemp(probe_name)
+    mission_name, options_path = _prepare_mission_options(
+        source,
+        artifacts,
+        mbh=False,
+        spice_meta_kernel=spice_meta_kernel,
+    )
+    script = _backend_source_script("IPOPT") + rf'''
+cmake --build /build --target EMTGv9 -j2 >/tmp/mission-build.log 2>&1 \
+    || {{ tail -n 150 /tmp/mission-build.log; exit 20; }}
+check {probe_name}_compile passed
+timeout 60 /build/src/EMTGv9 /artifacts/{options_path.name} \
+    >/tmp/mission-runtime.log 2>&1 || true
+cat /tmp/mission-runtime.log
+check {probe_name}_run attempted
+'''
+    volume = build_volume_name(toolchain_image, "ipopt")
+    log_path = artifacts / f"{probe_name}.log"
+    checks = run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name=probe_name,
+        tmp_path_factory=tmp_path_factory,
+        build_volume=volume,
+        writable_artifacts=artifacts,
+        read_only_mounts=read_only_mounts,
+        log_path=log_path,
+    )
+    checks["log"] = log_path.read_text()
+    checks["mission_name"] = mission_name
+    checks["result_path"] = str(artifacts / f"{mission_name}.emtg")
+    return checks
+
+
+def _write_meta_kernel_for_testatron_ephemeris(repository_root, directory):
+    """Write a meta-kernel listing every *.bsp the flat loader would scan.
+
+    Lists exactly the kernels already present under the host's
+    ``testatron/universe/ephemeris_files`` (the same directory the existing,
+    pre-meta-kernel flat-file loader scans), so this proves the meta-kernel
+    path is a drop-in replacement for an already-working mission rather than
+    depending on a hand-curated kernel subset that might drift out of sync.
+    """
+    kernel_names = ["naif0012.tls", "pck00010.tpc"] + sorted(
+        path.name
+        for path in (
+            repository_root / "testatron/universe/ephemeris_files"
+        ).glob("*.bsp")
+    )
+    kernel_list = ",\n".join(f"                         '$KERNELS/{name}'" for name in kernel_names)
+    (directory / "meta_kernel.tm").write_text(
+        "KPL/MK\n\n"
+        "\\begindata\n\n"
+        "    PATH_VALUES     = ( '/repo/testatron/universe/ephemeris_files' )\n"
+        "    PATH_SYMBOLS    = ( 'KERNELS' )\n"
+        "    KERNELS_TO_LOAD = (\n"
+        f"{kernel_list}\n"
+        "                       )\n\n"
+        "\\begintext\n"
+    )
+    return kernel_names
+
+
+@pytest.fixture(scope="session")
+def meta_kernel_mission_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Run CoastPhase_EMintercept driven by a meta-kernel instead of flat files."""
+    ephemeris_directory = repository_root / "testatron/universe/ephemeris_files"
+    if not (ephemeris_directory / "de430.bsp").exists():
+        pytest.skip(
+            "testatron/universe/ephemeris_files/de430.bsp is not present on "
+            "this host; see testatron/universe/ephemeris_files/"
+            "go_get_these_files.txt"
+        )
+
+    fixture_directory = tmp_path_factory.mktemp("meta-kernel-mission-fixture")
+    kernel_names = _write_meta_kernel_for_testatron_ephemeris(
+        repository_root, fixture_directory
+    )
+
+    source = (
+        repository_root
+        / "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt"
+    )
+    checks = _mission_runtime_probe(
+        toolchain_image=toolchain_image,
+        repository_root=repository_root,
+        tmp_path_factory=tmp_path_factory,
+        source=source,
+        probe_name="meta-kernel-mission",
+        mbh=False,
+        spice_meta_kernel="/meta-kernel-mission-fixture/meta_kernel.tm",
+        read_only_mounts=(
+            (fixture_directory, "/meta-kernel-mission-fixture"),
+        ),
+    )
+    checks["kernel_names"] = kernel_names
+    return checks
+
+
+@pytest.fixture(scope="session")
+def meta_kernel_missing_file_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Run a mission with SPICE_meta_kernel pointing at a nonexistent file."""
+    source = (
+        repository_root
+        / "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt"
+    )
+    return _mission_error_probe(
+        toolchain_image=toolchain_image,
+        repository_root=repository_root,
+        tmp_path_factory=tmp_path_factory,
+        source=source,
+        probe_name="meta-kernel-missing-file",
+        spice_meta_kernel="/meta-kernel-mission-fixture/does_not_exist.tm",
+    )
+
+
+@pytest.fixture(scope="session")
+def meta_kernel_malformed_tm_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Run a mission whose meta-kernel references a nonexistent kernel file."""
+    fixture_directory = repository_root / "tests/integration/fixtures/meta_kernel"
+    source = (
+        repository_root
+        / "testatron/tests/transcription_tests/CoastPhase_EMintercept.emtgopt"
+    )
+    return _mission_error_probe(
+        toolchain_image=toolchain_image,
+        repository_root=repository_root,
+        tmp_path_factory=tmp_path_factory,
+        source=source,
+        probe_name="meta-kernel-malformed-tm",
+        spice_meta_kernel="/meta-kernel-fixture/malformed_meta_kernel.tm",
+        read_only_mounts=(
+            (fixture_directory, "/meta-kernel-fixture"),
+        ),
+    )
+
+
+@pytest.fixture(scope="session")
+def meta_kernel_cspice_probe(toolchain_image, repository_root, tmp_path_factory):
+    """Compile and run a standalone CSPICE probe against the committed fixture."""
+    script = r'''
+set -eu
+check() { printf "EMTG_CHECK %s=%s\n" "$1" "$2"; }
+g++ -std=c++17 -Wall -Wextra -Werror \
+    /repo/tests/cpp/test_meta_kernel_cspice_probe.cpp \
+    -I/opt/emtg-deps/cspice/include \
+    /opt/emtg-deps/cspice/lib/libcspice.a \
+    -o /tmp/meta_kernel_cspice_probe \
+    >/tmp/meta-kernel-cspice-probe-build.log 2>&1 \
+    || { cat /tmp/meta-kernel-cspice-probe-build.log; exit 30; }
+check meta_kernel_cspice_probe_compile passed
+/tmp/meta_kernel_cspice_probe
+check meta_kernel_cspice_probe_run passed
+'''
+    return run_probe(
+        image=toolchain_image,
+        repository_root=repository_root,
+        script=script,
+        probe_name="meta-kernel-cspice-probe",
+        tmp_path_factory=tmp_path_factory,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -939,6 +1130,7 @@ def _run_tutorial_stage(
     tmp_path_factory,
     schema_cache,
     artifacts=None,
+    spice_meta_kernel=None,
 ):
     schema_descriptions = None
     if case.schema_probe:
@@ -967,6 +1159,7 @@ def _run_tutorial_stage(
         artifacts,
         repository_root=repository_root,
         schema_descriptions=schema_descriptions,
+        spice_meta_kernel=spice_meta_kernel,
     )
     options = MissionOptions.MissionOptions(str(options_path))
     mission_name = options.mission_name
@@ -1137,6 +1330,66 @@ def tutorial_baselining_stage_runner(
                 tmp_path_factory=tmp_path_factory,
                 schema_cache=schema_cache,
                 artifacts=artifacts,
+            )
+        except ValueError as error:
+            result = {
+                "status": "unreviewed",
+                "tutorial": case.case_id,
+                "stage": stage,
+                "taxonomy": case.taxonomy,
+                "classification": ipopt_characterization.classify_tutorial_preflight_error(
+                    error
+                ),
+                "acceptable": False,
+                "detail": str(error),
+            }
+            artifacts = Path(artifacts)
+            (artifacts / "result.json").write_text(
+                json.dumps(result, indent=2) + "\n"
+            )
+            ipopt_characterization.write_tutorial_provenance(
+                artifacts, case, stage, [], repository_root
+            )
+            return result
+        comparison = checks["comparison"]
+        return {
+            "classification": "completed",
+            "acceptable": comparison["acceptable"],
+            "comparison": comparison,
+            "output_file": checks["result"]["generated_mission"],
+        }
+
+    return run
+
+
+@pytest.fixture
+def meta_kernel_tutorial_baselining_stage_runner(
+    toolchain_image,
+    repository_root,
+    tmp_path_factory,
+):
+    """Run one promoted tutorial stage with SPICE kernels loaded via a committed
+    meta-kernel fixture instead of the flat universe ephemeris directory."""
+    schema_caches = {}
+
+    def run(case, stage, artifacts):
+        attempt_name = Path(artifacts).parent.name
+        schema_cache = schema_caches.setdefault(attempt_name, {})
+        artifacts = Path(artifacts)
+        artifacts.mkdir(parents=True, exist_ok=True)
+        spice_meta_kernel = ipopt_characterization.stage_tutorial_meta_kernel(
+            case, artifacts, repository_root=repository_root
+        )
+        try:
+            checks = _run_tutorial_stage(
+                case=case,
+                stage=stage,
+                toolchain_image=toolchain_image,
+                repository_root=repository_root,
+                tmp_path_factory=tmp_path_factory,
+                schema_cache=schema_cache,
+                artifacts=artifacts,
+                spice_meta_kernel=spice_meta_kernel,
             )
         except ValueError as error:
             result = {

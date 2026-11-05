@@ -99,6 +99,8 @@ class MissionOptions(object):
         """SPICE leap seconds kernel - required for SPICE to work"""
         self.SPICE_reference_frame_kernel = "pck00010.tpc"
         """SPICE_reference_frame_kernel"""
+        self.SPICE_meta_kernel = ""
+        """optional SPICE meta-kernel (.tm) filename; empty = disabled, falls back to flat ephemeris_files/*.bsp discovery"""
         self.universe_folder = "C:/emtg/Universe"
         """Universe folder"""
         self.ephemeris_source = 2
@@ -526,6 +528,12 @@ class MissionOptions(object):
                   
                     elif linecell[0] == "SPICE_reference_frame_kernel":
                         self.SPICE_reference_frame_kernel = linecell[1]
+                  
+                    elif linecell[0] == "SPICE_meta_kernel":
+                        #linecell[1] is absent when this option is written out empty
+                        #(writeAll mode strips the trailing delimiter space on read),
+                        #so guard rather than assume a value token is always present
+                        self.SPICE_meta_kernel = linecell[1] if len(linecell) > 1 else ""
                   
                     elif linecell[0] == "universe_folder":
                         self.universe_folder = linecell[1]
@@ -1111,6 +1119,10 @@ class MissionOptions(object):
             if (self.SPICE_reference_frame_kernel != "pck00010.tpc" or writeAll):
                 optionsFile.write("#SPICE_reference_frame_kernel\n")
                 optionsFile.write("SPICE_reference_frame_kernel " + str(self.SPICE_reference_frame_kernel) + "\n")
+    
+            if (self.SPICE_meta_kernel != "" or writeAll):
+                optionsFile.write("#optional SPICE meta-kernel (.tm) filename; takes priority over flat ephemeris_files/*.bsp discovery when non-empty\n")
+                optionsFile.write("SPICE_meta_kernel " + str(self.SPICE_meta_kernel) + "\n")
     
             if (self.universe_folder != "C:/emtg/Universe" or writeAll):
                 optionsFile.write("#Universe folder\n")
